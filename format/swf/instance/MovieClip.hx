@@ -54,7 +54,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		//currentFrame = 1;
 		__currentFrame = 1;
-		//totalFrames = data.frames.length;
+		//__totalFrames = data.frames.length;
 		__totalFrames = data.frames.length;
 		
 		update ();
@@ -724,7 +724,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	@:getter public function get_totalFrames():Int {
+	@:getter public function get___totalFrames():Int {
 		
 		return __totalFrames;
 		

@@ -11,12 +11,12 @@ import format.swf.lite.symbols.SpriteSymbol;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.lite.SWFLite;
 
-#if nme
-import nme.Assets;
+#if openfl
+import openfl.Assets;
 #end
 
 
-class MovieClip extends format.display.MovieClip {
+class MovieClip extends flash.display.MovieClip {
 	
 	
 	private static var clips:Array <MovieClip>;
@@ -43,12 +43,12 @@ class MovieClip extends format.display.MovieClip {
 			
 		}
 		
-		currentFrame = 1;
-		totalFrames = symbol.frames.length;
+		__currentFrame = 1;
+		__totalFrames = symbol.frames.length;
 		
 		update ();
 		
-		if (totalFrames > 1) {
+		if (__totalFrames > 1) {
 			
 			play ();
 			
@@ -114,7 +114,7 @@ class MovieClip extends format.display.MovieClip {
 				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
 				case BEGIN_BITMAP_FILL: 
 					
-					#if nme
+					#if openfl
 					
 					var bitmap:BitmapSymbol = cast swf.symbols.get (command.params[0]);
 					
@@ -240,13 +240,13 @@ class MovieClip extends format.display.MovieClip {
 	
 	private function enterFrame ():Void {
 		
-		if (lastUpdate == currentFrame) {
+		if (lastUpdate == __currentFrame) {
 			
-			currentFrame ++;
+			__currentFrame ++;
 			
-			if (currentFrame > totalFrames) {
+			if (__currentFrame > __totalFrames) {
 				
-				currentFrame = 1;
+				__currentFrame = 1;
 				
 			}
 			
@@ -317,7 +317,7 @@ class MovieClip extends format.display.MovieClip {
 	
 	public override function gotoAndPlay (frame:Dynamic, scene:String = null):Void {
 		
-		currentFrame = getFrame (frame);
+		__currentFrame = getFrame (frame);
 		update ();
 		play ();
 		
@@ -326,7 +326,7 @@ class MovieClip extends format.display.MovieClip {
 	
 	public override function gotoAndStop (frame:Dynamic, scene:String = null):Void {
 		
-		currentFrame = getFrame (frame);
+		__currentFrame = getFrame (frame);
 		update ();
 		stop ();
 		
@@ -335,11 +335,11 @@ class MovieClip extends format.display.MovieClip {
 	
 	public override function nextFrame ():Void {
 		
-		var next = currentFrame + 1;
+		var next = __currentFrame + 1;
 		
-		if (next > totalFrames) {
+		if (next > __totalFrames) {
 			
-			next = totalFrames;
+			next = __totalFrames;
 			
 		}
 		
@@ -373,7 +373,7 @@ class MovieClip extends format.display.MovieClip {
 	
 	public override function play ():Void {
 		
-		if (!playing && totalFrames > 1) {
+		if (!playing && __totalFrames > 1) {
 			
 			playing = true;
 			clips.push (this);
@@ -385,7 +385,7 @@ class MovieClip extends format.display.MovieClip {
 	
 	public override function prevFrame ():Void {
 		
-		var previous = currentFrame - 1;
+		var previous = __currentFrame - 1;
 		
 		if (previous < 1) {
 			
@@ -402,7 +402,7 @@ class MovieClip extends format.display.MovieClip {
 		
 		var frame = symbol.frames[index];
 		
-		//if (frame.frameNumber == currentFrame - 1 || frame.tweenType == null || frame.tweenType == "") {
+		//if (frame.frameNumber == __currentFrame - 1 || frame.tweenType == null || frame.tweenType == "") {
 		
 		for (object in frame.objects) {
 			
@@ -517,7 +517,7 @@ class MovieClip extends format.display.MovieClip {
 				if (firstInstance.libraryItemName == secondInstance.libraryItemName) {
 					
 					var instance:DOMSymbolInstance = firstInstance.clone ();
-					var ratio = (currentFrame - frame.index) / frame.duration;
+					var ratio = (__currentFrame - frame.index) / frame.duration;
 					
 					if (secondInstance.matrix != null) {
 						
@@ -604,7 +604,7 @@ class MovieClip extends format.display.MovieClip {
 	}
 	
 	
-	public override function unflatten ():Void {
+	public function unflatten ():Void {
 		
 		lastUpdate = -1;
 		update ();
@@ -614,7 +614,7 @@ class MovieClip extends format.display.MovieClip {
 	
 	private function update ():Void {
 		
-		if (currentFrame != lastUpdate) {
+		if (__currentFrame != lastUpdate) {
 			
 			for (i in 0...numChildren) {
 				
@@ -634,7 +634,7 @@ class MovieClip extends format.display.MovieClip {
 			//
 			//for (i in 0...data.frames.length) {
 				//
-				//if (data.frames[i]. <= currentFrame) {
+				//if (data.frames[i]. <= __currentFrame) {
 					//
 					//frameIndex = i;
 					//
@@ -642,7 +642,7 @@ class MovieClip extends format.display.MovieClip {
 				//
 			//}
 			
-			var frameIndex = currentFrame - 1;
+			var frameIndex = __currentFrame - 1;
 			
 			if (frameIndex > -1) {
 				
@@ -652,7 +652,7 @@ class MovieClip extends format.display.MovieClip {
 			
 		}
 		
-		lastUpdate = currentFrame;
+		lastUpdate = __currentFrame;
 		
 	}
 	
