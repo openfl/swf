@@ -134,7 +134,8 @@ class StringUtils
 						///////////////////////////
 						// parse flags
 						///////////////////////////
-						while((c = format.charAt(i)) == "+" || c == "-" || c == "#" || c == " " || c == "0") {
+						c = format.charAt(i);
+						while(c == "+" || c == "-" || c == "#" || c == " " || c == "0") {
 							switch(c) {
 								case "+": flagSign = true;
 								case "-": flagLeftAlign = true;
