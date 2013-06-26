@@ -7,6 +7,7 @@ import flash.utils.ByteArray;
 import format.swf.data.consts.BitmapFormat;
 import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBitsLossless;
+import format.swf.tags.TagDefineBitsJPEG2;
 
 
 class Bitmap extends flash.display.Bitmap {
@@ -79,7 +80,10 @@ class Bitmap extends flash.display.Bitmap {
 			
 			this.bitmapData = bitmapData;
 			
-		}
+		}/* else if (Std.is (tag, TagDefineBitsJPEG2)) {
+			what to do with a JPEG???
+			
+		}*/
 		
 	}
 	

@@ -1,10 +1,14 @@
 package format.swf.instance;
 
 
+import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.Shape;
 import flash.geom.ColorTransform;
+import flash.geom.Matrix;
+import flash.geom.Rectangle;
 import flash.text.TextField;
+import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
 import flash.events.Event;
 import flash.Lib;
@@ -109,6 +113,15 @@ class MovieClip extends flash.display.MovieClip {
 		var textField = new TextField ();
 		textField.selectable = !symbol.noSelect;
 		
+		var rect:Rectangle = symbol.bounds.rect;
+		
+		textField.width = rect.width;
+		textField.height = rect.height;
+		textField.multiline = symbol.multiline;
+		textField.wordWrap = symbol.wordWrap;
+		textField.autoSize = (symbol.autoSize)? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
+		textField.border = symbol.border;
+		
 		return textField;
 		
 	}
@@ -168,12 +181,13 @@ class MovieClip extends flash.display.MovieClip {
 		
 		var textField = new TextField ();
 		textField.selectable = false;
+		
 		//textField.x += instance.left;
 		
 		// xfl does not embed the font
 		//textField.embedFonts = true;
 		
-		var format = new TextFormat ();
+		//var format = new TextFormat ();
 		
 		/*
 		for (record in symbol.records) {
@@ -267,7 +281,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	/*public override function flatten ():Void {
+	public /*override*/ function flatten ():Void {
 		
 		var bounds = getBounds (this);
 		var bitmapData = null;
@@ -297,7 +311,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (bounds.width > 0 && bounds.height > 0) {
 			
-			var bitmap = new Bitmap (bitmapData);
+			var bitmap = new flash.display.Bitmap (bitmapData);
 			bitmap.smoothing = true;
 			bitmap.x = bounds.left;
 			bitmap.y = bounds.top;
@@ -305,7 +319,9 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-	}*/
+		stop();
+		
+	}
 	
 	
 	private function getFrame (frame:Dynamic):Int {
@@ -405,6 +421,16 @@ class MovieClip extends flash.display.MovieClip {
 			
 			displayObject.transform.colorTransform = firstTag.colorTransform.colorTransform;
 			
+		}
+		
+		if (lastTag != null && lastTag.hasFilterList) {
+			var filters_arr:Array<Dynamic> = [];
+			for (i in 0...lastTag.surfaceFilterList.length) { filters_arr[i] = lastTag.surfaceFilterList[i].filter; }
+			displayObject.filters = filters_arr;
+		} else if ( firstTag.hasFilterList) {
+			var filters_arr:Array<Dynamic> = [];
+			for (i in 0...firstTag.surfaceFilterList.length) { filters_arr[i] = firstTag.surfaceFilterList[i].filter; }
+			displayObject.filters = filters_arr;
 		}
 		
 	}
