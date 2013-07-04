@@ -139,7 +139,7 @@ class SWFLiteExporter {
 		var frame = new Frame ();
 		frame.label = tag.frames[0].label;
 		
-		for (object in tag.frames[0].objects) {
+		for (object in tag.frames[0].getObjectsSortedByDepth ()) {
 			
 			var frameObject = new FrameObject ();
 			frameObject.id = object.characterId;

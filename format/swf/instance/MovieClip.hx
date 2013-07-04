@@ -443,7 +443,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		//if (frame.frameNumber == currentFrame - 1 || frame.tweenType == null || frame.tweenType == "") {
 		
-		for (object in frame.objects) {
+		for (object in frame.getObjectsSortedByDepth ()) {
 			
 			var symbol = data.getCharacter (object.characterId);
 			var displayObject:DisplayObject = null;
