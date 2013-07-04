@@ -288,7 +288,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (bounds.width > 0 && bounds.height > 0) {
 			
-			bitmapData = new BitmapData (Std.int (bounds.width), Std.int (bounds.height), true, #if neko { a: 0, rgb: 0x000000 } #else 0x00000000 #end);
+			bitmapData = new BitmapData (Std.int (bounds.width), Std.int (bounds.height), true, 0x00000000);
 			var matrix = new Matrix ();
 			matrix.translate (-bounds.left, -bounds.top);
 			bitmapData.draw (this, matrix);
