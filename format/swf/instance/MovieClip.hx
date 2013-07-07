@@ -480,12 +480,11 @@ class MovieClip extends flash.display.MovieClip {
 				
 			} else if (Std.is (symbol, TagDefineBitsLossless)) {
 				
-				trace ("png");
 				//displayObject = createBitmap (cast symbol);
 				
 			} else if (Std.is (symbol, TagDefineBits)) {
 				
-				trace ("jpg");
+				//displayObject = createBitmap (cast symbol);
 				
 			} else if (Std.is (symbol, TagDefineShape)) {
 				

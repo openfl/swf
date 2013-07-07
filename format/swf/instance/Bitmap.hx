@@ -2,12 +2,16 @@ package format.swf.instance;
 
 
 import flash.display.BitmapData;
-import flash.geom.Rectangle;
 import flash.utils.ByteArray;
 import format.swf.data.consts.BitmapFormat;
 import format.swf.tags.IDefinitionTag;
+import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineBitsJPEG2;
+
+#if flash
+import org.bytearray.decoder.JPEGDecoder;
+#end
 
 
 class Bitmap extends flash.display.Bitmap {
@@ -17,7 +21,23 @@ class Bitmap extends flash.display.Bitmap {
 		
 		super ();
 		
-		if (Std.is (tag, TagDefineBitsLossless)) {
+		if (Std.is (tag, TagDefineBits)) {
+			
+			var data:TagDefineBits = cast tag;
+			
+			#if flash
+			
+			var jpeg = new JPEGDecoder (data.bitmapData);
+			bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
+			bitmapData.setVector (bitmapData.rect, jpeg.pixels);
+			
+			#else
+			
+			bitmapData = BitmapData.loadFromHaxeBytes (data.bitmapData, null);
+			
+			#end
+			
+		} else if (Std.is (tag, TagDefineBitsLossless)) {
 			
 			var data:TagDefineBitsLossless = cast tag;
 			
@@ -76,14 +96,68 @@ class Bitmap extends flash.display.Bitmap {
 			}
 			
 			var bitmapData = new BitmapData (data.bitmapWidth, data.bitmapHeight, transparent);
-			bitmapData.setPixels (new Rectangle (0, 0, data.bitmapWidth, data.bitmapHeight), buffer);
+			bitmapData.setPixels (bitmapData.rect, buffer);
 			
 			this.bitmapData = bitmapData;
 			
-		}/* else if (Std.is (tag, TagDefineBitsJPEG2)) {
-			what to do with a JPEG???
+		} else if (Std.is (tag, TagDefineBitsJPEG2)) {
 			
-		}*/
+			var data:TagDefineBitsJPEG2 = cast tag;
+			
+			//var buffer:ByteArray = null;
+			//var alpha:ByteArray = null;
+			//
+			//if (version == 1 && jpegTables != null) {
+				//
+				//buffer = jpegTables;
+				//
+			//} else if (version == 2) {
+				//
+				//var size = stream.getBytesLeft ();
+				//buffer = stream.readBytes (size);
+				//
+			//} else if (version == 3) {
+				//
+				//var size = stream.readInt ();
+				//buffer = stream.readBytes (size);
+				//
+				//alpha = stream.readFlashBytes (stream.getBytesLeft ());
+				//alpha.uncompress ();
+				//
+			//}
+			
+			//#if flash
+			//
+			//loader = new Loader ();
+			//this.alpha = alpha;
+			//
+			//loader.contentLoaderInfo.addEventListener (Event.COMPLETE, loader_onComplete);
+			//loader.loadBytes (buffer);
+			//
+			//#else
+			
+			#if flash
+			
+			var jpeg = new JPEGDecoder (data.bitmapData);
+			bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
+			bitmapData.setVector (bitmapData.rect, jpeg.pixels);
+			
+			#else
+			
+			bitmapData = BitmapData.loadFromHaxeBytes (data.bitmapData, null);
+			
+			#end
+			
+			//if (!lossless && alpha != null) {
+				
+				// NME doesn't currently handle alpha data for JPEG images, so we need to add it ourselves
+				//bitmapData = createWithAlpha (bitmapData, alpha);
+				
+			//}
+			
+			//#end
+			
+		}
 		
 	}
 	
