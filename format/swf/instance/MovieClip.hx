@@ -170,7 +170,10 @@ class MovieClip extends flash.display.MovieClip {
 				
 				case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
 				case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
-				case CURVE_TO: shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
+				case CURVE_TO: 
+					
+					shape.cacheAsBitmap = true;
+					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
 				
 			}
 			
