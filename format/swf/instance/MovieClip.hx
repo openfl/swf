@@ -4,6 +4,7 @@ package format.swf.instance;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.Shape;
+import flash.display.Sprite;
 import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.geom.Rectangle;
@@ -17,6 +18,7 @@ import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineEditText;
+import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineShape;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagDefineText;
@@ -184,54 +186,100 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function createStaticText (symbol:TagDefineText):TextField {
+	private function createStaticText (symbol:TagDefineText):Sprite {
 		
-		var textField = new TextField ();
-		//textField.background = true;
-		textField.selectable = false;
+		var shape = new Shape ();
 		
-		//textField.x += instance.left;
+		var matrix = null;
+		var cacheMatrix = null;
+		var tx = symbol.textMatrix.matrix.tx * 0.05;
+		var ty = symbol.textMatrix.matrix.ty * 0.05;
+		var color = 0;
+		var alpha = 1.0;
 		
-		// xfl does not embed the font
-		//textField.embedFonts = true;
+		var sprite = new Sprite ();
 		
-		//var format = new TextFormat ();
-		//
-		//for (record in symbol.records) {
-			//
-			//var pos = textField.text.length;
-			//
-			//for (entry in record.glyphEntries) {
-				//
-				//entry.
-				//
-			//}
-			//
-			//textField.appendText (record.);
-			//
-			//if (textRun.textAttrs.face != null) format.font = textRun.textAttrs.face;
-			//if (textRun.textAttrs.alignment != null) format.align = Reflect.field (TextFormatAlign, textRun.textAttrs.alignment.toUpperCase ());
-			//if (textRun.textAttrs.size != 0) format.size = textRun.textAttrs.size;
-			//if (textRun.textAttrs.fillColor != 0) {
-				//
-				//if (textRun.textAttrs.alpha != 0) {
-					//
-					// need to add alpha to color
-					//format.color = textRun.textAttrs.fillColor;
-					//
-				//} else {
-					//
-					//format.color = textRun.textAttrs.fillColor;
-					//
-				//}
-				//
-			//}
-			//
-			//textField.setTextFormat (format, pos, textField.text.length);
-			//
-		//}
+		for (record in symbol.records) {
+			
+			var scale = (record.textHeight / 1024) * 0.05;
+			
+			cacheMatrix = matrix;
+			matrix = symbol.textMatrix.matrix.clone ();
+			matrix.scale (scale, scale);
+			
+			if (record.hasColor) {
+				
+				color = record.textColor & 0x00FFFFFF;
+				alpha = (record.textColor & 0xFF) / 0xFF;
+				
+			}
+			
+			if (cacheMatrix != null && (record.hasColor || record.hasFont) && (!record.hasXOffset && !record.hasYOffset)) {
+				
+				matrix.tx = cacheMatrix.tx;
+				matrix.ty = cacheMatrix.ty;
+				
+			} else {
+				
+				matrix.tx = tx + (record.xOffset) * 0.05;
+				matrix.ty = ty + (record.yOffset) * 0.05;
+				
+			}
+			
+			for (i in 0...record.glyphEntries.length) {
+				
+				var handler = new ShapeCommandExporter (data);
+				handler.lineStyle ();
+				var shape = new Shape ();
+				
+				handler.beginFill (color, alpha);
+				
+				var font:TagDefineFont = cast data.getCharacter (record.fontId);
+				font.export (handler, record.glyphEntries[i].index);
+				
+				handler.endFill();
+				
+				for (command in handler.commands) {
+					
+					switch (command.type) {
+						
+						case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
+						case END_FILL: shape.graphics.endFill ();
+						case LINE_STYLE: 
+							
+							if (command.params.length > 0) {
+								
+								shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+								
+							} else {
+								
+								shape.graphics.lineStyle ();
+								
+							}
+						
+						case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
+						case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
+						case CURVE_TO: 
+							
+							shape.cacheAsBitmap = true;
+							shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
+							
+						default:
+						
+					}
+					
+				}
+				
+				shape.transform.matrix = matrix;
+				matrix.tx += record.glyphEntries[i].advance * 0.05;
+				
+				sprite.addChild (shape);
+				
+			}
+			
+		}
 		
-		return textField;
+		return sprite;
 		
 	}
 	

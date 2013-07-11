@@ -371,43 +371,48 @@ class SWFShape
 					try {
 						var matrix:Matrix;
 						var fillStyle:SWFFillStyle = fillStyles[fillStyleIdx - 1];
-						switch(fillStyle.type) {
-							case 0x00:
-								// Solid fill
-								handler.beginFill(ColorUtils.rgb(fillStyle.rgb), ColorUtils.alpha(fillStyle.rgb));
-							case 0x10, 0x12, 0x13:
-								// Gradient fill
-								var colors:Array<Int> = [];
-								var alphas:Array<Float> = [];
-								var ratios:Array<Float> = [];
-								var gradientRecord:SWFGradientRecord;
-								matrix = fillStyle.gradientMatrix.matrix.clone();
-								matrix.tx /= 20;
-								matrix.ty /= 20;
-								for (gri in 0...fillStyle.gradient.records.length) {
-									gradientRecord = fillStyle.gradient.records[gri];
-									colors.push(ColorUtils.rgb(gradientRecord.color));
-									alphas.push(ColorUtils.alpha(gradientRecord.color));
-									ratios.push(gradientRecord.ratio);
-								}
-								handler.beginGradientFill(
-									(fillStyle.type == 0x10) ? GradientType.LINEAR : GradientType.RADIAL,
-									colors, alphas, ratios, matrix,
-									GradientSpreadMode.toEnum(fillStyle.gradient.spreadMode),
-									GradientInterpolationMode.toEnum(fillStyle.gradient.interpolationMode),
-									fillStyle.gradient.focalPoint
-								);
-							case 0x40, 0x41, 0x42, 0x43:
-								// Bitmap fill
-								var m:SWFMatrix = fillStyle.bitmapMatrix;
-								matrix = new Matrix();
-								matrix.createBox(m.xscale / 20, m.yscale / 20, m.rotation, m.translateX / 20, m.translateY / 20);
-								handler.beginBitmapFill(
-									fillStyle.bitmapId,
-									matrix,
-									(fillStyle.type == 0x40 || fillStyle.type == 0x42),
-									(fillStyle.type == 0x40 || fillStyle.type == 0x41)
-								);
+						if (fillStyle != null) {
+							switch(fillStyle.type) {
+								case 0x00:
+									// Solid fill
+									handler.beginFill(ColorUtils.rgb(fillStyle.rgb), ColorUtils.alpha(fillStyle.rgb));
+								case 0x10, 0x12, 0x13:
+									// Gradient fill
+									var colors:Array<Int> = [];
+									var alphas:Array<Float> = [];
+									var ratios:Array<Float> = [];
+									var gradientRecord:SWFGradientRecord;
+									matrix = fillStyle.gradientMatrix.matrix.clone();
+									matrix.tx /= 20;
+									matrix.ty /= 20;
+									for (gri in 0...fillStyle.gradient.records.length) {
+										gradientRecord = fillStyle.gradient.records[gri];
+										colors.push(ColorUtils.rgb(gradientRecord.color));
+										alphas.push(ColorUtils.alpha(gradientRecord.color));
+										ratios.push(gradientRecord.ratio);
+									}
+									handler.beginGradientFill(
+										(fillStyle.type == 0x10) ? GradientType.LINEAR : GradientType.RADIAL,
+										colors, alphas, ratios, matrix,
+										GradientSpreadMode.toEnum(fillStyle.gradient.spreadMode),
+										GradientInterpolationMode.toEnum(fillStyle.gradient.interpolationMode),
+										fillStyle.gradient.focalPoint
+									);
+								case 0x40, 0x41, 0x42, 0x43:
+									// Bitmap fill
+									var m:SWFMatrix = fillStyle.bitmapMatrix;
+									matrix = new Matrix();
+									matrix.createBox(m.xscale / 20, m.yscale / 20, m.rotation, m.translateX / 20, m.translateY / 20);
+									handler.beginBitmapFill(
+										fillStyle.bitmapId,
+										matrix,
+										(fillStyle.type == 0x40 || fillStyle.type == 0x42),
+										(fillStyle.type == 0x40 || fillStyle.type == 0x41)
+									);
+							}
+						} else {
+							// TODO: Static SWF text is falling through to here :(
+							handler.beginFill (0xFFFFFF);
 						}
 					} catch (e:Error) {
 						// Font shapes define no fillstyles per se, but do reference fillstyle index 1,

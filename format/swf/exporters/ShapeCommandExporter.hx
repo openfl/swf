@@ -25,7 +25,7 @@ class ShapeCommandExporter extends DefaultShapeExporter {
 		
 		super (swf);
 		
-		
+		commands = new Array<ShapeCommand> ();
 		
 	}
 	
