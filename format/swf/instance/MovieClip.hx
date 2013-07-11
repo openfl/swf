@@ -65,7 +65,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__totalFrames > 1) {
 			
-			play ();
+			//play ();
 			
 		}
 		
@@ -180,6 +180,7 @@ class MovieClip extends flash.display.MovieClip {
 	private function createStaticText (symbol:TagDefineText):TextField {
 		
 		var textField = new TextField ();
+		//textField.background = true;
 		textField.selectable = false;
 		
 		//textField.x += instance.left;
@@ -188,41 +189,40 @@ class MovieClip extends flash.display.MovieClip {
 		//textField.embedFonts = true;
 		
 		//var format = new TextFormat ();
-		
-		/*
-		for (record in symbol.records) {
-			
-			var pos = textField.text.length;
-			
-			for (entry in record.glyphEntries) {
-				
-				entry.
-				
-			}
-			
-			textField.appendText (record.);
-			
-			if (textRun.textAttrs.face != null) format.font = textRun.textAttrs.face;
-			if (textRun.textAttrs.alignment != null) format.align = Reflect.field (TextFormatAlign, textRun.textAttrs.alignment.toUpperCase ());
-			if (textRun.textAttrs.size != 0) format.size = textRun.textAttrs.size;
-			if (textRun.textAttrs.fillColor != 0) {
-				
-				if (textRun.textAttrs.alpha != 0) {
-					
+		//
+		//for (record in symbol.records) {
+			//
+			//var pos = textField.text.length;
+			//
+			//for (entry in record.glyphEntries) {
+				//
+				//entry.
+				//
+			//}
+			//
+			//textField.appendText (record.);
+			//
+			//if (textRun.textAttrs.face != null) format.font = textRun.textAttrs.face;
+			//if (textRun.textAttrs.alignment != null) format.align = Reflect.field (TextFormatAlign, textRun.textAttrs.alignment.toUpperCase ());
+			//if (textRun.textAttrs.size != 0) format.size = textRun.textAttrs.size;
+			//if (textRun.textAttrs.fillColor != 0) {
+				//
+				//if (textRun.textAttrs.alpha != 0) {
+					//
 					// need to add alpha to color
-					format.color = textRun.textAttrs.fillColor;
-					
-				} else {
-					
-					format.color = textRun.textAttrs.fillColor;
-					
-				}
-				
-			}
-			
-			textField.setTextFormat (format, pos, textField.text.length);
-			
-		}*/
+					//format.color = textRun.textAttrs.fillColor;
+					//
+				//} else {
+					//
+					//format.color = textRun.textAttrs.fillColor;
+					//
+				//}
+				//
+			//}
+			//
+			//textField.setTextFormat (format, pos, textField.text.length);
+			//
+		//}
 		
 		return textField;
 		

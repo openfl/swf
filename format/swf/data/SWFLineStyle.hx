@@ -34,6 +34,7 @@ class SWFLineStyle
 		pixelHintingFlag = false;
 		noClose = false;
 		miterLimitFactor = 3;
+		color = 0;
 		
 		if (data != null) {
 			parse(data, level);

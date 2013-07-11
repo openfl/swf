@@ -3,9 +3,11 @@ package format.swf.instance;
 
 import flash.display.BitmapData;
 import flash.utils.ByteArray;
+import flash.utils.CompressionAlgorithm;
 import format.swf.data.consts.BitmapFormat;
 import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBits;
+import format.swf.tags.TagDefineBitsJPEG3;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineBitsJPEG2;
 
@@ -21,23 +23,7 @@ class Bitmap extends flash.display.Bitmap {
 		
 		super ();
 		
-		if (Std.is (tag, TagDefineBits)) {
-			
-			var data:TagDefineBits = cast tag;
-			
-			#if flash
-			
-			var jpeg = new JPEGDecoder (data.bitmapData);
-			bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
-			bitmapData.setVector (bitmapData.rect, jpeg.pixels);
-			
-			#else
-			
-			bitmapData = BitmapData.loadFromHaxeBytes (data.bitmapData, null);
-			
-			#end
-			
-		} else if (Std.is (tag, TagDefineBitsLossless)) {
+		if (Std.is (tag, TagDefineBitsLossless)) {
 			
 			var data:TagDefineBitsLossless = cast tag;
 			
@@ -104,6 +90,39 @@ class Bitmap extends flash.display.Bitmap {
 			
 			var data:TagDefineBitsJPEG2 = cast tag;
 			
+			#if flash
+			
+			var jpeg = new JPEGDecoder (data.bitmapData);
+			bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
+			bitmapData.setVector (bitmapData.rect, jpeg.pixels);
+			
+			#else
+			
+			if (Std.is (tag, TagDefineBitsJPEG3)) {
+				
+				var alpha = cast (tag, TagDefineBitsJPEG3).bitmapAlphaData;
+				
+				try {
+					
+					alpha.uncompress ();
+					
+				} catch (e:Dynamic) {
+					
+				}
+				
+				bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
+				
+			} else {
+				
+				bitmapData = BitmapData.loadFromBytes (data.bitmapData, null);
+				
+			}
+			
+			#end
+			
+			
+			
+			
 			//var buffer:ByteArray = null;
 			//var alpha:ByteArray = null;
 			//
@@ -136,6 +155,11 @@ class Bitmap extends flash.display.Bitmap {
 			//
 			//#else
 			
+			
+		} else if (Std.is (tag, TagDefineBits)) {
+			
+			var data:TagDefineBits = cast tag;
+			
 			#if flash
 			
 			var jpeg = new JPEGDecoder (data.bitmapData);
@@ -147,15 +171,6 @@ class Bitmap extends flash.display.Bitmap {
 			bitmapData = BitmapData.loadFromHaxeBytes (data.bitmapData, null);
 			
 			#end
-			
-			//if (!lossless && alpha != null) {
-				
-				// NME doesn't currently handle alpha data for JPEG images, so we need to add it ourselves
-				//bitmapData = createWithAlpha (bitmapData, alpha);
-				
-			//}
-			
-			//#end
 			
 		}
 		
