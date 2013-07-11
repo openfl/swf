@@ -145,7 +145,11 @@ class MovieClip extends flash.display.MovieClip {
 			switch (command.type) {
 				
 				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-				case BEGIN_GRADIENT_FILL: shape.graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+				case BEGIN_GRADIENT_FILL: 
+					
+					shape.cacheAsBitmap = true;
+					shape.graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+				
 				case BEGIN_BITMAP_FILL: 
 					
 					var bitmap = new Bitmap (cast data.getCharacter (command.params[0]));
