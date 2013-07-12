@@ -535,11 +535,11 @@ class MovieClip extends flash.display.MovieClip {
 				
 			} else if (Std.is (symbol, TagDefineBitsLossless)) {
 				
-				//displayObject = new Bitmap (cast symbol);
+				displayObject = new Bitmap (cast symbol);
 				
 			} else if (Std.is (symbol, TagDefineBits)) {
 				
-				//displayObject = new Bitmap (cast symbol);
+				displayObject = new Bitmap (cast symbol);
 				
 			} else if (Std.is (symbol, TagDefineShape)) {
 				
