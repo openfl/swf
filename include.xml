@@ -2,5 +2,6 @@
 <extension>
 	
 	<haxeflag name="-swf-lib" value="jpegdecoder.swc" if="flash" />
+	<haxeflag name="-debug" if="flash" />
 	
 </extension>
