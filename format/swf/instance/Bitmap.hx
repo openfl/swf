@@ -79,12 +79,33 @@ class Bitmap extends flash.display.Bitmap {
 				buffer = imageData;
 				buffer.position = 0;
 				
+			} else {
+				
+				var newBuffer = new ByteArray (buffer.length);
+				
+				for (y in 0...data.bitmapHeight) {
+					
+					for (x in 0...data.bitmapWidth) {
+						
+						var a = buffer.readUnsignedByte ();
+						var unmultiply = 0xFF / a;
+						
+						newBuffer.writeByte (a);
+						newBuffer.writeByte (Std.int (buffer.readUnsignedByte () * unmultiply));
+						newBuffer.writeByte (Std.int (buffer.readUnsignedByte () * unmultiply));
+						newBuffer.writeByte (Std.int (buffer.readUnsignedByte () * unmultiply));
+						
+					}
+					
+				}
+				
+				buffer = newBuffer;
+				buffer.position = 0;
+				
 			}
 			
-			var bitmapData = new BitmapData (data.bitmapWidth, data.bitmapHeight, transparent);
+			bitmapData = new BitmapData (data.bitmapWidth, data.bitmapHeight, transparent);
 			bitmapData.setPixels (bitmapData.rect, buffer);
-			
-			this.bitmapData = bitmapData;
 			
 		} else if (Std.is (tag, TagDefineBitsJPEG2)) {
 			
@@ -106,11 +127,41 @@ class Bitmap extends flash.display.Bitmap {
 					
 					alpha.uncompress ();
 					
-				} catch (e:Dynamic) {
+				} catch (e:Dynamic) { }
+				
+				bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
+				
+				var pixels = bitmapData.getPixels (bitmapData.rect);
+				var newPixels = new ByteArray (pixels.length);
+				pixels.position = 0;
+				
+				var clamp = function (value:Float):Int {
+					
+					if (value > 0xFF) value = 0xFF;
+					if (value < 0) value = 0;
+					
+					return Std.int (value);
 					
 				}
 				
-				bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
+				for (y in 0...bitmapData.height) {
+					
+					for (x in 0...bitmapData.width) {
+						
+						var a = pixels.readUnsignedByte ();
+						var unmultiply = 0xFF / a;
+						
+						newPixels.writeByte (a);
+						newPixels.writeByte (clamp (pixels.readUnsignedByte () * unmultiply));
+						newPixels.writeByte (clamp (pixels.readUnsignedByte () * unmultiply));
+						newPixels.writeByte (clamp (pixels.readUnsignedByte () * unmultiply));
+						
+					}
+					
+				}
+				
+				newPixels.position = 0;
+				bitmapData.setPixels (bitmapData.rect, newPixels);
 				
 			} else {
 				

@@ -4,9 +4,12 @@ package format;
 import flash.display.BitmapData;
 import flash.display.SimpleButton;
 import flash.utils.ByteArray;
+import format.swf.instance.Bitmap;
 import format.swf.instance.MovieClip;
 import format.swf.SWFRoot;
 import format.swf.SWFTimelineContainer;
+import format.swf.tags.TagDefineBits;
+import format.swf.tags.TagDefineBitsJPEG2;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagSymbolClass;
@@ -112,24 +115,28 @@ class SWF {
 	
 	public function getBitmapData (className:String):BitmapData {
 		
-		if (!symbols.exists (className)) {
+		var symbol:Dynamic = null;
+		
+		if (className == "") {
 			
-			return null;
+			symbol = data;
+			
+		} else {
+			
+			if (symbols.exists (className)) {
+				
+				symbol = data.getCharacter (symbols.get (className));
+				
+			}
 			
 		}
-		/*
-		switch (getSymbol (symbols.get (className))) {
+		
+		if (Std.is (symbol, TagDefineBits) || Std.is (symbol, TagDefineBitsLossless)) {
 			
-			case bitmapSymbol (bitmap):
-				
-				return bitmap.bitmapData;
-			
-			default:
-				
-				return null;
+			return new Bitmap (cast symbol).bitmapData;
 			
 		}
-		*/
+		
 		return null;
 		
 	}
