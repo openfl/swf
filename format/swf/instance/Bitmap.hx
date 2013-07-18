@@ -81,6 +81,7 @@ class Bitmap extends flash.display.Bitmap {
 				
 			} else {
 				
+				#if flash
 				//var newBuffer = new ByteArray ();
 				//
 				//for (y in 0...data.bitmapHeight) {
@@ -101,24 +102,20 @@ class Bitmap extends flash.display.Bitmap {
 				//
 				//buffer = newBuffer;
 				//buffer.position = 0;
+				#end
 				
 			}
 			
 			bitmapData = new BitmapData (data.bitmapWidth, data.bitmapHeight, transparent);
 			bitmapData.setPixels (bitmapData.rect, buffer);
+			
+			#if (cpp || neko)
 			bitmapData.unmultiplyAlpha ();
+			#end
 			
 		} else if (Std.is (tag, TagDefineBitsJPEG2)) {
 			
 			var data:TagDefineBitsJPEG2 = cast tag;
-			
-			#if flash
-			
-			var jpeg = new JPEGDecoder (data.bitmapData);
-			bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
-			bitmapData.setVector (bitmapData.rect, jpeg.pixels);
-			
-			#else
 			
 			if (Std.is (tag, TagDefineBitsJPEG3)) {
 				
@@ -130,9 +127,12 @@ class Bitmap extends flash.display.Bitmap {
 					
 				} catch (e:Dynamic) { }
 				
-				bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
-				bitmapData.unmultiplyAlpha ();
+				#if flash
 				
+				var jpeg = new JPEGDecoder (data.bitmapData);
+				bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
+				bitmapData.setVector (bitmapData.rect, jpeg.pixels);
+				//
 				//var pixels = bitmapData.getPixels (bitmapData.rect);
 				//var newPixels = new ByteArray ();
 				//pixels.position = 0;
@@ -154,16 +154,7 @@ class Bitmap extends flash.display.Bitmap {
 						//var unmultiply = 0xFF / a;
 						//
 						//newPixels.writeByte (a);
-						//
-						//if (a != 0 && a != 255) trace ("a: " + a + ", diff: " + unmultiply);
-						//
-						//var r = pixels.readUnsignedByte ();
-						//var result = clamp (r * unmultiply);
-						//
-						//newPixels.writeByte (result);
-						//
-						//if (a != 0 && a != 255) trace ("r: " + r + ", result: " + result);
-						//
+						//newPixels.writeByte (clamp (pixels.readUnsignedByte () * unmultiply));
 						//newPixels.writeByte (clamp (pixels.readUnsignedByte () * unmultiply));
 						//newPixels.writeByte (clamp (pixels.readUnsignedByte () * unmultiply));
 						//
@@ -174,13 +165,28 @@ class Bitmap extends flash.display.Bitmap {
 				//newPixels.position = 0;
 				//bitmapData.setPixels (bitmapData.rect, newPixels);
 				
+				#else
+				
+				bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
+				bitmapData.unmultiplyAlpha ();
+				
+				#end
+				
 			} else {
+				
+				#if flash
+				
+				var jpeg = new JPEGDecoder (data.bitmapData);
+				bitmapData = new BitmapData (jpeg.width, jpeg.height, false);
+				bitmapData.setVector (bitmapData.rect, jpeg.pixels);
+				
+				#else
 				
 				bitmapData = BitmapData.loadFromBytes (data.bitmapData, null);
 				
+				#end
+				
 			}
-			
-			#end
 			
 			
 			
