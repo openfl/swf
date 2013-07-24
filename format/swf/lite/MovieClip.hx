@@ -27,6 +27,11 @@ class MovieClip extends flash.display.MovieClip {
 	private var swf:SWFLite;
 	private var symbol:SpriteSymbol;
 	
+	#if flash
+	private var __currentFrame:Int;
+	private var __totalFrames:Int;
+	#end
+	
 	
 	public function new (swf:SWFLite, symbol:SpriteSymbol) {
 		
@@ -315,7 +320,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	public override function gotoAndPlay (frame:Dynamic, scene:String = null):Void {
+	public override function gotoAndPlay (frame:#if flash flash.utils.Object #else Dynamic #end, scene:String = null):Void {
 		
 		__currentFrame = getFrame (frame);
 		update ();
@@ -324,7 +329,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	public override function gotoAndStop (frame:Dynamic, scene:String = null):Void {
+	public override function gotoAndStop (frame:#if flash flash.utils.Object #else Dynamic #end, scene:String = null):Void {
 		
 		__currentFrame = getFrame (frame);
 		update ();
@@ -655,6 +660,29 @@ class MovieClip extends flash.display.MovieClip {
 		lastUpdate = __currentFrame;
 		
 	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	#if flash
+	@:getter public function get_currentFrame():Int {
+		
+		return __currentFrame;
+		
+	}
+	
+	
+	@:getter public function get___totalFrames():Int {
+		
+		return __totalFrames;
+		
+	}
+	#end
 	
 	
 	
