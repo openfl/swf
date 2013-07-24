@@ -22,6 +22,7 @@ class TagDefineBits implements IDefinitionTag
 	public var characterId:Int;
 
 	public var bitmapData (default, null):ByteArray;
+	public var instance:BitmapData;
 	
 	public function new() {
 		type = TYPE;
@@ -70,6 +71,7 @@ class TagDefineBits implements IDefinitionTag
 		var loader:Loader = event.target.loader;
 		var bitmapData:BitmapData = new BitmapData(Math.ceil (loader.content.width), Math.ceil (loader.content.height));
 		bitmapData.draw(loader);
+		instance = bitmapData;
 		onCompleteCallback(bitmapData);
 	}
 	

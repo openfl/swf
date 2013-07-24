@@ -3,6 +3,9 @@
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
 
+import flash.display.BitmapData;
+import flash.display.Loader;
+import flash.events.Event;
 import flash.utils.ByteArray;
 
 class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 #if !haxe3 , #end implements IDefinitionTag
@@ -63,6 +66,34 @@ class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 #if !haxe3 , #end implements
 			tag.bitmapAlphaData.writeBytes(bitmapAlphaData);
 		}
 		return tag;
+	}
+	
+	override private function exportCompleteHandler(event:Event):Void {
+		var loader:Loader = event.target.loader;
+		var bitmapData:BitmapData = new BitmapData(Math.ceil (loader.content.width), Math.ceil (loader.content.height), true);
+		bitmapData.draw(loader);
+		try {
+			bitmapAlphaData.uncompress ();
+		} catch (e:Dynamic) {}
+		bitmapAlphaData.position = 0;
+		var constrain = function (value:Float):Int {
+			if (value > 0xFF) return 0xFF;
+			else if (value < 0) return 0;
+			return Std.int (value);
+		}
+		for (y in 0...bitmapData.height) {
+			for (x in 0...bitmapData.width) {
+				var a = bitmapAlphaData.readUnsignedByte ();
+				var unmultiply = 255.0 / a;
+				var pixel = bitmapData.getPixel (x, y);
+				var r = constrain (((pixel >> 16) & 0xFF) * unmultiply);
+				var g = constrain (((pixel >> 8) & 0xFF) * unmultiply);
+				var b = constrain (((pixel) & 0xFF) * unmultiply);
+				bitmapData.setPixel32 (x, y, ((a << 24) + (r << 16) + (g << 8) + b));
+			}
+		}
+		instance = bitmapData;
+		onCompleteCallback(bitmapData);
 	}
 
 	override public function toString(indent:Int = 0):String {

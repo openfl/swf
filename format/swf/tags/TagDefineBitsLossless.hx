@@ -3,6 +3,7 @@
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapFormat;
 
+import flash.display.BitmapData;
 import flash.utils.ByteArray;
 
 class TagDefineBitsLossless implements IDefinitionTag
@@ -22,7 +23,8 @@ class TagDefineBitsLossless implements IDefinitionTag
 	public var characterId:Int;
 
 	public var zlibBitmapData (default, null):ByteArray;
-	
+	public var instance:BitmapData;
+		
 	public function new() {
 		
 		type = TYPE;

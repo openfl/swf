@@ -3,6 +3,8 @@ package format;
 
 import flash.display.BitmapData;
 import flash.display.SimpleButton;
+import flash.events.Event;
+import flash.events.EventDispatcher;
 import flash.utils.ByteArray;
 import format.swf.instance.Bitmap;
 import format.swf.instance.MovieClip;
@@ -19,7 +21,7 @@ typedef Map<String, T> = Hash<T>;
 #end
 
 
-class SWF {
+class SWF extends EventDispatcher {
 	
 	
 	public var data:SWFRoot;
@@ -31,8 +33,12 @@ class SWF {
 	public var symbols:Map <String, Int>;
 	public var width (default, null):Int;
 	
+	private var complete:Bool;
+	
 	
 	public function new (bytes:ByteArray) {
+		
+		super ();
 		
 		//SWFTimelineContainer.AUTOBUILD_LAYERS = true;
 		data = new SWFRoot (bytes);
@@ -55,6 +61,64 @@ class SWF {
 				}
 				
 			}
+			
+		}
+		
+		#if flash
+		
+		var allTags = 0;
+		var loadedTags = 0;
+		
+		var handler = function (_) {
+			
+			loadedTags++;
+			
+			if (loadedTags >= allTags) {
+				
+				complete = true;
+				dispatchEvent (new Event (Event.COMPLETE));
+				
+			}
+			
+		}
+		
+		for (tag in data.tags) {
+			
+			if (Std.is (tag, TagDefineBits)) {
+				
+				allTags++;
+				
+				var bits:TagDefineBits = cast tag;
+				bits.exportBitmapData (handler);
+				
+			} /*else if (Std.is (tag, TagDefineBitsLossless)) {
+				
+				allTags++;
+				
+				var bits:TagDefineBitsLossless = cast tag;
+				bits.exportBitmapData (handler);
+				
+			}*/
+			
+		}
+		
+		#else
+		
+		complete = true;
+		dispatchEvent (new Event (Event.COMPLETE));
+		
+		#end
+		
+	}
+	
+	
+	public override function addEventListener (type:String, listener:Dynamic, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void {
+		
+		super.addEventListener (type, listener, useCapture, priority, useWeakReference);
+		
+		if (complete) {
+			
+			dispatchEvent (new Event (Event.COMPLETE));
 			
 		}
 		
@@ -147,7 +211,7 @@ class SWF {
 		return false;
 		//return streamPositions.exists (id);
 		
-	}
+	}	
 	
 	
 }

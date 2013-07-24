@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<extension>
-	
-	<haxeflag name="-swf-lib" value="jpegdecoder.swc" if="flash" />
-	<haxeflag name="-debug" if="flash" />
-	
-</extension>
