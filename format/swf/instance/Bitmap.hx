@@ -159,7 +159,7 @@ class Bitmap extends flash.display.Bitmap {
 			
 			#else
 			
-			bitmapData = BitmapData.loadFromHaxeBytes (data.bitmapData, null);
+			bitmapData = BitmapData.loadFromBytes (data.bitmapData, null);
 			
 			#end
 			

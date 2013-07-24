@@ -1,6 +1,7 @@
 package format.swf.lite;
 
 
+import flash.display.Bitmap;
 import flash.display.DisplayObject;
 import flash.display.Shape;
 import flash.events.Event;
@@ -117,6 +118,13 @@ class MovieClip extends flash.display.MovieClip {
 			switch (command.type) {
 				
 				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
+				case BEGIN_GRADIENT_FILL: 
+					
+					#if (cpp || neko)
+					shape.cacheAsBitmap = true;
+					#end
+					shape.graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+				
 				case BEGIN_BITMAP_FILL: 
 					
 					#if openfl
@@ -147,8 +155,12 @@ class MovieClip extends flash.display.MovieClip {
 				
 				case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
 				case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
-				case CURVE_TO: shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
-				default:
+				case CURVE_TO:
+					
+					#if (cpp || neko)
+					shape.cacheAsBitmap = true;
+					#end
+					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
 				
 			}
 			
@@ -423,6 +435,10 @@ class MovieClip extends flash.display.MovieClip {
 				} else if (Std.is (symbol, ShapeSymbol)) {
 					
 					displayObject = createShape (cast symbol);
+					
+				} else if (Std.is (symbol, BitmapSymbol)) {
+					
+					displayObject = new Bitmap (Assets.getBitmapData (cast (symbol, BitmapSymbol).path));
 					
 				}
 				
