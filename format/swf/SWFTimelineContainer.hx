@@ -14,6 +14,7 @@ import format.swf.tags.IDefinitionTag;
 import format.swf.tags.IDisplayListTag;
 import format.swf.tags.ITag;
 import format.swf.tags.TagDefineMorphShape;
+import format.swf.tags.TagDefineScalingGrid;
 import format.swf.tags.TagDefineSceneAndFrameLabelData;
 import format.swf.tags.TagEnd;
 import format.swf.tags.TagFrameLabel;
@@ -57,6 +58,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	public var tags(default, null):Array<ITag>;
 	public var tagsRaw(default, null):Array<SWFRawTag>;
 	public var dictionary(default, null):Map<Int, Int>;
+	public var scalingGrids(default, null):Map<Int, Int>;
 	public var scenes(default, null):Array<Scene>;
 	public var frames(default, null):Array<Frame>;
 	public var layers(default, null):Array<Layer>;
@@ -88,6 +90,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		tags = new Array<ITag>();
 		tagsRaw = new Array<SWFRawTag>();
 		dictionary = new Map<Int, Int>();
+		scalingGrids = new Map<Int, Int>();
 		scenes = new Array<Scene>();
 		frames = new Array<Frame>();
 		layers = new Array<Layer>();
@@ -103,6 +106,13 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		var tagIndex:Int = rootTimelineContainer.dictionary.get (characterId);
 		if(tagIndex >= 0 && tagIndex < rootTimelineContainer.tags.length) {
 			return cast rootTimelineContainer.tags[tagIndex];
+		}
+		return null;
+	}
+	
+	public function getScalingGrid(characterId:Int):TagDefineScalingGrid {
+		if(scalingGrids.exists (characterId)) {
+			return cast rootTimelineContainer.tags[scalingGrids.get (characterId)];
 		}
 		return null;
 	}
@@ -296,6 +306,9 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			// Global JPEG Table
 			case TagJPEGTables.TYPE:
 				processJPEGTablesTag(cast tag, currentTagIndex);
+			// Scale-9 grids
+			case TagDefineScalingGrid.TYPE:
+				processScalingGridTag(cast tag, currentTagIndex);
 		}
 	}
 	
@@ -390,6 +403,10 @@ class SWFTimelineContainer extends SWFEventDispatcher
 
 	private function processJPEGTablesTag(tag:TagJPEGTables, currentTagIndex:Int):Void {
 		jpegTablesTag = tag;
+	}
+	
+	private function processScalingGridTag(tag:TagDefineScalingGrid, currentTagIndex:Int):Void {
+		scalingGrids.set (tag.characterId, currentTagIndex);
 	}
 	
 	public function buildLayers():Void {

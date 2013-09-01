@@ -527,6 +527,7 @@ class MovieClip extends flash.display.MovieClip {
 		for (object in frame.getObjectsSortedByDepth ()) {
 			
 			var symbol = data.getCharacter (object.characterId);
+			var grid = data.getScalingGrid (object.characterId);
 			var displayObject:DisplayObject = null;
 			
 			if (Std.is (symbol, TagDefineSprite)) {
@@ -556,6 +557,12 @@ class MovieClip extends flash.display.MovieClip {
 			}
 			
 			if (displayObject != null) {
+				
+				if (grid != null) {
+					
+					displayObject.scale9Grid = grid.splitter.rect.clone ();
+					
+				}
 				
 				placeObject (displayObject, object);
 				addChild (displayObject);

@@ -3,7 +3,7 @@
 import format.swf.SWFData;
 import format.swf.data.SWFRectangle;
 
-class TagDefineScalingGrid implements IDisplayListTag
+class TagDefineScalingGrid implements ITag
 {
 	public static inline var TYPE:Int = 78;
 	
@@ -38,7 +38,7 @@ class TagDefineScalingGrid implements IDisplayListTag
 		data.writeBytes(body);
 	}
 	
-	public function clone():IDisplayListTag {
+	public function clone():ITag {
 		var tag:TagDefineScalingGrid = new TagDefineScalingGrid();
 		tag.characterId = characterId;
 		tag.splitter = splitter.clone();
