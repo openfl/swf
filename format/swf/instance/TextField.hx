@@ -12,6 +12,7 @@ import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineEditText;
 import format.swf.tags.TagDefineFont;
+import format.swf.tags.TagDefineFont2;
 import format.swf.tags.TagDefineText;
 import format.swf.SWFTimelineContainer;
 
@@ -45,59 +46,102 @@ class TextField extends Sprite {
 	
 	private function createEditText (tag:TagDefineEditText):Void {
 		
-		var textField = new flash.text.TextField ();
-		textField.selectable = !tag.noSelect;
-		
-		var rect:Rectangle = tag.bounds.rect;
-		
-		textField.width = rect.width;
-		textField.height = rect.height;
-		textField.multiline = tag.multiline;
-		textField.wordWrap = tag.wordWrap;
-		textField.displayAsPassword = tag.password;
-		textField.border = tag.border;
-		textField.selectable = !tag.noSelect;
-		
-		var format = new TextFormat ();
-		if (tag.hasTextColor) format.color = tag.textColor;
-		//if (hasFont) format.font = symbol.fontId?
-		//else if (hasFontClass) format.font = symbol.fontClass?
-		
-		//if (tag.hasFont) trace ("has font");
-		//else if (tag.hasFontClass) trace ("has font class");
-		
-		format.leftMargin = tag.leftMargin;
-		format.rightMargin = tag.rightMargin;
-		format.indent = tag.indent;
-		format.leading = tag.leading;
-		
-		switch (tag.align) {
+		/*if (tag.hasFont) {
 			
-			case 0: format.align = TextFormatAlign.LEFT;
-			case 1: format.align = TextFormatAlign.RIGHT;
-			case 2: format.align = TextFormatAlign.CENTER;
-			case 3: format.align = TextFormatAlign.JUSTIFY;
+			var font:TagDefineFont2 = cast data.getCharacter (tag.fontId);
+			var color = tag.hasTextColor ? tag.textColor : 0x000000;
 			
-		}
-		
-		textField.defaultTextFormat = format;
-		
-		if (tag.hasText) {
-			
-			if (tag.html) {
+			if (tag.hasText) {
 				
-				textField.htmlText = tag.initialText;
+				tag.initialText = "hello";
 				
-			} else {
-				
-				textField.text = tag.initialText;
+				for (i in 0...tag.initialText.length) {
 					
+					var shape = new Shape ();
+					shape.graphics.lineStyle ();
+					shape.graphics.beginFill (color, 1);
+					
+					render (font, font.codeTable[tag.initialText.charCodeAt(i)], shape);
+					
+					trace (shape.width);
+					
+					//shape.transform.matrix = matrix;
+					//matrix.tx += record.glyphEntries[i].advance * 0.05;
+					
+					glyphs.push (shape);
+					addChild (shape);
+					
+				}
+				
 			}
 			
-		}
-		
-		textField.autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
-		addChild (textField);
+		} else {*/
+			
+			var textField = new flash.text.TextField ();
+			textField.selectable = !tag.noSelect;
+			
+			var rect:Rectangle = tag.bounds.rect;
+			
+			textField.width = rect.width;
+			textField.height = rect.height;
+			textField.multiline = tag.multiline;
+			textField.wordWrap = tag.wordWrap;
+			textField.displayAsPassword = tag.password;
+			textField.border = tag.border;
+			textField.selectable = !tag.noSelect;
+			
+			var format = new TextFormat ();
+			if (tag.hasTextColor) format.color = tag.textColor;
+			//if (hasFont) format.font = symbol.fontId?
+			//else if (hasFontClass) format.font = symbol.fontClass?
+			
+			if (tag.hasFont) {
+				
+				var font = data.getCharacter (tag.fontId);
+				
+				if (Std.is (font, TagDefineFont2)) {
+					
+					format.font = cast (font, TagDefineFont2).fontName;
+					//textField.embedFonts = true;
+					
+				}
+				
+			}
+			
+			format.leftMargin = tag.leftMargin;
+			format.rightMargin = tag.rightMargin;
+			format.indent = tag.indent;
+			format.leading = tag.leading;
+			
+			switch (tag.align) {
+				
+				case 0: format.align = TextFormatAlign.LEFT;
+				case 1: format.align = TextFormatAlign.RIGHT;
+				case 2: format.align = TextFormatAlign.CENTER;
+				case 3: format.align = TextFormatAlign.JUSTIFY;
+				
+			}
+			
+			textField.defaultTextFormat = format;
+			
+			if (tag.hasText) {
+				
+				if (tag.html) {
+					
+					textField.htmlText = tag.initialText;
+					
+				} else {
+					
+					textField.text = tag.initialText;
+						
+				}
+				
+			}
+			
+			textField.autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
+			addChild (textField);
+			
+		//}
 		
 	}
 	
@@ -146,9 +190,11 @@ class TextField extends Sprite {
 				
 				render (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, shape);
 				
+				shape.graphics.endFill ();
 				shape.transform.matrix = matrix;
 				matrix.tx += record.glyphEntries[i].advance * 0.05;
 				
+				glyphs.push (shape);
 				addChild (shape);
 				
 			}
@@ -162,7 +208,9 @@ class TextField extends Sprite {
 		
 		var handler = new ShapeCommandExporter (data);
 		font.export (handler, character);
-		handler.endFill();
+		
+		trace (handler.commands);
+		//trace (character);
 		
 		for (command in handler.commands) {
 			
