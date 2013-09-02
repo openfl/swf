@@ -3,6 +3,7 @@ package format.swf.instance;
 
 import flash.display.Shape;
 import flash.display.Sprite;
+import flash.geom.ColorTransform;
 import flash.geom.Rectangle;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
@@ -20,8 +21,12 @@ import format.swf.SWFTimelineContainer;
 class TextField extends Sprite {
 	
 	
+	public var text (get, set):String;
+	
+	private var _text:String;
 	private var data:SWFTimelineContainer;
 	private var glyphs:Array<Shape>;
+	private var tag:IDefinitionTag;
 	
 	
 	public function new (data:SWFTimelineContainer, tag:IDefinitionTag) {
@@ -29,170 +34,100 @@ class TextField extends Sprite {
 		super ();
 		
 		this.data = data;
+		this.tag = tag;
+		
+		if (Std.is (tag, TagDefineEditText)) {
+			
+			if (cast (tag, TagDefineEditText).hasText) {
+				
+				_text = cast (tag, TagDefineEditText).initialText;
+				
+			}
+			
+		}
+		
+		render ();
+		
+	}
+	
+	
+	private function render ():Void {
+		
 		glyphs = new Array<Shape> ();
 		
 		if (Std.is (tag, TagDefineText)) {
 			
-			createText (cast tag);
+			renderStatic ();
 			
 		} else {
 			
-			createEditText (cast tag);
+			if (cast (tag, TagDefineEditText).hasFont) {
+				
+				renderDynamic ();
+				
+			} else {
+				
+				renderFallback ();
+				
+			}
 			
 		}
 		
 	}
 	
 	
-	private function createEditText (tag:TagDefineEditText):Void {
+	private function renderDynamic ():Void {
 		
-		/*if (tag.hasFont) {
-			
-			var font:TagDefineFont2 = cast data.getCharacter (tag.fontId);
-			var color = tag.hasTextColor ? tag.textColor : 0x000000;
-			
-			if (tag.hasText) {
-				
-				tag.initialText = "hello";
-				
-				for (i in 0...tag.initialText.length) {
-					
-					var shape = new Shape ();
-					shape.graphics.lineStyle ();
-					shape.graphics.beginFill (color, 1);
-					
-					render (font, font.codeTable[tag.initialText.charCodeAt(i)], shape);
-					
-					trace (shape.width);
-					
-					//shape.transform.matrix = matrix;
-					//matrix.tx += record.glyphEntries[i].advance * 0.05;
-					
-					glyphs.push (shape);
-					addChild (shape);
-					
-				}
-				
-			}
-			
-		} else {*/
-			
-			var textField = new flash.text.TextField ();
-			textField.selectable = !tag.noSelect;
-			
-			var rect:Rectangle = tag.bounds.rect;
-			
-			textField.width = rect.width;
-			textField.height = rect.height;
-			textField.multiline = tag.multiline;
-			textField.wordWrap = tag.wordWrap;
-			textField.displayAsPassword = tag.password;
-			textField.border = tag.border;
-			textField.selectable = !tag.noSelect;
-			
-			var format = new TextFormat ();
-			if (tag.hasTextColor) format.color = tag.textColor;
-			//if (hasFont) format.font = symbol.fontId?
-			//else if (hasFontClass) format.font = symbol.fontClass?
-			
-			if (tag.hasFont) {
-				
-				var font = data.getCharacter (tag.fontId);
-				
-				if (Std.is (font, TagDefineFont2)) {
-					
-					format.font = cast (font, TagDefineFont2).fontName;
-					//textField.embedFonts = true;
-					
-				}
-				
-			}
-			
-			format.leftMargin = tag.leftMargin;
-			format.rightMargin = tag.rightMargin;
-			format.indent = tag.indent;
-			format.leading = tag.leading;
-			
-			switch (tag.align) {
-				
-				case 0: format.align = TextFormatAlign.LEFT;
-				case 1: format.align = TextFormatAlign.RIGHT;
-				case 2: format.align = TextFormatAlign.CENTER;
-				case 3: format.align = TextFormatAlign.JUSTIFY;
-				
-			}
-			
-			textField.defaultTextFormat = format;
-			
-			if (tag.hasText) {
-				
-				if (tag.html) {
-					
-					textField.htmlText = tag.initialText;
-					
-				} else {
-					
-					textField.text = tag.initialText;
-						
-				}
-				
-			}
-			
-			textField.autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
-			addChild (textField);
-			
-		//}
+		var editText:TagDefineEditText = cast tag;
+		var font:TagDefineFont2 = cast data.getCharacter (editText.fontId);
+		var color = editText.hasTextColor ? editText.textColor : 0x000000;
 		
-	}
-	
-	
-	private function createText (tag:TagDefineText):Void {
+		//scrollRect = editText.bounds.rect;
 		
-		var matrix = null;
-		var cacheMatrix = null;
-		var tx = tag.textMatrix.matrix.tx * 0.05;
-		var ty = tag.textMatrix.matrix.ty * 0.05;
-		var color = 0;
-		var alpha = 1.0;
-		
-		for (record in tag.records) {
+		if (editText.hasText) {
 			
-			var scale = (record.textHeight / 1024) * 0.05;
+			var x = 0.;
 			
-			cacheMatrix = matrix;
-			matrix = tag.textMatrix.matrix.clone ();
-			matrix.scale (scale, scale);
-			
-			if (record.hasColor) {
-				
-				color = record.textColor & 0x00FFFFFF;
-				alpha = (record.textColor & 0xFF) / 0xFF;
-				
-			}
-			
-			if (cacheMatrix != null && (record.hasColor || record.hasFont) && (!record.hasXOffset && !record.hasYOffset)) {
-				
-				matrix.tx = cacheMatrix.tx;
-				matrix.ty = cacheMatrix.ty;
-				
-			} else {
-				
-				matrix.tx = tx + (record.xOffset) * 0.05;
-				matrix.ty = ty + (record.yOffset) * 0.05;
-				
-			}
-			
-			for (i in 0...record.glyphEntries.length) {
+			for (i in 0...editText.initialText.length) {
 				
 				var shape = new Shape ();
 				shape.graphics.lineStyle ();
-				shape.graphics.beginFill (color, alpha);
+				shape.graphics.beginFill (color, 1);
 				
-				render (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, shape);
+				var index = 0;
 				
-				shape.graphics.endFill ();
-				shape.transform.matrix = matrix;
-				matrix.tx += record.glyphEntries[i].advance * 0.05;
+				for (j in 0...font.codeTable.length) {
+					
+					if (font.codeTable[j] == editText.initialText.charCodeAt (i)) {
+						
+						index = j;
+						
+					}
+					
+				}
+				
+				renderGlyph (font, index /*font.codeTable[tag.initialText.charCodeAt(i)]*/, shape);
+				
+				shape.scaleX = shape.scaleY = (editText.fontHeight / 1024) * 0.05;
+				
+				var colorTransform = new ColorTransform ();
+				colorTransform.color = color;
+				shape.transform.colorTransform = colorTransform;
+				
+				var bounds = font.fontBoundsTable[i];
+				
+				if (bounds != null) {
+					
+					var rect = bounds.rect;
+					if (rect.x != 0)trace (rect);
+					
+					shape.y = rect.y;
+					x += rect.x;
+					
+				}
+				
+				shape.x = x;
+				x += shape.scaleX * font.fontAdvanceTable[index] * 0.05;
 				
 				glyphs.push (shape);
 				addChild (shape);
@@ -204,13 +139,78 @@ class TextField extends Sprite {
 	}
 	
 	
-	private function render (font:TagDefineFont, character:Int, shape:Shape):Void {
+	private function renderFallback ():Void {
+		
+		var editText:TagDefineEditText = cast tag;
+		var textField = new flash.text.TextField ();
+		textField.selectable = !editText.noSelect;
+		
+		var rect:Rectangle = editText.bounds.rect;
+		
+		textField.width = rect.width;
+		textField.height = rect.height;
+		textField.multiline = editText.multiline;
+		textField.wordWrap = editText.wordWrap;
+		textField.displayAsPassword = editText.password;
+		textField.border = editText.border;
+		textField.selectable = !editText.noSelect;
+		
+		var format = new TextFormat ();
+		if (editText.hasTextColor) format.color = editText.textColor;
+		
+		if (editText.hasFont) {
+			
+			var font = data.getCharacter (editText.fontId);
+			
+			if (Std.is (font, TagDefineFont2)) {
+				
+				format.font = cast (font, TagDefineFont2).fontName;
+				//textField.embedFonts = true;
+				
+			}
+			
+		}
+		
+		format.leftMargin = editText.leftMargin;
+		format.rightMargin = editText.rightMargin;
+		format.indent = editText.indent;
+		format.leading = editText.leading;
+		
+		switch (editText.align) {
+			
+			case 0: format.align = TextFormatAlign.LEFT;
+			case 1: format.align = TextFormatAlign.RIGHT;
+			case 2: format.align = TextFormatAlign.CENTER;
+			case 3: format.align = TextFormatAlign.JUSTIFY;
+			
+		}
+		
+		textField.defaultTextFormat = format;
+		
+		if (editText.hasText) {
+			
+			if (editText.html) {
+				
+				textField.htmlText = editText.initialText;
+				
+			} else {
+				
+				textField.text = editText.initialText;
+					
+			}
+			
+		}
+		
+		textField.autoSize = (editText.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
+		addChild (textField);
+		
+	}
+	
+	
+	private function renderGlyph (font:TagDefineFont, character:Int, shape:Shape):Void {
 		
 		var handler = new ShapeCommandExporter (data);
 		font.export (handler, character);
-		
-		trace (handler.commands);
-		//trace (character);
 		
 		for (command in handler.commands) {
 			
@@ -242,6 +242,107 @@ class TextField extends Sprite {
 			}
 			
 		}
+		
+	}
+	
+	
+	private function renderStatic ():Void {
+		
+		var defineText:TagDefineText = cast tag;
+		
+		var matrix = null;
+		var cacheMatrix = null;
+		var tx = defineText.textMatrix.matrix.tx * 0.05;
+		var ty = defineText.textMatrix.matrix.ty * 0.05;
+		var color = 0;
+		var alpha = 1.0;
+		
+		for (record in defineText.records) {
+			
+			var scale = (record.textHeight / 1024) * 0.05;
+			
+			cacheMatrix = matrix;
+			matrix = defineText.textMatrix.matrix.clone ();
+			matrix.scale (scale, scale);
+			
+			if (record.hasColor) {
+				
+				color = record.textColor & 0x00FFFFFF;
+				alpha = (record.textColor & 0xFF) / 0xFF;
+				
+			}
+			
+			if (cacheMatrix != null && (record.hasColor || record.hasFont) && (!record.hasXOffset && !record.hasYOffset)) {
+				
+				matrix.tx = cacheMatrix.tx;
+				matrix.ty = cacheMatrix.ty;
+				
+			} else {
+				
+				matrix.tx = tx + (record.xOffset) * 0.05;
+				matrix.ty = ty + (record.yOffset) * 0.05;
+				
+			}
+			
+			for (i in 0...record.glyphEntries.length) {
+				
+				var shape = new Shape ();
+				shape.graphics.lineStyle ();
+				shape.graphics.beginFill (color, alpha);
+				
+				renderGlyph (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, shape);
+				
+				shape.graphics.endFill ();
+				shape.transform.matrix = matrix;
+				matrix.tx += record.glyphEntries[i].advance * 0.05;
+				
+				glyphs.push (shape);
+				addChild (shape);
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	private function update ():Void {
+		
+		for (glyph in glyphs) {
+			
+			removeChild (glyph);
+			
+		}
+		
+		render ();
+		
+	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	private function get_text ():String {
+		
+		return _text;
+		
+	}
+	
+	
+	private function set_text (value:String):String {
+		
+		if (_text != value && Std.is (tag, TagDefineEditText)) {
+			
+			_text = value;
+			update ();
+			
+		}
+		
+		return _text;
 		
 	}
 	
