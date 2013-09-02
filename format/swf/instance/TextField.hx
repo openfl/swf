@@ -20,6 +20,7 @@ class TextField extends Sprite {
 	
 	
 	private var data:SWFTimelineContainer;
+	private var glyphs:Array<Shape>;
 	
 	
 	public function new (data:SWFTimelineContainer, tag:IDefinitionTag) {
@@ -27,6 +28,7 @@ class TextField extends Sprite {
 		super ();
 		
 		this.data = data;
+		glyphs = new Array<Shape> ();
 		
 		if (Std.is (tag, TagDefineText)) {
 			
@@ -61,6 +63,9 @@ class TextField extends Sprite {
 		//if (hasFont) format.font = symbol.fontId?
 		//else if (hasFontClass) format.font = symbol.fontClass?
 		
+		//if (tag.hasFont) trace ("has font");
+		//else if (tag.hasFontClass) trace ("has font class");
+		
 		format.leftMargin = tag.leftMargin;
 		format.rightMargin = tag.rightMargin;
 		format.indent = tag.indent;
@@ -79,18 +84,15 @@ class TextField extends Sprite {
 		
 		if (tag.hasText) {
 			
-			//trace ("hi");
-			
-			//if (symbol.html) {
+			if (tag.html) {
 				
-				//textField.htmlText = symbol.initialText;
-				//trace ("hey");
+				textField.htmlText = tag.initialText;
 				
-			//} else {
+			} else {
 				
 				textField.text = tag.initialText;
 					
-			//}
+			}
 			
 		}
 		
@@ -138,52 +140,56 @@ class TextField extends Sprite {
 			
 			for (i in 0...record.glyphEntries.length) {
 				
-				var handler = new ShapeCommandExporter (null);
-				handler.lineStyle ();
 				var shape = new Shape ();
+				shape.graphics.lineStyle ();
+				shape.graphics.beginFill (color, alpha);
 				
-				handler.beginFill (color, alpha);
-				
-				var font:TagDefineFont = cast data.getCharacter (record.fontId);
-				font.export (handler, record.glyphEntries[i].index);
-				
-				handler.endFill();
-				
-				for (command in handler.commands) {
-					
-					switch (command.type) {
-						
-						case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-						case END_FILL: shape.graphics.endFill ();
-						case LINE_STYLE: 
-							
-							if (command.params.length > 0) {
-								
-								shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
-								
-							} else {
-								
-								shape.graphics.lineStyle ();
-								
-							}
-						
-						case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
-						case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
-						case CURVE_TO: 
-							
-							shape.cacheAsBitmap = true;
-							shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
-							
-						default:
-						
-					}
-					
-				}
+				render (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, shape);
 				
 				shape.transform.matrix = matrix;
 				matrix.tx += record.glyphEntries[i].advance * 0.05;
 				
 				addChild (shape);
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	private function render (font:TagDefineFont, character:Int, shape:Shape):Void {
+		
+		var handler = new ShapeCommandExporter (data);
+		font.export (handler, character);
+		handler.endFill();
+		
+		for (command in handler.commands) {
+			
+			switch (command.type) {
+				
+				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
+				case END_FILL: shape.graphics.endFill ();
+				case LINE_STYLE: 
+					
+					if (command.params.length > 0) {
+						
+						shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+						
+					} else {
+						
+						shape.graphics.lineStyle ();
+						
+					}
+				
+				case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
+				case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
+				case CURVE_TO: 
+					
+					shape.cacheAsBitmap = true;
+					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
+					
+				default:
 				
 			}
 			
