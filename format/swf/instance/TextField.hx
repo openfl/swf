@@ -40,7 +40,7 @@ class TextField extends Sprite {
 			
 			if (cast (tag, TagDefineEditText).hasText) {
 				
-				_text = cast (tag, TagDefineEditText).initialText;
+				_text = stripHTML (cast (tag, TagDefineEditText).initialText);
 				
 			}
 			
@@ -84,55 +84,51 @@ class TextField extends Sprite {
 		
 		//scrollRect = editText.bounds.rect;
 		
-		if (editText.hasText) {
+		var x = 0.;
+		
+		for (i in 0..._text.length) {
 			
-			var x = 0.;
+			var shape = new Shape ();
+			shape.graphics.lineStyle ();
+			shape.graphics.beginFill (color, 1);
 			
-			for (i in 0...editText.initialText.length) {
+			var index = 0;
+			
+			for (j in 0...font.codeTable.length) {
 				
-				var shape = new Shape ();
-				shape.graphics.lineStyle ();
-				shape.graphics.beginFill (color, 1);
-				
-				var index = 0;
-				
-				for (j in 0...font.codeTable.length) {
+				if (font.codeTable[j] == _text.charCodeAt (i)) {
 					
-					if (font.codeTable[j] == editText.initialText.charCodeAt (i)) {
-						
-						index = j;
-						
-					}
+					index = j;
 					
 				}
-				
-				renderGlyph (font, index /*font.codeTable[tag.initialText.charCodeAt(i)]*/, shape);
-				
-				shape.scaleX = shape.scaleY = (editText.fontHeight / 1024) * 0.05;
-				
-				var colorTransform = new ColorTransform ();
-				colorTransform.color = color;
-				shape.transform.colorTransform = colorTransform;
-				
-				var bounds = font.fontBoundsTable[i];
-				
-				if (bounds != null) {
-					
-					var rect = bounds.rect;
-					if (rect.x != 0)trace (rect);
-					
-					shape.y = rect.y;
-					x += rect.x;
-					
-				}
-				
-				shape.x = x;
-				x += shape.scaleX * font.fontAdvanceTable[index] * 0.05;
-				
-				glyphs.push (shape);
-				addChild (shape);
 				
 			}
+			
+			renderGlyph (font, index, shape);
+			
+			shape.scaleX = shape.scaleY = (editText.fontHeight / 1024) * 0.05;
+			
+			var colorTransform = new ColorTransform ();
+			colorTransform.color = color;
+			shape.transform.colorTransform = colorTransform;
+			
+			var bounds = font.fontBoundsTable[i];
+			
+			if (bounds != null) {
+				
+				var rect = bounds.rect;
+				if (rect.x != 0)trace (rect);
+				
+				shape.y = rect.y;
+				x += rect.x;
+				
+			}
+			
+			shape.x = x;
+			x += shape.scaleX * font.fontAdvanceTable[index] * 0.05;
+			
+			glyphs.push (shape);
+			addChild (shape);
 			
 		}
 		
@@ -189,15 +185,15 @@ class TextField extends Sprite {
 		
 		if (editText.hasText) {
 			
-			if (editText.html) {
+			//if (editText.html) {
 				
-				textField.htmlText = editText.initialText;
+				//textField.htmlText = editText.initialText;
 				
-			} else {
+			//} else {
 				
-				textField.text = editText.initialText;
+				textField.text = _text;
 					
-			}
+			//}
 			
 		}
 		
@@ -302,6 +298,14 @@ class TextField extends Sprite {
 			}
 			
 		}
+		
+	}
+	
+	
+	private function stripHTML (html:String):String {
+		
+		var ereg = new EReg ("<.*?>", "g");
+		return ereg.replace (html, "");
 		
 	}
 	
