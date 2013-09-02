@@ -6,6 +6,7 @@ import format.swf.exporters.core.ShapeCommand;
 import format.swf.instance.Bitmap;
 import format.swf.lite.SWFLite;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.FontSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
@@ -19,6 +20,9 @@ import format.swf.tags.TagDefineBitsJPEG2;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton;
 import format.swf.tags.TagDefineEditText;
+import format.swf.tags.TagDefineFont;
+import format.swf.tags.TagDefineFont2;
+import format.swf.tags.TagDefineFont4;
 import format.swf.tags.TagDefineShape;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagDefineText;
@@ -84,6 +88,38 @@ class SWFLiteExporter {
 			bitmaps.set (symbol.id, bitmap.bitmapData);
 			
 			symbol.path = "";
+			swfLite.symbols.set (symbol.id, symbol);
+			
+			return symbol;
+			
+		}
+		
+		return null;
+		
+	}
+	
+	
+	private function addFont (tag:IDefinitionTag):FontSymbol {
+		
+		if (Std.is (tag, TagDefineFont2)) {
+			
+			var defineFont:TagDefineFont2 = cast tag;
+			var symbol = new FontSymbol ();
+			symbol.className = defineFont.name;
+			symbol.id = defineFont.characterId;
+			symbol.glyphs = new Array<Array<ShapeCommand>> ();
+			
+			for (i in 0...defineFont.glyphShapeTable.length) {
+				
+				var handler = new ShapeCommandExporter (data);
+				defineFont.export (handler, i);
+				symbol.glyphs.push (handler.commands);
+				
+			}
+			
+			symbol.advances = cast defineFont.fontAdvanceTable.copy ();
+			symbol.codes = defineFont.codeTable.copy ();
+			
 			swfLite.symbols.set (symbol.id, symbol);
 			
 			return symbol;
@@ -188,6 +224,57 @@ class SWFLiteExporter {
 	
 	private function addText (tag:IDefinitionTag):TextSymbol {
 		
+		if (Std.is (tag, TagDefineEditText)) {
+			
+			var editText:TagDefineEditText = cast tag;
+			var symbol = new TextSymbol ();
+			
+			symbol.className = editText.name;
+			symbol.id = editText.characterId;
+			symbol.border = editText.border;
+			
+			if (editText.hasTextColor) {
+				
+				symbol.color = editText.textColor;
+				
+			}
+			
+			symbol.fontHeight = editText.fontHeight;
+			symbol.multiline = editText.multiline;
+			symbol.selectable = !editText.noSelect;
+			
+			if (editText.hasText) {
+				
+				symbol.text = new EReg ("<.*?>", "g").replace (editText.initialText, "");
+				
+			}
+			
+			symbol.wordWrap = editText.wordWrap;
+			
+			if (editText.hasFont) {
+				
+				var font:IDefinitionTag = cast data.getCharacter (editText.fontId);
+				
+				if (font != null) {
+					
+					processTag (font);
+					
+				}
+				
+				symbol.fontID = editText.fontId;
+				
+			}
+			
+			var bounds = editText.bounds.rect;
+			symbol.width = bounds.width;
+			symbol.height = bounds.height;
+			
+			swfLite.symbols.set (symbol.id, symbol);
+			
+			return symbol;
+			
+		}
+		
 		return null;
 		
 	}
@@ -229,6 +316,10 @@ class SWFLiteExporter {
 			} else if (Std.is (tag, TagDefineShape)) {
 				
 				return addShape (cast tag);
+				
+			} else if (Std.is (tag, TagDefineFont) || Std.is (tag, TagDefineFont4)) {
+				
+				return addFont (tag);
 				
 			}
 			

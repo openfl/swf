@@ -9,6 +9,7 @@ import flash.Lib;
 import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
+import format.swf.lite.symbols.TextSymbol;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.lite.SWFLite;
 
@@ -439,6 +440,10 @@ class MovieClip extends flash.display.MovieClip {
 				} else if (Std.is (symbol, BitmapSymbol)) {
 					
 					displayObject = new Bitmap (Assets.getBitmapData (cast (symbol, BitmapSymbol).path));
+					
+				} else if (Std.is (symbol, TextSymbol)) {
+					
+					displayObject = new TextField (swf, cast symbol);
 					
 				}
 				
