@@ -89,10 +89,7 @@ class TextField extends Sprite {
 		for (i in 0..._text.length) {
 			
 			var shape = new Shape ();
-			shape.graphics.lineStyle ();
-			shape.graphics.beginFill (color, 1);
-			
-			var index = 0;
+			var index = -1;
 			
 			for (j in 0...font.codeTable.length) {
 				
@@ -104,31 +101,35 @@ class TextField extends Sprite {
 				
 			}
 			
-			renderGlyph (font, index, shape);
-			
-			shape.scaleX = shape.scaleY = (editText.fontHeight / 1024) * 0.05;
-			
-			var colorTransform = new ColorTransform ();
-			colorTransform.color = color;
-			shape.transform.colorTransform = colorTransform;
-			
-			var bounds = font.fontBoundsTable[i];
-			
-			if (bounds != null) {
+			if (index > -1) {
 				
-				var rect = bounds.rect;
-				if (rect.x != 0)trace (rect);
+				renderGlyph (font, index, shape);
 				
-				shape.y = rect.y;
-				x += rect.x;
+				shape.scaleX = shape.scaleY = (editText.fontHeight / 1024) * 0.05;
+				
+				var colorTransform = new ColorTransform ();
+				colorTransform.color = color;
+				shape.transform.colorTransform = colorTransform;
+				
+				var bounds = font.fontBoundsTable[i];
+				
+				if (bounds != null) {
+					
+					var rect = bounds.rect;
+					if (rect.x != 0)trace (rect);
+					
+					shape.y = rect.y;
+					x += rect.x;
+					
+				}
+				
+				shape.x = x;
+				x += shape.scaleX * font.fontAdvanceTable[index] * 0.05;
+				
+				glyphs.push (shape);
+				addChild (shape);
 				
 			}
-			
-			shape.x = x;
-			x += shape.scaleX * font.fontAdvanceTable[index] * 0.05;
-			
-			glyphs.push (shape);
-			addChild (shape);
 			
 		}
 		
