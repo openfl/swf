@@ -3,18 +3,10 @@ package format.swf.instance;
 
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
-import flash.display.Shape;
 import flash.display.Sprite;
-import flash.geom.ColorTransform;
 import flash.geom.Matrix;
-import flash.geom.Rectangle;
-import flash.text.TextField;
-import flash.text.TextFieldAutoSize;
-import flash.text.TextFormat;
 import flash.events.Event;
 import flash.Lib;
-import format.swf.exporters.AS3GraphicsDataShapeExporter;
-import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineEditText;
@@ -58,9 +50,7 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		//currentFrame = 1;
 		__currentFrame = 1;
-		//__totalFrames = data.frames.length;
 		__totalFrames = data.frames.length;
 		
 		update ();
@@ -79,242 +69,6 @@ class MovieClip extends flash.display.MovieClip {
 		return start + ((end - start) * ratio);
 		
 	}
-	
-	
-	/*private function createBitmap (xfl:XFL, instance:DOMBitmapInstance):Bitmap {
-		
-		var bitmap = null;
-		var bitmapData = null;
-		
-		if (xfl.document.media.exists (instance.libraryItemName)) {
-			
-			var bitmapItem = xfl.document.media.get (instance.libraryItemName);
-			bitmapData = Assets.getBitmapData (Path.directory (xfl.path) + "/bin/" + bitmapItem.bitmapDataHRef);
-			
-		}
-		
-		if (bitmapData != null) {
-			
-			bitmap = new Bitmap (bitmapData);
-			
-			if (instance.matrix != null) {
-				
-				bitmap.transform.matrix = instance.matrix;
-				
-			}
-			
-		}
-		
-		return bitmap;
-		
-	}*/
-	
-	
-	private function createDynamicText (symbol:TagDefineEditText):TextField {
-		
-		var textField = new TextField ();
-		textField.selectable = !symbol.noSelect;
-		
-		var rect:Rectangle = symbol.bounds.rect;
-		
-		textField.width = rect.width;
-		textField.height = rect.height;
-		textField.multiline = symbol.multiline;
-		textField.wordWrap = symbol.wordWrap;
-		textField.autoSize = (symbol.autoSize)? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
-		textField.border = symbol.border;
-		
-		return textField;
-		
-	}
-	
-	
-	private function createShape (symbol:TagDefineShape):Shape {
-		
-		//var handler = new AS3GraphicsDataShapeExporter (data);
-		//symbol.export (handler);
-		//
-		//var shape = new Shape ();
-		//shape.graphics.drawGraphicsData (handler.graphicsData);
-		
-		var handler = new ShapeCommandExporter (data);
-		symbol.export (handler);
-		
-		var shape = new Shape ();
-		
-		for (command in handler.commands) {
-			
-			switch (command.type) {
-				
-				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-				case BEGIN_GRADIENT_FILL: 
-					
-					shape.cacheAsBitmap = true;
-					shape.graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
-				
-				case BEGIN_BITMAP_FILL: 
-					
-					var bitmap = new Bitmap (cast data.getCharacter (command.params[0]));
-					shape.graphics.beginBitmapFill (bitmap.bitmapData, command.params[1], command.params[2], command.params[3]);
-					
-				case END_FILL: shape.graphics.endFill ();
-				case LINE_STYLE: 
-					
-					if (command.params.length > 0) {
-						
-						shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
-						
-					} else {
-						
-						shape.graphics.lineStyle ();
-						
-					}
-				
-				case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
-				case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
-				case CURVE_TO: 
-					
-					shape.cacheAsBitmap = true;
-					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
-				
-			}
-			
-		}
-		
-		return shape;
-		
-	}
-	
-	
-	private function createStaticText (symbol:TagDefineText):Sprite {
-		
-		var shape = new Shape ();
-		
-		var matrix = null;
-		var cacheMatrix = null;
-		var tx = symbol.textMatrix.matrix.tx * 0.05;
-		var ty = symbol.textMatrix.matrix.ty * 0.05;
-		var color = 0;
-		var alpha = 1.0;
-		
-		var sprite = new Sprite ();
-		
-		for (record in symbol.records) {
-			
-			var scale = (record.textHeight / 1024) * 0.05;
-			
-			cacheMatrix = matrix;
-			matrix = symbol.textMatrix.matrix.clone ();
-			matrix.scale (scale, scale);
-			
-			if (record.hasColor) {
-				
-				color = record.textColor & 0x00FFFFFF;
-				alpha = (record.textColor & 0xFF) / 0xFF;
-				
-			}
-			
-			if (cacheMatrix != null && (record.hasColor || record.hasFont) && (!record.hasXOffset && !record.hasYOffset)) {
-				
-				matrix.tx = cacheMatrix.tx;
-				matrix.ty = cacheMatrix.ty;
-				
-			} else {
-				
-				matrix.tx = tx + (record.xOffset) * 0.05;
-				matrix.ty = ty + (record.yOffset) * 0.05;
-				
-			}
-			
-			for (i in 0...record.glyphEntries.length) {
-				
-				var handler = new ShapeCommandExporter (data);
-				handler.lineStyle ();
-				var shape = new Shape ();
-				
-				handler.beginFill (color, alpha);
-				
-				var font:TagDefineFont = cast data.getCharacter (record.fontId);
-				font.export (handler, record.glyphEntries[i].index);
-				
-				handler.endFill();
-				
-				for (command in handler.commands) {
-					
-					switch (command.type) {
-						
-						case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-						case END_FILL: shape.graphics.endFill ();
-						case LINE_STYLE: 
-							
-							if (command.params.length > 0) {
-								
-								shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
-								
-							} else {
-								
-								shape.graphics.lineStyle ();
-								
-							}
-						
-						case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
-						case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
-						case CURVE_TO: 
-							
-							shape.cacheAsBitmap = true;
-							shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
-							
-						default:
-						
-					}
-					
-				}
-				
-				shape.transform.matrix = matrix;
-				matrix.tx += record.glyphEntries[i].advance * 0.05;
-				
-				sprite.addChild (shape);
-				
-			}
-			
-		}
-		
-		return sprite;
-		
-	}
-	
-	
-	/*private function createSprite (symbol:SWFTimelineContainer, object:FrameObject):MovieClip {
-		
-		var movieClip = new MovieClip (symbol, swf);
-		
-		if (movieClip != null) {
-			
-			if (object.matrix != null) {
-				
-				movieClip.transform.matrix = object.matrix;
-				
-			}
-			
-			/*if (instance.color != null) {
-				
-				movieClip.transform.colorTransform = instance.color;
-				
-			}*/
-			
-			//movieClip.cacheAsBitmap = instance.cacheAsBitmap;
-			
-			/*if (instance.exportAsBitmap) {
-				
-				movieClip.flatten ();
-				
-			}
-			
-		}
-		
-		return movieClip;
-		
-	}*/
 	
 	
 	private function enterFrame ():Void {
@@ -522,8 +276,6 @@ class MovieClip extends flash.display.MovieClip {
 		
 		var frame = data.frames[index];
 		
-		//if (frame.frameNumber == currentFrame - 1 || frame.tweenType == null || frame.tweenType == "") {
-		
 		for (object in frame.getObjectsSortedByDepth ()) {
 			
 			var symbol = data.getCharacter (object.characterId);
@@ -544,15 +296,15 @@ class MovieClip extends flash.display.MovieClip {
 				
 			} else if (Std.is (symbol, TagDefineShape)) {
 				
-				displayObject = createShape (cast symbol);
+				displayObject = new Shape (data, cast symbol);
 				
 			} else if (Std.is (symbol, TagDefineText)) {
 				
-				displayObject = createStaticText (cast symbol);
+				displayObject = new TextField (data, symbol);
 				
 			} else if (Std.is (symbol, TagDefineEditText)) {
 				
-				displayObject = createDynamicText (cast symbol);
+				displayObject = new TextField (data, symbol);
 				
 			}
 			
@@ -570,163 +322,6 @@ class MovieClip extends flash.display.MovieClip {
 			}
 			
 		}
-		
-			/*for (element in frame.elements) {
-				
-				if (Std.is (element, DOMSymbolInstance)) {
-					
-					var movieClip = createSymbol (xfl, cast element);
-					
-					if (movieClip != null) {
-						
-						addChild (movieClip);
-						
-					}
-					
-				} else if (Std.is (element, DOMBitmapInstance)) {
-					
-					var bitmap = createBitmap (xfl, cast element);
-					
-					if (bitmap != null) {
-						
-						addChild (bitmap);
-						
-					}
-					
-				} else if (Std.is (element, DOMShape)) {
-					
-					var shape = new Shape (cast element);
-					addChild (shape);
-					
-				} else if (Std.is (element, DOMDynamicText)) {
-					
-					var text = createDynamicText (cast element);
-					
-					if (text != null) {
-						
-						addChild (text);
-						
-					}
-					
-				} else if (Std.is (element, DOMStaticText)) {
-					
-					var text = createStaticText (cast element);
-					
-					if (text != null) {
-						
-						addChild (text);
-						
-					}
-					
-				}
-				
-			}*/
-			
-		/*} else if (frame.tweenType == "motion") {
-			
-			if (index < layer.frames.length - 1) {
-				
-				var firstInstance = null;
-				
-				for (element in frame.elements) {
-					
-					if (Std.is (element, DOMSymbolInstance)) {
-						
-						firstInstance = element;
-						break;
-						
-					}
-					
-				}
-				
-				var secondFrame = layer.frames[index + 1];
-				var secondInstance = null;
-				
-				for (element in secondFrame.elements) {
-					
-					if (Std.is (element, DOMSymbolInstance)) {
-						
-						secondInstance = element;
-						break;
-						
-					}
-					
-				}
-				
-				if (firstInstance.libraryItemName == secondInstance.libraryItemName) {
-					
-					var instance:DOMSymbolInstance = firstInstance.clone ();
-					var ratio = (currentFrame - frame.index) / frame.duration;
-					
-					if (secondInstance.matrix != null) {
-						
-						if (instance.matrix == null) instance.matrix = new Matrix ();
-						
-						instance.matrix.a = applyTween (instance.matrix.a, secondInstance.matrix.a, ratio);
-						instance.matrix.b = applyTween (instance.matrix.b, secondInstance.matrix.b, ratio);
-						instance.matrix.c = applyTween (instance.matrix.c, secondInstance.matrix.c, ratio);
-						instance.matrix.d = applyTween (instance.matrix.d, secondInstance.matrix.d, ratio);
-						instance.matrix.tx = applyTween (instance.matrix.tx, secondInstance.matrix.tx, ratio);
-						instance.matrix.ty = applyTween (instance.matrix.ty, secondInstance.matrix.ty, ratio);
-						
-					}
-					
-					if (secondInstance.color != null) {
-						
-						if (instance.color == null) instance.color = new Color ();
-						
-						instance.color.alphaMultiplier = applyTween (instance.color.alphaMultiplier, secondInstance.color.alphaMultiplier, ratio);
-						instance.color.alphaOffset = applyTween (instance.color.alphaOffset, secondInstance.color.alphaOffset, ratio);
-						instance.color.blueMultiplier = applyTween (instance.color.blueMultiplier, secondInstance.color.blueMultiplier, ratio);
-						instance.color.blueOffset = applyTween (instance.color.blueOffset, secondInstance.color.blueOffset, ratio);
-						instance.color.greenMultiplier = applyTween (instance.color.greenMultiplier, secondInstance.color.greenMultiplier, ratio);
-						instance.color.greenOffset = applyTween (instance.color.greenOffset, secondInstance.color.greenOffset, ratio);
-						instance.color.redMultiplier = applyTween (instance.color.redMultiplier, secondInstance.color.redMultiplier, ratio);
-						instance.color.redOffset = applyTween (instance.color.redOffset, secondInstance.color.redOffset, ratio);
-						
-					}
-					
-					var movieClip = createSymbol (xfl, instance);
-					
-					if (movieClip != null) {
-						
-						addChild (movieClip);
-						
-					}
-					
-				}
-				
-			}
-			
-		} else if (frame.tweenType == "motion object") {
-			
-			var instances = [];
-			
-			for (element in frame.elements) {
-				
-				if (Std.is (element, DOMSymbolInstance)) {
-					
-					instances.push (element.clone ());
-					
-				}
-				
-			}
-			
-			// temporarily render without tweening
-			
-			for (instance in instances) {
-				
-				var movieClip = createSymbol (xfl, instance);
-				
-				if (movieClip != null) {
-					
-					addChild (movieClip);
-					
-				}
-				
-			}
-			
-		}*/
 		
 	}
 	
@@ -768,18 +363,6 @@ class MovieClip extends flash.display.MovieClip {
 				removeChildAt (0);
 				
 			}
-			
-			//var frameIndex = -1;
-			//
-			//for (i in 0...data.frames.length) {
-				//
-				//if (data.frames[i]. <= currentFrame) {
-					//
-					//frameIndex = i;
-					//
-				//}
-				//
-			//}
 			
 			var frameIndex = __currentFrame - 1;
 			
