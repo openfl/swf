@@ -117,6 +117,7 @@ class SWFLiteExporter {
 				
 			}
 			
+			symbol.ascent = defineFont.ascent;
 			symbol.advances = cast defineFont.fontAdvanceTable.copy ();
 			symbol.codes = defineFont.codeTable.copy ();
 			
@@ -198,6 +199,22 @@ class SWFLiteExporter {
 			if (placeTag.colorTransform != null) {
 				
 				frameObject.colorTransform = placeTag.colorTransform.colorTransform;
+				
+			}
+			
+			if (placeTag.hasFilterList) {
+				
+				var filters = [];
+				
+				for (surfaceFilter in placeTag.surfaceFilterList) {
+					
+					filters.push (surfaceFilter.filter);
+					
+				}
+				
+				// TODO: Create intermediate filter format, BitmapFilter isn't serializing properly
+				
+				//frameObject.filters = filters;
 				
 			}
 			

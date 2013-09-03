@@ -25,7 +25,6 @@ class TextField extends Sprite {
 	
 	private var _text:String;
 	private var data:SWFTimelineContainer;
-	private var glyphs:Array<Shape>;
 	private var tag:IDefinitionTag;
 	
 	
@@ -53,7 +52,7 @@ class TextField extends Sprite {
 	
 	private function render ():Void {
 		
-		glyphs = new Array<Shape> ();
+		graphics.clear ();
 		
 		if (Std.is (tag, TagDefineText)) {
 			
@@ -79,16 +78,18 @@ class TextField extends Sprite {
 	private function renderDynamic ():Void {
 		
 		var editText:TagDefineEditText = cast tag;
-		var font:TagDefineFont2 = cast data.getCharacter (editText.fontId);
-		var color = editText.hasTextColor ? editText.textColor : 0x000000;
 		
+		var font:TagDefineFont2 = cast data.getCharacter (editText.fontId);
+		var color = editText.hasTextColor ? (editText.textColor & 0xFFFFFF) : 0x000000;
+		var alpha = editText.hasTextColor ? ((editText.textColor >> 24) & 0xFF) / 0xFF : 1; 
+		var scale = (editText.fontHeight / 1024) * 0.05;
 		//scrollRect = editText.bounds.rect;
 		
 		var x = 0.;
+		//var x = editText.leftMargin * scale * 0.05;
 		
 		for (i in 0..._text.length) {
 			
-			var shape = new Shape ();
 			var index = -1;
 			
 			for (j in 0...font.codeTable.length) {
@@ -103,31 +104,18 @@ class TextField extends Sprite {
 			
 			if (index > -1) {
 				
-				renderGlyph (font, index, shape);
+				graphics.lineStyle ();
+				graphics.beginFill (color, alpha);
 				
-				shape.scaleX = shape.scaleY = (editText.fontHeight / 1024) * 0.05;
+				renderGlyph (font, index, scale, x, font.ascent * scale * 0.05);
 				
-				var colorTransform = new ColorTransform ();
-				colorTransform.color = color;
-				shape.transform.colorTransform = colorTransform;
+				graphics.endFill ();
 				
-				var bounds = font.fontBoundsTable[i];
+				//var colorTransform = new ColorTransform ();
+				//colorTransform.color = color;
+				//shape.transform.colorTransform = colorTransform;
 				
-				if (bounds != null) {
-					
-					var rect = bounds.rect;
-					if (rect.x != 0)trace (rect);
-					
-					shape.y = rect.y;
-					x += rect.x;
-					
-				}
-				
-				shape.x = x;
-				x += shape.scaleX * font.fontAdvanceTable[index] * 0.05;
-				
-				glyphs.push (shape);
-				addChild (shape);
+				x += scale * font.fontAdvanceTable[index] * 0.05;
 				
 			}
 			
@@ -204,7 +192,7 @@ class TextField extends Sprite {
 	}
 	
 	
-	private function renderGlyph (font:TagDefineFont, character:Int, shape:Shape):Void {
+	private function renderGlyph (font:TagDefineFont, character:Int, scale:Float, offsetX:Float, offsetY:Float):Void {
 		
 		var handler = new ShapeCommandExporter (data);
 		font.export (handler, character);
@@ -213,26 +201,26 @@ class TextField extends Sprite {
 			
 			switch (command.type) {
 				
-				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-				case END_FILL: shape.graphics.endFill ();
+				//case BEGIN_FILL: graphics.beginFill (command.params[0], command.params[1]);
+				//case END_FILL: graphics.endFill ();
 				case LINE_STYLE: 
 					
 					if (command.params.length > 0) {
 						
-						shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+						graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
 						
 					} else {
 						
-						shape.graphics.lineStyle ();
+						graphics.lineStyle ();
 						
 					}
 				
-				case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
-				case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
+				case MOVE_TO: graphics.moveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
+				case LINE_TO: graphics.lineTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
 				case CURVE_TO: 
 					
-					shape.cacheAsBitmap = true;
-					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
+					cacheAsBitmap = true;
+					graphics.curveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY, command.params[2] * scale + offsetX, command.params[3] * scale + offsetY);
 					
 				default:
 				
@@ -251,7 +239,7 @@ class TextField extends Sprite {
 		var cacheMatrix = null;
 		var tx = defineText.textMatrix.matrix.tx * 0.05;
 		var ty = defineText.textMatrix.matrix.ty * 0.05;
-		var color = 0;
+		var color = 0x000000;
 		var alpha = 1.0;
 		
 		for (record in defineText.records) {
@@ -283,18 +271,13 @@ class TextField extends Sprite {
 			
 			for (i in 0...record.glyphEntries.length) {
 				
-				var shape = new Shape ();
-				shape.graphics.lineStyle ();
-				shape.graphics.beginFill (color, alpha);
+				graphics.lineStyle ();
+				graphics.beginFill (color, alpha);
 				
-				renderGlyph (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, shape);
+				renderGlyph (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, matrix.a, matrix.tx, matrix.ty);
 				
-				shape.graphics.endFill ();
-				shape.transform.matrix = matrix;
+				graphics.endFill ();
 				matrix.tx += record.glyphEntries[i].advance * 0.05;
-				
-				glyphs.push (shape);
-				addChild (shape);
 				
 			}
 			
@@ -307,19 +290,6 @@ class TextField extends Sprite {
 		
 		var ereg = new EReg ("<.*?>", "g");
 		return ereg.replace (html, "");
-		
-	}
-	
-	
-	private function update ():Void {
-		
-		for (glyph in glyphs) {
-			
-			removeChild (glyph);
-			
-		}
-		
-		render ();
 		
 	}
 	
@@ -343,7 +313,7 @@ class TextField extends Sprite {
 		if (_text != value && Std.is (tag, TagDefineEditText)) {
 			
 			_text = value;
-			update ();
+			render ();
 			
 		}
 		

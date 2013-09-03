@@ -46,7 +46,7 @@ class TextField extends Sprite {
 			switch (command.type) {
 				
 				//case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-				case BEGIN_FILL: graphics.beginFill (symbol.color != null ? symbol.color : 0x000000, command.params[1]);
+				case BEGIN_FILL: graphics.beginFill (symbol.color != null ? symbol.color & 0xFFFFFF : 0x000000, symbol.color != null ? ((symbol.color >> 24) & 0xFF) / 0xFF : 1);
 				case END_FILL: graphics.endFill ();
 				case LINE_STYLE: 
 					
@@ -85,6 +85,7 @@ class TextField extends Sprite {
 			var font:FontSymbol = cast swf.symbols.get (symbol.fontID);
 			var scale = (symbol.fontHeight / 1024) * 0.05;
 			var x = 0.0;
+			var y = font.ascent * scale * 0.05;
 			
 			for (i in 0..._text.length) {
 				
@@ -102,7 +103,7 @@ class TextField extends Sprite {
 				
 				if (index > -1) {
 					
-					renderGlyph (font, index, scale, x, 0);
+					renderGlyph (font, index, scale, x, y);
 					x += scale * font.advances[index] * 0.05;
 					
 				}

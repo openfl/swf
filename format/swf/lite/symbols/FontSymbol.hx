@@ -8,6 +8,7 @@ class FontSymbol extends SWFSymbol {
 	
 	
 	public var advances:Array<Float>;
+	public var ascent:Int;
 	public var codes:Array<Int>;
 	public var glyphs:Array<Array<ShapeCommand>>;
 	

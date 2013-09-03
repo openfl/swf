@@ -386,6 +386,12 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
+		if (frameObject.filters != null) {
+			
+			displayObject.filters = frameObject.filters;
+			
+		}
+		
 	}
 	
 	
