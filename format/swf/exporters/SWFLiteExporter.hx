@@ -168,7 +168,7 @@ class SWFLiteExporter {
 			
 			symbol.className = untyped tag.name;
 			symbol.id = untyped tag.characterId;
-		
+			
 		}
 		
 		// TODO: Handle more frames, skipping frames without relevant data
