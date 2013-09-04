@@ -2,7 +2,9 @@ package format.swf;
 
 
 import flash.display.BitmapData;
+import flash.display.Loader;
 import flash.display.MovieClip;
+import flash.events.Event;
 import flash.media.Sound;
 import flash.text.Font;
 import flash.utils.ByteArray;
@@ -15,47 +17,37 @@ import openfl.Assets;
 class SWFAssetProvider implements IAssetProvider {
 	
 	
+	private var cachedLoaders:Map <String, Loader>;
 	private var cachedSWFLibraries:Map <String, SWF>;
 	private var cachedSWFLiteLibraries:Map <String, SWFLite>;
 	
 	
 	public function new () {
 		
+		cachedLoaders = new Map <String, Loader> ();
 		cachedSWFLibraries = new Map <String, SWF> ();
 		cachedSWFLiteLibraries = new Map <String, SWFLite> ();
 		
 	}
 	
 	
-	public function exists (id:String, type:AssetType):Bool {
-		
-		if (id.indexOf(":") > -1 && (type == MOVIE_CLIP || type == IMAGE)) {
-			
-			var libraryName = id.substr(0, id.indexOf(":"));
-			var libraryType = Std.string (Assets.library.get (libraryName))
-			;
-			
-			if (libraryType != null && libraryType.toLowerCase () == "swf" || libraryType.toLowerCase () == "swf_lite") {
-				
-				return true;
-				
-			}
-			
-		}
-		
-		return false;
-		
-	}
-	
-	
-	public function getBitmapData (id:String, useCache:Bool
-		):BitmapData {
+	public function getBitmapData (id:String, useCache:Bool):BitmapData {
 		
 		var libraryName = id.substr(0, id.indexOf(":"));
 		var symbolName = id.substr(id.indexOf(":") + 1);
 		var library = getLibrary (libraryName);
 		
 		if (library != null) {
+			
+			#if flash
+			
+			if (Std.is (library, Loader)) {
+				
+				return cast (library, Loader).contentLoaderInfo.applicationDomain.getDefinition (symbolName);
+				
+			}
+			
+			#end
 			
 			return library.getBitmapData (symbolName);
 			
@@ -100,6 +92,12 @@ class SWFAssetProvider implements IAssetProvider {
 				
 			} else {
 				
+				#if flash
+				
+				return cachedLoaders.get (libraryName);
+				
+				#else
+				
 				if (!cachedSWFLibraries.exists (libraryName)) {
 					
 					cachedSWFLibraries.set (libraryName, new SWF (Assets.getBytes("libraries/" + libraryName + ".swf")));
@@ -107,6 +105,8 @@ class SWFAssetProvider implements IAssetProvider {
 				}
 				
 				return cachedSWFLibraries.get (libraryName);
+				
+				#end
 			
 			}
 			
@@ -125,6 +125,24 @@ class SWFAssetProvider implements IAssetProvider {
 		
 		if (library != null) {
 			
+			#if flash
+			
+			if (Std.is (library, Loader)) {
+				
+				if (symbolName != "") {
+					
+					return cast (library, Loader).contentLoaderInfo.applicationDomain.getDefinition (symbolName);
+					
+				} else {
+					
+					return cast library.contentLoaderInfo.content;
+					
+				}
+				
+			}
+			
+			#end
+			
 			return library.createMovieClip (symbolName);
 			
 		}
@@ -137,6 +155,95 @@ class SWFAssetProvider implements IAssetProvider {
 	public function getSound (id:String):Sound {
 		
 		return null;
+		
+	}
+	
+	
+	public function hasAsset (id:String, type:AssetType):Bool {
+		
+		if (id.indexOf(":") > -1 && (type == MOVIE_CLIP || type == IMAGE)) {
+			
+			var libraryName = id.substr(0, id.indexOf(":"));
+			var libraryType = Std.string (Assets.library.get (libraryName))
+			;
+			
+			if (libraryType != null && libraryType.toLowerCase () == "swf" || libraryType.toLowerCase () == "swf_lite") {
+				
+				return true;
+				
+			}
+			
+		}
+		
+		return false;
+		
+	}
+	
+	
+	public function hasLibrary (name:String, type:String):Bool {
+		
+		if (type.toLowerCase () == "swf" || type.toLowerCase () == "swf_lite") {
+			
+			return true;
+			
+		}
+		
+		return false;
+		
+	}
+	
+	
+	public function loadLibrary (name:String, type:String, callback:Dynamic):Void {
+		
+		if (type.toLowerCase () == "swf") {
+			
+			#if flash
+			
+			var loader = new Loader ();
+			cachedLoaders.set (name, loader);
+			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
+				
+				callback ();
+				
+			});
+			loader.loadBytes (Assets.getBytes("libraries/" + name + ".swf"));
+			
+			#else
+			
+			getLibrary (name);
+			callback ();
+			
+			#end
+			
+		} else {
+			
+			getLibrary (name);
+			callback ();
+			
+		}
+		
+	}
+	
+	
+	public function unloadLibrary (name:String, type:String):Void {
+		
+		if (type.toLowerCase () == "swf") {
+			
+			#if flash
+			
+			cachedLoaders.remove (name);
+			
+			#else
+			
+			cachedSWFLibraries.remove (name);
+			
+			#end
+		
+		} else {
+			
+			cachedSWFLiteLibraries.remove (name);
+			
+		}
 		
 	}
 	
