@@ -1,0 +1,7 @@
+-main Tools
+-neko ../run.n
+-lib openfl
+-lib openfl-native
+-lib openfl-tools
+-lib swf
+--remap flash:flash

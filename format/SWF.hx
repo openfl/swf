@@ -206,9 +206,9 @@ class SWF extends EventDispatcher {
 	}
 	
 	
-	public function hasSymbol (id:Int):Bool {
+	public function hasSymbol (className:String):Bool {
 		
-		return false;
+		return symbols.exists (className);
 		//return streamPositions.exists (id);
 		
 	}	
