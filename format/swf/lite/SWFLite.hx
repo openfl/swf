@@ -86,4 +86,21 @@ class SWFLite {
 	}
 	
 	
+	public function hasSymbol (className:String):Bool {
+		
+		for (symbol in symbols) {
+			
+			if (symbol.className == className) {
+				
+				return true;
+				
+			}
+			
+		}
+		
+		return false;
+		
+	}
+	
+	
 }

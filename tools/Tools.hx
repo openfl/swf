@@ -4,6 +4,7 @@ package;
 import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.library.SWFLibrary;
+import format.swf.lite.library.SWFLiteLibrary;
 import format.swf.lite.symbols.BitmapSymbol;
 import format.SWF;
 import haxe.io.Path;
@@ -204,8 +205,9 @@ class Tools {
 					
 				}
 				
+				var data = new SWFLiteLibrary (swfLite);
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
-				asset.data = Serializer.run (swfLite);
+				asset.data = Serializer.run (data);
 				output.assets.push (asset);
 				
 				embeddedSWFLite = true;
@@ -217,6 +219,13 @@ class Tools {
 		if (embeddedSWF) {
 			
 			output.haxeflags.push ("--macro include('format.swf.library')");
+			output.haxeflags.push ("--remap flash:flash");
+			
+		}
+		
+		if (embeddedSWF) {
+			
+			output.haxeflags.push ("--macro include('format.swf.lite.library')");
 			output.haxeflags.push ("--remap flash:flash");
 			
 		}
