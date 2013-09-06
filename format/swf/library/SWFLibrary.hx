@@ -40,7 +40,15 @@ class SWFLibrary extends AssetLibrary {
 		
 		if (type == IMAGE || type == MOVIE_CLIP) {
 			
+			#if flash
+			
+			return loader.contentLoaderInfo.applicationDomain.hasDefinition (id);
+			
+			#else
+			
 			return swf.hasSymbol (id);
+			
+			#end
 			
 		}
 		
@@ -74,7 +82,7 @@ class SWFLibrary extends AssetLibrary {
 			
 		} else {
 			
-			return loader.contentLoaderInfo.applicationDomain.getDefinition (id);
+			return cast Type.createInstance (loader.contentLoaderInfo.applicationDomain.getDefinition (id), []);
 			
 		}
 		
