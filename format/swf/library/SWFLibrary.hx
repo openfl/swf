@@ -17,6 +17,7 @@ class SWFLibrary extends AssetLibrary {
 	
 	
 	private var id:String;
+	private var loader:Loader;
 	private var swf:SWF;
 	
 	
@@ -30,8 +31,6 @@ class SWFLibrary extends AssetLibrary {
 	
 	
 	public override function exists (id:String, type:AssetType):Bool {
-		
-		initialize ();
 		
 		if (id == "" && type == MOVIE_CLIP) {
 			
@@ -52,29 +51,63 @@ class SWFLibrary extends AssetLibrary {
 	
 	public override function getBitmapData (id:String):BitmapData {
 		
-		initialize ();
+		#if flash
+		
+		return loader.contentLoaderInfo.applicationDomain.getDefinition (id);
+		
+		#else
 		
 		return swf.getBitmapData (id);
+		
+		#end
 		
 	}
 	
 	
 	public override function getMovieClip (id:String):MovieClip {
 		
-		initialize ();
+		#if flash
+		
+		if (id == "") {
+			
+			return cast loader.content;
+			
+		} else {
+			
+			return loader.contentLoaderInfo.applicationDomain.getDefinition (id);
+			
+		}
+		
+		#else
 		
 		return swf.createMovieClip (id);
+		
+		#end
 		
 	}
 	
 	
-	private function initialize ():Void {
+	public override function load (handler:AssetLibrary -> Void):Void {
+		
+		#if flash
+		
+		loader = new Loader ();
+		loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
+			
+			handler (this);
+				
+		});
+		loader.loadBytes (Assets.getBytes (id));
+		
+		#else
 		
 		if (swf == null) {
 			
 			swf = new SWF (Assets.getBytes (id));
 			
 		}
+		
+		#end
 		
 	}
 	
