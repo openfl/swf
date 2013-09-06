@@ -104,6 +104,7 @@ class SWFLibrary extends AssetLibrary {
 		if (swf == null) {
 			
 			swf = new SWF (Assets.getBytes (id));
+			handler (this);
 			
 		}
 		
