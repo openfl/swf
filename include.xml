@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension>
 	
-	<haxeflag name="--macro" value="include('format.swf.library')" />
-	<haxeflag name="--remap" value="flash:flash" />
-	
 	<library handler="swf" type="swf" />
 	<library handler="swf" type="swf_lite" />
 	<library handler="swf" type="swflite" />

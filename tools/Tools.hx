@@ -156,6 +156,8 @@ class Tools {
 	private static function processLibraries (project:OpenFLProject):Void {
 		
 		var output = new OpenFLProject ();
+		var embeddedSWF = false;
+		var embeddedSWFLite = false;
 		
 		for (library in project.libraries) {
 			
@@ -175,6 +177,8 @@ class Tools {
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
 				asset.data = Serializer.run (data);
 				output.assets.push (asset);
+				
+				embeddedSWF = true;
 				//project.haxelibs.push (new Haxelib ("swf"));
 				//output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));
 				
@@ -204,7 +208,16 @@ class Tools {
 				asset.data = Serializer.run (swfLite);
 				output.assets.push (asset);
 				
+				embeddedSWFLite = true;
+				
 			}
+			
+		}
+		
+		if (embeddedSWF) {
+			
+			output.haxeflags.push ("--macro include('format.swf.library')");
+			output.haxeflags.push ("--remap flash:flash");
 			
 		}
 		
