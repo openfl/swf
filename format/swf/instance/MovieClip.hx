@@ -300,11 +300,11 @@ class MovieClip extends flash.display.MovieClip {
 				
 			} else if (Std.is (symbol, TagDefineText)) {
 				
-				displayObject = new TextField (data, symbol);
+				displayObject = new StaticText (data, cast symbol);
 				
 			} else if (Std.is (symbol, TagDefineEditText)) {
 				
-				displayObject = new TextField (data, symbol);
+				displayObject = new DynamicText (data, cast symbol);
 				
 			}
 			

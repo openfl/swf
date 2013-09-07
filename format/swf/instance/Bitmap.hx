@@ -165,6 +165,10 @@ class Bitmap extends flash.display.Bitmap {
 			
 		}*/
 		
+		// TODO: Is there a way to catch "allow smoothing" from Flash?
+		
+		//smoothing = true;
+		
 	}
 	
 	
