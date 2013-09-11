@@ -54,7 +54,7 @@ class DynamicText extends TextField {
 				
 				#if (cpp || neko)
 				
-				format.font = getFont (cast font, format.color);
+				//format.font = getFont (cast font, format.color);
 				
 				#else
 				
@@ -157,7 +157,48 @@ class SWFFont extends AbstractFont {
 	
 	private function generateGlyph (charCode:Int):Void {
 		
+		
+		
+	}
+	
+	
+	public override function getGlyphInfo (charCode:Int):GlyphInfo {
+		
 		if (!glyphInfo.exists (charCode)) {
+			
+			var index = -1;
+			
+			for (i in 0...font.codeTable.length) {
+				
+				if (font.codeTable[i] == charCode) {
+					
+					index = i;
+					
+				}
+				
+			}
+			
+			if (index > -1) {
+			
+				var advance = Math.round ((height / 1024) * font.fontAdvanceTable[index] * 0.05);
+				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: 0 });
+			
+			} else {
+				
+				glyphInfo.set (charCode, { width: 0, height: 0, advance: 0, offsetX: 0, offsetY: 0 });
+				
+			}
+			
+		}
+		
+		return glyphInfo.get (charCode);
+		
+	}
+	
+	
+	public override function renderGlyph (charCode:Int):BitmapData {
+		
+		if (!bitmapData.exists (charCode)) {
 			
 			var index = -1;
 			
@@ -221,32 +262,14 @@ class SWFFont extends AbstractFont {
 				var advance = Math.round (scale * font.fontAdvanceTable[index] * 0.05);
 				
 				bitmapData.set (charCode, data);
-				//glyphInfo.set (charCode, { width: data.width, height: data.height, advance: advance, offsetX: Math.round (bounds.x), offsetY: Math.round (bounds.y) });
-				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: 0 });
 				
 			} else {
 				
-				glyphInfo.set (charCode, { width: 0, height: 0, advance: 0, offsetX: 0, offsetY: 0 });
+				//bitmapData.set (charCode)
 				
 			}
 			
 		}
-		
-	}
-	
-	
-	public override function getGlyphInfo (charCode:Int):GlyphInfo {
-		
-		generateGlyph (charCode);
-		
-		return glyphInfo.get (charCode);
-		
-	}
-	
-	
-	public override function renderGlyph (charCode:Int):BitmapData {
-		
-		generateGlyph (charCode);
 		
 		return bitmapData.get (charCode);
 		
