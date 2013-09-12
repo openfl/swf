@@ -44,7 +44,8 @@ class DynamicText extends TextField {
 		selectable = !tag.noSelect;
 		
 		var format = new TextFormat ();
-		if (tag.hasTextColor) format.color = tag.textColor;
+		if (tag.hasTextColor) format.color = (tag.textColor & 0x00FFFFFF);
+		format.size = (tag.fontHeight / 20);
 		
 		if (tag.hasFont) {
 			
@@ -86,7 +87,7 @@ class DynamicText extends TextField {
 		
 		if (tag.hasText) {
 			
-			#if android
+			#if (cpp || neko)
 			
 			text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
 			
@@ -266,7 +267,7 @@ class SWFFont extends AbstractFont {
 				
 			} else {
 				
-				//bitmapData.set (charCode)
+				bitmapData.set (charCode, null);
 				
 			}
 			
