@@ -54,7 +54,7 @@ class DynamicText extends TextField {
 				
 				#if (cpp || neko)
 				
-				//format.font = getFont (cast font, format.color);
+				format.font = getFont (cast font, format.color);
 				
 				#else
 				
@@ -86,6 +86,12 @@ class DynamicText extends TextField {
 		
 		if (tag.hasText) {
 			
+			#if android
+			
+			text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
+			
+			#else
+			
 			if (tag.html) {
 				
 				htmlText = tag.initialText;
@@ -96,6 +102,8 @@ class DynamicText extends TextField {
 				text = tag.initialText;
 					
 			}
+			
+			#end
 			
 		}
 		
@@ -151,13 +159,6 @@ class SWFFont extends AbstractFont {
 		var descent = Math.round (font.descent / (font.ascent + font.descent));
 		
 		super (definition.height, ascent, descent, false);
-		
-	}
-	
-	
-	private function generateGlyph (charCode:Int):Void {
-		
-		
 		
 	}
 	
