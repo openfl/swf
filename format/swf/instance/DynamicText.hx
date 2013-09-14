@@ -2,6 +2,7 @@ package format.swf.instance;
 
 
 import flash.display.BitmapData;
+import flash.geom.Matrix;
 import flash.geom.Rectangle;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
@@ -23,6 +24,8 @@ class DynamicText extends TextField {
 	
 	private static var registeredFonts = new Map <Int, Bool> ();
 	
+	public var offset:Matrix;
+	
 	private var data:SWFTimelineContainer;
 	private var tag:TagDefineEditText;
 	
@@ -33,10 +36,12 @@ class DynamicText extends TextField {
 		
 		selectable = !tag.noSelect;
 		
-		var rect:Rectangle = tag.bounds.rect;
+		var rect = tag.bounds.rect;
 		
+		offset = new Matrix (1, 0, 0, 1, rect.x, rect.y);
 		width = rect.width;
 		height = rect.height;
+		
 		multiline = tag.multiline;
 		wordWrap = tag.wordWrap;
 		displayAsPassword = tag.password;
@@ -181,9 +186,12 @@ class SWFFont extends AbstractFont {
 			}
 			
 			if (index > -1) {
-			
-				var advance = Math.round ((height / 1024) * font.fontAdvanceTable[index] * 0.05);
-				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: 0 });
+				
+				var scale = (height / 1024);
+				var advance = Math.round (scale * font.fontAdvanceTable[index] * 0.05);
+				var offsetY = Math.round (font.descent * scale * 0.05);
+				
+				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: offsetY });
 			
 			} else {
 				
@@ -224,7 +232,7 @@ class SWFFont extends AbstractFont {
 				
 				var scale = (height / 1024);
 				var offsetX = 0;
-				var offsetY = font.ascent * scale * 0.05;
+				var offsetY = (font.ascent - font.descent) * scale * 0.05;
 				
 				for (command in handler.commands) {
 

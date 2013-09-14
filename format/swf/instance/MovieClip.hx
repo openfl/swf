@@ -210,6 +210,14 @@ class MovieClip extends flash.display.MovieClip {
 			matrix.tx *= 1 / 20;
 			matrix.ty *= 1 / 20;
 			
+			if (Std.is (displayObject, DynamicText)) {
+				
+				var offset = cast (displayObject, DynamicText).offset.clone ();
+				offset.concat (matrix);
+				matrix = offset;
+				
+			}
+				
 			displayObject.transform.matrix = matrix;
 			
 		} else if (firstTag.hasMatrix) {
@@ -217,6 +225,14 @@ class MovieClip extends flash.display.MovieClip {
 			var matrix = firstTag.matrix.matrix;
 			matrix.tx *= 1 / 20;
 			matrix.ty *= 1 / 20;
+			
+			if (Std.is (displayObject, DynamicText)) {
+				
+				var offset = cast (displayObject, DynamicText).offset.clone ();
+				offset.concat (matrix);
+				matrix = offset;
+				
+			}
 			
 			displayObject.transform.matrix = matrix;
 			
@@ -233,13 +249,29 @@ class MovieClip extends flash.display.MovieClip {
 		}
 		
 		if (lastTag != null && lastTag.hasFilterList) {
-			var filters_arr:Array<Dynamic> = [];
-			for (i in 0...lastTag.surfaceFilterList.length) { filters_arr[i] = lastTag.surfaceFilterList[i].filter; }
-			displayObject.filters = filters_arr;
-		} else if ( firstTag.hasFilterList) {
-			var filters_arr:Array<Dynamic> = [];
-			for (i in 0...firstTag.surfaceFilterList.length) { filters_arr[i] = firstTag.surfaceFilterList[i].filter; }
-			displayObject.filters = filters_arr;
+			
+			var filters = [];
+			
+			for (i in 0...lastTag.surfaceFilterList.length) {
+				
+				filters[i] = lastTag.surfaceFilterList[i].filter;
+				
+			}
+			
+			displayObject.filters = filters;
+			
+		} else if (firstTag.hasFilterList) {
+			
+			var filters = [];
+			
+			for (i in 0...firstTag.surfaceFilterList.length) {
+				
+				filters[i] = firstTag.surfaceFilterList[i].filter;
+				
+			}
+			
+			displayObject.filters = filters;
+			
 		}
 		
 	}
