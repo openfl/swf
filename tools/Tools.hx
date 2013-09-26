@@ -11,6 +11,7 @@ import haxe.io.Path;
 import haxe.Serializer;
 import haxe.Unserializer;
 import helpers.PlatformHelper;
+import helpers.StringHelper;
 import openfl.Assets;
 import project.Architecture;
 import project.Asset;
@@ -200,12 +201,14 @@ class Tools {
 					swfLite.symbols.set (id, symbol);
 					
 					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
-					asset.data = bitmapData.encode ("png");
+					asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
+					asset.isBase64 = true;
 					output.assets.push (asset);
 					
 				}
 				
 				var data = new SWFLiteLibrary (swfLite);
+				
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
 				asset.data = Serializer.run (data);
 				output.assets.push (asset);
@@ -223,7 +226,7 @@ class Tools {
 			
 		}
 		
-		if (embeddedSWF) {
+		if (embeddedSWFLite) {
 			
 			output.haxeflags.push ("--macro include('format.swf.lite.library')");
 			output.haxeflags.push ("--remap flash:flash");
