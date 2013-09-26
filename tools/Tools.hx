@@ -15,6 +15,7 @@ import helpers.StringHelper;
 import openfl.Assets;
 import project.Architecture;
 import project.Asset;
+import project.AssetEncoding;
 import project.OpenFLProject;
 import sys.io.Process;
 import sys.FileSystem;
@@ -202,7 +203,7 @@ class Tools {
 					
 					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
 					asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
-					asset.isBase64 = true;
+					asset.encoding = AssetEncoding.BASE64;
 					output.assets.push (asset);
 					
 				}
