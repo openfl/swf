@@ -6,11 +6,11 @@ import format.swf.exporters.core.ShapeCommand;
 import format.swf.instance.Bitmap;
 import format.swf.lite.SWFLite;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.DynamicTextSymbol;
 import format.swf.lite.symbols.FontSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
-import format.swf.lite.symbols.TextSymbol;
 import format.swf.lite.timeline.Frame;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.SWFTimelineContainer;
@@ -239,12 +239,12 @@ class SWFLiteExporter {
 	}
 	
 	
-	private function addText (tag:IDefinitionTag):TextSymbol {
+	private function addDynamicText (tag:IDefinitionTag):DynamicTextSymbol {
 		
 		if (Std.is (tag, TagDefineEditText)) {
 			
 			var editText:TagDefineEditText = cast tag;
-			var symbol = new TextSymbol ();
+			var symbol = new DynamicTextSymbol ();
 			
 			symbol.className = editText.name;
 			symbol.id = editText.characterId;
@@ -290,6 +290,54 @@ class SWFLiteExporter {
 			
 			return symbol;
 			
+		} else {
+			
+			/*var staticText:TagDefineText = cast tag;
+			var symbol = new StaticTextSymbol ();
+			
+			symbol.className = editText.name;
+			symbol.id = editText.characterId;
+			
+			if (editText.hasTextColor) {
+				
+				symbol.color = editText.textColor;
+				
+			}
+			
+			symbol.fontHeight = editText.fontHeight;
+			symbol.multiline = editText.multiline;
+			symbol.selectable = !editText.noSelect;
+			
+			if (editText.hasText) {
+				
+				symbol.text = new EReg ("<.*?>", "g").replace (editText.initialText, "");
+				
+			}
+			
+			symbol.wordWrap = editText.wordWrap;
+			
+			if (editText.hasFont) {
+				
+				var font:IDefinitionTag = cast data.getCharacter (editText.fontId);
+				
+				if (font != null) {
+					
+					processTag (font);
+					
+				}
+				
+				symbol.fontID = editText.fontId;
+				
+			}
+			
+			var bounds = editText.bounds.rect;
+			symbol.width = bounds.width;
+			symbol.height = bounds.height;
+			
+			swfLite.symbols.set (symbol.id, symbol);
+			
+			return symbol;*/
+			
 		}
 		
 		return null;
@@ -326,10 +374,14 @@ class SWFLiteExporter {
 				
 				return addButton (cast tag);
 				
-			} else if (Std.is (tag, TagDefineEditText) || Std.is (tag, TagDefineText)) {
+			} else if (Std.is (tag, TagDefineEditText)) {
 				
-				return addText (tag);
+				return addDynamicText (tag);
 				
+			} else if (Std.is (tag, TagDefineText)) {
+				
+				return null;
+					
 			} else if (Std.is (tag, TagDefineShape)) {
 				
 				return addShape (cast tag);

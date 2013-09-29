@@ -48,8 +48,8 @@ class StaticText extends Shape {
 				
 			} else {
 				
-				matrix.tx = tx + (record.xOffset) * 0.05;
-				matrix.ty = ty + (record.yOffset) * 0.05;
+				matrix.tx = record.hasXOffset ? tx + (record.xOffset) * 0.05 : tx;
+				matrix.ty = record.hasYOffset ? ty + (record.yOffset) * 0.05 : ty;
 				
 			}
 			

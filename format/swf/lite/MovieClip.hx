@@ -2,14 +2,16 @@ package format.swf.lite;
 
 
 import flash.display.Bitmap;
+import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.Shape;
 import flash.events.Event;
 import flash.Lib;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.DynamicTextSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
-import format.swf.lite.symbols.TextSymbol;
+import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.lite.SWFLite;
 
@@ -122,7 +124,7 @@ class MovieClip extends flash.display.MovieClip {
 				case BEGIN_GRADIENT_FILL: 
 					
 					#if (cpp || neko)
-					shape.cacheAsBitmap = true;
+					//shape.cacheAsBitmap = true;
 					#end
 					shape.graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
 				
@@ -159,13 +161,21 @@ class MovieClip extends flash.display.MovieClip {
 				case CURVE_TO:
 					
 					#if (cpp || neko)
-					shape.cacheAsBitmap = true;
+					//shape.cacheAsBitmap = true;
 					#end
 					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
 				
 			}
 			
 		}
+		
+		/*if (shape.cacheAsBitmap) {
+			
+			var bitmapData = new BitmapData (Math.ceil (shape.width), Math.ceil (shape.height), true, 0x00000000);
+			bitmapData.draw (shape);
+			return new Bitmap (bitmapData);
+			
+		}*/
 		
 		return shape;
 		
@@ -447,9 +457,13 @@ class MovieClip extends flash.display.MovieClip {
 					
 					displayObject = new Bitmap (Assets.getBitmapData (cast (symbol, BitmapSymbol).path));
 					
-				} else if (Std.is (symbol, TextSymbol)) {
+				} else if (Std.is (symbol, DynamicTextSymbol)) {
 					
-					displayObject = new TextField (swf, cast symbol);
+					displayObject = new DynamicTextField (swf, cast symbol);
+					
+				} else if (Std.is (symbol, StaticTextSymbol)) {
+					
+					//
 					
 				}
 				
