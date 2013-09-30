@@ -52,8 +52,8 @@ class SWFMatrix
 		var px:Point = matrix.deltaTransformPoint(new Point(0, 1));
 		rotation = ((180 / Math.PI) * Math.atan2(px.y, px.x) - 90);
 		if(rotation < 0) { rotation = 360 + rotation; }
-		xscale = Math.sqrt(scaleX * scaleX + rotateSkew0 * rotateSkew0);
-		yscale = Math.sqrt(rotateSkew1 * rotateSkew1 + scaleY * scaleY);
+		xscale = Math.sqrt(scaleX * scaleX + rotateSkew0 * rotateSkew0) * (scaleX < 0 ? -1 : 1);
+		yscale = Math.sqrt(rotateSkew1 * rotateSkew1 + scaleY * scaleY) * (scaleY < 0 ? -1 : 1);
 	}
 	
 	public function clone():SWFMatrix {
