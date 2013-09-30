@@ -147,7 +147,7 @@ class Bitmap extends flash.display.Bitmap {
 				
 			}
 			
-		} /*else if (Std.is (tag, TagDefineBits)) {
+		} else if (Std.is (tag, TagDefineBits)) {
 			
 			var data:TagDefineBits = cast tag;
 			
@@ -163,7 +163,7 @@ class Bitmap extends flash.display.Bitmap {
 			
 			#end
 			
-		}*/
+		}
 		
 		// TODO: Is there a way to catch "allow smoothing" from Flash?
 		
