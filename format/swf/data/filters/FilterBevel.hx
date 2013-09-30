@@ -3,7 +3,9 @@
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 
+#if flash
 import flash.filters.BevelFilter;
+#end
 import flash.filters.BitmapFilter;
 import flash.filters.BitmapFilterType;
 
@@ -27,12 +29,17 @@ class FilterBevel extends Filter #if !haxe3 , #end implements IFilter
 	}
 	
 	override private function get_filter():BitmapFilter {
+		#if flash
 		var filterType:BitmapFilterType;
+		#else
+		var filterType:String;
+		#end
 		if(onTop) {
 			filterType = BitmapFilterType.FULL;
 		} else {
 			filterType = (innerShadow) ? BitmapFilterType.INNER : BitmapFilterType.OUTER;
 		}
+		#if flash
 		return new BevelFilter(
 			distance,
 			angle * 180 / Math.PI,
@@ -47,6 +54,9 @@ class FilterBevel extends Filter #if !haxe3 , #end implements IFilter
 			filterType,
 			knockout
 		);
+		#else
+		return new BitmapFilter ("");
+		#end
 	}
 	
 	override public function parse(data:SWFData):Void {

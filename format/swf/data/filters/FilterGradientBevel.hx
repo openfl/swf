@@ -4,7 +4,9 @@ import format.swf.utils.ColorUtils;
 
 import flash.filters.BitmapFilter;
 import flash.filters.BitmapFilterType;
-import flash.filters.GradientBevelFilter;
+#if flash
+import flash.filters.GradientBevelFilter; // Not supported on native yet
+#end
 
 class FilterGradientBevel extends FilterGradientGlow #if !haxe3 , #end implements IFilter
 {
@@ -21,12 +23,17 @@ class FilterGradientBevel extends FilterGradientGlow #if !haxe3 , #end implement
 			gradientGlowAlphas.push(ColorUtils.alpha(gradientColors[i]));
 			gradientGlowRatios.push(gradientRatios[i]);
 		}
+		#if flash
 		var filterType:BitmapFilterType;
+		#else
+		var filterType:String;
+		#end
 		if(onTop) {
 			filterType = BitmapFilterType.FULL;
 		} else {
 			filterType = (innerShadow) ? BitmapFilterType.INNER : BitmapFilterType.OUTER;
 		}
+		#if flash
 		return new GradientBevelFilter(
 			distance,
 			angle,
@@ -40,6 +47,9 @@ class FilterGradientBevel extends FilterGradientGlow #if !haxe3 , #end implement
 			Std.string (filterType),
 			knockout
 		);
+		#else
+		return new BitmapFilter ("");
+		#end
 	}
 	
 	override public function clone():IFilter {

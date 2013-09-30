@@ -6,7 +6,9 @@ import format.swf.utils.StringUtils;
 
 import flash.filters.BitmapFilter;
 import flash.filters.BitmapFilterType;
-import flash.filters.GradientGlowFilter;
+#if flash
+import flash.filters.GradientGlowFilter; // Not supported on native yet
+#end
 
 class FilterGradientGlow extends Filter #if !haxe3 , #end implements IFilter
 {
@@ -41,12 +43,17 @@ class FilterGradientGlow extends Filter #if !haxe3 , #end implements IFilter
 			gradientGlowAlphas.push(ColorUtils.alpha(gradientColors[i]));
 			gradientGlowRatios.push(gradientRatios[i]);
 		}
+		#if flash
 		var filterType:BitmapFilterType;
+		#else
+		var filterType:String;
+		#end
 		if(onTop) {
 			filterType = BitmapFilterType.FULL;
 		} else {
 			filterType = (innerShadow) ? BitmapFilterType.INNER : BitmapFilterType.OUTER;
 		}
+		#if flash
 		return new GradientGlowFilter(
 			distance,
 			angle * 180 / Math.PI,
@@ -60,6 +67,9 @@ class FilterGradientGlow extends Filter #if !haxe3 , #end implements IFilter
 			filterType,
 			knockout
 		);
+		#else
+		return new BitmapFilter ("");
+		#end
 	}
 	
 	override public function parse(data:SWFData):Void {

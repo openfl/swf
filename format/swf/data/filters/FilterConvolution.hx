@@ -5,7 +5,9 @@ import format.swf.utils.ColorUtils;
 import format.swf.utils.StringUtils;
 
 import flash.filters.BitmapFilter;
-import flash.filters.ConvolutionFilter;
+#if flash
+import flash.filters.ConvolutionFilter; // Not supported on native yet
+#end
 
 class FilterConvolution extends Filter #if !haxe3 , #end implements IFilter
 {
@@ -29,6 +31,7 @@ class FilterConvolution extends Filter #if !haxe3 , #end implements IFilter
 		for (i in 0...matrix.length) {
 			convolutionMatrix.push(matrix[i]);
 		}
+		#if flash
 		return new ConvolutionFilter(
 			matrixX,
 			matrixY,
@@ -40,6 +43,9 @@ class FilterConvolution extends Filter #if !haxe3 , #end implements IFilter
 			ColorUtils.rgb(defaultColor),
 			ColorUtils.alpha(defaultColor)
 		);
+		#else
+		return new BitmapFilter ("");
+		#end
 	}
 	
 	override public function parse(data:SWFData):Void {

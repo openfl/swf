@@ -6,14 +6,14 @@ import format.swf.SWFData;
 class SWFColorTransform
 {
 	public var colorTransform(get_colorTransform, null):ColorTransform;
-	public var rMult:Int = 1;
-	public var gMult:Int = 1;
-	public var bMult:Int = 1;
+	public var rMult:Int = 0xFF;
+	public var gMult:Int = 0xFF;
+	public var bMult:Int = 0xFF;
 	public var rAdd:Int = 0;
 	public var gAdd:Int = 0;
 	public var bAdd:Int = 0;
 
-	public var aMult:Int = 1;
+	public var aMult:Int = 0xFF;
 	public var aAdd:Int = 0;
 	
 	public var hasMultTerms:Bool;
@@ -26,7 +26,7 @@ class SWFColorTransform
 	}
 	
 	private function get_colorTransform():ColorTransform {
-		return new ColorTransform(1 - rMult, 1 - gMult, 1 - bMult, 1 - aMult, rAdd, gAdd, bAdd, aAdd);
+		return new ColorTransform(rMult / 0xFF, gMult / 0xFF, bMult / 0xFF, aMult / 0xFF, rAdd, gAdd, bAdd, aAdd);
 	}
 	
 	public function parse(data:SWFData):Void {
