@@ -32,7 +32,12 @@ class Shape extends flash.display.Shape {
 					case BEGIN_BITMAP_FILL: 
 						
 						var bitmap = new Bitmap (cast data.getCharacter (command.params[0]));
-						graphics.beginBitmapFill (bitmap.bitmapData, command.params[1], command.params[2], command.params[3]);
+						
+						if (bitmap.bitmapData != null) {
+							
+							graphics.beginBitmapFill (bitmap.bitmapData, command.params[1], command.params[2], command.params[3]);
+							
+						}
 						
 					case END_FILL: graphics.endFill ();
 					case LINE_STYLE: 
