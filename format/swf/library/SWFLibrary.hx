@@ -13,7 +13,7 @@ import haxe.Unserializer;
 import openfl.Assets;
 
 
-class SWFLibrary extends AssetLibrary {
+@:keep class SWFLibrary extends AssetLibrary {
 	
 	
 	private var id:String;

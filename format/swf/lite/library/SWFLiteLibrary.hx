@@ -13,7 +13,7 @@ import haxe.Unserializer;
 import openfl.Assets;
 
 
-class SWFLiteLibrary extends AssetLibrary {
+@:keep class SWFLiteLibrary extends AssetLibrary {
 	
 	
 	private var swf:SWFLite;
