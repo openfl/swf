@@ -9,8 +9,9 @@ import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.symbols.DynamicTextSymbol;
 import format.swf.lite.symbols.FontSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
-import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
+import format.swf.lite.symbols.StaticTextSymbol;
+import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.timeline.Frame;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.SWFTimelineContainer;
@@ -239,108 +240,67 @@ class SWFLiteExporter {
 	}
 	
 	
-	private function addDynamicText (tag:IDefinitionTag):DynamicTextSymbol {
+	private function addDynamicText (tag:TagDefineEditText):DynamicTextSymbol {
 		
-		if (Std.is (tag, TagDefineEditText)) {
+		var symbol = new DynamicTextSymbol ();
+		
+		symbol.className = tag.name;
+		symbol.id = tag.characterId;
+		symbol.border = tag.border;
+		
+		if (tag.hasTextColor) {
 			
-			var editText:TagDefineEditText = cast tag;
-			var symbol = new DynamicTextSymbol ();
-			
-			symbol.className = editText.name;
-			symbol.id = editText.characterId;
-			symbol.border = editText.border;
-			
-			if (editText.hasTextColor) {
-				
-				symbol.color = editText.textColor;
-				
-			}
-			
-			symbol.fontHeight = editText.fontHeight;
-			symbol.multiline = editText.multiline;
-			symbol.selectable = !editText.noSelect;
-			
-			if (editText.hasText) {
-				
-				symbol.text = new EReg ("<.*?>", "g").replace (editText.initialText, "");
-				
-			}
-			
-			symbol.wordWrap = editText.wordWrap;
-			
-			if (editText.hasFont) {
-				
-				var font:IDefinitionTag = cast data.getCharacter (editText.fontId);
-				
-				if (font != null) {
-					
-					processTag (font);
-					
-				}
-				
-				symbol.fontID = editText.fontId;
-				
-			}
-			
-			var bounds = editText.bounds.rect;
-			symbol.width = bounds.width;
-			symbol.height = bounds.height;
-			
-			swfLite.symbols.set (symbol.id, symbol);
-			
-			return symbol;
-			
-		} else {
-			
-			/*var staticText:TagDefineText = cast tag;
-			var symbol = new StaticTextSymbol ();
-			
-			symbol.className = editText.name;
-			symbol.id = editText.characterId;
-			
-			if (editText.hasTextColor) {
-				
-				symbol.color = editText.textColor;
-				
-			}
-			
-			symbol.fontHeight = editText.fontHeight;
-			symbol.multiline = editText.multiline;
-			symbol.selectable = !editText.noSelect;
-			
-			if (editText.hasText) {
-				
-				symbol.text = new EReg ("<.*?>", "g").replace (editText.initialText, "");
-				
-			}
-			
-			symbol.wordWrap = editText.wordWrap;
-			
-			if (editText.hasFont) {
-				
-				var font:IDefinitionTag = cast data.getCharacter (editText.fontId);
-				
-				if (font != null) {
-					
-					processTag (font);
-					
-				}
-				
-				symbol.fontID = editText.fontId;
-				
-			}
-			
-			var bounds = editText.bounds.rect;
-			symbol.width = bounds.width;
-			symbol.height = bounds.height;
-			
-			swfLite.symbols.set (symbol.id, symbol);
-			
-			return symbol;*/
+			symbol.color = tag.textColor;
 			
 		}
 		
-		return null;
+		symbol.fontHeight = tag.fontHeight;
+		symbol.multiline = tag.multiline;
+		symbol.selectable = !tag.noSelect;
+		
+		if (tag.hasText) {
+			
+			symbol.text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
+			
+		}
+		
+		symbol.wordWrap = tag.wordWrap;
+		
+		if (tag.hasFont) {
+			
+			var font:IDefinitionTag = cast data.getCharacter (tag.fontId);
+			
+			if (font != null) {
+				
+				processTag (font);
+				
+			}
+			
+			symbol.fontID = tag.fontId;
+			
+		}
+		
+		var bounds = tag.bounds.rect;
+		symbol.width = bounds.width;
+		symbol.height = bounds.height;
+		
+		swfLite.symbols.set (symbol.id, symbol);
+		
+		return symbol;
+		
+	}
+	
+	
+	private function addStaticText (tag:TagDefineText):StaticTextSymbol {
+		
+		var symbol = new StaticTextSymbol ();
+		
+		symbol.className = tag.name;
+		symbol.id = tag.characterId;
+		
+		swfLite.symbols.set (symbol.id, symbol);
+		
+		return symbol;
 		
 	}
 	
@@ -376,11 +336,11 @@ class SWFLiteExporter {
 				
 			} else if (Std.is (tag, TagDefineEditText)) {
 				
-				return addDynamicText (tag);
+				return addDynamicText (cast tag);
 				
 			} else if (Std.is (tag, TagDefineText)) {
 				
-				return null;
+				return addStaticText (cast tag);
 					
 			} else if (Std.is (tag, TagDefineShape)) {
 				
