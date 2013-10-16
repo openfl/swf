@@ -40,7 +40,7 @@ class DynamicText extends TextField {
 		
 		offset = new Matrix (1, 0, 0, 1, rect.x, rect.y);
 		width = rect.width;
-		height = rect.height;
+		height = rect.height * 2;
 		
 		multiline = tag.multiline;
 		wordWrap = tag.wordWrap;
@@ -68,6 +68,8 @@ class DynamicText extends TextField {
 				
 				#end
 				
+				//format.font = "_sans";
+				
 				embedFonts = true;
 				
 			}
@@ -92,11 +94,11 @@ class DynamicText extends TextField {
 		
 		if (tag.hasText) {
 			
-			#if (cpp || neko)
+			//#if (cpp || neko)
 			
-			text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
+			//text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
 			
-			#else
+			//#else
 			
 			if (tag.html) {
 				
@@ -104,12 +106,11 @@ class DynamicText extends TextField {
 				
 			} else {
 				
-				//text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
 				text = tag.initialText;
 					
 			}
 			
-			#end
+			//#end
 			
 		}
 		
