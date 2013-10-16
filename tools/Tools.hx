@@ -181,7 +181,15 @@ class Tools {
 			
 			if (type == "swf") {
 				
-				output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));
+				var swf = new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY);
+				
+				if (library.embed != null) {
+					
+					swf.embed = library.embed;
+					
+				}
+				
+				output.assets.push (swf);
 				
 				var data = new SWFLibrary ("libraries/" + library.name + ".swf");
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);

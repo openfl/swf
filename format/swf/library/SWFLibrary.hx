@@ -6,6 +6,7 @@ import flash.display.Loader;
 import flash.display.MovieClip;
 import flash.events.Event;
 import flash.media.Sound;
+import flash.net.URLRequest;
 import flash.text.Font;
 import flash.utils.ByteArray;
 import format.SWF;
@@ -99,13 +100,27 @@ import openfl.Assets;
 		
 		#if flash
 		
-		loader = new Loader ();
-		loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
+		if (Assets.isLocal (id, AssetType.BINARY)) {
 			
-			handler (this);
+			loader = new Loader ();
+			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
 				
-		});
-		loader.loadBytes (Assets.getBytes (id));
+				handler (this);
+				
+			});
+			loader.loadBytes (Assets.getBytes (id));
+			
+		} else {
+			
+			loader = new Loader ();
+			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
+				
+				handler (this);
+				
+			});
+			loader.load (new URLRequest (Assets.getPath (id)));
+			
+		}
 		
 		#else
 		
