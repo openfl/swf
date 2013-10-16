@@ -17,6 +17,7 @@ import project.Architecture;
 import project.Asset;
 import project.AssetEncoding;
 import project.OpenFLProject;
+import project.Platform;
 import sys.io.Process;
 import sys.FileSystem;
 
@@ -169,6 +170,12 @@ class Tools {
 			if (type == null) {
 				
 				type = Path.extension (library.sourcePath).toLowerCase ();
+				
+				if (type == "swf" && project.target == Platform.HTML5) {
+					
+					type = "swflite";
+					
+				}
 				
 			}
 			
