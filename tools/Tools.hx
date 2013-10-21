@@ -221,8 +221,9 @@ class Tools {
 					swfLite.symbols.set (id, symbol);
 					
 					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
-					asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
-					asset.encoding = AssetEncoding.BASE64;
+					//asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
+					asset.data = bitmapData.encode ("png");
+					//asset.encoding = AssetEncoding.BASE64;
 					output.assets.push (asset);
 					
 				}
