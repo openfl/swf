@@ -18,6 +18,7 @@ import project.Asset;
 import project.AssetEncoding;
 import project.OpenFLProject;
 import project.Platform;
+import sys.io.File;
 import sys.io.Process;
 import sys.FileSystem;
 
@@ -144,7 +145,10 @@ class Tools {
 			
 			try {
 				
-				var unserializer = new Unserializer (arguments[1]);
+				var path = arguments[1];
+				var projectData = File.getContent (path);
+				
+				var unserializer = new Unserializer (projectData);
 				unserializer.setResolver (cast { resolveEnum: Type.resolveEnum, resolveClass: resolveClass });
 				
 				var project:OpenFLProject = unserializer.unserialize ();
