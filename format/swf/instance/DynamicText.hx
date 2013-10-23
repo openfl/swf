@@ -76,6 +76,11 @@ class DynamicText extends TextField {
 			
 		}
 		
+		//defaultTextFormat = format;
+		//text = "Hello";
+		
+		//return;
+		
 		format.leftMargin = tag.leftMargin;
 		format.rightMargin = tag.rightMargin;
 		format.indent = tag.indent;
@@ -94,11 +99,13 @@ class DynamicText extends TextField {
 		
 		if (tag.hasText) {
 			
-			//#if (cpp || neko)
+			#if (cpp || neko)
 			
-			//text = new EReg ("<.*?>", "g").replace (tag.initialText, "");
+			var plain = new EReg ("</p>", "g").replace (tag.initialText, "\n");
+			plain = new EReg ("<br>", "g").replace (tag.initialText, "\n");
+			text = new EReg ("<.*?>", "g").replace (plain, "");
 			
-			//#else
+			#else
 			
 			if (tag.html) {
 				
@@ -110,7 +117,7 @@ class DynamicText extends TextField {
 					
 			}
 			
-			//#end
+			#end
 			
 		}
 		
