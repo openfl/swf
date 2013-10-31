@@ -44,8 +44,6 @@ class MovieClip extends flash.display.MovieClip {
 		if (!initialized) {
 			
 			clips = new Array <MovieClip> ();
-			//Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
-			
 			initialized = true;
 			
 		}
@@ -57,7 +55,8 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__totalFrames > 1) {
 			
-			//play ();
+			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
+			play ();
 			
 		}
 		

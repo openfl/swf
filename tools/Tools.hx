@@ -16,7 +16,7 @@ import openfl.Assets;
 import project.Architecture;
 import project.Asset;
 import project.AssetEncoding;
-import project.OpenFLProject;
+import project.HXProject;
 import project.Platform;
 import sys.io.File;
 import sys.io.Process;
@@ -151,7 +151,7 @@ class Tools {
 				var unserializer = new Unserializer (projectData);
 				unserializer.setResolver (cast { resolveEnum: Type.resolveEnum, resolveClass: resolveClass });
 				
-				var project:OpenFLProject = unserializer.unserialize ();
+				var project:HXProject = unserializer.unserialize ();
 				processLibraries (project);
 				
 			} catch (e:Dynamic) {}
@@ -161,9 +161,9 @@ class Tools {
 	}
 	
 	
-	private static function processLibraries (project:OpenFLProject):Void {
+	private static function processLibraries (project:HXProject):Void {
 		
-		var output = new OpenFLProject ();
+		var output = new HXProject ();
 		var embeddedSWF = false;
 		var embeddedSWFLite = false;
 		
@@ -269,7 +269,7 @@ class Tools {
 		
 		if (result == null) {
 			
-			result = OpenFLProject;
+			result = HXProject;
 			
 		}
 		
