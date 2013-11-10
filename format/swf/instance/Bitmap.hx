@@ -40,13 +40,13 @@ class Bitmap extends flash.display.Bitmap {
 					
 					for (i in 0...data.bitmapColorTableSize) {
 						
-						var r = buffer.readByte ();
-						var g = buffer.readByte ();
-						var b = buffer.readByte ();
+						var r = buffer.readUnsignedByte ();
+						var g = buffer.readUnsignedByte ();
+						var b = buffer.readUnsignedByte ();
 						
 						if (transparent) {
 							
-							var a = buffer.readByte ();
+							var a = buffer.readUnsignedByte ();
 							colorTable.push ((a << 24) + (r << 16) + (g << 8) + b);
 							
 						} else {
@@ -59,12 +59,23 @@ class Bitmap extends flash.display.Bitmap {
 					
 					var imageData = new ByteArray ();
 					var padding = Math.ceil (data.bitmapWidth / 4) - Math.floor (data.bitmapWidth / 4);
+					var index = 0;
 					
 					for (y in 0...data.bitmapHeight) {
 						
 						for (x in 0...data.bitmapWidth) {
 							
-							imageData.writeUnsignedInt (colorTable[buffer.readByte ()]);
+							index = buffer.readUnsignedByte ();
+							
+							if (index >= 0 && index < colorTable.length) {
+								
+								imageData.writeUnsignedInt (colorTable[index]);
+								
+							} else {
+								
+								imageData.writeUnsignedInt (0);
+								
+							}
 							
 						}
 						
@@ -109,6 +120,7 @@ class Bitmap extends flash.display.Bitmap {
 				
 				#if (cpp || neko)
 				bitmapData.unmultiplyAlpha ();
+				//bitmapData.setAlphaMode (1);
 				#end
 				
 				data.instance = bitmapData;
@@ -134,6 +146,7 @@ class Bitmap extends flash.display.Bitmap {
 					
 					bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
 					bitmapData.unmultiplyAlpha ();
+					//bitmapData.setAlphaMode (1);
 					
 				} else {
 					
