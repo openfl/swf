@@ -119,8 +119,8 @@ class Bitmap extends flash.display.Bitmap {
 				bitmapData.setPixels (bitmapData.rect, buffer);
 				
 				#if (cpp || neko)
-				//bitmapData.unmultiplyAlpha ();
-				bitmapData.setAlphaMode (1);
+				bitmapData.unmultiplyAlpha ();
+				//bitmapData.setAlphaMode (1);
 				#end
 				
 				data.instance = bitmapData;
@@ -145,8 +145,8 @@ class Bitmap extends flash.display.Bitmap {
 					alpha.uncompress ();
 					
 					bitmapData = BitmapData.loadFromBytes (data.bitmapData, alpha);
-					//bitmapData.unmultiplyAlpha ();
-					bitmapData.setAlphaMode (1);
+					bitmapData.unmultiplyAlpha ();
+					//bitmapData.setAlphaMode (1);
 					
 				} else {
 					
