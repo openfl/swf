@@ -55,8 +55,8 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__totalFrames > 1) {
 			
-			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
-			play ();
+			//Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
+			//play ();
 			
 		}
 		
@@ -134,9 +134,11 @@ class MovieClip extends flash.display.MovieClip {
 	
 	private function getFrame (frame:Dynamic):Int {
 		
+		var value = 1;
+		
 		if (Std.is (frame, Int)) {
 			
-			return cast frame;
+			value = cast frame;
 			
 		} else if (Std.is (frame, String)) {
 			
@@ -144,7 +146,10 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		return 1;
+		if (value < 1) value = 1;
+		if (value > __totalFrames) value = __totalFrames;
+		
+		return value;
 		
 	}
 	
