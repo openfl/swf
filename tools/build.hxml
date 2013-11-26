@@ -2,6 +2,6 @@
 -neko ../run.n
 -lib openfl
 -lib openfl-native
--lib hxtools
+-lib lime-tools
 -lib swf
 --remap flash:flash
