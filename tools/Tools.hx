@@ -4,8 +4,6 @@ package;
 import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.library.SWFLibrary;
-import format.swf.lite.library.SWFLiteLibrary;
-import format.swf.lite.symbols.BitmapSymbol;
 import format.SWF;
 import haxe.io.Path;
 import haxe.Serializer;
@@ -32,7 +30,7 @@ class Tools {
 		var haxePath = Sys.getEnv ("HAXEPATH");
 		var command = (haxePath != null && haxePath != "") ? haxePath + "/haxelib" : "haxelib";
 		
-		var process = new Process (command, [ "path", "openfl-tools" ]);
+		var process = new Process (command, [ "path", "lime-tools" ]);
 		var path = "";
 		
 		try {
@@ -44,7 +42,7 @@ class Tools {
 				var length = lines.length;
 				var line = process.stdout.readLine ();
 				
-				if (length > 0 && StringTools.trim (line) == "-D openfl-tools") {
+				if (length > 0 && StringTools.trim (line) == "-D lime-tools") {
 					
 					path = StringTools.trim (lines[length - 1]);
 					
@@ -175,15 +173,9 @@ class Tools {
 				
 				type = Path.extension (library.sourcePath).toLowerCase ();
 				
-				if (type == "swf" && project.target == Platform.HTML5) {
-					
-					type = "swflite";
-					
-				}
-				
 			}
 			
-			if (type == "swf") {
+			if (type == "swf" && project.target != Platform.HTML5) {
 				
 				var swf = new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY);
 				
@@ -204,38 +196,6 @@ class Tools {
 				//project.haxelibs.push (new Haxelib ("swf"));
 				//output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));
 				
-			} else if (type == "swf_lite" || type == "swflite") {
-				
-				//project.haxelibs.push (new Haxelib ("swf"));
-				
-				var bytes = ByteArray.readFile (library.sourcePath);
-				var swf = new SWF (bytes);
-				var exporter = new SWFLiteExporter (swf.data);
-				var swfLite = exporter.swfLite;
-				
-				for (id in exporter.bitmaps.keys ()) {
-					
-					var bitmapData = exporter.bitmaps.get (id);
-					var symbol:BitmapSymbol = cast swfLite.symbols.get (id);
-					symbol.path = "libraries/bin/" + id + ".png";
-					swfLite.symbols.set (id, symbol);
-					
-					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
-					//asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
-					asset.data = bitmapData.encode ("png");
-					//asset.encoding = AssetEncoding.BASE64;
-					output.assets.push (asset);
-					
-				}
-				
-				var data = new SWFLiteLibrary (swfLite);
-				
-				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
-				asset.data = Serializer.run (data);
-				output.assets.push (asset);
-				
-				embeddedSWFLite = true;
-				
 			}
 			
 		}
@@ -243,13 +203,6 @@ class Tools {
 		if (embeddedSWF) {
 			
 			output.haxeflags.push ("--macro include('format.swf.library')");
-			output.haxeflags.push ("--remap flash:flash");
-			
-		}
-		
-		if (embeddedSWFLite) {
-			
-			output.haxeflags.push ("--macro include('format.swf.lite.library')");
 			output.haxeflags.push ("--remap flash:flash");
 			
 		}
