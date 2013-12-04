@@ -2,7 +2,6 @@ package;
 
 
 import flash.utils.ByteArray;
-import format.swf.exporters.SWFLiteExporter;
 import format.swf.library.SWFLibrary;
 import format.SWF;
 import haxe.io.Path;
