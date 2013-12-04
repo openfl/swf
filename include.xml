@@ -2,7 +2,5 @@
 <extension>
 	
 	<library handler="swf" type="swf" />
-	<library handler="swf" type="swf_lite" />
-	<library handler="swf" type="swflite" />
 	
 </extension>
