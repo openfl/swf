@@ -5,6 +5,7 @@ import flash.display.Shape;
 import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineText;
+import format.swf.tags.TagDefineText2;
 import format.swf.SWFTimelineContainer;
 
 
@@ -37,7 +38,12 @@ class StaticText extends Shape {
 			if (record.hasColor) {
 				
 				color = record.textColor & 0x00FFFFFF;
-				alpha = (record.textColor & 0xFF) / 0xFF;
+				
+				if (Std.is (tag, TagDefineText2)) {
+					
+					alpha = (record.textColor & 0xFF) / 0xFF;
+					
+				}
 				
 			}
 			
@@ -56,7 +62,7 @@ class StaticText extends Shape {
 			for (i in 0...record.glyphEntries.length) {
 				
 				graphics.lineStyle ();
-				graphics.beginFill (color, alpha);
+				graphics.beginFill (color, 1);
 				
 				renderGlyph (cast data.getCharacter (record.fontId), record.glyphEntries[i].index, matrix.a, matrix.tx, matrix.ty);
 				
