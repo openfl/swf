@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension>
 	
-	<library handler="swf" type="swf" />
+	<library handler="swf" type="swf" unless="html5" />
 	
 </extension>
