@@ -55,7 +55,6 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__totalFrames > 1) {
 			
-			//Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
 			//play ();
 			
 		}
@@ -288,6 +287,9 @@ class MovieClip extends flash.display.MovieClip {
 			playing = true;
 			clips.push (this);
 			
+			Lib.current.stage.removeEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
+			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
+			
 		}
 		
 	}
@@ -361,6 +363,8 @@ class MovieClip extends flash.display.MovieClip {
 	public override function stop ():Void {
 		
 		if (playing) {
+			
+			Lib.current.stage.removeEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
 			
 			playing = false;
 			clips.remove (this);
