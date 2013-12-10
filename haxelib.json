@@ -4,8 +4,8 @@
   "license": "",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.1.1",
-  "releasenote": "Minor fixes",
+  "version": "1.2.0",
+  "releasenote": "Update for OpenFL 1.2",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
