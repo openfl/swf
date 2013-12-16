@@ -314,6 +314,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		var frame = data.frames[index];
 		
+		if (frame == null) {
+			
+			return;
+			
+		}
+		
 		for (object in frame.getObjectsSortedByDepth ()) {
 			
 			var symbol = data.getCharacter (object.characterId);
