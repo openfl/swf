@@ -37,8 +37,6 @@ class DynamicText extends TextField {
 		
 		super ();
 		
-		selectable = !tag.noSelect;
-		
 		var rect = tag.bounds.rect;
 		
 		offset = new Matrix (1, 0, 0, 1, rect.x, rect.y);
