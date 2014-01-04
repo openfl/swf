@@ -4,6 +4,7 @@ package format.swf.instance;
 import flash.display.BitmapData;
 import flash.geom.Matrix;
 import flash.geom.Rectangle;
+import flash.text.Font;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
@@ -13,6 +14,8 @@ import format.swf.tags.TagDefineEditText;
 import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineFont2;
 import format.swf.SWFTimelineContainer;
+
+import openfl.Assets;
 
 #if (cpp || neko)
 import openfl.text.AbstractFont;
@@ -60,15 +63,43 @@ class DynamicText extends TextField {
 				
 				#if (cpp || neko)
 				
-				format.font = getFont (cast font, format.color);
+				// Check if the font is available. If it is, use the real TTF font. Otherwise, go use the embedded SWF font (Creating a SWFFont, a bitmap representation)
+				
+				var tagFontName:String = cast (font, TagDefineFont2).fontName;
+				//trace(tagFontName);
+				//trace(tagFontName.length);
+				//for (i in 0...tagFontName.length) {
+					//
+					//trace(" char code at : " + i + ": " + tagFontName.charCodeAt(i) + " - char: " + tagFontName.charAt(i) );
+				//}
+				
+				// Hack to fix a last empty char (char code 0) that was preventing concatenation
+				//TODO: Fix this directly when TagDefineFont2 is created? What about other strings coming from a swf file?
+				if (tagFontName.charCodeAt(tagFontName.length - 1) == 0) tagFontName = tagFontName.substr(0, tagFontName.length - 1);
+				
+				//TODO: Set a defaultFontFolder property for the SWF Lib?
+				//TODO: Address other possible font file extensions (otf)
+				
+				tagFontName = "fonts/" + tagFontName + ".ttf";
+				
+				//TODO: Try to use Font.registerFont to avoid hunting file names and extensions
+				//trace("Enumerated: " + Font.enumerateFonts(true).length);
+				//Font.registerFont(cast font);
+				
+				var fnt:Font = Assets.getFont(tagFontName);
+				
+				if (fnt != null) {
+					//trace("fnt.fontName: " + fnt.fontName);
+					format.font = fnt.fontName;
+				} else {
+					format.font = getFont (cast font, format.color);
+				}
 				
 				#else
 				
 				format.font = cast (font, TagDefineFont2).fontName;
 				
 				#end
-				
-				//format.font = "_sans";
 				
 				embedFonts = true;
 				
