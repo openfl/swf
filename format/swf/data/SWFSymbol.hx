@@ -22,7 +22,7 @@ class SWFSymbol
 	
 	public function parse(data:SWFData):Void {
 		tagId = data.readUI16();
-		name = data.readSTRING();
+		name = data.readSTRING();	
 	}
 	
 	public function publish(data:SWFData):Void {

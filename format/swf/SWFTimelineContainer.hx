@@ -103,8 +103,10 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 	
 	public function getCharacter(characterId:Int):IDefinitionTag {
+		
 		var tagIndex:Int = rootTimelineContainer.dictionary.get (characterId);
-		if(tagIndex >= 0 && tagIndex < rootTimelineContainer.tags.length) {
+		
+		if (tagIndex >= 0 && tagIndex < rootTimelineContainer.tags.length) {
 			return cast rootTimelineContainer.tags[tagIndex];
 		}
 		return null;
@@ -199,8 +201,6 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		tags.push(tag);
 		tagsRaw.push(tagRaw);
 		// Build dictionary and display list etc
-		//trace (tag);
-		//trace ("hello");
 		processTag(tag);
 		// Adjust position (just in case the parser under- or overflows)
 		var position = pos + tagHeader.tagLength;

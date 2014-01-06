@@ -151,7 +151,7 @@ class SWF extends EventDispatcher {
 	public function createMovieClip (className:String = ""):MovieClip {
 		
 		var symbol:Dynamic = null;
-		
+		var charId:Int;
 		if (className == "") {
 			
 			symbol = data;
@@ -160,7 +160,13 @@ class SWF extends EventDispatcher {
 			
 			if (symbols.exists (className)) {
 				
-				symbol = data.getCharacter (symbols.get (className));
+				charId = symbols.get (className);
+				
+				if (charId > 0) {
+					symbol = data.getCharacter (charId);
+				} else {
+					symbol = data;
+				}
 				
 			}
 			
