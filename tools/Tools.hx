@@ -147,9 +147,13 @@ class Tools {
 				
 				var unserializer = new Unserializer (projectData);
 				unserializer.setResolver (cast { resolveEnum: Type.resolveEnum, resolveClass: resolveClass });
-				
 				var project:HXProject = unserializer.unserialize ();
-				processLibraries (project);
+				
+				if (processLibraries (project)) {
+					
+					File.saveContent (path, Serializer.run (project));
+					
+				}
 				
 			} catch (e:Dynamic) {}
 			
@@ -158,11 +162,9 @@ class Tools {
 	}
 	
 	
-	private static function processLibraries (project:HXProject):Void {
+	private static function processLibraries (project:HXProject):Bool {
 		
-		var output = new HXProject ();
-		var embeddedSWF = false;
-		var embeddedSWFLite = false;
+		var embedded = false;
 		
 		for (library in project.libraries) {
 			
@@ -184,14 +186,14 @@ class Tools {
 					
 				}
 				
-				output.assets.push (swf);
+				project.assets.push (swf);
 				
 				var data = new SWFLibrary ("libraries/" + library.name + ".swf");
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
 				asset.data = Serializer.run (data);
-				output.assets.push (asset);
+				project.assets.push (asset);
 				
-				embeddedSWF = true;
+				embedded = true;
 				//project.haxelibs.push (new Haxelib ("swf"));
 				//output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));
 				
@@ -199,18 +201,16 @@ class Tools {
 			
 		}
 		
-		if (embeddedSWF) {
+		if (embedded) {
 			
-			output.haxeflags.push ("--macro include('format.swf.library')");
-			output.haxeflags.push ("--remap flash:flash");
+			project.haxeflags.push ("--macro include('format.swf.library')");
+			project.haxeflags.push ("--remap flash:flash");
+			
+			return true;
 			
 		}
 		
-		if (output.assets.length > 0) {
-			
-			Sys.print (Serializer.run (output));
-			
-		}
+		return false;
 		
 	}
 	
