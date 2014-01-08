@@ -74,7 +74,7 @@ class DynamicText extends TextField {
 				
 				for (font in fonts) {
 					
-					if (font == fontName) {
+					if (font.fontName == fontName) {
 						
 						foundFont = true;
 						format.font = fontName;
