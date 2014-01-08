@@ -9,6 +9,7 @@ import flash.events.Event;
 import flash.Lib;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
+import format.swf.tags.TagDefineButton2;
 import format.swf.tags.TagDefineEditText;
 import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineShape;
@@ -346,6 +347,8 @@ class MovieClip extends flash.display.MovieClip {
 				
 				displayObject = new DynamicText (data, cast symbol);
 				
+			} else if (Std.is (symbol, TagDefineButton2)) {
+				displayObject = new SimpleButton(data, cast symbol);
 			}
 			
 			if (displayObject != null) {
