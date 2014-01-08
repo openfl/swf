@@ -61,23 +61,34 @@ class DynamicText extends TextField {
 				
 				#if (cpp || neko)
 				
-				// Check if the font is available. If it is, use the real TTF font. Otherwise, go use the embedded SWF font (Creating a SWFFont, a bitmap representation)
+				var fontName =  cast (font, TagDefineFont2).fontName;
 				
-				var tagFontName:String = cast (font, TagDefineFont2).fontName;
+				/*if (fontName.charCodeAt (fontName.length - 1) == 0) {
+					
+					fontName = fontName.substr (0, fontName.length - 1).split (" ").join ("");
+					
+				}*/
 				
-				// Hack to fix a last empty char (char code 0) that was preventing concatenation.
-				// Then strip blank chars (because registered font names doesn't appear to have)
-				//TODO: Fix this directly when TagDefineFont2 is created? What about other strings coming from a swf file?
-				if (tagFontName.charCodeAt(tagFontName.length - 1) == 0) tagFontName = tagFontName.substr(0, tagFontName.length - 1).split(" ").join("");
+				var fonts = Font.enumerateFonts (false);
+				var foundFont = false;
 				
-				//Find the font (if it was previously registered using Font.registerFont)
+				for (font in fonts) {
+					
+					if (font == fontName) {
+						
+						foundFont = true;
+						format.font = fontName;
+						break;
+						
+					}
+					
+				}
 				
-				var fontArr:Array<Font> = Font.enumerateFonts(false);
-				var idx:Int = fontArr.length - 1;
-				//var len:Int = fontArr.length;
-				while (idx > -1 && fontArr[idx].fontName != tagFontName) idx--;
-				
-				format.font = (idx > -1)? tagFontName : getFont (cast font, format.color);
+				if (!foundFont) {
+					
+					format.font = getFont (cast font, format.color);
+					
+				}
 				
 				#else
 				
@@ -91,10 +102,10 @@ class DynamicText extends TextField {
 			
 		}
 		
-		format.leftMargin = tag.leftMargin;
-		format.rightMargin = tag.rightMargin;
-		format.indent = tag.indent;
-		format.leading = tag.leading;
+		format.leftMargin = tag.leftMargin / 20;
+		format.rightMargin = tag.rightMargin / 20;
+		format.indent = tag.indent / 20;
+		format.leading = tag.leading / 20;
 		
 		switch (tag.align) {
 			

@@ -41,7 +41,7 @@ class TagDefineEditText implements IDefinitionTag
 	public var leftMargin:Int;
 	public var rightMargin:Int;
 	public var indent:Int;
-	public var leading:Float;
+	public var leading:Int;
 	public var initialText:String;
 
 	public var characterId:Int;
@@ -96,7 +96,7 @@ class TagDefineEditText implements IDefinitionTag
 			leftMargin = data.readUI16();
 			rightMargin = data.readUI16();
 			indent = data.readUI16();
-			leading = data.readSI16() / 20;
+			leading = data.readSI16();
 		}
 		variableName = data.readSTRING();
 		if (hasText) {
@@ -148,7 +148,7 @@ class TagDefineEditText implements IDefinitionTag
 			body.writeUI16(leftMargin);
 			body.writeUI16(rightMargin);
 			body.writeUI16(indent);
-			body.writeSI16(Math.round (leading * 20));
+			body.writeSI16(leading);
 		}
 		body.writeSTRING(variableName);
 		if (hasText) {
