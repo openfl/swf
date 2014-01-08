@@ -220,7 +220,7 @@ class MovieClip extends flash.display.MovieClip {
 				matrix = offset;
 				
 			}
-				
+			
 			displayObject.transform.matrix = matrix;
 			
 		} else if (firstTag.hasMatrix) {

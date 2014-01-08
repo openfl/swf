@@ -39,7 +39,7 @@ class DynamicText extends TextField {
 		
 		var rect = tag.bounds.rect;
 		
-		offset = new Matrix (1, 0, 0, 1, rect.x, rect.y);
+		offset = new Matrix (1, 0, 0, 1, rect.x, rect.y - 2);
 		width = rect.width;
 		height = rect.height * 2;
 		
@@ -253,33 +253,33 @@ class SWFFont extends AbstractFont {
 				var offsetY = (font.ascent - font.descent) * scale * 0.05;
 				
 				for (command in handler.commands) {
-
+					
 					switch (command.type) {
-
+						
 						//case BEGIN_FILL: shape.graphics.beginFill (0x0000FF, 1);
 						//case END_FILL: shape.graphics.endFill ();
 						case LINE_STYLE: 
-
+							
 							if (command.params.length > 0) {
-
+								
 								shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
-
+								
 							} else {
-
+								
 								shape.graphics.lineStyle ();
-
+								
 							}
-
+							
 						case MOVE_TO: shape.graphics.moveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
 						case LINE_TO: shape.graphics.lineTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
 						case CURVE_TO: 
 							
 							shape.graphics.curveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY, command.params[2] * scale + offsetX, command.params[3] * scale + offsetY);
-
+						
 						default:
-
+						
 					}
-
+					
 				}
 				
 				//var bounds = shape.getBounds (shape);
