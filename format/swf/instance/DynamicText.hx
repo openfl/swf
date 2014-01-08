@@ -124,7 +124,7 @@ class DynamicText extends TextField {
 			} else {
 				
 				text = tag.initialText;
-					
+				
 			}
 			
 			#end
