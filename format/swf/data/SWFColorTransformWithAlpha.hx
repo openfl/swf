@@ -13,10 +13,10 @@ class SWFColorTransformWithAlpha extends SWFColorTransform
 		hasAddTerms = (data.readUB(1) == 1);
 		hasMultTerms = (data.readUB(1) == 1);
 		var bits:Int = data.readUB(4);
-		rMult = 1;
-		gMult = 1;
-		bMult = 1;
-		aMult = 1;
+		rMult = 0xFF;
+		gMult = 0xFF;
+		bMult = 0xFF;
+		aMult = 0xFF;
 		if (hasMultTerms) {
 			rMult = data.readSB(bits);
 			gMult = data.readSB(bits);
@@ -74,6 +74,6 @@ class SWFColorTransformWithAlpha extends SWFColorTransform
 	}
 	
 	override public function toString():String {
-		return rMult + "," + gMult + "," + bMult + "," + aMult + "," + rAdd + "," + gAdd + "," + bAdd + "," + aAdd;
+		return ("(redMultiplier=" + rMult + ", greenMultiplier=" + gMult + ", blueMultiplier=" + bMult + ", alphaMultiplier=" + aMult + ", redOffset=" + rAdd + ", greenOffset=" + gAdd + ", blueOffset=" + bAdd + ", alphaOffset=" + aAdd +")");
 	}
 }
