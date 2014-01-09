@@ -6,6 +6,7 @@ import flash.display.BlendMode;
 import flash.display.DisplayObject;
 import flash.display.Sprite;
 import flash.filters.BitmapFilter;
+import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.events.Event;
 import flash.Lib;
@@ -57,17 +58,17 @@ class SimpleButton extends flash.display.SimpleButton {
 			if (rec.stateOver) {
 				if (this.overState == null) this.overState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
-				if (displayObject != null)  cast (this.overState, Sprite).addChild(displayObject);
+				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.overState);
 			}
 			if (rec.stateDown) {
 				if (this.downState == null) this.downState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
-				if (displayObject != null)  cast (this.downState, Sprite).addChild(displayObject);
+				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.downState);
 			}
 			if (rec.stateHitTest) {
 				if (this.hitTestState == null) this.hitTestState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
-				if (displayObject != null)  cast (this.hitTestState, Sprite).addChild(displayObject);
+				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.hitTestState);
 			}
 			
 		}
@@ -139,9 +140,9 @@ class SimpleButton extends flash.display.SimpleButton {
 			//displayObject.blendMode = record;
 		//}
 		
-		//if (record.colorTransform != null) {
-			//displayObject.transform.colorTransform = record.colorTransform.colorTransform;
-		//}
+		if (record.colorTransform != null /*&& record.colorTransform.rMult != 1*/) {
+			displayObject.transform.colorTransform = record.colorTransform.colorTransform;
+		}
 		
 		//cast(container, Sprite).addChildAt(displayObject, record.placeDepth-1);
 		cast(container, Sprite).addChild(displayObject);
