@@ -2,13 +2,16 @@ package format.swf.instance;
 
 
 import flash.display.BitmapData;
+import flash.display.BlendMode;
 import flash.display.DisplayObject;
 import flash.display.Sprite;
+import flash.filters.BitmapFilter;
 import flash.geom.Matrix;
 import flash.events.Event;
 import flash.Lib;
 import format.swf.data.SWFButtonRecord;
 import format.swf.SWFTimelineContainer;
+import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton2;
@@ -38,11 +41,35 @@ class SimpleButton extends flash.display.SimpleButton {
 		this.data = data;
 		this.tag = tag;
 		
+		var displayObject:DisplayObject;
+		var stateSprite:Sprite = null;
 		//trace(tag.characters);
 		var rec:SWFButtonRecord;
 		for (i in 0...tag.characters.length) {
 			rec = tag.characters[i];
 			trace(i + ": " + rec);
+			
+			if (rec.stateUp) {
+				if (this.upState == null) this.upState = new Sprite();
+				displayObject = getDisplayObject(rec.characterId);
+				if (displayObject != null) placeButtonRecord(displayObject, rec, this.upState);
+			}
+			if (rec.stateOver) {
+				if (this.overState == null) this.overState = new Sprite();
+				displayObject = getDisplayObject(rec.characterId);
+				if (displayObject != null)  cast (this.overState, Sprite).addChild(displayObject);
+			}
+			if (rec.stateDown) {
+				if (this.downState == null) this.downState = new Sprite();
+				displayObject = getDisplayObject(rec.characterId);
+				if (displayObject != null)  cast (this.downState, Sprite).addChild(displayObject);
+			}
+			if (rec.stateHitTest) {
+				if (this.hitTestState == null) this.hitTestState = new Sprite();
+				displayObject = getDisplayObject(rec.characterId);
+				if (displayObject != null)  cast (this.hitTestState, Sprite).addChild(displayObject);
+			}
+			
 		}
 		
 		
@@ -50,8 +77,77 @@ class SimpleButton extends flash.display.SimpleButton {
 		
 	}
 	
+	private inline function getDisplayObject(charId:Int):DisplayObject {
+		var symbol = data.getCharacter (charId);
+		//var grid = data.getScalingGrid (charId);
+		var displayObject:DisplayObject = null;
+		
+		if (Std.is (symbol, TagDefineSprite)) {
+			
+			displayObject = new MovieClip (cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineBitsLossless) || Std.is (symbol, TagDefineBits)) {
+			
+			displayObject = new Bitmap (cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineShape)) {
+			
+			displayObject = new Shape (data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineText)) {
+			
+			displayObject = new StaticText (data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineEditText)) {
+			
+			displayObject = new DynamicText (data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineButton2)) {
+			displayObject = new SimpleButton(data, cast symbol);
+		}
+		
+		if (displayObject != null) {
+			
+			//if (grid != null) {
+				//
+				//displayObject.scale9Grid = grid.splitter.rect.clone ();
+				//
+			//}
+		}
+		
+		return displayObject;
+		
+		
+	}
+	
+	private inline function placeButtonRecord(displayObject:DisplayObject, record:SWFButtonRecord, container:DisplayObject) :Void {
+		if (record.placeMatrix != null) {
+			trace(record.placeMatrix.matrix);
+			displayObject.transform.matrix = new Matrix(record.placeMatrix.matrix.a, record.placeMatrix.matrix.b, record.placeMatrix.matrix.c, record.placeMatrix.matrix.d, record.placeMatrix.matrix.tx / 20, record.placeMatrix.matrix.ty / 20);
+		}
+		
+		if (record.hasFilterList) {
+			var filters:Array<BitmapFilter> = [];
+			
+			for (i in 0...record.filterList.length) {
+				filters.push(record.filterList[i].filter);
+			}
+			displayObject.filters = filters;
+		}
+		
+		//if (record.hasBlendMode) {
+			//displayObject.blendMode = record;
+		//}
+		
+		//if (record.colorTransform != null) {
+			//displayObject.transform.colorTransform = record.colorTransform.colorTransform;
+		//}
+		
+		//cast(container, Sprite).addChildAt(displayObject, record.placeDepth-1);
+		cast(container, Sprite).addChild(displayObject);
+	}
 
-	private function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
+	/*private function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
 		
 		var firstTag:TagPlaceObject = cast data.tags [frameObject.placedAtIndex];
 		var lastTag:TagPlaceObject = null;
@@ -142,7 +238,7 @@ class SimpleButton extends flash.display.SimpleButton {
 			
 		}
 		
-	}
+	}*/
 	
 	
 	
