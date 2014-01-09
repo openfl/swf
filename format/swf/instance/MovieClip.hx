@@ -56,7 +56,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__totalFrames > 1) {
 			
-			//play ();
+			play ();
 			
 		}
 		
