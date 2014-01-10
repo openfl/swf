@@ -46,7 +46,7 @@ class SimpleButton extends flash.display.SimpleButton {
 		var rec:SWFButtonRecord;
 		for (i in 0...tag.characters.length) {
 			rec = tag.characters[i];
-			trace(i + ": " + rec);
+			//trace(i + ": " + rec);
 			
 			if (rec.stateUp) {
 				if (this.upState == null) this.upState = new Sprite();
@@ -120,7 +120,6 @@ class SimpleButton extends flash.display.SimpleButton {
 	
 	private inline function placeButtonRecord(displayObject:DisplayObject, record:SWFButtonRecord, container:DisplayObject) :Void {
 		if (record.placeMatrix != null) {
-			trace(record.placeMatrix.matrix);
 			displayObject.transform.matrix = new Matrix(record.placeMatrix.matrix.a, record.placeMatrix.matrix.b, record.placeMatrix.matrix.c, record.placeMatrix.matrix.d, record.placeMatrix.matrix.tx / 20, record.placeMatrix.matrix.ty / 20);
 		}
 		
@@ -167,9 +166,9 @@ class SimpleButton extends flash.display.SimpleButton {
 		if (record.colorTransform != null) {
 			displayObject.transform.colorTransform = record.colorTransform.colorTransform;
 		}
-		
-		//cast(container, Sprite).addChildAt(displayObject, record.placeDepth-1);
-		cast(container, Sprite).addChild(displayObject);
+		var spr:Sprite = cast(container, Sprite);
+		spr.addChildAt(displayObject, (spr.numChildren < record.placeDepth)? spr.numChildren : record.placeDepth - 1);
+		//cast(container, Sprite).addChild(displayObject);
 	}
 	
 }
