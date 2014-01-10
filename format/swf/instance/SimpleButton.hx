@@ -43,7 +43,6 @@ class SimpleButton extends flash.display.SimpleButton {
 		
 		var displayObject:DisplayObject;
 		var stateSprite:Sprite = null;
-		//trace(tag.characters);
 		var rec:SWFButtonRecord;
 		for (i in 0...tag.characters.length) {
 			rec = tag.characters[i];
@@ -53,12 +52,15 @@ class SimpleButton extends flash.display.SimpleButton {
 				if (this.upState == null) this.upState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
 				if (displayObject != null) placeButtonRecord(displayObject, rec, this.upState);
+				#if (mobile) if (this.overState == null) this.overState = this.upState; #end
 			}
+			#if !(mobile)
 			if (rec.stateOver) {
 				if (this.overState == null) this.overState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
 				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.overState);
 			}
+			#end
 			if (rec.stateDown) {
 				if (this.downState == null) this.downState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
