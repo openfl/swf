@@ -2,17 +2,18 @@ package format;
 
 
 import flash.display.BitmapData;
-import flash.display.SimpleButton;
 import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.utils.ByteArray;
 import format.swf.instance.Bitmap;
 import format.swf.instance.MovieClip;
+import format.swf.instance.SimpleButton;
 import format.swf.SWFRoot;
 import format.swf.SWFTimelineContainer;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsJPEG2;
 import format.swf.tags.TagDefineBitsLossless;
+import format.swf.tags.TagDefineButton2;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagSymbolClass;
 
@@ -126,23 +127,20 @@ class SWF extends EventDispatcher {
 	
 	
 	public function createButton (className:String):SimpleButton {
+		var symbol:Dynamic = null;
+		var charId:Int;
+			
+		if (symbols.exists (className)) {
+			charId = symbols.get (className);
+			symbol = data.getCharacter (charId);
+		}
 		
-		var id = symbols.get (className);
-		/*
-		switch (getSymbol (id)) {
+		if (Std.is (symbol, TagDefineButton2)) {
 			
-			case buttonSymbol (data):
-				
-				var b = new SimpleButton ();
-				data.apply (b);
-				return b;
-			
-			default:
-				
-				return null;
+			return new SimpleButton (data, cast symbol);
 			
 		}
-		*/
+		
 		return null;
 		
 	}
