@@ -30,10 +30,9 @@ class SimpleButton extends flash.display.SimpleButton {
 	
 	private var data:SWFTimelineContainer;
 	private var tag:TagDefineButton2;
-	private var lastUpdate:Int;
 	
-	
-	
+	//TODO: Check why BlendModes in the SWF spec follow this order, and why the difference between cpp and flash order
+	static private var blendModes:Array<BlendMode> = [BlendMode.NORMAL, BlendMode.NORMAL, BlendMode.LAYER, BlendMode.MULTIPLY, BlendMode.SCREEN, BlendMode.LIGHTEN, BlendMode.DARKEN, BlendMode.DIFFERENCE, BlendMode.ADD, 	BlendMode.SUBTRACT,	BlendMode.INVERT, BlendMode.ALPHA, BlendMode.ERASE, BlendMode.OVERLAY, BlendMode.HARDLIGHT #if flash, BlendMode.SHADER #end];
 	
 	public function new (data:SWFTimelineContainer, tag:TagDefineButton2) {
 		
@@ -72,10 +71,6 @@ class SimpleButton extends flash.display.SimpleButton {
 			}
 			
 		}
-		
-		
-		update ();
-		
 	}
 	
 	private inline function getDisplayObject(charId:Int):DisplayObject {
@@ -136,146 +131,43 @@ class SimpleButton extends flash.display.SimpleButton {
 			displayObject.filters = filters;
 		}
 		
-		//if (record.hasBlendMode) {
-			//displayObject.blendMode = record;
-		//}
+		if (record.hasBlendMode) {
+			
+			//trace("blendMode :" + record.blendMode);
+			//
+			//trace("NORMAL: " + Type.enumIndex(BlendMode.NORMAL));
+			//trace("LAYER: " + Type.enumIndex(BlendMode.LAYER));
+			//trace("MULTIPLY: " + Type.enumIndex(BlendMode.MULTIPLY));
+			//trace("SCREEN: " + Type.enumIndex(BlendMode.SCREEN));
+			//trace("LIGHTEN: " + Type.enumIndex(BlendMode.LIGHTEN));
+			//trace("DARKEN: " + Type.enumIndex(BlendMode.DARKEN));
+			//trace("DIFFERENCE: " + Type.enumIndex(BlendMode.DIFFERENCE));
+			//trace("ADD: " + Type.enumIndex(BlendMode.ADD));
+			//trace("SUBTRACT: " + Type.enumIndex(BlendMode.SUBTRACT));
+			//trace("INVERT: " + Type.enumIndex(BlendMode.INVERT));
+			//trace("ALPHA: " + Type.enumIndex(BlendMode.ALPHA));
+			//trace("ERASE: " + Type.enumIndex(BlendMode.ERASE));
+			//trace("OVERLAY: " + Type.enumIndex(BlendMode.OVERLAY));
+			//trace("HARDLIGHT: " + Type.enumIndex(BlendMode.HARDLIGHT));
+			//trace("SHADER: " + Type.enumIndex(BlendMode.SHADER));
+			
+			//var arr = Type.getEnumConstructs(BlendMode);
+			//for (i in 0...arr.length) {
+				//trace(i + ") " + arr[i] + ": " + Type.enumIndex(Type.createEnum(BlendMode, arr[i])));
+			//}
+			//trace("Constrs:" + Type.getEnumConstructs(BlendMode));
+			//displayObject.blendMode = Type.createEnumIndex(BlendMode, record.blendMode - 1);
+			
+			displayObject.blendMode = blendModes[record.blendMode];
+			
+		}
 		
-		if (record.colorTransform != null /*&& record.colorTransform.rMult != 1*/) {
+		if (record.colorTransform != null) {
 			displayObject.transform.colorTransform = record.colorTransform.colorTransform;
 		}
 		
 		//cast(container, Sprite).addChildAt(displayObject, record.placeDepth-1);
 		cast(container, Sprite).addChild(displayObject);
-	}
-
-	/*private function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
-		
-		var firstTag:TagPlaceObject = cast data.tags [frameObject.placedAtIndex];
-		var lastTag:TagPlaceObject = null;
-		
-		if (frameObject.lastModifiedAtIndex > 0) {
-			
-			lastTag = cast data.tags [frameObject.lastModifiedAtIndex];
-			
-		}
-		
-		if (lastTag != null && lastTag.hasName) {
-			
-			displayObject.name = lastTag.instanceName;
-			
-		} else if (firstTag.hasName) {
-			
-			displayObject.name = firstTag.instanceName;
-			
-		}
-		
-		if (lastTag != null && lastTag.hasMatrix) {
-			
-			var matrix = lastTag.matrix.matrix;
-			matrix.tx *= 1 / 20;
-			matrix.ty *= 1 / 20;
-			
-			if (Std.is (displayObject, DynamicText)) {
-				
-				var offset = cast (displayObject, DynamicText).offset.clone ();
-				offset.concat (matrix);
-				matrix = offset;
-				
-			}
-				
-			displayObject.transform.matrix = matrix;
-			
-		} else if (firstTag.hasMatrix) {
-			
-			var matrix = firstTag.matrix.matrix;
-			matrix.tx *= 1 / 20;
-			matrix.ty *= 1 / 20;
-			
-			if (Std.is (displayObject, DynamicText)) {
-				
-				var offset = cast (displayObject, DynamicText).offset.clone ();
-				offset.concat (matrix);
-				matrix = offset;
-				
-			}
-			
-			displayObject.transform.matrix = matrix;
-			
-		}
-		
-		if (lastTag != null && lastTag.hasColorTransform) {
-			
-			displayObject.transform.colorTransform = lastTag.colorTransform.colorTransform;
-			
-		} else if (firstTag.hasColorTransform) {
-			
-			displayObject.transform.colorTransform = firstTag.colorTransform.colorTransform;
-			
-		}
-		
-		if (lastTag != null && lastTag.hasFilterList) {
-			
-			var filters = [];
-			
-			for (i in 0...lastTag.surfaceFilterList.length) {
-				
-				filters[i] = lastTag.surfaceFilterList[i].filter;
-				
-			}
-			
-			displayObject.filters = filters;
-			
-		} else if (firstTag.hasFilterList) {
-			
-			var filters = [];
-			
-			for (i in 0...firstTag.surfaceFilterList.length) {
-				
-				filters[i] = firstTag.surfaceFilterList[i].filter;
-				
-			}
-			
-			displayObject.filters = filters;
-			
-		}
-		
-	}*/
-	
-	
-	
-	
-	
-	
-	private function update ():Void {
-		
-		/*if (__currentFrame != lastUpdate) {
-			
-			for (i in 0...numChildren) {
-				
-				var child = getChildAt (0);
-				
-				if (Std.is (child, MovieClip)) {
-					
-					untyped child.stop ();
-					
-				}
-				
-				removeChildAt (0);
-				
-			}
-			
-			var frameIndex = __currentFrame - 1;
-			
-			if (frameIndex > -1) {
-				
-				renderFrame (frameIndex);
-				
-			}
-			
-		}
-		
-		lastUpdate = __currentFrame;*/
-		
 	}
 	
 }
