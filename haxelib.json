@@ -4,8 +4,8 @@
   "license": "",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.2.1",
-  "releasenote": "Update for OpenFL 1.2.1",
+  "version": "1.2.2",
+  "releasenote": "Improvements to DynamicText, SimpleButton",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
