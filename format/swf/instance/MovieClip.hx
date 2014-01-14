@@ -7,6 +7,7 @@ import flash.display.Sprite;
 import flash.geom.Matrix;
 import flash.events.Event;
 import flash.Lib;
+import format.swf.instance.MovieClip.ChildObject;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton2;
@@ -16,8 +17,14 @@ import format.swf.tags.TagDefineShape;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagDefineText;
 import format.swf.tags.TagPlaceObject;
+import format.swf.timeline.Frame;
 import format.swf.timeline.FrameObject;
 
+
+typedef ChildObject = {
+	var object:DisplayObject;
+	var frameObject:FrameObject;
+}
 
 class MovieClip extends flash.display.MovieClip {
 	
@@ -28,6 +35,11 @@ class MovieClip extends flash.display.MovieClip {
 	private var data:SWFTimelineContainer;
 	private var lastUpdate:Int;
 	private var playing:Bool;
+	
+	private var objectPool:Map<Int, ChildObject>;
+	private var activeObjects:Array<ChildObject>;
+	//private var activeForeignObjects:Array<ChildObject>;
+	
 	
 	#if flash
 	private var __currentFrame:Int;
@@ -51,6 +63,10 @@ class MovieClip extends flash.display.MovieClip {
 		
 		__currentFrame = 1;
 		__totalFrames = data.frames.length;
+		
+		objectPool = new Map<Int, ChildObject>();
+		activeObjects = [];
+		//activeForeignObjects = [];
 		
 		update ();
 		
@@ -187,7 +203,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
+	private inline function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
 		
 		var firstTag:TagPlaceObject = cast data.tags [frameObject.placedAtIndex];
 		var lastTag:TagPlaceObject = null;
@@ -311,61 +327,146 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function renderFrame (index:Int):Void {
+	private inline function renderFrame (index:Int):Void {
 		
-		var frame = data.frames[index];
-		
+		var frame:Frame = data.frames[index];
 		if (frame == null) {
-			
 			return;
-			
 		}
 		
+		var frameObject:FrameObject = null;
+		
+		var newActiveObjects:Array<ChildObject> = [];
+		/*
+		// Check foreign objects (added outside the lib)
+		var foreignObject:DisplayObject;
+		var foreignIdx:Int = activeForeignObjects.length - 1;
+		for (i in 0...numChildren) {
+			foreignObject = getChildAt(i);
+			while (foreignIdx > -1 && activeForeignObjects[foreignIdx].object != foreignObject) { foreignIdx--; }
+			if (foreignIdx == -1) {
+				//activeForeignObjects.push
+			}
+			
+			
+		}*/
+		
+		
+		// Check previously active objects (Maintain or remove)
+		
+		for (activeObject in activeObjects) {
+			if (activeObject.frameObject != null) {
+				// Normal active object
+				frameObject = frame.objects.get(activeObject.frameObject.depth);
+				
+				if (frameObject == null || frameObject.characterId != activeObject.frameObject.characterId) {
+					// The frameObject isn't the same as the active
+					// Return object to pool
+					objectPool.set(activeObject.frameObject.characterId, activeObject);
+					
+					// Remove the object from the display list
+					// todo - disconnect event handlers ?
+					removeChild(activeObject.object);
+				} else {
+					
+					newActiveObjects.push(activeObject);
+					
+				}
+				
+			} /*else {
+				// Foreign active object
+				newActiveObjects.push(activeObject);
+			}*/
+		}
+		
+		// splice actives?
+		activeObjects = newActiveObjects;
+		
+		// Check possible new objects
+		//var object:FrameObject;
+		var displayObject:DisplayObject;
+		var child:ChildObject;
+		
+		var activeIdx:Int = activeObjects.length - 1;
+		
 		for (object in frame.getObjectsSortedByDepth ()) {
+			child = null;
 			
-			var symbol = data.getCharacter (object.characterId);
-			var grid = data.getScalingGrid (object.characterId);
-			var displayObject:DisplayObject = null;
-			
-			if (Std.is (symbol, TagDefineSprite)) {
+			// Check if it's in the active objects
+			while (activeIdx > -1 && activeObjects[activeIdx].frameObject.characterId != object.characterId) { activeIdx--; }
+			if (activeIdx > -1) {
+				child = activeObjects[activeIdx];
+				child.frameObject = object;
+				displayObject = child.object;
+			} else {
 				
-				displayObject = new MovieClip (cast symbol);
-				
-			} else if (Std.is (symbol, TagDefineBitsLossless) || Std.is (symbol, TagDefineBits)) {
-				
-				displayObject = new Bitmap (cast symbol);
-				
-			} else if (Std.is (symbol, TagDefineShape)) {
-				
-				displayObject = new Shape (data, cast symbol);
-				
-			} else if (Std.is (symbol, TagDefineText)) {
-				
-				displayObject = new StaticText (data, cast symbol);
-				
-			} else if (Std.is (symbol, TagDefineEditText)) {
-				
-				displayObject = new DynamicText (data, cast symbol);
-				
-			} else if (Std.is (symbol, TagDefineButton2)) {
-				displayObject = new SimpleButton(data, cast symbol);
+				child = objectPool.get(object.characterId);
+				if (child != null) {
+					// DisplayObject already created and in the pool
+					child.frameObject = object;
+					activeObjects.push(child);
+					objectPool.remove(object.characterId);
+					displayObject = child.object;
+				} else {
+					// We have to create it
+					displayObject = getDisplayObject(object.characterId);
+					if (displayObject != null) {
+						activeObjects.push( { object:displayObject, frameObject:object } );
+					}
+				}
 			}
 			
 			if (displayObject != null) {
 				
-				if (grid != null) {
-					
-					displayObject.scale9Grid = grid.splitter.rect.clone ();
-					
-				}
-				
 				placeObject (displayObject, object);
-				addChild (displayObject);
-				
+				addChild(displayObject);
 			}
 			
 		}
 		
+	}
+	
+	private inline function getDisplayObject(charId:Int):DisplayObject {
+		
+		var displayObject:DisplayObject = null;
+			
+		var symbol = data.getCharacter (charId);
+		var grid = data.getScalingGrid (charId);
+		
+		if (Std.is (symbol, TagDefineSprite)) {
+				
+			displayObject = new MovieClip (cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineBitsLossless) || Std.is (symbol, TagDefineBits)) {
+			
+			displayObject = new Bitmap (cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineShape)) {
+			
+			displayObject = new Shape (data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineText)) {
+			
+			displayObject = new StaticText (data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineEditText)) {
+			
+			displayObject = new DynamicText (data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineButton2)) {
+			displayObject = new SimpleButton(data, cast symbol);
+		}
+		
+		if (displayObject != null) {
+			
+			if (grid != null) {
+				
+				displayObject.scale9Grid = grid.splitter.rect.clone ();
+				
+			}
+		}
+		
+		return displayObject;
 	}
 	
 	
@@ -395,7 +496,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__currentFrame != lastUpdate) {
 			
-			for (i in 0...numChildren) {
+			/*for (i in 0...numChildren) {
 				
 				var child = getChildAt (0);
 				
@@ -407,7 +508,7 @@ class MovieClip extends flash.display.MovieClip {
 				
 				removeChildAt (0);
 				
-			}
+			}*/
 			
 			var frameIndex = __currentFrame - 1;
 			

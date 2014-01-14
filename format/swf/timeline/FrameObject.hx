@@ -39,7 +39,7 @@ class FrameObject
 	
 	public function toString(/*indent:Int = 0*/):String {
 		var indent = 0;
-		var str:String = "\n" + StringUtils.repeat(indent + 2) +
+		var str:String = StringUtils.repeat(indent + 2) +
 			"Depth: " + depth + (layer > -1 ? " (Layer " + layer + ")" : "") + ", " +
 			"CharacterId: " + characterId + ", ";
 		if(className != null) {
