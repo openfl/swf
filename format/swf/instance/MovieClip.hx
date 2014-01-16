@@ -348,98 +348,96 @@ class MovieClip extends flash.display.MovieClip {
 		
 		//trace(" :: " + this.name + ": Rendering Frame " + index);
 		
-		
 		var frame:Frame = data.frames[index];
-		if (frame == null) {
-			return;
-		}
-		
-		var frameObject:FrameObject = null;
-		
-		var newActiveObjects:Array<ChildObject> = [];
-		
-		// Check previously active objects (Maintain or remove)
-		
-		for (activeObject in activeObjects) {
-			if (activeObject.frameObject != null) {
-				// Normal active object
-				frameObject = frame.objects.get(activeObject.frameObject.depth);
-				
-				if (frameObject == null || frameObject.characterId != activeObject.frameObject.characterId) {
-					// The frameObject isn't the same as the active
-					// Return object to pool
-					objectPool.set(activeObject.frameObject.characterId, activeObject);
-					
-					// Remove the object from the display list
-					// todo - disconnect event handlers ?
-					removeChild(activeObject.object);
-				} else {
-					
-					newActiveObjects.push(activeObject);
-					
-				}
-				
-			} /*else {
-				// Foreign active object
-				newActiveObjects.push(activeObject);
-			}*/
-		}
-		
-		// splice actives?
-		activeObjects = newActiveObjects;
-		
-		// Check possible new objects
-		//var object:FrameObject;
-		var displayObject:DisplayObject;
-		var child:ChildObject;
-		
-		var activeIdx:Int;
-		
-		for (object in frame.getObjectsSortedByDepth ()) {
-			child = null;
+		if (frame != null) {
 			
-			//trace(" - search for: " + object.characterId);
-			//trace(" - .. actives: " + activeObjects);
-			activeIdx = activeObjects.length - 1;
-			// Check if it's in the active objects
-			while (activeIdx > -1 && activeObjects[activeIdx].frameObject.characterId != object.characterId) { 
-				activeIdx--;
+			var frameObject:FrameObject = null;
+			
+			var newActiveObjects:Array<ChildObject> = [];
+			
+			// Check previously active objects (Maintain or remove)
+			
+			for (activeObject in activeObjects) {
+				if (activeObject.frameObject != null) {
+					// Normal active object
+					frameObject = frame.objects.get(activeObject.frameObject.depth);
+					
+					if (frameObject == null || frameObject.characterId != activeObject.frameObject.characterId) {
+						// The frameObject isn't the same as the active
+						// Return object to pool
+						objectPool.set(activeObject.frameObject.characterId, activeObject);
+						
+						// Remove the object from the display list
+						// todo - disconnect event handlers ?
+						removeChild(activeObject.object);
+					} else {
+						
+						newActiveObjects.push(activeObject);
+						
+					}
+					
+				} /*else {
+					// Foreign active object
+					newActiveObjects.push(activeObject);
+				}*/
 			}
 			
-			if (activeIdx > -1) {
-				child = activeObjects[activeIdx];
-				child.frameObject = object;
-				displayObject = child.object;
-				//trace(" - .. IN ACtives");
-			} else {
+			// splice actives?
+			activeObjects = newActiveObjects;
+			
+			// Check possible new objects
+			//var object:FrameObject;
+			var displayObject:DisplayObject;
+			var child:ChildObject;
+			
+			var activeIdx:Int;
+			
+			for (object in frame.getObjectsSortedByDepth ()) {
+				child = null;
 				
-				//trace(" - .. not IN ACtives... searching in pool");
-				//trace(" - .. " + objectPool.keys());
-				child = objectPool.get(object.characterId);
-				if (child != null) {
-					//trace(" - .. IN POOL!");
-					// DisplayObject already created and in the pool
+				//trace(" - search for: " + object.characterId);
+				//trace(" - .. actives: " + activeObjects);
+				activeIdx = activeObjects.length - 1;
+				// Check if it's in the active objects
+				while (activeIdx > -1 && activeObjects[activeIdx].frameObject.characterId != object.characterId) { 
+					activeIdx--;
+				}
+				
+				if (activeIdx > -1) {
+					child = activeObjects[activeIdx];
 					child.frameObject = object;
-					activeObjects.push(child);
-					objectPool.remove(object.characterId);
 					displayObject = child.object;
+					//trace(" - .. IN ACtives");
 				} else {
-					// We have to create it
-					displayObject = getDisplayObject(object.characterId);
-					//trace("!!!CREATED: charID: " + object.characterId);
 					
-					if (displayObject != null) {
-						activeObjects.push( { object:displayObject, frameObject:object } );
+					//trace(" - .. not IN ACtives... searching in pool");
+					//trace(" - .. " + objectPool.keys());
+					child = objectPool.get(object.characterId);
+					if (child != null) {
+						//trace(" - .. IN POOL!");
+						// DisplayObject already created and in the pool
+						child.frameObject = object;
+						activeObjects.push(child);
+						objectPool.remove(object.characterId);
+						displayObject = child.object;
+					} else {
+						// We have to create it
+						displayObject = getDisplayObject(object.characterId);
+						//trace("!!!CREATED: charID: " + object.characterId);
+						
+						if (displayObject != null) {
+							activeObjects.push( { object:displayObject, frameObject:object } );
+						}
 					}
 				}
-			}
-			
-			if (displayObject != null) {
 				
-				placeObject (displayObject, object);
-				addChild(displayObject);
+				if (displayObject != null) {
+					
+					placeObject (displayObject, object);
+					addChild(displayObject);
+				}
+				
 			}
-			
 		}
 		
 	}
