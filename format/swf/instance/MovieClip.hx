@@ -36,7 +36,7 @@ class MovieClip extends flash.display.MovieClip {
 	private var lastUpdate:Int;
 	private var playing:Bool;
 	
-	private var objectPool:Map<Int, ChildObject>;
+	private var objectPool:Map<Int, List<ChildObject>>;
 	private var activeObjects:Array<ChildObject>;
 	
 	#if flash
@@ -62,14 +62,14 @@ class MovieClip extends flash.display.MovieClip {
 		__currentFrame = 1;
 		__totalFrames = data.frames.length;
 		
-		objectPool = new Map<Int, ChildObject>();
+		objectPool = new Map<Int, List<ChildObject>>();
 		activeObjects = [];
 		
 		update ();
 		
 		if (__totalFrames > 1) {
 			
-			//play ();
+			play ();
 			
 		}
 		
@@ -349,6 +349,8 @@ class MovieClip extends flash.display.MovieClip {
 		//trace(" :: " + this.name + ": Rendering Frame " + index);
 		
 		var frame:Frame = data.frames[index];
+		var sameCharIdList:List<ChildObject>;
+		
 		if (frame != null) {
 			
 			var frameObject:FrameObject = null;
@@ -365,21 +367,23 @@ class MovieClip extends flash.display.MovieClip {
 					if (frameObject == null || frameObject.characterId != activeObject.frameObject.characterId) {
 						// The frameObject isn't the same as the active
 						// Return object to pool
-						objectPool.set(activeObject.frameObject.characterId, activeObject);
+						
+						sameCharIdList = objectPool.get(activeObject.frameObject.characterId);
+						if (sameCharIdList == null) {
+							sameCharIdList = new List<ChildObject>();
+							objectPool.set(activeObject.frameObject.characterId, sameCharIdList);
+						}
+						sameCharIdList.push (activeObject);
 						
 						// Remove the object from the display list
 						// todo - disconnect event handlers ?
 						removeChild(activeObject.object);
 					} else {
-						
 						newActiveObjects.push(activeObject);
 						
 					}
 					
-				} /*else {
-					// Foreign active object
-					newActiveObjects.push(activeObject);
-				}*/
+				} 
 			}
 			
 			// splice actives?
@@ -395,12 +399,14 @@ class MovieClip extends flash.display.MovieClip {
 			for (object in frame.getObjectsSortedByDepth ()) {
 				child = null;
 				
-				//trace(" - search for: " + object.characterId);
+				//trace(" - search for: " + object.characterId + " at depth: " + object.depth);
 				//trace(" - .. actives: " + activeObjects);
 				activeIdx = activeObjects.length - 1;
 				// Check if it's in the active objects
-				while (activeIdx > -1 && activeObjects[activeIdx].frameObject.characterId != object.characterId) { 
-					activeIdx--;
+				if (activeIdx > -1) {
+					while (activeIdx > -1 && (activeObjects[activeIdx].frameObject.characterId != object.characterId || ( activeObjects[activeIdx].frameObject.characterId == object.characterId && activeObjects[activeIdx].frameObject.depth != object.depth))) { 
+						activeIdx--;
+					}
 				}
 				
 				if (activeIdx > -1) {
@@ -412,13 +418,18 @@ class MovieClip extends flash.display.MovieClip {
 					
 					//trace(" - .. not IN ACtives... searching in pool");
 					//trace(" - .. " + objectPool.keys());
-					child = objectPool.get(object.characterId);
-					if (child != null) {
+					//child = objectPool.get(object.characterId);
+					sameCharIdList = objectPool.get(object.characterId);
+					if (sameCharIdList != null && !sameCharIdList.isEmpty()) {
 						//trace(" - .. IN POOL!");
 						// DisplayObject already created and in the pool
+						
+						child = sameCharIdList.pop();
 						child.frameObject = object;
 						activeObjects.push(child);
-						objectPool.remove(object.characterId);
+						
+						if (sameCharIdList.isEmpty()) objectPool.remove(object.characterId);
+						
 						displayObject = child.object;
 					} else {
 						// We have to create it
