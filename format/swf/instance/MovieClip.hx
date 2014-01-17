@@ -84,7 +84,6 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	private function enterFrame ():Void {
-		//trace(" :: " +  this.name + ": EnterFrame");
 		
 		if (lastUpdate == __currentFrame) {
 			
@@ -98,15 +97,12 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		
 		update ();
 		
 	}
 	
 	
 	public /*override*/ function flatten ():Void {
-		
-		//trace("Flatten : " + this.name);
 		
 		var bounds = getBounds (this);
 		var bitmapData = null;
@@ -136,17 +132,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (bounds.width > 0 && bounds.height > 0) {
 			
-			//trace(".bitmapAdded");
-			
 			var bitmap = new flash.display.Bitmap (bitmapData);
 			bitmap.smoothing = true;
 			bitmap.x = bounds.left;
 			bitmap.y = bounds.top;
 			addChild (bitmap);
 			
-			
-			//trace("...childAt[0]: " + this.getChildAt(0) + " - numChildren: " + this.numChildren);
-			//trace("parent: " + parent.name);
 		}
 		
 		
@@ -232,11 +223,6 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		//trace("place: " + displayObject.name + " - charID: " + frameObject.characterId);
-		if (displayObject.name == "over" || displayObject.name == "container") {
-			//trace("...childAt[0]: " + untyped displayObject.getChildAt(0) + " - numChildren: " + untyped displayObject.numChildren);
-		}
-		
 		if (lastTag != null && lastTag.hasMatrix) {
 			
 			var matrix = lastTag.matrix.matrix;
@@ -312,8 +298,6 @@ class MovieClip extends flash.display.MovieClip {
 	
 	public override function play ():Void {
 		
-		//trace(" :: " + this.name + ":PLAY  - playing: " + playing + " - __totalFrames: " + __totalFrames);
-		
 		if (!playing && __totalFrames > 1) {
 			
 			playing = true;
@@ -321,8 +305,6 @@ class MovieClip extends flash.display.MovieClip {
 			
 			Lib.current.stage.removeEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
 			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
-			
-			//trace("EnterFrame ON");
 			
 		}
 		
@@ -346,8 +328,6 @@ class MovieClip extends flash.display.MovieClip {
 	
 	private inline function renderFrame (index:Int):Void {
 		
-		//trace(" :: " + this.name + ": Rendering Frame " + index);
-		
 		var frame:Frame = data.frames[index];
 		var sameCharIdList:List<ChildObject>;
 		
@@ -360,37 +340,32 @@ class MovieClip extends flash.display.MovieClip {
 			// Check previously active objects (Maintain or remove)
 			
 			for (activeObject in activeObjects) {
-				if (activeObject.frameObject != null) {
-					// Normal active object
-					frameObject = frame.objects.get(activeObject.frameObject.depth);
+				
+				frameObject = frame.objects.get(activeObject.frameObject.depth);
+				
+				if (frameObject == null || frameObject.characterId != activeObject.frameObject.characterId) {
+					// The The frameObject isn't the same as the active
+					// Return object to pool
 					
-					if (frameObject == null || frameObject.characterId != activeObject.frameObject.characterId) {
-						// The frameObject isn't the same as the active
-						// Return object to pool
-						
-						sameCharIdList = objectPool.get(activeObject.frameObject.characterId);
-						if (sameCharIdList == null) {
-							sameCharIdList = new List<ChildObject>();
-							objectPool.set(activeObject.frameObject.characterId, sameCharIdList);
-						}
-						sameCharIdList.push (activeObject);
-						
-						// Remove the object from the display list
-						// todo - disconnect event handlers ?
-						removeChild(activeObject.object);
-					} else {
-						newActiveObjects.push(activeObject);
-						
+					sameCharIdList = objectPool.get(activeObject.frameObject.characterId);
+					if (sameCharIdList == null) {
+						sameCharIdList = new List<ChildObject>();
+						objectPool.set(activeObject.frameObject.characterId, sameCharIdList);
 					}
+					sameCharIdList.push (activeObject);
 					
-				} 
+					// Remove the object from the display list
+					// todo - disconnect event handlers ?
+					removeChild(activeObject.object);
+				} else {
+					newActiveObjects.push(activeObject);
+				}
 			}
 			
-			// splice actives?
 			activeObjects = newActiveObjects;
 			
 			// Check possible new objects
-			//var object:FrameObject;
+			// For each FrameObject inside the frame, check if it already exists in the activeObjects array, then check in the Pool, and if it's not there, create the DisplayObject
 			var displayObject:DisplayObject;
 			var child:ChildObject;
 			
@@ -398,47 +373,50 @@ class MovieClip extends flash.display.MovieClip {
 			
 			for (object in frame.getObjectsSortedByDepth ()) {
 				child = null;
-				
-				//trace(" - search for: " + object.characterId + " at depth: " + object.depth);
-				//trace(" - .. actives: " + activeObjects);
 				activeIdx = activeObjects.length - 1;
+				
 				// Check if it's in the active objects
 				if (activeIdx > -1) {
+					
 					while (activeIdx > -1 && (activeObjects[activeIdx].frameObject.characterId != object.characterId || ( activeObjects[activeIdx].frameObject.characterId == object.characterId && activeObjects[activeIdx].frameObject.depth != object.depth))) { 
 						activeIdx--;
 					}
+					
 				}
 				
 				if (activeIdx > -1) {
+					
+					// Object in the activeObjects Array, no need to create, just set the frameObject
 					child = activeObjects[activeIdx];
 					child.frameObject = object;
 					displayObject = child.object;
-					//trace(" - .. IN ACtives");
+					
 				} else {
 					
-					//trace(" - .. not IN ACtives... searching in pool");
-					//trace(" - .. " + objectPool.keys());
-					//child = objectPool.get(object.characterId);
+					// Not in the active objects, search in the Pool (For each char ID there's a list of ChildObjects, because the same symbol may be instantiated more than once)
+					
 					sameCharIdList = objectPool.get(object.characterId);
 					if (sameCharIdList != null && !sameCharIdList.isEmpty()) {
-						//trace(" - .. IN POOL!");
-						// DisplayObject already created and in the pool
+						
+						// Object already created and in the pool
 						
 						child = sameCharIdList.pop();
 						child.frameObject = object;
 						activeObjects.push(child);
 						
-						if (sameCharIdList.isEmpty()) objectPool.remove(object.characterId);
+						//if (sameCharIdList.isEmpty()) objectPool.remove(object.characterId); // No need to remove the list, just leave it empty
 						
 						displayObject = child.object;
+						
 					} else {
+						
 						// We have to create it
 						displayObject = getDisplayObject(object.characterId);
-						//trace("!!!CREATED: charID: " + object.characterId);
 						
 						if (displayObject != null) {
 							activeObjects.push( { object:displayObject, frameObject:object } );
 						}
+						
 					}
 				}
 				
@@ -499,19 +477,12 @@ class MovieClip extends flash.display.MovieClip {
 	
 	public override function stop ():Void {
 		
-		//trace(" :: " + this.name + ":STOP  - playing: " + playing);
-		
-		
 		if (playing) {
-			
-			//Lib.current.stage.removeEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
 			
 			playing = false;
 			clips.remove (this);
 			
 			if (clips.length == 0) Lib.current.stage.removeEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
-			
-			//trace("clips: " + clips);
 			
 		}
 		
@@ -527,26 +498,10 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	private function update ():Void {
-		//trace( ":: " + this.name + ": __currentFrame: " + __currentFrame + " - lastUpdate: " + lastUpdate);
+
 		if (__currentFrame != lastUpdate) {
 			
-			/*for (i in 0...numChildren) {
-				
-				var child = getChildAt (0);
-				
-				if (Std.is (child, MovieClip)) {
-					
-					untyped child.stop ();
-					
-				}
-				
-				removeChildAt (0);
-				
-			}*/
-			
 			var frameIndex = __currentFrame - 1;
-			
-			//trace( ":: " + this.name + ": frameIndex: " + frameIndex);
 			
 			if (frameIndex > -1) {
 				
@@ -559,7 +514,6 @@ class MovieClip extends flash.display.MovieClip {
 		lastUpdate = __currentFrame;
 		
 	}
-	
 	
 	
 	
@@ -592,8 +546,6 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	private static function stage_onEnterFrame (event:Event):Void {
-		
-		//trace("EF");
 		
 		for (clip in clips) {
 			
