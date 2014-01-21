@@ -138,20 +138,24 @@ class Tools {
 			
 		}
 		
-		if (arguments.length > 1 && arguments[0] == "process") {
+		if (arguments.length > 2 && arguments[0] == "process") {
 			
 			try {
 				
-				var path = arguments[1];
-				var projectData = File.getContent (path);
+				var inputPath = arguments[1];
+				var outputPath = arguments[2];
+				
+				var projectData = File.getContent (inputPath);
 				
 				var unserializer = new Unserializer (projectData);
 				unserializer.setResolver (cast { resolveEnum: Type.resolveEnum, resolveClass: resolveClass });
 				var project:HXProject = unserializer.unserialize ();
 				
-				if (processLibraries (project)) {
+				var output = processLibraries (project);
+				
+				if (output != null) {
 					
-					File.saveContent (path, Serializer.run (project));
+					File.saveContent (outputPath, Serializer.run (output));
 					
 				}
 				
@@ -162,8 +166,9 @@ class Tools {
 	}
 	
 	
-	private static function processLibraries (project:HXProject):Bool {
+	private static function processLibraries (project:HXProject):HXProject {
 		
+		var output = new HXProject ();
 		var embedded = false;
 		
 		for (library in project.libraries) {
@@ -186,12 +191,12 @@ class Tools {
 					
 				}
 				
-				project.assets.push (swf);
+				output.assets.push (swf);
 				
 				var data = new SWFLibrary ("libraries/" + library.name + ".swf");
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
 				asset.data = Serializer.run (data);
-				project.assets.push (asset);
+				output.assets.push (asset);
 				
 				embedded = true;
 				//project.haxelibs.push (new Haxelib ("swf"));
@@ -203,14 +208,14 @@ class Tools {
 		
 		if (embedded) {
 			
-			project.haxeflags.push ("--macro include('format.swf.library')");
-			project.haxeflags.push ("--remap flash:flash");
+			output.haxeflags.push ("--macro include('format.swf.library')");
+			output.haxeflags.push ("--remap flash:flash");
 			
-			return true;
+			return output;
 			
 		}
 		
-		return false;
+		return null;
 		
 	}
 	
