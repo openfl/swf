@@ -4,8 +4,8 @@
   "license": "",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.2.2",
-  "releasenote": "Improvements to DynamicText, SimpleButton",
+  "version": "1.2.3",
+  "releasenote": "MovieClip performance improvements",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
