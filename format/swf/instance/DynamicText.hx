@@ -41,7 +41,7 @@ class DynamicText extends TextField {
 		
 		offset = new Matrix (1, 0, 0, 1, rect.x, rect.y - 2);
 		width = rect.width;
-		height = rect.height * 2;
+		height = rect.height;
 		
 		multiline = tag.multiline;
 		wordWrap = tag.wordWrap;
@@ -63,11 +63,11 @@ class DynamicText extends TextField {
 				
 				var fontName =  cast (font, TagDefineFont2).fontName;
 				
-				/*if (fontName.charCodeAt (fontName.length - 1) == 0) {
+				if (fontName.charCodeAt (fontName.length - 1) == 0) {
 					
 					fontName = fontName.substr (0, fontName.length - 1).split (" ").join ("");
 					
-				}*/
+				}
 				
 				var fonts = Font.enumerateFonts (false);
 				var foundFont = false;
