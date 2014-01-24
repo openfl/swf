@@ -2,7 +2,7 @@ package;
 
 
 import flash.utils.ByteArray;
-import format.swf.library.SWFLibrary;
+import format.swf.SWFLibrary;
 import format.SWF;
 import haxe.io.Path;
 import haxe.Serializer;
@@ -208,7 +208,7 @@ class Tools {
 		
 		if (embedded) {
 			
-			output.haxeflags.push ("--macro include('format.swf.library')");
+			output.haxeflags.push ("format.swf.SWFLibrary");
 			output.haxeflags.push ("--remap flash:flash");
 			
 			return output;

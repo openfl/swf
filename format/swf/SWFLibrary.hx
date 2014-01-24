@@ -1,4 +1,4 @@
-package format.swf.library;
+package format.swf;
 
 
 import flash.display.BitmapData;
