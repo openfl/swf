@@ -34,6 +34,7 @@ class TagDefineSceneAndFrameLabelData implements ITag
 			var sceneName:String = data.readSTRING();
 			scenes.push(new SWFScene(sceneOffset, sceneName));
 		}
+		
 		var frameLabelCount:Int = data.readEncodedU32();
 		for (i in 0...frameLabelCount) {
 			var frameNumber:Int = data.readEncodedU32();

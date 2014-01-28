@@ -64,8 +64,10 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	public var layers(default, null):Array<Layer>;
 	public var soundStream(default, null):SoundStream;
 
+	public var frameLabels(default, null):Map<Int, String>;
+	public var frameIndexes(default, null):Map<String, Int>;
+	
 	private var currentFrame:Frame;
-	private var frameLabels:Map<Int, String>;
 	private var hasSoundStream:Bool;
 
 	private var enterFrameProvider:Sprite;
@@ -163,6 +165,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		dictionary = new Map<Int, Int>();
 		currentFrame = new Frame();
 		frameLabels = new Map<Int, String>();
+		frameIndexes = new Map<String, Int>();
 		hasSoundStream = false;
 		_tmpData = data;
 		_tmpVersion = version;
@@ -291,6 +294,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			processDisplayListTag(cast tag, currentTagIndex);
 			return;
 		}
+		
 		switch(cast (tag.type, Int)) {
 			// Frame labels and scenes
 			case TagFrameLabel.TYPE, TagDefineSceneAndFrameLabelData.TYPE:
@@ -327,7 +331,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		switch(cast (tag.type, Int)) {
 			case TagShowFrame.TYPE:
 				currentFrame.tagIndexEnd = currentTagIndex;
-				if(currentFrame.label == null && frameLabels.exists (currentFrame.frameNumber)) {
+				if (currentFrame.label == null && frameLabels.exists (currentFrame.frameNumber)) {
 					currentFrame.label = frameLabels.get (currentFrame.frameNumber);
 				}
 				frames.push(currentFrame);
@@ -344,11 +348,13 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	private function processFrameLabelTag(tag:ITag, currentTagIndex:Int):Void {
 		switch(cast (tag.type, Int)) {
 			case TagDefineSceneAndFrameLabelData.TYPE:
+				// This seems to be unnecessary (at least for frame labels) because frameLabels appear again as TagFrameLabel, and TagDefineSceneAndFrameLabelData does not appear on every MC
 				var tagSceneAndFrameLabelData:TagDefineSceneAndFrameLabelData = cast tag;
 				var i:Int;
 				for(i in 0...tagSceneAndFrameLabelData.frameLabels.length) {
 					var frameLabel:SWFFrameLabel = tagSceneAndFrameLabelData.frameLabels[i];
 					frameLabels.set (frameLabel.frameNumber, frameLabel.name);
+					frameIndexes.set (frameLabel.name, frameLabel.frameNumber + 1);
 				}
 				for(i in 0...tagSceneAndFrameLabelData.scenes.length) {
 					var scene:SWFScene = cast tagSceneAndFrameLabelData.scenes[i];
@@ -357,6 +363,8 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			case TagFrameLabel.TYPE:
 				var tagFrameLabel:TagFrameLabel = cast tag;
 				currentFrame.label = tagFrameLabel.frameName;
+				frameLabels.set(currentFrame.frameNumber, tagFrameLabel.frameName);
+				frameIndexes.set (tagFrameLabel.frameName, currentFrame.frameNumber + 1);
 		}
 	}
 	

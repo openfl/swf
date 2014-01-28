@@ -154,15 +154,15 @@ class MovieClip extends flash.display.MovieClip {
 		if (Std.is (frame, Int)) {
 			
 			value = cast frame;
+			if (value < 1) value = 1;
+			if (value > __totalFrames) value = __totalFrames;
 			
 		} else if (Std.is (frame, String)) {
-			
-			// need to handle frame labels
-			
+			if (data.frameIndexes.exists(cast frame))
+				value = data.frameIndexes.get(cast frame);
+			else
+				value = 1;
 		}
-		
-		if (value < 1) value = 1;
-		if (value > __totalFrames) value = __totalFrames;
 		
 		return value;
 		
