@@ -6,6 +6,7 @@ import flash.display.DisplayObject;
 import flash.display.Sprite;
 import flash.geom.Matrix;
 import flash.events.Event;
+import flash.geom.Rectangle;
 import flash.Lib;
 import format.swf.instance.MovieClip.ChildObject;
 import format.swf.tags.TagDefineBits;
@@ -293,6 +294,9 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
+		//trace("placeObject " + displayObject.name + ": grid: " + displayObject.scale9Grid);
+		//if (displayObject.name == "withGrid") trace(".child0 :" + (untyped displayObject.getChildAt(0)));
+		
 	}
 	
 	
@@ -434,7 +438,7 @@ class MovieClip extends flash.display.MovieClip {
 	private inline function getDisplayObject(charId:Int):DisplayObject {
 		
 		var displayObject:DisplayObject = null;
-			
+		
 		var symbol = data.getCharacter (charId);
 		var grid = data.getScalingGrid (charId);
 		
@@ -465,8 +469,9 @@ class MovieClip extends flash.display.MovieClip {
 		if (displayObject != null) {
 			
 			if (grid != null) {
+				var rect:Rectangle = grid.splitter.rect.clone ();
 				
-				displayObject.scale9Grid = grid.splitter.rect.clone ();
+				displayObject.scale9Grid = rect;
 				
 			}
 		}
