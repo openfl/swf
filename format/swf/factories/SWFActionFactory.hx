@@ -8,6 +8,7 @@
 //import format.swf.data.actions.swf7.*;
 import format.swf.data.actions.ActionUnknown;
 import format.swf.data.actions.IAction;
+import format.swf.data.actions.swf3.ActionStop;
 
 class SWFActionFactory
 {
@@ -18,7 +19,7 @@ class SWFActionFactory
 			///* 0x04 */ case ActionNextFrame.CODE: 		return new ActionNextFrame(code, length);
 			///* 0x05 */ case ActionPreviousFrame.CODE: 	return new ActionPreviousFrame(code, length);
 			///* 0x06 */ case ActionPlay.CODE: 			return new ActionPlay(code, length);
-			///* 0x07 */ case ActionStop.CODE: 			return new ActionStop(code, length);
+			/* 0x07 */ case ActionStop.CODE: 			return new ActionStop(code, length);
 			///* 0x08 */ case ActionToggleQuality.CODE: 	return new ActionToggleQuality(code, length);
 			///* 0x09 */ case ActionStopSounds.CODE: 		return new ActionStopSounds(code, length);
 			///* 0x0a */ case ActionAdd.CODE: 			return new ActionAdd(code, length);

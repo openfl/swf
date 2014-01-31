@@ -1,7 +1,7 @@
-﻿package com.codeazur.hxswf.data.actions.swf7
+﻿package format.swf.data.actions.swf7
 {
 	import com.codeazur.hxswf.SWFData;
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	import com.codeazur.utils.StringUtils;
 	
 	class ActionTry extends Action implements IAction

@@ -1,6 +1,6 @@
-﻿package com.codeazur.hxswf.data.actions.swf6
+﻿package format.swf.data.actions.swf6
 {
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	
 	class ActionEnumerate2 extends Action implements IAction
 	{

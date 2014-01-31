@@ -14,6 +14,8 @@ class SWFClipActions
 		if (data != null) {
 			parse(data, version);
 		}
+		
+		trace("Hello SWFClipActions");
 	}
 	
 	public function parse(data:SWFData, version:Int):Void {

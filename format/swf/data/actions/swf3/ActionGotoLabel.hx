@@ -1,6 +1,6 @@
-﻿package com.codeazur.hxswf.data.actions.swf3
+﻿package format.swf.data.actions.swf3
 {
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	import com.codeazur.hxswf.SWFData;
 	
 	class ActionGotoLabel extends Action implements IAction

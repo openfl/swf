@@ -16,6 +16,7 @@ import format.swf.tags.ITag;
 import format.swf.tags.TagDefineMorphShape;
 import format.swf.tags.TagDefineScalingGrid;
 import format.swf.tags.TagDefineSceneAndFrameLabelData;
+import format.swf.tags.TagDoABC;
 import format.swf.tags.TagEnd;
 import format.swf.tags.TagFrameLabel;
 import format.swf.tags.TagJPEGTables;
@@ -173,6 +174,8 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		hasSoundStream = false;
 		_tmpData = data;
 		_tmpVersion = version;
+		
+		trace(":: Container parseTagsInit");
 	}
 	
 	private function parseTag(data:SWFData, async:Bool = false):ITag {
@@ -230,6 +233,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			// TODO: This needs to go into processTags()
 			buildLayers();
 		}
+		trace(":: Container parseTagsFinalize");
 	}
 
 	public function publishTags(data:SWFData, version:Int):Void {
@@ -290,6 +294,11 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 
 	private function processTag(tag:ITag):Void {
+		
+		trace("  ..Process: " + tag.type + " - name: " + tag.name);
+		
+		
+		
 		var currentTagIndex:Int = tags.length - 1;
 		if(Std.is (tag, IDefinitionTag)) {
 			processDefinitionTag(cast tag, currentTagIndex);
@@ -317,6 +326,9 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			// Scale-9 grids
 			case TagDefineScalingGrid.TYPE:
 				processScalingGridTag(cast tag, currentTagIndex);
+			// Actionscript 3
+			case TagDoABC.TYPE:
+				processAS3Tag(cast tag, currentTagIndex);
 		}
 	}
 	
@@ -419,6 +431,11 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	
 	private function processScalingGridTag(tag:TagDefineScalingGrid, currentTagIndex:Int):Void {
 		scalingGrids.set (tag.characterId, currentTagIndex);
+	}
+	
+	private function processAS3Tag(tag:TagDoABC, currentTagIndex:Int):Void {
+		//scalingGrids.set (tag.characterId, currentTagIndex);
+		trace("ABC: " + tag);
 	}
 	
 	public function buildLayers():Void {

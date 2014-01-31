@@ -1,6 +1,6 @@
-﻿package com.codeazur.hxswf.data.actions.swf5
+﻿package format.swf.data.actions.swf5
 {
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	
 	class ActionPushDuplicate extends Action implements IAction
 	{

@@ -1,6 +1,6 @@
-﻿package com.codeazur.hxswf.data.actions.swf7
+﻿package format.swf.data.actions.swf7
 {
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	
 	class ActionCastOp extends Action implements IAction
 	{
