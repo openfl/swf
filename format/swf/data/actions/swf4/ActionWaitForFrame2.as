@@ -1,7 +1,7 @@
-﻿package com.codeazur.hxswf.data.actions.swf4
+﻿package format.swf.data.actions.swf4
 {
 	import com.codeazur.hxswf.SWFData;
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	
 	class ActionWaitForFrame2 extends Action implements IAction
 	{

@@ -74,6 +74,7 @@ class SWFData extends BitArray
 		
 		super ();
 		endian = Endian.LITTLE_ENDIAN;
+		
 	}
 
 	/////////////////////////////////////////////////////////
@@ -714,6 +715,7 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 	
 	public function readACTIONRECORD():IAction {
+		trace("readACTIONRECORD");
 		var action:IAction = null;
 		var actionCode:Int = readUI8();
 		if (actionCode != 0) {

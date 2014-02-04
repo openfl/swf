@@ -1,6 +1,6 @@
-﻿package com.codeazur.hxswf.data.actions.swf4
+﻿package format.swf.data.actions.swf4
 {
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	
 	class ActionStringEquals extends Action implements IAction
 	{

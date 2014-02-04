@@ -21,6 +21,8 @@ class TagDoAction implements ITag
 		version = 3;
 		level = 1;
 		actions = new Array<IAction>();
+		
+		trace("Hello TagDoAction");
 	}
 	
 	public function parse(data:SWFData, length:Int, version:Int, async:Bool = false):Void {

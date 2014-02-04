@@ -1,7 +1,7 @@
-﻿package com.codeazur.hxswf.data.actions.swf3
+﻿package format.swf.data.actions.swf3
 {
 	import com.codeazur.hxswf.SWFData;
-	import com.codeazur.hxswf.data.actions.*;
+	import format.swf.data.actions.*;
 	
 	class ActionSetTarget extends Action implements IAction
 	{

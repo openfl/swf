@@ -16,6 +16,7 @@ import format.swf.tags.ITag;
 import format.swf.tags.TagDefineMorphShape;
 import format.swf.tags.TagDefineScalingGrid;
 import format.swf.tags.TagDefineSceneAndFrameLabelData;
+import format.swf.tags.TagDoABC;
 import format.swf.tags.TagEnd;
 import format.swf.tags.TagFrameLabel;
 import format.swf.tags.TagJPEGTables;
@@ -54,11 +55,11 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	public static var TIMEOUT:Int = 50;
 	public static var AUTOBUILD_LAYERS:Bool = false;
 	public static var EXTRACT_SOUND_STREAM:Bool = true;
+	public static var scalingGrids(default, null):Map<Int, Int>;
 	
 	public var tags(default, null):Array<ITag>;
 	public var tagsRaw(default, null):Array<SWFRawTag>;
 	public var dictionary(default, null):Map<Int, Int>;
-	public var scalingGrids(default, null):Map<Int, Int>;
 	public var scenes(default, null):Array<Scene>;
 	public var frames(default, null):Array<Frame>;
 	public var layers(default, null):Array<Layer>;
@@ -88,11 +89,12 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	{
 		super();
 		
+		if (scalingGrids == null) scalingGrids = new Map<Int, Int>();
+		
 		backgroundColor = 0xffffff;
 		tags = new Array<ITag>();
 		tagsRaw = new Array<SWFRawTag>();
 		dictionary = new Map<Int, Int>();
-		scalingGrids = new Map<Int, Int>();
 		scenes = new Array<Scene>();
 		frames = new Array<Frame>();
 		layers = new Array<Layer>();
@@ -115,7 +117,10 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 	
 	public function getScalingGrid(characterId:Int):TagDefineScalingGrid {
-		if(scalingGrids.exists (characterId)) {
+		//trace(characterId  + " getScalingGrid" );
+		//trace(scalingGrids);
+		
+		if (scalingGrids.exists (characterId)) {
 			return cast rootTimelineContainer.tags[scalingGrids.get (characterId)];
 		}
 		return null;
@@ -169,6 +174,8 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		hasSoundStream = false;
 		_tmpData = data;
 		_tmpVersion = version;
+		
+		trace(":: Container parseTagsInit");
 	}
 	
 	private function parseTag(data:SWFData, async:Bool = false):ITag {
@@ -226,6 +233,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			// TODO: This needs to go into processTags()
 			buildLayers();
 		}
+		trace(":: Container parseTagsFinalize");
 	}
 
 	public function publishTags(data:SWFData, version:Int):Void {
@@ -286,6 +294,11 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 
 	private function processTag(tag:ITag):Void {
+		
+		trace("  ..Process: " + tag.type + " - name: " + tag.name);
+		
+		
+		
 		var currentTagIndex:Int = tags.length - 1;
 		if(Std.is (tag, IDefinitionTag)) {
 			processDefinitionTag(cast tag, currentTagIndex);
@@ -313,6 +326,9 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			// Scale-9 grids
 			case TagDefineScalingGrid.TYPE:
 				processScalingGridTag(cast tag, currentTagIndex);
+			// Actionscript 3
+			case TagDoABC.TYPE:
+				processAS3Tag(cast tag, currentTagIndex);
 		}
 	}
 	
@@ -415,6 +431,11 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	
 	private function processScalingGridTag(tag:TagDefineScalingGrid, currentTagIndex:Int):Void {
 		scalingGrids.set (tag.characterId, currentTagIndex);
+	}
+	
+	private function processAS3Tag(tag:TagDoABC, currentTagIndex:Int):Void {
+		//scalingGrids.set (tag.characterId, currentTagIndex);
+		trace("ABC: " + tag);
 	}
 	
 	public function buildLayers():Void {

@@ -21,6 +21,8 @@ class TagDoABCDeprecated implements ITag
 		version = 9;
 		level = 1;
 		bytes = new ByteArray();
+		
+		trace("Hello " + name);
 	}
 
 	public static function create(abcData:ByteArray = null):TagDoABCDeprecated {
