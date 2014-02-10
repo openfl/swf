@@ -2,6 +2,9 @@ package;
 
 
 import flash.utils.ByteArray;
+import format.swf.exporters.SWFLiteExporter;
+import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.SWFLiteLibrary;
 import format.swf.SWFLibrary;
 import format.SWF;
 import haxe.io.Path;
@@ -169,7 +172,9 @@ class Tools {
 	private static function processLibraries (project:HXProject):HXProject {
 		
 		var output = new HXProject ();
-		var embedded = false;
+		var embeddedSWF = false;
+		var embeddedSWFLite = false;
+		var filterClasses = [];
 		
 		for (library in project.libraries) {
 			
@@ -178,6 +183,12 @@ class Tools {
 			if (type == null) {
 				
 				type = Path.extension (library.sourcePath).toLowerCase ();
+				
+				if (type == "swf" && project.target == Platform.HTML5) {
+					
+					type = "swflite";
+					
+				}
 				
 			}
 			
@@ -198,18 +209,77 @@ class Tools {
 				asset.data = Serializer.run (data);
 				output.assets.push (asset);
 				
-				embedded = true;
+				embeddedSWF = true;
 				//project.haxelibs.push (new Haxelib ("swf"));
 				//output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));
+				
+			} else if (type == "swf_lite" || type == "swflite") {
+				
+				//project.haxelibs.push (new Haxelib ("swf"));
+				
+				var bytes = ByteArray.readFile (library.sourcePath);
+				var swf = new SWF (bytes);
+				var exporter = new SWFLiteExporter (swf.data);
+				var swfLite = exporter.swfLite;
+				
+				for (id in exporter.bitmaps.keys ()) {
+					
+					var bitmapData = exporter.bitmaps.get (id);
+					var symbol:BitmapSymbol = cast swfLite.symbols.get (id);
+					symbol.path = "libraries/bin/" + id + ".png";
+					swfLite.symbols.set (id, symbol);
+					
+					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
+					asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
+					//asset.data = bitmapData.encode ("png");
+					asset.encoding = AssetEncoding.BASE64;
+					output.assets.push (asset);
+					
+				}
+				
+				for (filterClass in exporter.filterClasses.keys ()) {
+					
+					filterClasses.remove (filterClass);
+					filterClasses.push (filterClass);
+					
+				}
+				
+				var data = new SWFLiteLibrary (swfLite);
+				
+				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
+				asset.data = Serializer.run (data);
+				output.assets.push (asset);
+				
+				embeddedSWFLite = true;
 				
 			}
 			
 		}
 		
-		if (embedded) {
+		if (embeddedSWF) {
 			
 			output.haxeflags.push ("format.swf.SWFLibrary");
+			output.haxeflags.remove ("--remap flash:flash");
 			output.haxeflags.push ("--remap flash:flash");
+			
+		}
+		
+		if (embeddedSWFLite) {
+			
+			output.haxeflags.push ("format.swf.lite.SWFLiteLibrary");
+			
+			for (filterClass in filterClasses) {
+				
+				output.haxeflags.push (filterClass);
+				
+			}
+			
+			output.haxeflags.remove ("--remap flash:flash");
+			output.haxeflags.push ("--remap flash:flash");
+			
+		}
+		
+		if (embeddedSWF || embeddedSWFLite) {
 			
 			return output;
 			
