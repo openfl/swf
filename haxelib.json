@@ -1,11 +1,11 @@
 {
   "name": "swf",
   "url": "http://github.com/openfl/swf",
-  "license": "",
+  "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.2.3",
-  "releasenote": "MovieClip performance improvements",
+  "version": "1.3.0",
+  "releasenote": "Merged SWFLite support",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
