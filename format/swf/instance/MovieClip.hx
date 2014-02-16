@@ -3,6 +3,7 @@ package format.swf.instance;
 
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.display.FrameLabel;
 import flash.display.Sprite;
 import flash.geom.Matrix;
 import flash.events.Event;
@@ -42,6 +43,9 @@ class MovieClip extends flash.display.MovieClip {
 	
 	#if flash
 	private var __currentFrame:Int;
+	private var __currentFrameLabel:String;
+	private var __currentLabel:String;
+	private var __currentLabels:Array<FrameLabel>;
 	private var __totalFrames:Int;
 	#end
 	
@@ -62,6 +66,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		__currentFrame = 1;
 		__totalFrames = data.frames.length;
+
+		for (frame in data.frameLabels.keys ()) {
+
+			__currentLabels.push (new FrameLabel (data.frameLabels.get (frame), frame + 1));
+
+		}
 		
 		objectPool = new Map<Int, List<ChildObject>>();
 		activeObjects = [];
@@ -512,6 +522,16 @@ class MovieClip extends flash.display.MovieClip {
 				
 				renderFrame (frameIndex);
 				
+			}
+
+			var frame = data.frames[frameIndex];
+
+			__currentFrameLabel = frame.label;
+
+			if (frameIndex == 0 || frame.label != null) {
+
+				__currentLabel = frame.label;
+
 			}
 			
 		}
