@@ -452,6 +452,10 @@ class MovieClip extends flash.display.MovieClip {
 						displayObject.mask = mask.object;
 					
 					}
+				} else {
+
+					displayObject.mask = null;
+
 				}
 
 				if (object.clipDepth != 0) {
