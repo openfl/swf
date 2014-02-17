@@ -382,6 +382,7 @@ class MovieClip extends flash.display.MovieClip {
 			// For each FrameObject inside the frame, check if it already exists in the activeObjects array, then check in the Pool, and if it's not there, create the DisplayObject
 			var displayObject:DisplayObject;
 			var child:ChildObject;
+			var mask:ChildObject = null;
 			
 			var activeIdx:Int;
 			
@@ -428,7 +429,7 @@ class MovieClip extends flash.display.MovieClip {
 						displayObject = getDisplayObject(object.characterId);
 						
 						if (displayObject != null) {
-							activeObjects.push( { object:displayObject, frameObject:object } );
+							activeObjects.push( child = { object:displayObject, frameObject:object } );
 						}
 						
 					}
@@ -438,6 +439,26 @@ class MovieClip extends flash.display.MovieClip {
 					
 					placeObject (displayObject, object);
 					addChild(displayObject);
+				}
+
+				if (mask != null) {
+
+					if (mask.frameObject.clipDepth < object.depth) {
+
+						mask = null;
+
+					} else {
+
+						displayObject.mask = mask.object;
+					
+					}
+				}
+
+				if (object.clipDepth != 0) {
+
+					mask = child;
+					displayObject.visible = false;
+
 				}
 				
 			}

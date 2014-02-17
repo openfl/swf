@@ -78,7 +78,7 @@ class Frame
 			}
 		} else {
 			// No character defined at specified depth. Create one.
-			objects.set (tag.depth, new FrameObject(tag.depth, tag.characterId, tag.className, tagIndex, 0, true));
+			objects.set (tag.depth, new FrameObject(tag.depth, tag.clipDepth, tag.characterId, tag.className, tagIndex, 0, true));
 		}
 		_objectsSortedByDepth = null;
 	}

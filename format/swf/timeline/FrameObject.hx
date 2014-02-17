@@ -5,6 +5,8 @@ import format.swf.utils.StringUtils;
 
 class FrameObject
 {
+	// The clipping depth of this display object
+	public var clipDepth:Int;
 	// The depth of this display object
 	public var depth:Int;
 	// The character id of this display object
@@ -22,9 +24,10 @@ class FrameObject
 	// The index of the layer this object resides on 
 	public var layer:Int = -1;
 	
-	public function new(depth:Int, characterId:Int, className:String, placedAtIndex:Int, lastModifiedAtIndex:Int = 0, isKeyframe:Bool = false)
+	public function new(depth:Int, clipDepth:Int, characterId:Int, className:String, placedAtIndex:Int, lastModifiedAtIndex:Int = 0, isKeyframe:Bool = false)
 	{
 		this.depth = depth;
+		this.clipDepth = clipDepth;
 		this.characterId = characterId;
 		this.className = className;
 		this.placedAtIndex = placedAtIndex;
@@ -34,7 +37,7 @@ class FrameObject
 	}
 	
 	public function clone():FrameObject {
-		return new FrameObject(depth, characterId, className, placedAtIndex, lastModifiedAtIndex, false);
+		return new FrameObject(depth, clipDepth, characterId, className, placedAtIndex, lastModifiedAtIndex, false);
 	}
 	
 	public function toString(/*indent:Int = 0*/):String {
