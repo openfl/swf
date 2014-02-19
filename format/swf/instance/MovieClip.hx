@@ -49,8 +49,6 @@ class MovieClip extends flash.display.MovieClip {
 	private var __totalFrames:Int;
 	#end
 	
-	
-	
 	public function new (data:SWFTimelineContainer) {
 		
 		super ();
@@ -86,6 +84,30 @@ class MovieClip extends flash.display.MovieClip {
 		
 	}
 	
+	@:setter(x)
+	public function set_x(val:Float):Void
+	{
+		trace("set x");
+		super.x = val;
+	}
+	
+	@:setter(alpha)
+	public function set_alpha(alpha:Float):Void
+	{
+		trace("set alpha");
+		super.alpha = alpha;
+	}
+	
+	/*@getter(scale9Grid)
+	private function get_scale9Grid():Rectangle {
+		trace("Scale9 get");
+		return super.scale9Grid;
+	}
+	@setter(scale9Grid)
+	private function set_scale9Grid(value:Rectangle):Void {
+		trace("Scale9 set");
+		super.scale9Grid = value;
+	}*/
 	
 	private inline function applyTween (start:Float, end:Float, ratio:Float):Float {
 		
@@ -475,11 +497,17 @@ class MovieClip extends flash.display.MovieClip {
 		var displayObject:DisplayObject = null;
 		
 		var symbol = data.getCharacter (charId);
-		var grid = data.getScalingGrid (charId);
 		
 		if (Std.is (symbol, TagDefineSprite)) {
 				
 			displayObject = new MovieClip (cast symbol);
+			var grid = data.getScalingGrid (charId);
+			if (grid != null) {
+				var rect:Rectangle = grid.splitter.rect.clone ();
+				
+				displayObject.scale9Grid = rect;
+				
+			}
 			
 		} else if (Std.is (symbol, TagDefineBitsLossless) || Std.is (symbol, TagDefineBits)) {
 			
@@ -499,16 +527,6 @@ class MovieClip extends flash.display.MovieClip {
 			
 		} else if (Std.is (symbol, TagDefineButton2)) {
 			displayObject = new SimpleButton(data, cast symbol);
-		}
-		
-		if (displayObject != null) {
-			
-			if (grid != null) {
-				var rect:Rectangle = grid.splitter.rect.clone ();
-				
-				displayObject.scale9Grid = rect;
-				
-			}
 		}
 		
 		return displayObject;
