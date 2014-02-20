@@ -1,12 +1,15 @@
 package format.swf.instance;
 
 
+import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.FrameLabel;
+import flash.display.Graphics;
 import flash.display.Sprite;
 import flash.geom.Matrix;
 import flash.events.Event;
+import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.Lib;
 import format.swf.instance.MovieClip.ChildObject;
@@ -49,6 +52,12 @@ class MovieClip extends flash.display.MovieClip {
 	private var __totalFrames:Int;
 	#end
 	
+	public var scale9BitmapGrid(get, set):Rectangle;
+	private var _scale9BitmapGrid:Rectangle;
+	private var _scale9BitmapData:BitmapData;
+	private var _scale9ScaleX:Float = 1;
+	private var _scale9ScaleY:Float = 1;
+	
 	public function new (data:SWFTimelineContainer) {
 		
 		super ();
@@ -84,30 +93,185 @@ class MovieClip extends flash.display.MovieClip {
 		
 	}
 	
-	@:setter(x)
-	public function set_x(val:Float):Void
+	#if flash
+	@:setter(scaleX)
+	public function set_scaleX(val:Float):Void
 	{
-		//trace("set x");
-		super.x = val;
+		//trace("set scaleX");
+		if (_scale9BitmapGrid == null) super.scaleX = val;
+		else {
+			super.scaleX = 1;
+			_scale9ScaleX = val;
+			drawScale9BitmapData();
+		}
+	}
+	@:getter(scaleX)
+	public function get_scaleX():Float {
+		if (_scale9BitmapGrid == null) return super.scaleX;
+		else return _scale9ScaleX;
 	}
 	
-	@:setter(alpha)
-	public function set_alpha(alpha:Float):Void
+	@:setter(scaleY)
+	public function set_scaleY(val:Float):Void
 	{
-		//trace("set alpha");
-		super.alpha = alpha;
+		if (_scale9BitmapGrid == null) super.scaleY = val;
+		else {
+			super.scaleY = 1;
+			_scale9ScaleY = val;
+			drawScale9BitmapData();
+		}
+	}
+	@:getter(scaleY)
+	public function get_scaleY():Float {
+		if (_scale9BitmapGrid == null) return super.scaleY;
+		else return _scale9ScaleY;
 	}
 	
-	/*@getter(scale9Grid)
-	private function get_scale9Grid():Rectangle {
-		trace("Scale9 get");
-		return super.scale9Grid;
+	
+	@:setter(width)
+	public function set_width(val:Float):Void
+	{
+		//trace("set width");
+		if (_scale9BitmapGrid == null) super.width = val;
+		else {
+			_scale9ScaleX = val / _scale9BitmapData.width;
+			drawScale9BitmapData();
+		}
 	}
-	@setter(scale9Grid)
-	private function set_scale9Grid(value:Rectangle):Void {
-		trace("Scale9 set");
-		super.scale9Grid = value;
-	}*/
+	
+	@:setter(height)
+	public function set_height(val:Float):Void
+	{
+		//trace("set height");
+		if (_scale9BitmapGrid == null) super.height = val;
+		else {
+			_scale9ScaleY = val / _scale9BitmapData.height;
+			drawScale9BitmapData();
+		}
+	}
+	#end
+		
+	private function get_scale9BitmapGrid():Rectangle {
+		return _scale9BitmapGrid;
+	}
+	private function set_scale9BitmapGrid(value:Rectangle):Rectangle {
+		
+		_scale9BitmapGrid = value;
+		if (_scale9BitmapGrid != null) { 
+			
+			flatten();
+			
+			var bmp:flash.display.Bitmap = cast(getChildAt(0), flash.display.Bitmap);
+			
+			_scale9BitmapData = bmp.bitmapData;
+	
+			drawScale9BitmapData();
+			removeChild(bmp);
+			
+		} else {
+			unflatten();
+		}
+		//trace("Scale9 set");
+		
+		return value;
+	}
+	private inline function drawScale9BitmapData():Void {
+		if (_scale9BitmapData != null) {
+			drawScale9Bitmap(_scale9BitmapData, _scale9BitmapData.width * _scale9ScaleX, _scale9BitmapData.height * _scale9ScaleY, _scale9BitmapGrid, null);
+		}
+	}
+	
+	private function drawScale9Bitmap(bitmap : BitmapData,			// bitmap data source
+								width:Float,					// draw width
+								height:Float,					// draw height
+								inner : Rectangle,				// inner rectangle (relative to 0,0)
+								outer : Rectangle=null):Void{	// outer rectangle (relative to 0,0)
+		
+		// some useful local vars
+		var x:Int, y:Int, i:Int, j:Int;
+		var ox:Float=0, oy:Float;
+		var dx : Float = 0, dy : Float;
+		var wid:Float, hei:Float;
+		var dwid:Float, dhei : Float;
+		var sw : Int = bitmap.width;
+		var sh : Int = bitmap.height;
+		
+		graphics.clear();
+		
+		//trace("Scale Draw " + width + ", " + height);
+		
+		// outer null ?
+		if (outer==null){
+			outer = new Rectangle(0,0,sw,sh);
+		}
+		
+		
+		// matrix creation
+		var mat : Matrix = new Matrix();
+		
+		// pre-calculate widths
+		var widths : Array<Float>=[	inner.left,
+								inner.width,
+								sw - inner.right];
+
+		// pre-calculate heights
+		var heights : Array<Float>=[	inner.top,
+								inner.height,
+								sh - inner.bottom];
+								
+		// resized part 
+		var resize : Point = new Point(	width - widths[0] - widths[2],
+										height - heights[0] - heights[2]);
+
+		// let's draw
+		//for (x=0;x<3;x++){
+		for (x in 0...3) {
+			
+			// original width
+			wid = widths[x];
+			
+			// draw width						
+			dwid = x==1 ? resize.x : widths[x];
+			
+
+			// original & draw offset
+			dy=oy=0;
+			
+			//for (y=0;y<3;y++){
+			for (y in  0...3){
+				
+				// original & draw height
+				hei = heights[y];
+				dhei = y==1 ? resize.y : heights[y];
+	
+				if (dwid > 0 && dhei > 0) {
+					
+					// some matrix computation
+					mat.a=dwid/wid;
+					mat.d=dhei/hei;
+					mat.tx=-ox*mat.a + dx;
+					mat.ty=-oy*mat.d + dy;
+					mat.translate(-outer.left,-outer.top);
+					
+					// draw the cell
+					graphics.beginBitmapFill(bitmap,mat,false,true);
+					graphics.drawRect(dx - outer.left, dy - outer.top, dwid, dhei);
+					graphics.endFill();
+				}
+				
+				
+				// offset incrementation
+				oy += hei;
+				dy += dhei;
+			}
+			
+			// offset incrementation
+			ox += wid;
+			dx += dwid;
+		}
+	}
+	
+	
 	
 	private inline function applyTween (start:Float, end:Float, ratio:Float):Float {
 		
@@ -256,6 +420,12 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
+		var oldScaleX:Float = displayObject.scaleX;
+		var oldScaleY:Float = displayObject.scaleY;
+		
+		var sx:Float;
+		var sy:Float;
+		
 		if (lastTag != null && lastTag.hasMatrix) {
 			
 			var matrix = lastTag.matrix.matrix;
@@ -289,6 +459,27 @@ class MovieClip extends flash.display.MovieClip {
 			displayObject.transform.matrix = matrix;
 			
 		}
+		
+		//trace(displayObject.name + " W, H : " + displayObject.scaleX + ", " + displayObject.scaleY + " - vs - " + oldScaleX + ", " + oldScaleY);
+		if (Std.is(displayObject, MovieClip)) {
+			var mc = cast(displayObject, MovieClip);
+			if (mc.scale9BitmapGrid != null && (mc.transform.matrix.a != oldScaleX || mc.transform.matrix.d != oldScaleY)) {
+				
+				mc._scale9ScaleX = mc.transform.matrix.a;
+				mc._scale9ScaleY = mc.transform.matrix.d;
+				
+				var mt:Matrix = mc.transform.matrix;
+				
+				mt.a = 1;
+				mt.d = 1;
+				
+				mc.transform.matrix = mt;
+				
+				mc.drawScale9BitmapData();
+			}
+		}
+		
+		
 		
 		if (lastTag != null && lastTag.hasColorTransform) {
 			
@@ -325,6 +516,7 @@ class MovieClip extends flash.display.MovieClip {
 			displayObject.filters = filters;
 			
 		}
+		
 		
 		//trace("placeObject " + displayObject.name + ": grid: " + displayObject.scale9Grid);
 		//if (displayObject.name == "withGrid") trace(".child0 :" + (untyped displayObject.getChildAt(0)));
@@ -460,6 +652,7 @@ class MovieClip extends flash.display.MovieClip {
 				if (displayObject != null) {
 					
 					placeObject (displayObject, object);
+					
 					addChild(displayObject);
 				}
 
@@ -505,7 +698,7 @@ class MovieClip extends flash.display.MovieClip {
 			if (grid != null) {
 				var rect:Rectangle = grid.splitter.rect.clone ();
 				
-				displayObject.scale9Grid = rect;
+				cast (displayObject, MovieClip).scale9BitmapGrid = rect;
 				
 			}
 			
