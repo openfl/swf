@@ -175,7 +175,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		_tmpData = data;
 		_tmpVersion = version;
 		
-		trace(":: Container parseTagsInit");
+		//trace(":: Container parseTagsInit");
 	}
 	
 	private function parseTag(data:SWFData, async:Bool = false):ITag {
@@ -233,7 +233,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			// TODO: This needs to go into processTags()
 			buildLayers();
 		}
-		trace(":: Container parseTagsFinalize");
+		//trace(":: Container parseTagsFinalize");
 	}
 
 	public function publishTags(data:SWFData, version:Int):Void {
@@ -295,9 +295,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 
 	private function processTag(tag:ITag):Void {
 		
-		trace("  ..Process: " + tag.type + " - name: " + tag.name);
-		
-		
+		//trace("  ..Process: " + tag.type + " - name: " + tag.name);
 		
 		var currentTagIndex:Int = tags.length - 1;
 		if(Std.is (tag, IDefinitionTag)) {
@@ -435,7 +433,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	
 	private function processAS3Tag(tag:TagDoABC, currentTagIndex:Int):Void {
 		//scalingGrids.set (tag.characterId, currentTagIndex);
-		trace("ABC: " + tag);
+		//trace("ABC: " + tag);
 	}
 	
 	public function buildLayers():Void {

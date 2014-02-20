@@ -19,7 +19,7 @@ class TagDoInitAction extends TagDoAction #if !haxe3 , #end implements ITag
 		version = 6;
 		level = 1;
 		
-		trace("Hello TagDoInitAction");
+		//trace("Hello TagDoInitAction");
 	}
 	
 	override public function parse(data:SWFData, length:Int, version:Int, async:Bool = false):Void {

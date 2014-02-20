@@ -15,7 +15,7 @@ class SWFClipActions
 			parse(data, version);
 		}
 		
-		trace("Hello SWFClipActions");
+		//trace("Hello SWFClipActions");
 	}
 	
 	public function parse(data:SWFData, version:Int):Void {

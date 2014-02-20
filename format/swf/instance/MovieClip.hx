@@ -87,14 +87,14 @@ class MovieClip extends flash.display.MovieClip {
 	@:setter(x)
 	public function set_x(val:Float):Void
 	{
-		trace("set x");
+		//trace("set x");
 		super.x = val;
 	}
 	
 	@:setter(alpha)
 	public function set_alpha(alpha:Float):Void
 	{
-		trace("set alpha");
+		//trace("set alpha");
 		super.alpha = alpha;
 	}
 	

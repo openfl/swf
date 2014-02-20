@@ -6,7 +6,7 @@ class ActionUnknown extends Action #if !haxe3 , #end implements IAction
 {
 	public function new(code:Int, length:Int) {
 		super(code, length);
-		trace("Hello ActionUnknown");
+		//trace("Hello ActionUnknown");
 	}
 	
 	override public function parse(data:SWFData):Void {

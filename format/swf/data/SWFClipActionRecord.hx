@@ -16,12 +16,12 @@ class SWFClipActionRecord
 		if (data != null) {
 			parse(data, version);
 		}
-		trace("Hello SWFClipActionRecord");
+		//trace("Hello SWFClipActionRecord");
 	}
 	
 	public function parse(data:SWFData, version:Int):Void {
 		
-		trace("SWFClipActionRecord Parse");
+		//trace("SWFClipActionRecord Parse");
 		
 		eventFlags = data.readCLIPEVENTFLAGS(version);
 		data.readUI32(); // actionRecordSize, not needed here

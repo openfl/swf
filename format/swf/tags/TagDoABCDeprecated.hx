@@ -22,7 +22,7 @@ class TagDoABCDeprecated implements ITag
 		level = 1;
 		bytes = new ByteArray();
 		
-		trace("Hello " + name);
+		//trace("Hello " + name);
 	}
 
 	public static function create(abcData:ByteArray = null):TagDoABCDeprecated {

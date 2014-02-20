@@ -715,7 +715,7 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 	
 	public function readACTIONRECORD():IAction {
-		trace("readACTIONRECORD");
+		//trace("readACTIONRECORD");
 		var action:IAction = null;
 		var actionCode:Int = readUI8();
 		if (actionCode != 0) {
