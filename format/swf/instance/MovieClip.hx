@@ -340,6 +340,12 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
+		/*trace("firstTag.hasClassName: " + firstTag.hasClassName);
+		if (firstTag.hasClassName) trace(firstTag.className);
+		if (lastTag != null){
+			trace("lastTag.hasClassName: " + lastTag.hasClassName);
+			if (lastTag.hasClassName) trace(lastTag.className);
+		}*/
 		
 		//trace("placeObject " + displayObject.name + ": grid: " + displayObject.scale9Grid);
 		//if (displayObject.name == "withGrid") trace(".child0 :" + (untyped displayObject.getChildAt(0)));

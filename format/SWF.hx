@@ -50,21 +50,8 @@ class SWF extends EventDispatcher {
 		width = Std.int (data.frameSize.rect.width);
 		height = Std.int (data.frameSize.rect.height);
 		
-		symbols = new Map <String, Int> ();
+		symbols = data.symbols;
 		
-		for (tag in data.tags) {
-			
-			if (Std.is (tag, TagSymbolClass)) {
-				
-				for (symbol in cast (tag, TagSymbolClass).symbols) {
-					
-					symbols.set (symbol.name, symbol.tagId);
-					
-				}
-				
-			}
-			
-		}
 		
 		#if flash
 		

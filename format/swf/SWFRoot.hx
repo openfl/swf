@@ -1,10 +1,16 @@
 ﻿package format.swf;
 
+import format.abc.Data.ABCData;
+import format.abc.Data.ClassDef;
+import format.abc.Data.Field;
+import format.abc.Data.IName;
+import format.abc.Data.Name;
 import format.swf.data.SWFRectangle;
 import format.swf.events.SWFProgressEvent;
 import flash.utils.ByteArray;
 import flash.utils.CompressionAlgorithm;
 import flash.errors.Error;
+import format.swf.tags.TagSymbolClass;
 
 
 class SWFRoot extends SWFTimelineContainer
@@ -19,6 +25,7 @@ class SWFRoot extends SWFTimelineContainer
 	public var compressed:Bool;
 	public var compressionMethod:CompressionAlgorithm;
 	
+	public var symbols(default, null):Map <String, Int>;
 	private var bytes:SWFData;
 	
 	private static inline var FILE_LENGTH_POS:Int = 4;
@@ -39,7 +46,133 @@ class SWFRoot extends SWFTimelineContainer
 			compressed = true;
 			compressionMethod = CompressionAlgorithm.ZLIB;
 		}
+		
+		symbols = new Map <String, Int> ();
+		for (tag in this.tags) {
+			
+			if (Std.is (tag, TagSymbolClass)) {
+				
+				for (symbol in cast (tag, TagSymbolClass).symbols) {
+					
+					symbols.set (symbol.name, symbol.tagId);
+					
+				}
+				
+			}
+			
+		}
+		
+
+		if (abcData != null) bindABCWithSymbols();
+		
+		
 	}
+	
+	function bindABCWithSymbols() 
+	{
+		
+		trace("ABC Data");
+		
+		trace(abcData);
+		trace("abcData.ints:");
+		trace(abcData.ints);
+		trace("abcData.uints:");
+		trace(abcData.uints);
+		trace("abcData.floats:");
+		trace(abcData.floats);
+		trace("abcData.strings:");
+		trace(abcData.strings);
+		trace("abcData.namespaces:");
+		trace(abcData.namespaces);
+		trace("abcData.nssets:");
+		trace(abcData.nssets);
+		trace("abcData.names:");
+		trace(abcData.names);
+		trace("abcData.methodTypes:");
+		trace(abcData.methodTypes);
+		trace("abcData.metadatas:");
+		trace(abcData.metadatas);
+		trace("abcData.classes:");
+		trace(abcData.classes);
+		trace("abcData.inits:");
+		trace(abcData.inits);
+		trace("abcData.functions:");
+		trace(abcData.functions);
+		trace(".--");
+		
+		
+		
+		
+		trace("ClassName: " + cast abcData.classes[0].name);
+		
+		
+		
+		//trace("ClassName: " + ABCData.get<String>( data.names/*, data.classes[0].name*/ ) );
+		//trace("ClassName: " + data.strings[cast data.classes[0].name]);
+		
+		//var test = abcData.get(abcData.names, abcData.classes[0].name);
+		//
+		//switch (test) {
+			//
+			//case NName(name, ns): trace("este: " + abcData.get( abcData.strings, name) );
+			//default: trace("no luck");
+			//
+		//}
+		
+		//TODO: Bind className with SWFRoot.symbols
+		var testClsName:String = getStrName(abcData, abcData.classes[0].name);
+		trace("Name: " + testClsName);
+		
+		trace("Symbols: " + symbols);
+		
+		
+		//trace(this == rootTimelineContainer);
+		
+		//if (rootTimelineContainer.symbols != null) trace(rootTimelineContainer.symbols);
+		
+		if (symbols.exists(testClsName)) trace("Class Exists!!!!!");
+		
+		var cuadClass:ClassDef = abcData.classes[0];
+		
+		
+		trace("fields: ");
+		for (i in 0...cuadClass.fields.length) {
+			var fld:Field = cuadClass.fields[i];
+			trace(fld.name  + " - " + getStrName(abcData, fld.name) + " - kind: " + fld.kind );
+			//FMethod( type : Index<MethodType>, k : MethodKind, ?isFinal : Bool, ?isOverride : Bool );
+			switch (fld.kind) {
+				case FMethod( type, k, isFinal, isOverride ): trace("Method!");
+				default: 
+			}
+			
+		}
+		
+		trace(".--");
+			
+			
+	}
+	
+	
+	inline function getStrName(data:ABCData, idx:IName):String {
+		var n:Name = data.get(data.names, idx);
+		switch (n) {
+			case NName(name, ns): 
+				
+				switch (data.get( data.namespaces, ns)) {
+					case NNamespace(ns): trace("NS: NNamespace " + data.get( data.strings, ns));
+					case NPublic(ns): trace("NS: NPublic " + data.get( data.strings, ns));
+					case NInternal(ns): trace("NS: NInternal " + data.get( data.strings, ns));
+					case NProtected(ns): trace("NS: NProtected " + data.get( data.strings, ns));
+					case NExplicit(ns): trace("NS: NExplicit " + data.get( data.strings, ns));
+					case NStaticProtected(ns): trace("NS: NStaticProtected " + data.get( data.strings, ns));
+					default:
+				}
+				
+				return data.get( data.strings, name);
+			default: return "not found";
+		}
+	}
+	
 	
 	public function loadBytes(ba:ByteArray):Void {
 		bytes = new SWFData ();

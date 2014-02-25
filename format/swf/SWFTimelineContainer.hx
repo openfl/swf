@@ -38,6 +38,7 @@ import format.swf.tags.TagShowFrame;
 import format.swf.tags.TagSoundStreamBlock;
 import format.swf.tags.TagSoundStreamHead;
 import format.swf.tags.TagSoundStreamHead2;
+import format.swf.tags.TagSymbolClass;
 import format.swf.timeline.Frame;
 import format.swf.timeline.FrameObject;
 import format.swf.timeline.Layer;
@@ -95,6 +96,8 @@ class SWFTimelineContainer extends SWFEventDispatcher
 
 	public var abcTag:TagDoABC;
 	public var abcData:ABCData;
+	public var abcClasses:Map<String, Int>;
+	
 	
 	public function new()
 	{
@@ -209,6 +212,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 				timelineContainer.tagFactory = tagFactory;
 				timelineContainer.rootTimelineContainer = this;
 			}
+			
 			// Parse tag
 			tag.parse(data, tagHeader.contentLength, _tmpVersion, async);
 		} catch(e:Error) {
@@ -221,6 +225,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		// Register tag
 		tags.push(tag);
 		tagsRaw.push(tagRaw);
+		
 		// Build dictionary and display list etc
 		processTag(tag);
 		// Adjust position (just in case the parser under- or overflows)
@@ -443,99 +448,21 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 	
 	private function processAS3Tag(tag:TagDoABC, currentTagIndex:Int):Void {
-		//scalingGrids.set (tag.characterId, currentTagIndex);
+		// Just store it for now
 		abcTag = tag;
 		
-		trace("ABC: " + tag);
+		//trace("ABC: " + tag);
 		
 		var bytes = haxe.io.Bytes.ofData(tag.bytes); 
 		var input = new haxe.io.BytesInput(bytes); 
 		var reader = new format.abc.Reader(input);
 		
-		trace("Reading...");
+		//trace("Reading...");
 		abcData = reader.read();
 
-		trace(abcData);
-		trace("abcData.ints:");
-		trace(abcData.ints);
-		trace("abcData.uints:");
-		trace(abcData.uints);
-		trace("abcData.floats:");
-		trace(abcData.floats);
-		trace("abcData.strings:");
-		trace(abcData.strings);
-		trace("abcData.namespaces:");
-		trace(abcData.namespaces);
-		trace("abcData.nssets:");
-		trace(abcData.nssets);
-		trace("abcData.names:");
-		trace(abcData.names);
-		trace("abcData.methodTypes:");
-		trace(abcData.methodTypes);
-		trace("abcData.metadatas:");
-		trace(abcData.metadatas);
-		trace("abcData.classes:");
-		trace(abcData.classes);
-		trace("abcData.inits:");
-		trace(abcData.inits);
-		trace("abcData.functions:");
-		trace(abcData.functions);
-		trace(".--");
 		
-		
-		
-		
-		trace("ClassName: " + cast abcData.classes[0].name);
-		//trace("ClassName: " + ABCData.get<String>( data.names/*, data.classes[0].name*/ ) );
-		//trace("ClassName: " + data.strings[cast data.classes[0].name]);
-		
-		//var test = abcData.get(abcData.names, abcData.classes[0].name);
-		//
-		//switch (test) {
-			//
-			//case NName(name, ns): trace("este: " + abcData.get( abcData.strings, name) );
-			//default: trace("no luck");
-			//
-		//}
-		
-		trace("Name: " + getStrName(abcData, abcData.classes[0].name));
-		
-		var cuadClass:ClassDef = abcData.classes[0];
-		
-		trace("fields: ");
-		for (i in 0...cuadClass.fields.length) {
-			var fld:Field = cuadClass.fields[i];
-			trace(fld.name  + " - " + getStrName(abcData, fld.name) + " - kind: " + fld.kind );
-			//FMethod( type : Index<MethodType>, k : MethodKind, ?isFinal : Bool, ?isOverride : Bool );
-			switch (fld.kind) {
-				case FMethod( type, k, isFinal, isOverride ): trace("Method!");
-				default: 
-			}
-			
-		}
-		
-		trace(".--");
 	}
 	
-	inline function getStrName(data:ABCData, idx:IName):String {
-		var n:Name = data.get(data.names, idx);
-		switch (n) {
-			case NName(name, ns): 
-				
-				switch (data.get( data.namespaces, ns)) {
-					case NNamespace(ns): trace("NS: NNamespace " + data.get( data.strings, ns));
-					case NPublic(ns): trace("NS: NPublic " + data.get( data.strings, ns));
-					case NInternal(ns): trace("NS: NInternal " + data.get( data.strings, ns));
-					case NProtected(ns): trace("NS: NProtected " + data.get( data.strings, ns));
-					case NExplicit(ns): trace("NS: NExplicit " + data.get( data.strings, ns));
-					case NStaticProtected(ns): trace("NS: NStaticProtected " + data.get( data.strings, ns));
-					default:
-				}
-				
-				return data.get( data.strings, name);
-			default: return "not found";
-		}
-	}
 	
 	public function buildLayers():Void {
 		var i:Int;
