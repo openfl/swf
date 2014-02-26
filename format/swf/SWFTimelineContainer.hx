@@ -453,7 +453,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		
 		//trace("ABC: " + tag);
 		
-		var bytes = haxe.io.Bytes.ofData(tag.bytes); 
+		var bytes = #if flash haxe.io.Bytes.ofData(tag.bytes) #else tag.bytes #end; 
 		var input = new haxe.io.BytesInput(bytes); 
 		var reader = new format.abc.Reader(input);
 		
