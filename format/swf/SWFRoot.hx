@@ -70,10 +70,23 @@ class SWFRoot extends SWFTimelineContainer
 	
 	function bindABCWithSymbols() 
 	{
+		abcClasses = new Map<Int, ClassDef>();
+		
+		var clsName:String;
+		for (cls in abcData.classes) {
+			clsName = getABCStrName(abcData, cls.name);
+			if (symbols.exists(clsName)) {
+				abcClasses.set(symbols.get(clsName), cls);
+			}
+		}
+		
 		
 		trace("ABC Data");
 		
-		trace(abcData);
+		trace("Symbols: " + symbols);
+		trace("abcClasses: " + abcClasses);
+		
+		/*trace(abcData);
 		trace("abcData.ints:");
 		trace(abcData.ints);
 		trace("abcData.uints:");
@@ -98,79 +111,62 @@ class SWFRoot extends SWFTimelineContainer
 		trace(abcData.inits);
 		trace("abcData.functions:");
 		trace(abcData.functions);
-		trace(".--");
+		trace(".--");*/
+	
 		
 		
 		
 		
-		trace("ClassName: " + cast abcData.classes[0].name);
 		
-		
-		
-		//trace("ClassName: " + ABCData.get<String>( data.names/*, data.classes[0].name*/ ) );
-		//trace("ClassName: " + data.strings[cast data.classes[0].name]);
-		
-		//var test = abcData.get(abcData.names, abcData.classes[0].name);
-		//
-		//switch (test) {
-			//
-			//case NName(name, ns): trace("este: " + abcData.get( abcData.strings, name) );
-			//default: trace("no luck");
-			//
-		//}
-		
-		//TODO: Bind className with SWFRoot.symbols
-		var testClsName:String = getStrName(abcData, abcData.classes[0].name);
-		trace("Name: " + testClsName);
-		
-		trace("Symbols: " + symbols);
-		
-		
-		//trace(this == rootTimelineContainer);
-		
-		//if (rootTimelineContainer.symbols != null) trace(rootTimelineContainer.symbols);
-		
-		if (symbols.exists(testClsName)) trace("Class Exists!!!!!");
-		
+		/*
 		var cuadClass:ClassDef = abcData.classes[0];
-		
 		
 		trace("fields: ");
 		for (i in 0...cuadClass.fields.length) {
 			var fld:Field = cuadClass.fields[i];
-			trace(fld.name  + " - " + getStrName(abcData, fld.name) + " - kind: " + fld.kind );
-			//FMethod( type : Index<MethodType>, k : MethodKind, ?isFinal : Bool, ?isOverride : Bool );
-			switch (fld.kind) {
-				case FMethod( type, k, isFinal, isOverride ): trace("Method!");
-				default: 
-			}
+			trace(fld.name  + " - " + getABCStrName(abcData, fld.name) + " - kind: " + fld.kind + " - isMethod: " + isABCMethod(fld) );
 			
-		}
+			
+		}*/
 		
 		trace(".--");
 			
 			
 	}
 	
+	inline function isABCMethod(fld:Field) :Bool {
+		switch (fld.kind) {
+			case FMethod( type, k, isFinal, isOverride ): return true;
+			default: return false; 
+		}
+		
+	}
 	
-	inline function getStrName(data:ABCData, idx:IName):String {
+	inline function getABCStrName(data:ABCData, idx:IName/*, withNamespace:Bool = false*/):String {
 		var n:Name = data.get(data.names, idx);
+		var ret:String;
 		switch (n) {
 			case NName(name, ns): 
+				/*if (withNamespace) {
+					switch (data.get(data.namespaces, ns)) {
+						case NNamespace(ns): ret = "NNamespace " + data.get(data.strings, ns);
+						case NPublic(ns): ret = "NPublic " + data.get(data.strings, ns);
+						case NInternal(ns): ret = "NInternal " + data.get(data.strings, ns);
+						case NProtected(ns): ret = "NProtected " + data.get(data.strings, ns);
+						case NExplicit(ns): ret = "NExplicit " + data.get(data.strings, ns);
+						case NStaticProtected(ns): ret = "NStaticProtected " + data.get(data.strings, ns);
+						default:
+					}
+					ret += "::" + data.get(data.strings, name);
+				} else {
+					ret = data.get(data.strings, name);
+				}*/
+				ret = data.get(data.strings, name);
 				
-				switch (data.get( data.namespaces, ns)) {
-					case NNamespace(ns): trace("NS: NNamespace " + data.get( data.strings, ns));
-					case NPublic(ns): trace("NS: NPublic " + data.get( data.strings, ns));
-					case NInternal(ns): trace("NS: NInternal " + data.get( data.strings, ns));
-					case NProtected(ns): trace("NS: NProtected " + data.get( data.strings, ns));
-					case NExplicit(ns): trace("NS: NExplicit " + data.get( data.strings, ns));
-					case NStaticProtected(ns): trace("NS: NStaticProtected " + data.get( data.strings, ns));
-					default:
-				}
-				
-				return data.get( data.strings, name);
-			default: return "not found";
+			default: ret = "not found";
 		}
+		
+		return ret;
 	}
 	
 	

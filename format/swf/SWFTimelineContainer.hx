@@ -96,7 +96,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 
 	public var abcTag:TagDoABC;
 	public var abcData:ABCData;
-	public var abcClasses:Map<String, Int>;
+	public var abcClasses(default, null):Map<Int, ClassDef>;
 	
 	
 	public function new()

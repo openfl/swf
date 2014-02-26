@@ -85,6 +85,8 @@ class MovieClip extends flash.display.MovieClip {
 		objectPool = new Map<Int, List<ChildObject>>();
 		activeObjects = [];
 		
+		// TODO: Set ABCData here if needed
+		
 		update ();
 		
 		if (__totalFrames > 1) {
