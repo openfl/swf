@@ -4,4 +4,5 @@
 -lib openfl-native
 -lib lime-tools
 -lib swf
+-lib format
 --remap flash:flash

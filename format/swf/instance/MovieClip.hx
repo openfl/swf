@@ -46,11 +46,11 @@ class MovieClip extends flash.display.MovieClip {
 	
 	#if flash
 	private var __currentFrame:Int;
+	private var __currentFrameLabel:String;
 	private var __totalFrames:Int;
+	private var __currentLabel:String;
 	private var __currentLabels:Array<FrameLabel>;
 	#end
-	private var __currentFrameLabel:String;
-	private var __currentLabel:String;
 	
 	public var scale9BitmapGrid(get, set):Rectangle;
 	private var _scale9BitmapGrid:Rectangle;

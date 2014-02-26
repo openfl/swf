@@ -16,6 +16,7 @@ import openfl.Assets;
 import project.Architecture;
 import project.Asset;
 import project.AssetEncoding;
+import project.Haxelib;
 import project.HXProject;
 import project.Platform;
 import sys.io.File;
@@ -258,6 +259,7 @@ class Tools {
 		
 		if (embeddedSWF) {
 			
+			output.haxelibs.push (new Haxelib ("format"));
 			output.haxeflags.push ("format.swf.SWFLibrary");
 			output.haxeflags.remove ("--remap flash:flash");
 			output.haxeflags.push ("--remap flash:flash");
