@@ -484,32 +484,33 @@ class MovieClip extends flash.display.MovieClip {
 					
 					placeObject (displayObject, object);
 					
+					if (mask != null) {
+	
+						if (mask.frameObject.clipDepth < object.depth) {
+	
+							mask = null;
+	
+						} else {
+	
+							displayObject.mask = mask.object;
+						
+						}
+					} else {
+	
+						displayObject.mask = null;
+	
+					}
+	
+					if (object.clipDepth != 0) {
+	
+						mask = child;
+						displayObject.visible = false;
+	
+					}
+					
 					addChild(displayObject);
 				}
 
-				if (mask != null) {
-
-					if (mask.frameObject.clipDepth < object.depth) {
-
-						mask = null;
-
-					} else {
-
-						displayObject.mask = mask.object;
-					
-					}
-				} else {
-
-					displayObject.mask = null;
-
-				}
-
-				if (object.clipDepth != 0) {
-
-					mask = child;
-					displayObject.visible = false;
-
-				}
 				
 			}
 		}
