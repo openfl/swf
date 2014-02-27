@@ -592,7 +592,8 @@ class MovieClip extends flash.display.MovieClip {
 			}
 
 			var frame = data.frames[frameIndex];
-
+			
+			#if flash
 			__currentFrameLabel = frame.label;
 
 			if (frameIndex == 0 || frame.label != null) {
@@ -600,6 +601,7 @@ class MovieClip extends flash.display.MovieClip {
 				__currentLabel = frame.label;
 
 			}
+			#end
 			
 		}
 		
