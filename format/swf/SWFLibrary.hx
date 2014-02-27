@@ -62,7 +62,13 @@ import openfl.Assets;
 		
 		#if flash
 		
-		return loader.contentLoaderInfo.applicationDomain.getDefinition (id);
+		//var ret/*:Class*/ = loader.contentLoaderInfo.applicationDomain.getDefinition (id);
+		//trace(ret);
+		
+		var bmd = Type.createEmptyInstance(cast loader.contentLoaderInfo.applicationDomain.getDefinition);
+		
+		trace (bmd);
+		return bmd;
 		
 		#else
 		
