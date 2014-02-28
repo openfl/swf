@@ -344,6 +344,21 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
+		
+		/*if (Std.is(displayObject, MorphShape)) {
+			trace("Morph");
+		} else if (Std.is(displayObject, Shape)) {
+			trace("Shape");
+		} 
+		
+		if (lastTag != null && lastTag.hasRatio) {
+			trace("LastTag Ratio: " + lastTag.ratio);
+		} 
+		if (firstTag.hasRatio) {
+			trace("firstTag Ratio: " + firstTag.ratio);
+		}*/
+		
+		
 		/*trace("firstTag.hasClassName: " + firstTag.hasClassName);
 		if (firstTag.hasClassName) trace(firstTag.className);
 		if (lastTag != null){
