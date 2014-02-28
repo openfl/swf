@@ -18,6 +18,8 @@ import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton2;
 import format.swf.tags.TagDefineEditText;
 import format.swf.tags.TagDefineFont;
+import format.swf.tags.TagDefineMorphShape;
+import format.swf.tags.TagDefineMorphShape2;
 import format.swf.tags.TagDefineShape;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagDefineText;
@@ -49,7 +51,7 @@ class MovieClip extends flash.display.MovieClip {
 	private var __currentFrameLabel:String;
 	private var __totalFrames:Int;
 	private var __currentLabel:String;
-	private var __currentLabels:Array<FrameLabel>;
+	//private var __currentLabels:Array<FrameLabel>;
 	#end
 	
 	public var scale9BitmapGrid(get, set):Rectangle;
@@ -74,13 +76,13 @@ class MovieClip extends flash.display.MovieClip {
 		__currentFrame = 1;
 		__totalFrames = data.frames.length;
 
-		#if flash
+		/*#if flash
 		for (frame in data.frameLabels.keys ()) {
 
 			__currentLabels.push (new FrameLabel (data.frameLabels.get (frame), frame + 1));
 
 		}
-		#end
+		#end*/
 		
 		objectPool = new Map<Int, List<ChildObject>>();
 		activeObjects = [];
@@ -551,7 +553,18 @@ class MovieClip extends flash.display.MovieClip {
 			displayObject = new DynamicText (data, cast symbol);
 			
 		} else if (Std.is (symbol, TagDefineButton2)) {
+			
 			displayObject = new SimpleButton(data, cast symbol);
+			
+		} else if (Std.is (symbol, TagDefineMorphShape)) {
+			
+			//displayObject = new SimpleButton(data, cast symbol);
+			//trace("TagDefineMorphShape");
+			
+		} else {
+			
+			//trace("Warning: No SWF Support for " + Type.getClassName(Type.getClass(symbol)));
+			
 		}
 		
 		return displayObject;
