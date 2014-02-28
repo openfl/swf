@@ -126,6 +126,8 @@ class TagDefineMorphShape implements IDefinitionTag
 			// style change records without moveTo's.
 			if(startRecord.type == SWFShapeRecord.TYPE_STYLECHANGE && !cast(startRecord,SWFShapeRecordStyleChange).stateMoveTo) {
 				exportShape.records.push(startRecord.clone());
+				// Also increment the endEdges (Prevent errors)
+				j++;
 				continue;
 			}
 			var endRecord:SWFShapeRecord = endEdges.records[j++];
