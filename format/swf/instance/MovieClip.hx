@@ -558,7 +558,7 @@ class MovieClip extends flash.display.MovieClip {
 			
 		} else if (Std.is (symbol, TagDefineMorphShape)) {
 			
-			//displayObject = new SimpleButton(data, cast symbol);
+			displayObject = new MorphShape(data, cast symbol);
 			//trace("TagDefineMorphShape");
 			
 		} else {
@@ -566,6 +566,7 @@ class MovieClip extends flash.display.MovieClip {
 			//trace("Warning: No SWF Support for " + Type.getClassName(Type.getClass(symbol)));
 			
 		}
+		//trace(Type.getClassName(Type.getClass(symbol)));
 		
 		return displayObject;
 	}
