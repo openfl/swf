@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.4.0",
-  "releasenote": "scale9Grid support",
+  "version": "1.4.1",
+  "releasenote": "Compile fixes",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
