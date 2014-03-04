@@ -517,8 +517,8 @@ class MovieClip extends flash.display.MovieClip {
 						displayObject.mask = null;
 	
 					}
-	
-					if (object.clipDepth != 0) {
+					
+					if (object.clipDepth != 0 #if neko && object.clipDepth != null #end) {
 	
 						mask = child;
 						displayObject.visible = false;
@@ -610,7 +610,7 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	private function update ():Void {
-
+		
 		if (__currentFrame != lastUpdate) {
 			
 			var frameIndex = __currentFrame - 1;
