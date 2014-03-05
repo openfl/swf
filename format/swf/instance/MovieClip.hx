@@ -345,18 +345,23 @@ class MovieClip extends flash.display.MovieClip {
 		}
 		
 		
-		/*if (Std.is(displayObject, MorphShape)) {
-			trace("Morph");
-		} else if (Std.is(displayObject, Shape)) {
-			trace("Shape");
-		} 
-		
-		if (lastTag != null && lastTag.hasRatio) {
-			trace("LastTag Ratio: " + lastTag.ratio);
-		} 
-		if (firstTag.hasRatio) {
-			trace("firstTag Ratio: " + firstTag.ratio);
-		}*/
+		if (Std.is(displayObject, MorphShape)) {
+			
+			if (lastTag != null) cast(displayObject, MorphShape).render(lastTag.ratio);
+			
+			
+			/*if (lastTag != null && lastTag.hasRatio) {
+				trace("LastTag Ratio: " + (lastTag.ratio / 65536.0));
+				
+				cast(displayObject, MorphShape).render(lastTag.ratio);
+				
+			} else {
+				cast(displayObject, MorphShape).render();
+			}
+			
+			trace("morph w, h: " + displayObject.width + ", " + displayObject.height);*/
+			
+		}
 		
 		
 		/*trace("firstTag.hasClassName: " + firstTag.hasClassName);
@@ -368,7 +373,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		//trace("placeObject " + displayObject.name + ": grid: " + displayObject.scale9Grid);
 		//if (displayObject.name == "withGrid") trace(".child0 :" + (untyped displayObject.getChildAt(0)));
-		
+		//trace(".--");
 	}
 	
 	
@@ -574,14 +579,12 @@ class MovieClip extends flash.display.MovieClip {
 		} else if (Std.is (symbol, TagDefineMorphShape)) {
 			
 			displayObject = new MorphShape(data, cast symbol);
-			//trace("TagDefineMorphShape");
 			
 		} else {
 			
 			//trace("Warning: No SWF Support for " + Type.getClassName(Type.getClass(symbol)));
 			
 		}
-		//trace(Type.getClassName(Type.getClass(symbol)));
 		
 		return displayObject;
 	}

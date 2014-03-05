@@ -34,6 +34,10 @@ class TagDefineMorphShape implements IDefinitionTag
 	public var morphFillStyles (default, null):Array<SWFMorphFillStyle>;
 	public var morphLineStyles (default, null):Array<SWFMorphLineStyle>;
 	
+	public var exportHandler:IShapeExporter;
+	
+	private var exportShape:SWFShape;
+	
 	public function new() {
 		
 		type = TYPE;
@@ -43,6 +47,8 @@ class TagDefineMorphShape implements IDefinitionTag
 		
 		morphFillStyles = new Array<SWFMorphFillStyle>();
 		morphLineStyles = new Array<SWFMorphLineStyle>();
+		
+		exportShape = new SWFShape();
 	}
 	
 	public function parse(data:SWFData, length:Int, version:Int, async:Bool = false):Void {
@@ -114,44 +120,90 @@ class TagDefineMorphShape implements IDefinitionTag
 		return tag;
 	}
 	
-	public function export(handler:IShapeExporter = null, ratio:Float = 0):Void {
+	public function export(ratio:Float = 0):Void {
 		var i:Int;
 		var j:Int = 0;
-		var exportShape:SWFShape = new SWFShape();
+		//var exportShape:SWFShape = new SWFShape();
+		
+		exportShape.records.splice(0, exportShape.records.length);
+		exportShape.fillStyles.splice(0, exportShape.fillStyles.length);
+		exportShape.lineStyles.splice(0, exportShape.lineStyles.length);
+		
 		var numEdges:Int = startEdges.records.length;
 		for(i in 0...numEdges) {
 			var startRecord:SWFShapeRecord = startEdges.records[i];
 			// Ignore start records that are style change records and don't have moveTo
 			// The end record index is not incremented, because end records do not have
 			// style change records without moveTo's.
-			if(startRecord.type == SWFShapeRecord.TYPE_STYLECHANGE && !cast(startRecord,SWFShapeRecordStyleChange).stateMoveTo) {
-				exportShape.records.push(startRecord.clone());
-				// Also increment the endEdges (Prevent errors)
-				j++;
-				continue;
+			//if(startRecord.type == SWFShapeRecord.TYPE_STYLECHANGE && !cast(startRecord,SWFShapeRecordStyleChange).stateMoveTo) {
+				//exportShape.records.push(startRecord.clone());
+				//trace("salto");
+				/* //Also increment the endEdges (Prevent errors)
+				j++;*/
+				//continue;
+			//}
+			
+			
+			if (startRecord.type == SWFShapeRecord.TYPE_STYLECHANGE) {
+				//trace("start moveTo: " + cast(startRecord, SWFShapeRecordStyleChange).stateMoveTo );
 			}
+			
 			var endRecord:SWFShapeRecord = endEdges.records[j++];
+			if (endRecord.type == SWFShapeRecord.TYPE_STYLECHANGE) {
+				//trace("end moveTo: " + cast(endRecord, SWFShapeRecordStyleChange).stateMoveTo );
+			}
+			
+			
 			var exportRecord:SWFShapeRecord = null;
 			// It is possible for an edge to change type over the course of a morph sequence. 
 			// A straight edge can become a curved edge and vice versa
 			// Convert straight edge to curved edge, if needed:
 			if(startRecord.type == SWFShapeRecord.TYPE_CURVEDEDGE && endRecord.type == SWFShapeRecord.TYPE_STRAIGHTEDGE) {
 				endRecord = convertToCurvedEdge(cast (endRecord, SWFShapeRecordStraightEdge));
+				//trace("From Curve to line");
 			} else if(startRecord.type == SWFShapeRecord.TYPE_STRAIGHTEDGE && endRecord.type == SWFShapeRecord.TYPE_CURVEDEDGE) {
 				startRecord = convertToCurvedEdge(cast (startRecord, SWFShapeRecordStraightEdge));
+				//trace("From Line to curve");
 			}
+			
+			//var boundsX0 = (endBounds.xmin - startBounds.xmin);
+			//var boundsY0 = (endBounds.ymin - startBounds.ymin);
+			
 			switch(startRecord.type) {
 				case SWFShapeRecord.TYPE_STYLECHANGE:
+					//trace("TYPE_STYLECHANGE");
 					var startStyleChange:SWFShapeRecordStyleChange = cast startRecord.clone();
-					var endStyleChange:SWFShapeRecordStyleChange = cast endRecord;
-					startStyleChange.moveDeltaX += Std.int ((endStyleChange.moveDeltaX - startStyleChange.moveDeltaX) * ratio);
-					startStyleChange.moveDeltaY += Std.int ((endStyleChange.moveDeltaY - startStyleChange.moveDeltaY) * ratio);
+					startStyleChange.stateMoveTo = true;
+					if (endRecord.type == SWFShapeRecord.TYPE_STYLECHANGE) {
+						var endStyleChange:SWFShapeRecordStyleChange = cast endRecord;
+						startStyleChange.moveDeltaX += Std.int ((endStyleChange.moveDeltaX - startStyleChange.moveDeltaX) * ratio);
+						startStyleChange.moveDeltaY += Std.int ((endStyleChange.moveDeltaY - startStyleChange.moveDeltaY) * ratio);
+					} else {
+						startStyleChange.moveDeltaX += Std.int ((-startStyleChange.moveDeltaX) * ratio);
+						startStyleChange.moveDeltaY += Std.int (( -startStyleChange.moveDeltaY) * ratio);
+						j--;
+					}
 					exportRecord = startStyleChange;
+					//trace("   startStyleChange.moveDeltaX Y: " + (startStyleChange.moveDeltaX/ 20) + ", " + (startStyleChange.moveDeltaY/ 20));
 				case SWFShapeRecord.TYPE_STRAIGHTEDGE:
+					//trace("TYPE_STRAIGHTEDGE");
 					var startStraightEdge:SWFShapeRecordStraightEdge = cast startRecord.clone();
 					var endStraightEdge:SWFShapeRecordStraightEdge = cast endRecord;
+					//trace("   startStraightEdge.deltaX Y: " + (startStraightEdge.deltaX / 20) + ", " + (startStraightEdge.deltaY / 20));
+					//trace("   endStraightEdge.deltaX Y: " + (endStraightEdge.deltaX / 20) + ", " + (endStraightEdge.deltaY / 20));
+					//trace("   resta            .deltaX Y: " + Std.int ((endStraightEdge.deltaX - startStraightEdge.deltaX) /20) + ", " + Std.int ((endStraightEdge.deltaY - startStraightEdge.deltaY) / 20));
+					//trace("   resta  *ratio    .deltaX Y: " + Std.int ((endStraightEdge.deltaX - startStraightEdge.deltaX) /20 * ratio) + ", " + Std.int ((endStraightEdge.deltaY - startStraightEdge.deltaY) /20 * ratio));
+					//
+					//
+					//
+					//trace("startBounds: " + startBounds.rect);
+					//trace("boundsX0: " + boundsX0);
+					//trace("boundsY0: " + boundsY0);
+					//trace("endBounds: " + endBounds.rect);
+					
 					startStraightEdge.deltaX += Std.int ((endStraightEdge.deltaX - startStraightEdge.deltaX) * ratio);
 					startStraightEdge.deltaY += Std.int ((endStraightEdge.deltaY - startStraightEdge.deltaY) * ratio);
+					
 					if(startStraightEdge.deltaX != 0 && startStraightEdge.deltaY != 0) {
 						startStraightEdge.generalLineFlag = true;
 						startStraightEdge.vertLineFlag = false;
@@ -159,16 +211,22 @@ class TagDefineMorphShape implements IDefinitionTag
 						startStraightEdge.generalLineFlag = false;
 						startStraightEdge.vertLineFlag = (startStraightEdge.deltaX == 0);
 					}
+					//trace("   startStraightEdge.generalLineFlag: " + startStraightEdge.generalLineFlag);
+					//trace("   startStraightEdge.vertLineFlag: " + startStraightEdge.vertLineFlag);
+					
 					exportRecord = startStraightEdge;
 				case SWFShapeRecord.TYPE_CURVEDEDGE:
+					//trace("TYPE_CURVEDEDGE");
 					var startCurvedEdge:SWFShapeRecordCurvedEdge = cast startRecord.clone();
 					var endCurvedEdge:SWFShapeRecordCurvedEdge = cast endRecord;
 					startCurvedEdge.controlDeltaX += Std.int ((endCurvedEdge.controlDeltaX - startCurvedEdge.controlDeltaX) * ratio);
 					startCurvedEdge.controlDeltaY += Std.int ((endCurvedEdge.controlDeltaY - startCurvedEdge.controlDeltaY) * ratio);
 					startCurvedEdge.anchorDeltaX += Std.int ((endCurvedEdge.anchorDeltaX - startCurvedEdge.anchorDeltaX) * ratio);
 					startCurvedEdge.anchorDeltaY += Std.int ((endCurvedEdge.anchorDeltaY - startCurvedEdge.anchorDeltaY) * ratio);
+					//trace("   startCurvedEdge.control anchor deltaX Y: " + (startCurvedEdge.controlDeltaX/ 20) + ", " + (startCurvedEdge.controlDeltaY/ 20) + " -- : " + (startCurvedEdge.anchorDeltaX/ 20) + ", " + (startCurvedEdge.anchorDeltaY/ 20));
 					exportRecord = startCurvedEdge;
 				case SWFShapeRecord.TYPE_END:
+					//trace("TYPE_END");
 					exportRecord = startRecord.clone();
 			}
 			exportShape.records.push(exportRecord);
@@ -179,15 +237,17 @@ class TagDefineMorphShape implements IDefinitionTag
 		for(i in 0...morphLineStyles.length) {
 			exportShape.lineStyles.push(morphLineStyles[i].getMorphedLineStyle(ratio));
 		}
-		exportShape.export(handler);
+		exportShape.export(exportHandler);
 	}
 	
 	private function convertToCurvedEdge(straightEdge:SWFShapeRecordStraightEdge):SWFShapeRecordCurvedEdge {
 		var curvedEdge:SWFShapeRecordCurvedEdge = new SWFShapeRecordCurvedEdge();
 		curvedEdge.controlDeltaX = Std.int (straightEdge.deltaX / 2);
 		curvedEdge.controlDeltaY = Std.int (straightEdge.deltaY / 2);
-		curvedEdge.anchorDeltaX = straightEdge.deltaX;
-		curvedEdge.anchorDeltaY = straightEdge.deltaY;
+		//curvedEdge.anchorDeltaX = straightEdge.deltaX;
+		//curvedEdge.anchorDeltaY = straightEdge.deltaY;
+		curvedEdge.anchorDeltaX = Std.int (straightEdge.deltaX / 2);
+		curvedEdge.anchorDeltaY = Std.int (straightEdge.deltaY / 2);
 		return curvedEdge;
 	}
 	
