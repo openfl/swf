@@ -349,31 +349,8 @@ class MovieClip extends flash.display.MovieClip {
 			
 			if (lastTag != null) cast(displayObject, MorphShape).render(lastTag.ratio);
 			
-			
-			/*if (lastTag != null && lastTag.hasRatio) {
-				trace("LastTag Ratio: " + (lastTag.ratio / 65536.0));
-				
-				cast(displayObject, MorphShape).render(lastTag.ratio);
-				
-			} else {
-				cast(displayObject, MorphShape).render();
-			}
-			
-			trace("morph w, h: " + displayObject.width + ", " + displayObject.height);*/
-			
 		}
 		
-		
-		/*trace("firstTag.hasClassName: " + firstTag.hasClassName);
-		if (firstTag.hasClassName) trace(firstTag.className);
-		if (lastTag != null){
-			trace("lastTag.hasClassName: " + lastTag.hasClassName);
-			if (lastTag.hasClassName) trace(lastTag.className);
-		}*/
-		
-		//trace("placeObject " + displayObject.name + ": grid: " + displayObject.scale9Grid);
-		//if (displayObject.name == "withGrid") trace(".child0 :" + (untyped displayObject.getChildAt(0)));
-		//trace(".--");
 	}
 	
 	
