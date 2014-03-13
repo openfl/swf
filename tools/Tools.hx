@@ -10,6 +10,7 @@ import format.SWF;
 import haxe.io.Path;
 import haxe.Serializer;
 import haxe.Unserializer;
+import helpers.LogHelper;
 import helpers.PlatformHelper;
 import helpers.StringHelper;
 import openfl.Assets;
@@ -163,7 +164,11 @@ class Tools {
 					
 				}
 				
-			} catch (e:Dynamic) {}
+			} catch (e:Dynamic) {
+				
+				LogHelper.error (e);
+				
+			}
 			
 		}
 		
