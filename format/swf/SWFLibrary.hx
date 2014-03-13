@@ -65,7 +65,7 @@ import openfl.Assets;
 		//var ret/*:Class*/ = loader.contentLoaderInfo.applicationDomain.getDefinition (id);
 		//trace(ret);
 		
-		var bmd = Type.createEmptyInstance(cast loader.contentLoaderInfo.applicationDomain.getDefinition);
+		var bmd = Type.createEmptyInstance(cast loader.contentLoaderInfo.applicationDomain.getDefinition(id));
 		
 		trace (bmd);
 		return bmd;
