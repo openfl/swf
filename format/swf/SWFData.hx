@@ -10,7 +10,7 @@ import format.swf.factories.SWFActionFactory;
 import format.swf.factories.SWFFilterFactory;
 import format.swf.data.filters.IFilter;
 import format.swf.utils.HalfPrecisionWriter;
-import format.swf.data.SWFActionValue;
+//import format.swf.data.SWFActionValue;
 import format.swf.data.SWFButtonCondAction;
 import format.swf.data.SWFButtonRecord;
 import format.swf.data.SWFClipActionRecord;
@@ -729,13 +729,13 @@ class SWFData extends BitArray
 		action.publish(this);
 	}
 	
-	public function readACTIONVALUE():SWFActionValue {
+	/*public function readACTIONVALUE():SWFActionValue {
 		return new SWFActionValue(this);
 	}
 	
 	public function writeACTIONVALUE(value:SWFActionValue):Void {
 		value.publish(this);
-	}
+	}*/
 	
 	public function readREGISTERPARAM():SWFRegisterParam {
 		return new SWFRegisterParam(this);
