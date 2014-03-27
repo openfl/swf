@@ -1,6 +1,9 @@
 package format.swf.instance;
 
 
+import flash.display.PixelSnapping;
+import Math;
+import Math;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
@@ -129,6 +132,10 @@ class MovieClip extends flash.display.MovieClip {
 	public /*override*/ function flatten ():Void {
 		
 		var bounds = getBounds (this);
+		bounds.x = Math.round(bounds.x);
+		bounds.y = Math.round(bounds.y);
+		bounds.width = Math.round(bounds.width);
+		bounds.height = Math.round(bounds.height);
 		var bitmapData = null;
 		
 		if (bounds.width > 0 && bounds.height > 0) {
@@ -156,12 +163,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (bounds.width > 0 && bounds.height > 0) {
 			
-			var bitmap = new flash.display.Bitmap (bitmapData);
+			var bitmap = new flash.display.Bitmap (bitmapData, PixelSnapping.ALWAYS, false);
 			bitmap.smoothing = true;
 			bitmap.x = bounds.left;
 			bitmap.y = bounds.top;
 			addChild (bitmap);
-			
+
 		}
 		
 		
@@ -622,117 +629,79 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	private inline function drawScale9BitmapData():Void {
+
 		if (_scale9BitmapData != null) {
-			drawScale9Bitmap(_scale9BitmapData, _scale9BitmapData.width * _scale9ScaleX, _scale9BitmapData.height * _scale9ScaleY, _scale9BitmapGrid, null);
+
+				drawScale9Bitmap(_scale9BitmapData, _scale9BitmapData.width * _scale9ScaleX, _scale9BitmapData.height * _scale9ScaleY, _scale9BitmapGrid);
+
 		}
+
 	}
-	
-	private function drawScale9Bitmap(bitmap : BitmapData,		// bitmap data source
-								width:Float,					// draw width
-								height:Float,					// draw height
-								inner : Rectangle,				// inner rectangle (relative to 0,0)
-								outer : Rectangle=null):Void{	// outer rectangle (relative to 0,0)
-		
-		// some useful local vars
-		var x:Int, y:Int, i:Int, j:Int;
-		var ox:Float=0, oy:Float;
-		var dx : Float = 0, dy : Float;
-		var wid:Float, hei:Float;
-		var dwid:Float, dhei : Float;
-		var sw : Int = bitmap.width;
-		var sh : Int = bitmap.height;
-		
+
+
+
+	private function drawScale9Bitmap(bitmap : BitmapData, drawWidth:Float, drawHeight:Float, scale9Rect:Rectangle):Void {
+
 		graphics.clear();
-		
-		// outer null ?
-		if (outer==null){
-			outer = new Rectangle(0,0,sw,sh);
-		}
-		
-		
-		// matrix creation
-		var mat : Matrix = new Matrix();
-		var widths : Array<Float>;
-		var heights : Array<Float>;
-		var resize : Point = new Point();
-		var widthsLen:Int;
-		var heightsLen:Int;
-		
-		
-		// pre-calculate widths, heights and resized part
-		if (width > sw) {
-			widths = [inner.left, inner.width, sw - inner.right];
-			resize.x = width - widths[0] - widths[2];
-		} else {
-			widths = [bitmap.width];
-			resize.x = width;
-		}
-		
-		if (height > sh) {
-			heights = [inner.top, inner.height, sh - inner.bottom];
-			resize.y = height - heights[0] - heights[2];
-		} else {
-			heights = [bitmap.height];
-			resize.y = height;
-		}
 
-		// let's draw
-		widthsLen = widths.length;
-		heightsLen = heights.length;
-		
-		for (x in 0...widthsLen) {
-			
-			// original width
-			wid = widths[x];
-			
-			// draw width						
-			dwid = (x == 1 || widthsLen == 1) ? resize.x : widths[x];
-			
+		var matrix = new Matrix();
+		var cols = [0, scale9Rect.left, scale9Rect.right, bitmap.width];
+		var rows = [0, scale9Rect.top, scale9Rect.bottom, bitmap.height];
+		var outerWidth = bitmap.width - (cols[2] - cols[1]);
+		var outerHeight = bitmap.height - (rows[2] - rows[1]);
+		var innerScaleX = (drawWidth - outerWidth) / (bitmap.width - outerWidth);
+		var innerScaleY = (drawHeight - outerHeight) / (bitmap.height - outerHeight);
+		var dx = 0.0;
+		var dy = 0.0;
+		var w = 0.0;
+		var h = 0.0;
 
-			// original & draw offset
-			dy=oy=0;
-			
-			for (y in  0...heightsLen){
-				
-				// original & draw height
-				hei = heights[y];
-				dhei = (y == 1 || heightsLen == 1) ? resize.y : heights[y];
-	
-				if (dwid > 0 && dhei > 0) {
-					
-					// some matrix computation
-					mat.a=dwid/wid;
-					mat.d=dhei/hei;
-					mat.tx=-ox*mat.a + dx;
-					mat.ty=-oy*mat.d + dy;
-					mat.translate(-outer.left,-outer.top);
-					
-					// draw the cell
-					graphics.beginBitmapFill(bitmap,mat,false,true);
-					graphics.drawRect(dx - outer.left, dy - outer.top, dwid, dhei);
-					graphics.endFill();
+		//loop through and draw each section of the scale9Grid
+		for(row in 0...3) {
+			for(col in 0...3) {
+
+				var sourceX = cols[col];
+				var sourceY = rows[row];
+				w = cols[col+1] - cols[col];
+				h = rows[row+1] - rows[row];
+
+				//this makes sure the bitmap is drawn in the right spot to be drawn
+				matrix.identity();
+				matrix.translate(dx-sourceX, dy-sourceY);
+
+		//scale the middle section
+				if(row == 1) {
+
+					h *= innerScaleY;
+					matrix.scale(1, innerScaleY);
+					matrix.translate(0, dy - sourceY * innerScaleY);
+
 				}
-				
-				
-				// offset incrementation
-				oy += hei;
-				dy += dhei;
+
+				if(col == 1) {
+
+					w *= innerScaleX;
+					matrix.scale(innerScaleX, 1);
+					matrix.translate(dx - sourceX * innerScaleX, 0);
+
+				}
+
+//now draw it
+				graphics.beginBitmapFill(bitmap, matrix, false, true);
+				graphics.drawRect(dx, dy, w, h);
+				graphics.endFill();
+				dx += w;
+
 			}
-			
-			// offset incrementation
-			ox += wid;
-			dx += dwid;
+
+			dx = 0;
+			dy += h;
+
 		}
-		
 	}
-	
 	
 	
 	// Get & Set Methods
-	
-	
-	
-	
 	#if flash
 	@:getter public function get_currentFrame():Int {
 		
