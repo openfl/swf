@@ -1,9 +1,6 @@
 package format.swf.instance;
 
 
-import flash.display.PixelSnapping;
-import Math;
-import Math;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
@@ -132,10 +129,6 @@ class MovieClip extends flash.display.MovieClip {
 	public /*override*/ function flatten ():Void {
 		
 		var bounds = getBounds (this);
-		bounds.x = Math.round(bounds.x);
-		bounds.y = Math.round(bounds.y);
-		bounds.width = Math.round(bounds.width);
-		bounds.height = Math.round(bounds.height);
 		var bitmapData = null;
 		
 		if (bounds.width > 0 && bounds.height > 0) {
@@ -163,12 +156,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (bounds.width > 0 && bounds.height > 0) {
 			
-			var bitmap = new flash.display.Bitmap (bitmapData, PixelSnapping.ALWAYS, false);
+			var bitmap = new flash.display.Bitmap (bitmapData);
 			bitmap.smoothing = true;
 			bitmap.x = bounds.left;
 			bitmap.y = bounds.top;
 			addChild (bitmap);
-
+			
 		}
 		
 		
