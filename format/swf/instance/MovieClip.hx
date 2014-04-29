@@ -60,6 +60,14 @@ class MovieClip extends flash.display.MovieClip {
 	private var _scale9ScaleX:Float = 1;
 	private var _scale9ScaleY:Float = 1;
 	
+	public static function stopAllClips() {
+		if (clips != null) {
+			while (clips.length > 0) {
+				clips[0].stop();
+			}
+		}
+	}
+	
 	public function new (data:SWFTimelineContainer) {
 		
 		super ();
