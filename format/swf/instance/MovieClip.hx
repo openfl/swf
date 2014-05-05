@@ -261,21 +261,25 @@ class MovieClip extends flash.display.MovieClip {
 		var sx:Float;
 		var sy:Float;
 		
-		if (lastTag != null && lastTag.hasMatrix) {
+		if (lastTag != null) {
 			
-			var matrix = lastTag.matrix.matrix;
-			matrix.tx *= 1 / 20;
-			matrix.ty *= 1 / 20;
+			if (lastTag.hasMatrix) {
 			
-			if (Std.is (displayObject, DynamicText)) {
+				var matrix = lastTag.matrix.matrix;
+				matrix.tx *= 1 / 20;
+				matrix.ty *= 1 / 20;
 				
-				var offset = cast (displayObject, DynamicText).offset.clone ();
-				offset.concat (matrix);
-				matrix = offset;
+				if (Std.is (displayObject, DynamicText)) {
+					
+					var offset = cast (displayObject, DynamicText).offset.clone ();
+					offset.concat (matrix);
+					matrix = offset;
+					
+				}
+				
+				displayObject.transform.matrix = matrix;
 				
 			}
-			
-			displayObject.transform.matrix = matrix;
 			
 		} else if (firstTag.hasMatrix) {
 			
