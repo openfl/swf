@@ -1,7 +1,7 @@
 -main Tools
 -neko ../run.n
--lib openfl
 -lib lime-tools
+-lib openfl
 -lib swf
 -lib format
 --macro openfl.Lib.includeBackend("native")

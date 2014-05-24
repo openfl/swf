@@ -212,7 +212,10 @@ class Tools {
 				
 				var data = new SWFLibrary ("libraries/" + library.name + ".swf");
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
-				asset.data = Serializer.run (data);
+				var serializer = new Serializer ();
+				serializer.useCache = true;
+				serializer.serialize (data);
+				asset.data = serializer.toString ();
 				output.assets.push (asset);
 				
 				embeddedSWF = true;
@@ -253,7 +256,10 @@ class Tools {
 				var data = new SWFLiteLibrary (swfLite);
 				
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
-				asset.data = Serializer.run (data);
+				var serializer = new Serializer ();
+				serializer.useCache = true;
+				serializer.serialize (data);
+				asset.data = serializer.toString ();
 				output.assets.push (asset);
 				
 				embeddedSWFLite = true;
@@ -266,8 +272,6 @@ class Tools {
 			
 			output.haxelibs.push (new Haxelib ("format"));
 			output.haxeflags.push ("format.swf.SWFLibrary");
-			output.haxeflags.remove ("--remap flash:flash");
-			output.haxeflags.push ("--remap flash:flash");
 			
 		}
 		
@@ -280,9 +284,6 @@ class Tools {
 				output.haxeflags.push (filterClass);
 				
 			}
-			
-			output.haxeflags.remove ("--remap flash:flash");
-			output.haxeflags.push ("--remap flash:flash");
 			
 		}
 		
