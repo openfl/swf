@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.5.1",
-  "releasenote": "Patch for Flash and Firefox OS targets",
+  "version": "1.5.2",
+  "releasenote": "Do not require format library",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
