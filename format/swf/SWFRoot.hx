@@ -1,10 +1,12 @@
 ﻿package format.swf;
 
+#if test_abc
 import format.abc.Data.ABCData;
 import format.abc.Data.ClassDef;
 import format.abc.Data.Field;
 import format.abc.Data.IName;
 import format.abc.Data.Name;
+#end
 import format.swf.data.SWFRectangle;
 import format.swf.events.SWFProgressEvent;
 import flash.utils.ByteArray;
@@ -62,12 +64,15 @@ class SWFRoot extends SWFTimelineContainer
 			
 		}
 		
-
+		
+		#if test_abc
 		if (abcData != null) bindABCWithSymbols();
+		#end
 		
 		
 	}
 	
+	#if test_abc
 	function bindABCWithSymbols() 
 	{
 		abcClasses = new Map<Int, ClassDef>();
@@ -169,6 +174,7 @@ class SWFRoot extends SWFTimelineContainer
 		return ret;
 	}
 	
+	#end
 	
 	public function loadBytes(ba:ByteArray):Void {
 		bytes = new SWFData ();
