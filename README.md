@@ -2,4 +2,4 @@
 swf
 ===
 
-Provides SWF parsing and rendering for C++ and Flash
+Provides SWF parsing and rendering for C++, Flash and HTML5
