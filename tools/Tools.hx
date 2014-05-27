@@ -190,7 +190,7 @@ class Tools {
 				
 				type = Path.extension (library.sourcePath).toLowerCase ();
 				
-				if (type == "swf" && project.target == Platform.HTML5) {
+				if (type == "swf" && (project.target == Platform.HTML5 || project.target == Platform.FIREFOXOS)) {
 					
 					type = "swflite";
 					
