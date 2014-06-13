@@ -7,6 +7,8 @@ import flash.display.MovieClip;
 import flash.events.Event;
 import flash.media.Sound;
 import flash.net.URLRequest;
+import flash.system.ApplicationDomain;
+import flash.system.LoaderContext;
 import flash.text.Font;
 import flash.utils.ByteArray;
 import format.SWF;
@@ -17,6 +19,7 @@ import openfl.Assets;
 @:keep class SWFLibrary extends AssetLibrary {
 	
 	
+	private var context:LoaderContext;
 	private var id:String;
 	private var loader:Loader;
 	private var swf:SWF;
@@ -106,6 +109,9 @@ import openfl.Assets;
 		
 		#if flash
 		
+		context = new LoaderContext (false, ApplicationDomain.currentDomain, null);
+		context.allowCodeImport = true;
+		
 		if (Assets.isLocal (id, AssetType.BINARY)) {
 			
 			loader = new Loader ();
@@ -114,7 +120,7 @@ import openfl.Assets;
 				handler (this);
 				
 			});
-			loader.loadBytes (Assets.getBytes (id));
+			loader.loadBytes (Assets.getBytes (id), context);
 			
 		} else {
 			
@@ -124,7 +130,7 @@ import openfl.Assets;
 				handler (this);
 				
 			});
-			loader.load (new URLRequest (Assets.getPath (id)));
+			loader.load (new URLRequest (Assets.getPath (id)), context);
 			
 		}
 		
