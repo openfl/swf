@@ -594,6 +594,15 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	public /*override*/ function unflatten ():Void {
+		var bmp_do = getChildAt(0);
+		if (bmp_do != null && Std.is(bmp_do, Bitmap)) {
+			removeChild(bmp_do);
+			var bmp:Bitmap = cast bmp_do;
+			#if flash
+			bmp.bitmapData.dispose();
+			#end
+			bmp.bitmapData = null;
+		}
 		
 		lastUpdate = -1;
 		update ();
