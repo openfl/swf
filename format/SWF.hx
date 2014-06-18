@@ -64,8 +64,7 @@ class SWF extends EventDispatcher {
 			
 			if (loadedTags >= allTags) {
 				
-				complete = true;
-				dispatchEvent (new Event (Event.COMPLETE));
+				dispatchCompleteTimer();
 				
 			}
 			
@@ -91,13 +90,28 @@ class SWF extends EventDispatcher {
 			
 		}
 		
+		if (allTags == 0) {
+			dispatchCompleteTimer();
+		}
+		
 		#else
 		
-		complete = true;
-		dispatchEvent (new Event (Event.COMPLETE));
+		dispatchCompleteTimer();
 		
 		#end
 		
+	}
+	
+	inline private function dispatchCompleteTimer():Void {
+		var tmr = new flash.utils.Timer(1, 1);
+		tmr.addEventListener(flash.events.TimerEvent.TIMER_COMPLETE, dispatchComplete);
+		tmr.start();
+	}
+	
+	private function dispatchComplete(e:flash.events.TimerEvent):Void 
+	{
+		complete = true;
+		dispatchEvent (new Event (Event.COMPLETE));
 	}
 	
 	
