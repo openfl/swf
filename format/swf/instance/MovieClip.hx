@@ -624,15 +624,16 @@ class MovieClip extends flash.display.MovieClip {
 
 			var frame = data.frames[frameIndex];
 			
-			#if flash
+			//#if flash
 			__currentFrameLabel = frame.label;
 
+			
 			if (frameIndex == 0 || frame.label != null) {
 
 				__currentLabel = frame.label;
 
 			}
-			#end
+			//#end
 			
 		}
 		
@@ -723,6 +724,9 @@ class MovieClip extends flash.display.MovieClip {
 		
 	}
 	
+	@:getter(currentLabel) private function get_currentLabel():String {
+		return __currentLabel;
+	}
 	
 	@:getter public function get___totalFrames():Int {
 		
