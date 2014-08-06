@@ -252,8 +252,6 @@ class SWFFont extends AbstractFont {
 				var handler = new ShapeCommandExporter (null);
 				font.export (handler, index);
 				
-				shape.graphics.beginFill (0xFFFFFF);
-				
 				var scale = (height / 1024);
 				var offsetX = 0;
 				var offsetY = font.ascent * scale * 0.05;
@@ -262,8 +260,8 @@ class SWFFont extends AbstractFont {
 					
 					switch (command.type) {
 						
-						//case BEGIN_FILL: shape.graphics.beginFill (0x0000FF, 1);
-						//case END_FILL: shape.graphics.endFill ();
+						case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
+						case END_FILL: shape.graphics.endFill ();
 						case LINE_STYLE: 
 							
 							if (command.params.length > 0) {
