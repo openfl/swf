@@ -214,9 +214,8 @@ class SWFFont extends AbstractFont {
 				
 				var scale = (height / 1024);
 				var advance = Math.round (scale * font.fontAdvanceTable[index] * 0.05);
-				var offsetY = Math.round (font.descent * scale * 0.05);
 				
-				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: offsetY });
+				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: 2 });
 			
 			} else {
 				
@@ -257,8 +256,8 @@ class SWFFont extends AbstractFont {
 				
 				var scale = (height / 1024);
 				var offsetX = 0;
-				var offsetY = (font.ascent - font.descent) * scale * 0.05;
-				
+				var offsetY = font.ascent * scale * 0.05;
+
 				for (command in handler.commands) {
 					
 					switch (command.type) {
