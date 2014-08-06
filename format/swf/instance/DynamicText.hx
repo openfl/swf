@@ -86,7 +86,7 @@ class DynamicText extends TextField {
 				
 				if (!foundFont) {
 					
-					format.font = getFont (cast font, format.color);
+					format.font = getFont (cast font);
 					
 				}
 				
@@ -149,11 +149,11 @@ class DynamicText extends TextField {
 	
 	#if (cpp || neko)
 	
-	private function getFont (font:TagDefineFont2, color:Int):String {
+	private function getFont (font:TagDefineFont2):String {
 		
 		if (!registeredFonts.exists (font.characterId)) {
 			
-			AbstractFont.registerFont (font.fontName, function (definition) { return new SWFFont (font, definition, color); });
+			AbstractFont.registerFont (font.fontName, function (definition) { return new SWFFont (font, definition); });
 			registeredFonts.set (font.characterId, true);
 			
 		}
@@ -175,17 +175,13 @@ class SWFFont extends AbstractFont {
 	
 	
 	private var bitmapData:Map <Int, BitmapData>;
-	private var color:Int;
 	private var font:TagDefineFont2;
 	private var glyphInfo:Map <Int, GlyphInfo>;
 	
 	
-	public function new (font:TagDefineFont2, definition:FontDefinition, color:Int) {
+	public function new (font:TagDefineFont2, definition:FontDefinition) {
 		
 		this.font = font;
-		this.color = color;
-		
-		// TODO: Allow dynamic change of color
 		
 		bitmapData = new Map <Int, BitmapData> ();
 		glyphInfo = new Map <Int, GlyphInfo> ();
@@ -218,9 +214,8 @@ class SWFFont extends AbstractFont {
 				
 				var scale = (height / 1024);
 				var advance = Math.round (scale * font.fontAdvanceTable[index] * 0.05);
-				var offsetY = Math.round (font.descent * scale * 0.05);
 				
-				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: offsetY });
+				glyphInfo.set (charCode, { width: height, height: height, advance: advance, offsetX: 0, offsetY: 2 });
 			
 			} else {
 				
@@ -257,18 +252,16 @@ class SWFFont extends AbstractFont {
 				var handler = new ShapeCommandExporter (null);
 				font.export (handler, index);
 				
-				shape.graphics.beginFill (color);
-				
 				var scale = (height / 1024);
 				var offsetX = 0;
-				var offsetY = (font.ascent - font.descent) * scale * 0.05;
-				
+				var offsetY = font.ascent * scale * 0.05;
+
 				for (command in handler.commands) {
 					
 					switch (command.type) {
 						
-						//case BEGIN_FILL: shape.graphics.beginFill (0x0000FF, 1);
-						//case END_FILL: shape.graphics.endFill ();
+						case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
+						case END_FILL: shape.graphics.endFill ();
 						case LINE_STYLE: 
 							
 							if (command.params.length > 0) {
