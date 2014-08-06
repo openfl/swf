@@ -51,7 +51,7 @@ class MovieClip extends flash.display.MovieClip {
 	private var __currentFrameLabel:String;
 	private var __totalFrames:Int;
 	private var __currentLabel:String;
-	//private var __currentLabels:Array<FrameLabel>;
+	private var __currentLabels:Array<FrameLabel>;
 	#end
 	
 	public var scale9BitmapGrid(get, set):Rectangle;
@@ -84,13 +84,11 @@ class MovieClip extends flash.display.MovieClip {
 		__currentFrame = 1;
 		__totalFrames = data.frames.length;
 
-		/*#if flash
 		for (frame in data.frameLabels.keys ()) {
 
 			__currentLabels.push (new FrameLabel (data.frameLabels.get (frame), frame + 1));
 
 		}
-		#end*/
 		
 		objectPool = new Map<Int, List<ChildObject>>();
 		activeObjects = [];
