@@ -86,7 +86,7 @@ class DynamicText extends TextField {
 				
 				if (!foundFont) {
 					
-					format.font = getFont (cast font, format.color);
+					format.font = getFont (cast font);
 					
 				}
 				
@@ -149,11 +149,11 @@ class DynamicText extends TextField {
 	
 	#if (cpp || neko)
 	
-	private function getFont (font:TagDefineFont2, color:Int):String {
+	private function getFont (font:TagDefineFont2):String {
 		
 		if (!registeredFonts.exists (font.characterId)) {
 			
-			AbstractFont.registerFont (font.fontName, function (definition) { return new SWFFont (font, definition, color); });
+			AbstractFont.registerFont (font.fontName, function (definition) { return new SWFFont (font, definition); });
 			registeredFonts.set (font.characterId, true);
 			
 		}
@@ -175,17 +175,13 @@ class SWFFont extends AbstractFont {
 	
 	
 	private var bitmapData:Map <Int, BitmapData>;
-	private var color:Int;
 	private var font:TagDefineFont2;
 	private var glyphInfo:Map <Int, GlyphInfo>;
 	
 	
-	public function new (font:TagDefineFont2, definition:FontDefinition, color:Int) {
+	public function new (font:TagDefineFont2, definition:FontDefinition) {
 		
 		this.font = font;
-		this.color = color;
-		
-		// TODO: Allow dynamic change of color
 		
 		bitmapData = new Map <Int, BitmapData> ();
 		glyphInfo = new Map <Int, GlyphInfo> ();
@@ -257,7 +253,7 @@ class SWFFont extends AbstractFont {
 				var handler = new ShapeCommandExporter (null);
 				font.export (handler, index);
 				
-				shape.graphics.beginFill (color);
+				shape.graphics.beginFill (0xFFFFFF);
 				
 				var scale = (height / 1024);
 				var offsetX = 0;
