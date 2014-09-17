@@ -6,5 +6,4 @@
 -lib swf
 -lib format
 -D legacy
---macro openfl.Lib.includeBackend('legacy')
 --remap flash:openfl

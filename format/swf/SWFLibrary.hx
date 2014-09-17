@@ -15,6 +15,10 @@ import format.SWF;
 import haxe.Unserializer;
 import openfl.Assets;
 
+#if (lime && !legacy)
+import lime.graphics.Image;
+#end
+
 
 @:keep class SWFLibrary extends AssetLibrary {
 	
@@ -34,15 +38,19 @@ import openfl.Assets;
 	}
 	
 	
+	#if (!lime || legacy)
 	public override function exists (id:String, type:AssetType):Bool {
+	#else
+	public override function exists (id:String, type:String):Bool {
+	#end
 		
-		if (id == "" && type == MOVIE_CLIP) {
+		if (id == "" && type == cast AssetType.MOVIE_CLIP) {
 			
 			return true;
 			
 		}
 		
-		if (type == IMAGE || type == MOVIE_CLIP) {
+		if (type == (cast AssetType.IMAGE) || type == (cast AssetType.MOVIE_CLIP)) {
 			
 			#if flash
 			
@@ -61,6 +69,7 @@ import openfl.Assets;
 	}
 	
 	
+	#if (!lime || legacy)
 	public override function getBitmapData (id:String):BitmapData {
 		
 		#if flash
@@ -68,9 +77,7 @@ import openfl.Assets;
 		//var ret/*:Class*/ = loader.contentLoaderInfo.applicationDomain.getDefinition (id);
 		//trace(ret);
 		
-		var bmd = Type.createEmptyInstance(cast loader.contentLoaderInfo.applicationDomain.getDefinition(id));
-		
-		trace (bmd);
+		var bmd = Type.createEmptyInstance(cast loader.contentLoaderInfo.applicationDomain.getDefinition (id));
 		return bmd;
 		
 		#else
@@ -80,6 +87,21 @@ import openfl.Assets;
 		#end
 		
 	}
+	#else
+	public override function getImage (id:String):Image {
+		
+		#if flash
+		
+		return Image.fromBitmapData (Type.createEmptyInstance(cast loader.contentLoaderInfo.applicationDomain.getDefinition (id)));
+		
+		#else
+		
+		return Image.fromBitmapData (swf.getBitmapData (id));
+		
+		#end
+		
+	}
+	#end
 	
 	
 	public override function getMovieClip (id:String):MovieClip {

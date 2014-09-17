@@ -18,7 +18,11 @@ import format.swf.SWFTimelineContainer;
 import openfl.Assets;
 
 #if (cpp || neko)
+#if (legacy || openfl > "2.0")
+import openfl._v2.text.AbstractFont;
+#else
 import openfl.text.AbstractFont;
+#end
 #end
 
 
