@@ -1,8 +1,10 @@
 -main Tools
 -neko ../run.n
--lib lime-tools
+-lib aether
+-lib lime
 -lib openfl
 -lib swf
 -lib format
---macro openfl.Lib.includeBackend("native")
+-D legacy
+--macro openfl.Lib.includeBackend('legacy')
 --remap flash:openfl

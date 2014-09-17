@@ -34,7 +34,7 @@ class Tools {
 		var haxePath = Sys.getEnv ("HAXEPATH");
 		var command = (haxePath != null && haxePath != "") ? haxePath + "/haxelib" : "haxelib";
 		
-		var process = new Process (command, [ "path", "lime-tools" ]);
+		var process = new Process (command, [ "path", "lime" ]);
 		var path = "";
 		
 		try {
@@ -46,7 +46,7 @@ class Tools {
 				var length = lines.length;
 				var line = process.stdout.readLine ();
 				
-				if (length > 0 && StringTools.trim (line) == "-D lime-tools") {
+				if (length > 0 && StringTools.trim (line) == "-D lime") {
 					
 					path = StringTools.trim (lines[length - 1]);
 					
@@ -62,7 +62,7 @@ class Tools {
 			
 		}
 		
-		path += "/ndll/";
+		path += "/legacy/ndll/";
 		
 		switch (PlatformHelper.hostPlatform) {
 			
@@ -190,7 +190,7 @@ class Tools {
 				
 				type = Path.extension (library.sourcePath).toLowerCase ();
 				
-				if (type == "swf" && (project.target == Platform.HTML5 || project.target == Platform.FIREFOXOS)) {
+				if (type == "swf" && (project.target == Platform.HTML5 || project.target == Platform.FIREFOX)) {
 					
 					type = "swflite";
 					
@@ -239,7 +239,7 @@ class Tools {
 					swfLite.symbols.set (id, symbol);
 					
 					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
-					asset.data = StringHelper.base64Encode (bitmapData.encode ("png"));
+					asset.data = StringHelper.base64Encode (cast bitmapData.encode ("png"));
 					//asset.data = bitmapData.encode ("png");
 					asset.encoding = AssetEncoding.BASE64;
 					output.assets.push (asset);
