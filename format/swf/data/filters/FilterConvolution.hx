@@ -44,7 +44,11 @@ class FilterConvolution extends Filter #if !haxe3 , #end implements IFilter
 			ColorUtils.alpha(defaultColor)
 		);
 		#else
+		#if ((cpp || neko) && !openfl_next)
 		return new BitmapFilter ("");
+		#else
+		return new BitmapFilter ();
+		#end
 		#end
 	}
 	

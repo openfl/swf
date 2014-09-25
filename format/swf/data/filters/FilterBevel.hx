@@ -55,7 +55,11 @@ class FilterBevel extends Filter #if !haxe3 , #end implements IFilter
 			knockout
 		);
 		#else
+		#if ((cpp || neko) && !openfl_next)
 		return new BitmapFilter ("");
+		#else
+		return new BitmapFilter ();
+		#end
 		#end
 	}
 	

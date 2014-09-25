@@ -15,7 +15,7 @@ import format.SWF;
 import haxe.Unserializer;
 import openfl.Assets;
 
-#if (lime && !legacy)
+#if (lime && !lime_legacy)
 import lime.graphics.Image;
 #end
 
@@ -38,7 +38,7 @@ import lime.graphics.Image;
 	}
 	
 	
-	#if (!lime || legacy)
+	#if (!lime || lime_legacy)
 	public override function exists (id:String, type:AssetType):Bool {
 	#else
 	public override function exists (id:String, type:String):Bool {
@@ -69,7 +69,7 @@ import lime.graphics.Image;
 	}
 	
 	
-	#if (!lime || legacy)
+	#if (!lime || lime_legacy)
 	public override function getBitmapData (id:String):BitmapData {
 		
 		#if flash

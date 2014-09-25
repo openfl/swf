@@ -17,12 +17,8 @@ import format.swf.SWFTimelineContainer;
 
 import openfl.Assets;
 
-#if (cpp || neko)
-#if (legacy || openfl > "2.0")
-import openfl._v2.text.AbstractFont;
-#else
+#if ((cpp || neko) && !openfl_next)
 import openfl.text.AbstractFont;
-#end
 #end
 
 
@@ -63,7 +59,7 @@ class DynamicText extends TextField {
 			
 			if (Std.is (font, TagDefineFont2)) {
 				
-				#if (cpp || neko)
+				#if ((cpp || neko) && !openfl_next)
 				
 				var fontName =  cast (font, TagDefineFont2).fontName;
 				
@@ -151,7 +147,7 @@ class DynamicText extends TextField {
 	}
 	
 	
-	#if (cpp || neko)
+	#if ((cpp || neko) && !openfl_next)
 	
 	private function getFont (font:TagDefineFont2):String {
 		
@@ -172,7 +168,7 @@ class DynamicText extends TextField {
 }
 
 
-#if (cpp || neko)
+#if ((cpp || neko) && !openfl_next)
 
 
 class SWFFont extends AbstractFont {

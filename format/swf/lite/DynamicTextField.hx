@@ -48,13 +48,13 @@ class DynamicTextField extends TextField {
 		format.indent = symbol.indent / 20;
 		format.leading = symbol.leading / 20;
 		
-		#if (flash || html5)
+		//#if (flash || html5)
 		if (symbol.align == "center") format.align = TextFormatAlign.CENTER;
 		else if (symbol.align == "right") format.align = TextFormatAlign.RIGHT;
 		else if (symbol.align == "justify") format.align = TextFormatAlign.JUSTIFY;
-		#else
-		format.align = symbol.align;
-		#end
+		//#else
+		//format.align = symbol.align;
+		//#end
 		
 		defaultTextFormat = format;
 		

@@ -8,6 +8,7 @@ import format.swf.lite.SWFLiteLibrary;
 import format.swf.SWFLibrary;
 import format.SWF;
 import haxe.io.Path;
+import haxe.Json;
 import haxe.Serializer;
 import haxe.Unserializer;
 import helpers.LogHelper;
@@ -210,12 +211,13 @@ class Tools {
 				
 				output.assets.push (swf);
 				
-				var data = new SWFLibrary ("libraries/" + library.name + ".swf");
-				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
-				var serializer = new Serializer ();
-				serializer.useCache = true;
-				serializer.serialize (data);
-				asset.data = serializer.toString ();
+				var data:Dynamic = {};
+				data.version = 0.1;
+				data.type = "format.swf.SWFLibrary";
+				data.args = [ "libraries/" + library.name + ".swf" ];
+				
+				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
+				asset.data = Json.stringify (data);
 				output.assets.push (asset);
 				
 				embeddedSWF = true;
@@ -253,13 +255,20 @@ class Tools {
 					
 				}
 				
-				var data = new SWFLiteLibrary (swfLite);
+				var data:Dynamic = {};
+				data.version = 0.1;
+				data.type = "format.swf.lite.SWFLiteLibrary";
+				data.args = [ "libraries/" + library.name + ".dat" ];
 				
 				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
 				var serializer = new Serializer ();
 				serializer.useCache = true;
-				serializer.serialize (data);
+				serializer.serialize (swfLite);
 				asset.data = serializer.toString ();
+				output.assets.push (asset);
+				
+				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
+				asset.data = Json.stringify (data);
 				output.assets.push (asset);
 				
 				embeddedSWFLite = true;

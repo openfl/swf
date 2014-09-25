@@ -48,7 +48,11 @@ class FilterGradientBevel extends FilterGradientGlow #if !haxe3 , #end implement
 			knockout
 		);
 		#else
+		#if ((cpp || neko) && !openfl_next)
 		return new BitmapFilter ("");
+		#else
+		return new BitmapFilter ();
+		#end
 		#end
 	}
 	
