@@ -1,9 +1,10 @@
 -main Tools
 -neko ../run.n
--lib aether
+--macro lime.system.System.includeTools()
 -lib lime
 -lib openfl
 -lib swf
 -lib format
--D legacy
+-D lime-legacy
 --remap flash:openfl
+-lib openfl
