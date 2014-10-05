@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.5.2",
-  "releasenote": "Do not require format library",
+  "version": "1.5.3",
+  "releasenote": "Update for Lime 2.0",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
