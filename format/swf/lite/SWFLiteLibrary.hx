@@ -119,6 +119,16 @@ import lime.graphics.Image;
 		
 		var value = Type.resolveEnum (name);
 		
+		if (value == null) {
+			
+			#if flash
+			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "flash"));
+			#else
+			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "openfl"));
+			#end
+			
+		}
+		
 		#if flash
 		
 		if (value == null) {
