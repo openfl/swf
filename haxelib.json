@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.5.3",
-  "releasenote": "Update for Lime 2.0",
+  "version": "1.6.0",
+  "releasenote": "Update for OpenFL 2.1 and Lime 2.0-alpha",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
