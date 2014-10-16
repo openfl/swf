@@ -318,9 +318,13 @@ class MovieClip extends flash.display.MovieClip {
 		
 		
 		
-		if (lastTag != null && lastTag.hasColorTransform) {
+		if (lastTag != null ) {
 			
-			displayObject.transform.colorTransform = lastTag.colorTransform.colorTransform;
+			
+			if ( lastTag.hasColorTransform) {
+				
+				displayObject.transform.colorTransform = lastTag.colorTransform.colorTransform;
+			}
 			
 		} else if (firstTag.hasColorTransform) {
 			
@@ -328,17 +332,21 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		if (lastTag != null && lastTag.hasFilterList) {
+		if ( lastTag != null ) {
 			
-			var filters = [];
-			
-			for (i in 0...lastTag.surfaceFilterList.length) {
+			if ( lastTag.hasFilterList) {
 				
-				filters[i] = lastTag.surfaceFilterList[i].filter;
+				var filters = [];
+				
+				for (i in 0...lastTag.surfaceFilterList.length) {
+					
+					filters[i] = lastTag.surfaceFilterList[i].filter;
+					
+				}
+				
+				displayObject.filters = filters;
 				
 			}
-			
-			displayObject.filters = filters;
 			
 		} else if (firstTag.hasFilterList) {
 			
