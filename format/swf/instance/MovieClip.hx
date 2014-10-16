@@ -83,6 +83,8 @@ class MovieClip extends flash.display.MovieClip {
 		
 		__currentFrame = 1;
 		__totalFrames = data.frames.length;
+		
+		__currentLabels = [];
 
 		for (frame in data.frameLabels.keys ()) {
 
