@@ -1,4 +1,4 @@
-package ::PACKAGE_NAME::;
+package ::PACKAGE_NAME::; #if !flash
 
 
 import format.swf.instance.MovieClip;
@@ -26,3 +26,8 @@ class ::CLASS_NAME:: extends MovieClip {
 	
 	
 }
+
+
+#else
+typedef ::CLASS_NAME:: = flash.display.MovieClip;
+#end
