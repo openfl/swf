@@ -259,12 +259,28 @@ class Tools {
 			
 		}
 		
-		if (arguments.length > 2 && arguments[0] == "process") {
+		var words = new Array<String> ();
+		
+		for (arg in arguments) {
+			
+			if (arg == "-verbose") {
+				
+				LogHelper.verbose = true;
+				
+			} else {
+				
+				words.push (arg);
+				
+			}
+			
+		}
+		
+		if (words.length > 2 && words[0] == "process") {
 			
 			try {
 				
-				var inputPath = arguments[1];
-				var outputPath = arguments[2];
+				var inputPath = words[1];
+				var outputPath = words[2];
 				
 				var projectData = File.getContent (inputPath);
 				
@@ -316,6 +332,8 @@ class Tools {
 			
 			if (type == "swf" && project.target != Platform.HTML5) {
 				
+				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
+				
 				var swf = new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY);
 				
 				if (library.embed != null) {
@@ -346,6 +364,8 @@ class Tools {
 				//output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));
 				
 			} else if (type == "swf_lite" || type == "swflite") {
+				
+				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWFLite]");
 				
 				//project.haxelibs.push (new Haxelib ("swf"));
 				
