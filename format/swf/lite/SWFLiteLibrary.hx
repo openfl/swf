@@ -29,9 +29,7 @@ import lime.graphics.Image;
 		
 		if (id != null) {
 			
-			var unserializer = new Unserializer (Assets.getText (id));
-			unserializer.setResolver (cast { resolveEnum: resolveEnum, resolveClass: resolveClass });
-			swf = unserializer.unserialize ();
+			swf = SWFLite.unserialize (Assets.getText (id));
 			
 		}
 		

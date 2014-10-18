@@ -32,6 +32,35 @@ class DynamicTextSymbol extends SWFSymbol {
 		
 		super ();
 		
+		type = "dynamictext";
+		
+	}
+	
+	
+	public override function parse (data:Dynamic):Void {
+		
+		super.parse (data);
+		
+		align = data.align;
+		border = data.border;
+		color = data.color;
+		fontHeight = data.fontHeight;
+		fontID = data.fontID;
+		fontName = data.fontName;
+		height = data.height;
+		indent = data.indent;
+		leading = data.leading;
+		leftMargin = data.leftMargin;
+		multiline = data.multiline;
+		password = data.password;
+		rightMargin = data.rightMargin;
+		selectable = data.selectable;
+		text = data.text;
+		width = data.width;
+		wordWrap = data.wordWrap;
+		x = data.x;
+		y = data.y;
+		
 	}
 	
 	

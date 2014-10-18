@@ -7,6 +7,7 @@ import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
 import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.MovieClip;
+import haxe.Json;
 import openfl.Assets;
 
 
@@ -101,6 +102,49 @@ class SWFLite {
 		}
 		
 		return false;
+		
+	}
+	
+	
+	public function serialize ():String {
+		
+		var object:Dynamic = {};
+		object.frameRate = frameRate;
+		object.root = root.prepare ();
+		
+		var symbolData = [];
+		
+		for (id in symbols.keys ()) {
+			
+			var character:Dynamic = {};
+			character.id = id;
+			character.symbol = symbols.get (id).prepare ();
+			
+			symbolData.push (character);
+			
+		}
+		
+		object.symbols = symbolData;
+		
+		return Json.stringify (object);
+		
+	}
+	
+	
+	public static function unserialize (data:String):SWFLite {
+		
+		var object:Dynamic = Json.parse (data);
+		var swfLite = new SWFLite ();
+		swfLite.frameRate = object.frameRate;
+		swfLite.root = cast SWFSymbol.unserialize (object.root);
+		
+		for (character in cast (object.symbols, Array<Dynamic>)) {
+			
+			swfLite.symbols.set (character.id, SWFSymbol.unserialize (character.symbol));
+			
+		}
+		
+		return swfLite;
 		
 	}
 	

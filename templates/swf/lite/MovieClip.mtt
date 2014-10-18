@@ -14,9 +14,7 @@ class ::CLASS_NAME:: extends MovieClip {
 		
 		if (!SWFLite.instances.exists ("::SWF_ID::")) {
 			
-			var unserializer = new Unserializer (Assets.getText ("::SWF_ID::"));
-			unserializer.setResolver (cast { resolveEnum: resolveEnum, resolveClass: resolveClass });
-			SWFLite.instances.set ("::SWF_ID::", unserializer.unserialize ());
+			SWFLite.instances.set ("::SWF_ID::", SWFLite.unserialize (Assets.getText ("::SWF_ID::")));
 			
 		}
 		

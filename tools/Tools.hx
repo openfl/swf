@@ -402,10 +402,7 @@ class Tools {
 				data.args = [ "libraries/" + library.name + ".dat" ];
 				
 				var swfLiteAsset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
-				var serializer = new Serializer ();
-				serializer.useCache = true;
-				serializer.serialize (swfLite);
-				swfLiteAsset.data = serializer.toString ();
+				swfLiteAsset.data = swfLite.serialize ();
 				output.assets.push (swfLiteAsset);
 				
 				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
@@ -437,7 +434,7 @@ class Tools {
 			
 			for (filterClass in filterClasses) {
 				
-				output.haxeflags.push (filterClass);
+				output.haxeflags.push (StringTools.replace (filterClass, "._v2", ""));
 				
 			}
 			
