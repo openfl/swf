@@ -5,13 +5,17 @@ import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.SWFLiteLibrary;
+import format.swf.tags.TagDefineButton2;
 import format.swf.SWFLibrary;
+import format.swf.SWFTimelineContainer;
 import format.SWF;
 import haxe.io.Path;
 import haxe.Json;
 import haxe.Serializer;
+import haxe.Template;
 import haxe.Unserializer;
 import helpers.LogHelper;
+import helpers.PathHelper;
 import helpers.PlatformHelper;
 import helpers.StringHelper;
 import project.Architecture;
@@ -107,6 +111,64 @@ class Tools {
 		
 	}
 	#end
+	
+	
+	private static function generateSWFClasses (project:HXProject, swfAsset:Asset):Void {
+		
+		var movieClipTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/MovieClip.mtt");
+		var simpleButtonTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/SimpleButton.mtt");
+		
+		var swf = new SWF (ByteArray.fromBytes (File.getBytes (swfAsset.sourcePath)));
+		
+		for (className in swf.symbols.keys ()) {
+			
+			var lastIndexOfPeriod = className.lastIndexOf (".");
+			
+			var packageName = "";
+			var name = "";
+			
+			if (lastIndexOfPeriod == -1) {
+				
+				name = className;
+				
+			} else {
+				
+				packageName = className.substr (0, lastIndexOfPeriod);
+				name = className.substr (lastIndexOfPeriod + 1);
+				
+			}
+			
+			packageName = packageName.toLowerCase ();
+			name = name.substr (0, 1).toUpperCase () + name.substr (1);
+			
+			var symbolID = swf.symbols.get (className);
+			var templateData = null;
+			var symbol = swf.data.getCharacter (symbolID);
+			
+			if (Std.is (symbol, TagDefineButton2)) {
+				
+				templateData = simpleButtonTemplate;
+				
+			} else if (Std.is (symbol, SWFTimelineContainer)) {
+				
+				templateData = movieClipTemplate;
+				
+			}
+			
+			if (templateData != null) {
+				
+				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID };
+				var template = new Template (templateData);
+				
+				var templateFile = new Asset ("", PathHelper.combine ("../haxe", Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				templateFile.data = template.execute (context);
+				project.assets.push (templateFile);
+				
+			}
+			
+		}
+		
+	}
 	
 	
 	public static function main () {
@@ -219,6 +281,12 @@ class Tools {
 				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
 				asset.data = Json.stringify (data);
 				output.assets.push (asset);
+				
+				if (library.generate) {
+					
+					generateSWFClasses (output, swf);
+					
+				}
 				
 				embeddedSWF = true;
 				//project.haxelibs.push (new Haxelib ("swf"));
