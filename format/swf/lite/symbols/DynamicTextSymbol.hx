@@ -14,6 +14,7 @@ class DynamicTextSymbol extends SWFSymbol {
 	public var fontID:Int;
 	public var fontName:String;
 	public var height:Float;
+	public var html:Bool;
 	public var indent:Int;
 	public var leading:Int;
 	public var leftMargin:Int;
@@ -48,6 +49,7 @@ class DynamicTextSymbol extends SWFSymbol {
 		fontID = data.fontID;
 		fontName = data.fontName;
 		height = data.height;
+		html = data.html;
 		indent = data.indent;
 		leading = data.leading;
 		leftMargin = data.leftMargin;

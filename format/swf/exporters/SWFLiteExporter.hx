@@ -121,9 +121,11 @@ class SWFLiteExporter {
 				
 			}
 			
-			symbol.ascent = defineFont.ascent;
 			symbol.advances = cast defineFont.fontAdvanceTable.copy ();
+			symbol.bold = defineFont.bold;
 			symbol.codes = defineFont.codeTable.copy ();
+			symbol.italic = defineFont.italic;
+			symbol.leading = defineFont.leading;
 			
 			swfLite.symbols.set (symbol.id, symbol);
 			
@@ -262,9 +264,8 @@ class SWFLiteExporter {
 		
 		if (tag.hasText) {
 			
-			var plain = new EReg ("</p>", "g").replace (tag.initialText, "\n");
-			plain = new EReg ("<br>", "g").replace (tag.initialText, "\n");
-			symbol.text = new EReg ("<.*?>", "g").replace (plain, "");
+			symbol.html = tag.html;
+			symbol.text = tag.initialText;
 			
 		}
 		

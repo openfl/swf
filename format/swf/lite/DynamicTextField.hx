@@ -41,6 +41,12 @@ class DynamicTextField extends TextField {
 		var format = new TextFormat ();
 		if (symbol.color != null) format.color = (symbol.color & 0x00FFFFFF);
 		format.size = (symbol.fontHeight / 20);
+		
+		var font:FontSymbol = cast swf.symbols.get (symbol.fontID);
+		format.bold = font.bold;
+		format.italic = font.italic;
+		format.leading = font.leading / 20;
+		
 		format.font = symbol.fontName;
 		
 		format.leftMargin = symbol.leftMargin / 20;
@@ -58,7 +64,25 @@ class DynamicTextField extends TextField {
 		
 		defaultTextFormat = format;
 		
-		text = symbol.text;
+		#if (cpp || neko)
+		
+		var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
+		plain = new EReg ("<br>", "g").replace (symbol.text, "\n");
+		text = new EReg ("<.*?>", "g").replace (plain, "");
+		
+		#else
+		
+		if (symbol.html) {
+			
+			htmlText = symbol.text;
+			
+		} else {
+			
+			text = symbol.text;
+			
+		}
+		
+		#end
 		
 		//autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
 		

@@ -9,9 +9,11 @@ class FontSymbol extends SWFSymbol {
 	
 	
 	public var advances:Array<Float>;
-	public var ascent:Int;
+	public var bold:Bool;
 	public var codes:Array<Int>;
 	public var glyphs:Array<Array<ShapeCommand>>;
+	public var italic:Bool;
+	public var leading:Int;
 	
 	
 	public function new () {
@@ -28,7 +30,7 @@ class FontSymbol extends SWFSymbol {
 		super.parse (data);
 		
 		advances = data.advances;
-		ascent = data.ascent;
+		bold = data.bold;
 		codes = data.codes;
 		
 		if (data.glyphs != null) {
@@ -89,6 +91,9 @@ class FontSymbol extends SWFSymbol {
 			
 		}
 		
+		italic = data.italic;
+		leading = data.leading;
+		
 	}
 	
 	
@@ -100,7 +105,7 @@ class FontSymbol extends SWFSymbol {
 		data.type = type;
 		
 		data.advances = advances;
-		data.ascent = ascent;
+		data.bold = bold;
 		data.codes = codes;
 		
 		data.glyphs = [];
@@ -165,6 +170,9 @@ class FontSymbol extends SWFSymbol {
 			}
 			
 		}
+		
+		data.italic = italic;
+		data.leading = leading;
 		
 		return data;
 		
