@@ -4,7 +4,9 @@ package;
 import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.SpriteSymbol;
 import format.swf.lite.SWFLiteLibrary;
+import format.swf.lite.SWFLite;
 import format.swf.tags.TagDefineButton2;
 import format.swf.SWFLibrary;
 import format.swf.SWFTimelineContainer;
@@ -161,6 +163,57 @@ class Tools {
 				var template = new Template (templateData);
 				
 				var templateFile = new Asset ("", PathHelper.combine ("../haxe", Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				templateFile.data = template.execute (context);
+				project.assets.push (templateFile);
+				
+			}
+			
+		}
+		
+	}
+	
+	
+	private static function generateSWFLiteClasses (project:HXProject, swfLite:SWFLite, swfLiteAsset:Asset):Void {
+		
+		var movieClipTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/lite/MovieClip.mtt");
+		var simpleButtonTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/lite/SimpleButton.mtt");
+		
+		for (symbolID in swfLite.symbols.keys ()) {
+			
+			var symbol = swfLite.symbols.get (symbolID);
+			var templateData = null;
+			
+			if (Std.is (symbol, SpriteSymbol)) {
+				
+				templateData = movieClipTemplate;
+				
+			}
+			
+			if (templateData != null) {
+				
+				var lastIndexOfPeriod = symbol.className.lastIndexOf (".");
+				
+				var packageName = "";
+				var name = "";
+				
+				if (lastIndexOfPeriod == -1) {
+					
+					name = symbol.className;
+					
+				} else {
+					
+					packageName = symbol.className.substr (0, lastIndexOfPeriod);
+					name = symbol.className.substr (lastIndexOfPeriod + 1);
+					
+				}
+				
+				packageName = packageName.toLowerCase ();
+				name = name.substr (0, 1).toUpperCase () + name.substr (1);
+				
+				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfLiteAsset.id, SYMBOL_ID: symbolID };
+				var template = new Template (templateData);
+				
+				var templateFile = new Asset ("", PathHelper.combine ("../haxe", Path.directory (symbol.className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
 				templateFile.data = template.execute (context);
 				project.assets.push (templateFile);
 				
@@ -328,16 +381,22 @@ class Tools {
 				data.type = "format.swf.lite.SWFLiteLibrary";
 				data.args = [ "libraries/" + library.name + ".dat" ];
 				
-				var asset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
+				var swfLiteAsset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
 				var serializer = new Serializer ();
 				serializer.useCache = true;
 				serializer.serialize (swfLite);
-				asset.data = serializer.toString ();
-				output.assets.push (asset);
+				swfLiteAsset.data = serializer.toString ();
+				output.assets.push (swfLiteAsset);
 				
 				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
 				asset.data = Json.stringify (data);
 				output.assets.push (asset);
+				
+				if (library.generate) {
+					
+					generateSWFLiteClasses (output, swfLite, swfLiteAsset);
+					
+				}
 				
 				embeddedSWFLite = true;
 				
