@@ -29,5 +29,15 @@ class ::CLASS_NAME:: extends MovieClip {
 
 
 #else
-typedef ::CLASS_NAME:: = flash.display.MovieClip;
+@:bind class ::CLASS_NAME:: extends flash.display.MovieClip {
+	
+	
+	public function new () {
+		
+		super ();
+		
+	}
+	
+	
+}
 #end
