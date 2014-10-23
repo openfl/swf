@@ -1,7 +1,12 @@
 package format.swf.lite.symbols;
 
 
+import flash.display.CapsStyle;
 import flash.display.IGraphicsData;
+import flash.display.InterpolationMethod;
+import flash.display.JointStyle;
+import flash.display.LineScaleMode;
+import flash.display.SpreadMethod;
 import flash.Vector;
 import format.swf.exporters.core.ShapeCommand;
 import openfl.geom.Matrix;
@@ -33,7 +38,7 @@ class ShapeSymbol extends SWFSymbol {
 			for (commandData in cast (data.commands, Array<Dynamic>)) {
 				
 				var type = Type.createEnumIndex (CommandType, commandData.type);
-				var params:Array<Dynamic> = commandData.params.copy ();
+				var params = cast (commandData.params, Array<Dynamic>).copy ();
 				
 				switch (type) {
 					
@@ -62,6 +67,38 @@ class ShapeSymbol extends SWFSymbol {
 							params[4].d = commandData.params[4].d;
 							params[4].tx = commandData.params[4].tx;
 							params[4].ty = commandData.params[4].ty;
+							
+						}
+						
+						if (params[5] != null) {
+							
+							params[5] = Type.createEnumIndex (SpreadMethod, params[5]);
+							
+						}
+						
+						if (params[6] != null) {
+							
+							params[6] = Type.createEnumIndex (InterpolationMethod, params[6]);
+							
+						}
+					
+					case LINE_STYLE:
+						
+						if (params[4] != null) {
+							
+							params[4] = Type.createEnumIndex (LineScaleMode, params[4]);
+							
+						}
+						
+						if (params[5] != null) {
+							
+							params[5] = Type.createEnumIndex (CapsStyle, params[5]);
+							
+						}
+						
+						if (params[6] != null) {
+							
+							params[6] = Type.createEnumIndex (JointStyle, params[6]);
 							
 						}
 					
@@ -125,6 +162,38 @@ class ShapeSymbol extends SWFSymbol {
 							commandData.params[4].d = command.params[4].d;
 							commandData.params[4].tx = command.params[4].tx;
 							commandData.params[4].ty = command.params[4].ty;
+							
+						}
+						
+						if (command.params[5] != null) {
+							
+							command.params[5] = Type.enumIndex (command.params[5]);
+							
+						}
+						
+						if (command.params[6] != null) {
+							
+							command.params[6] = Type.enumIndex (command.params[6]);
+							
+						}
+					
+					case LINE_STYLE:
+						
+						if (command.params[4] != null) {
+							
+							command.params[4] = Type.enumIndex (command.params[4]);
+							
+						}
+						
+						if (command.params[5] != null) {
+							
+							command.params[5] = Type.enumIndex (command.params[5]);
+							
+						}
+						
+						if (command.params[6] != null) {
+							
+							command.params[6] = Type.enumIndex (command.params[6]);
 							
 						}
 					
