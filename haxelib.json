@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.6.4",
-  "releasenote": "Fix serialization bug in gradient fill",
+  "version": "1.6.5",
+  "releasenote": "Add SWFLite filters and mask support",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
