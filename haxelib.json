@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.6.1",
-  "releasenote": "support for library generate (SWF classes) and preload (no Assets.loadLibrary), JSON for SWFLite",
+  "version": "1.6.2",
+  "releasenote": "Improvements to SWFLite",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
