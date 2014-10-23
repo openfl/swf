@@ -223,6 +223,9 @@ class SWFLiteExporter {
 				
 			}
 			
+			frameObject.depth = placeTag.depth;
+			frameObject.clipDepth = (placeTag.hasClipDepth ? placeTag.clipDepth : 0);
+			
 			frame.objects.push (frameObject);
 			
 		}

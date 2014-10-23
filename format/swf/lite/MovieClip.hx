@@ -446,6 +446,9 @@ class MovieClip extends flash.display.MovieClip {
 		
 		//if (frame.frameNumber == __currentFrame - 1 || frame.tweenType == null || frame.tweenType == "") {
 		
+		var mask = null;
+		var maskObject = null;
+		
 		for (object in frame.objects) {
 			
 			if (swf.symbols.exists (object.id)) {
@@ -478,6 +481,33 @@ class MovieClip extends flash.display.MovieClip {
 				if (displayObject != null) {
 					
 					placeObject (displayObject, object);
+					
+					if (mask != null) {
+						
+						if (mask.clipDepth < object.depth) {
+							
+							mask = null;
+							
+						} else {
+							
+							displayObject.mask = maskObject;
+							
+						}
+						
+					} else {
+						
+						displayObject.mask = null;
+						
+					}
+					
+					if (object.clipDepth != 0 #if neko && object.clipDepth != null #end) {
+						
+						mask = object;
+						displayObject.visible = false;
+						maskObject = displayObject;
+						
+					}
+					
 					addChild (displayObject);
 					
 				}

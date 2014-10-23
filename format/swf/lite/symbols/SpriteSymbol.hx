@@ -36,6 +36,8 @@ class SpriteSymbol extends SWFSymbol {
 				
 				var object = new FrameObject ();
 				
+				object.clipDepth = objectData.clipDepth;
+				
 				if (objectData.colorTransform != null) {
 					
 					object.colorTransform = new ColorTransform ();
@@ -49,6 +51,8 @@ class SpriteSymbol extends SWFSymbol {
 					object.colorTransform.redOffset = objectData.colorTransform.redOffset;
 						
 				}
+				
+				object.depth = objectData.depth;
 				
 				if (objectData.filters != null) {
 					
@@ -117,7 +121,9 @@ class SpriteSymbol extends SWFSymbol {
 			
 			for (object in frame.objects) {
 				
-				var objectData:Dynamic = {};
+				var objectData:Dynamic = { };
+				
+				objectData.clipDepth = object.clipDepth;
 				
 				if (object.colorTransform != null) {
 					
@@ -132,6 +138,8 @@ class SpriteSymbol extends SWFSymbol {
 					objectData.colorTransform.redOffset = object.colorTransform.redOffset;
 					
 				}
+				
+				objectData.depth = object.depth;
 				
 				if (object.filters != null) {
 					
