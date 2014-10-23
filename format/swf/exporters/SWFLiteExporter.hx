@@ -126,6 +126,7 @@ class SWFLiteExporter {
 			symbol.codes = defineFont.codeTable.copy ();
 			symbol.italic = defineFont.italic;
 			symbol.leading = defineFont.leading;
+			symbol.name = defineFont.fontName;
 			
 			swfLite.symbols.set (symbol.id, symbol);
 			

@@ -20,6 +20,7 @@ class FontSymbol extends SWFSymbol {
 	public var glyphs:Array<Array<ShapeCommand>>;
 	public var italic:Bool;
 	public var leading:Int;
+	public var name:String;
 	
 	
 	public function new () {
@@ -110,6 +111,7 @@ class FontSymbol extends SWFSymbol {
 		
 		italic = data.italic;
 		leading = data.leading;
+		name = data.name;
 		
 	}
 	
@@ -234,6 +236,7 @@ class FontSymbol extends SWFSymbol {
 		#else
 		data.leading = leading;
 		#end
+		data.name = name;
 		
 		return data;
 		
