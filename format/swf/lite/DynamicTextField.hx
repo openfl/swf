@@ -4,6 +4,7 @@ package format.swf.lite;
 import flash.display.Shape;
 import flash.display.Sprite;
 import flash.geom.Point;
+import flash.text.Font;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.text.TextFormatAlign;
@@ -43,11 +44,38 @@ class DynamicTextField extends TextField {
 		format.size = (symbol.fontHeight / 20);
 		
 		var font:FontSymbol = cast swf.symbols.get (symbol.fontID);
-		format.bold = font.bold;
-		format.italic = font.italic;
-		format.leading = font.leading / 20;
+		
+		if (font != null) {
+			
+			format.bold = font.bold;
+			format.italic = font.italic;
+			format.leading = font.leading / 20;
+			//embedFonts = true;
+			
+		}
 		
 		format.font = symbol.fontName;
+		var found = false;
+		
+		for (font in Font.enumerateFonts ()) {
+			
+			if (font.fontName == format.font) {
+				
+				found = true;
+				
+			}
+			
+		}
+		
+		if (found) {
+			
+			embedFonts = true;
+			
+		} else {
+			
+			trace ("Warning: Could not find required font \"" + format.font + "\", it has not been embedded");
+			
+		}
 		
 		format.leftMargin = symbol.leftMargin / 20;
 		format.rightMargin = symbol.rightMargin / 20;
@@ -63,8 +91,6 @@ class DynamicTextField extends TextField {
 		//#end
 		
 		defaultTextFormat = format;
-		
-		embedFonts = true;
 		
 		#if (cpp || neko)
 		
