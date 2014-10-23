@@ -2,6 +2,7 @@ package format.swf.lite.symbols;
 
 
 import flash.display.CapsStyle;
+import flash.display.GradientType;
 import flash.display.InterpolationMethod;
 import flash.display.JointStyle;
 import flash.display.LineScaleMode;
@@ -68,6 +69,13 @@ class FontSymbol extends SWFSymbol {
 							}
 						
 						case BEGIN_GRADIENT_FILL:
+							
+							params[0] = switch (params[0]) {
+								
+								case 1: GradientType.RADIAL;
+								default: GradientType.LINEAR;
+								
+							}
 							
 							if (params[4] != null) {
 								
@@ -189,7 +197,13 @@ class FontSymbol extends SWFSymbol {
 						
 						case BEGIN_GRADIENT_FILL:
 							
-							commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, null, null, command.params[7] ];
+							commandData.params = [ null, command.params[1], command.params[2], command.params[3], null, null, null, command.params[7] ];
+							
+							if (command.params[0] != null) {
+								
+								commandData.params[0] = Type.enumIndex (command.params[0]);
+								
+							}
 							
 							if (command.params[4] != null) {
 								
