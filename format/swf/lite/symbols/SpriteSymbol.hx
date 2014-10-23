@@ -50,7 +50,30 @@ class SpriteSymbol extends SWFSymbol {
 						
 				}
 				
-				//object.filters = 
+				if (objectData.filters != null) {
+					
+					object.filters = [];
+					
+					for (filterData in cast (objectData.filters, Array<Dynamic>)) {
+						
+						var filter = Type.createInstance (resolveClass (filterData.className), []);
+						
+						for (field in Reflect.fields (filterData)) {
+							
+							if (Reflect.hasField (filter, field)) {
+								
+								Reflect.setField (filter, field, Reflect.field (filterData, field));
+								
+							}
+							
+						}
+						
+						object.filters.push (filter);
+						
+					}
+					
+				}
+				
 				object.id = objectData.id;
 				
 				if (objectData.matrix != null) {
@@ -110,7 +133,27 @@ class SpriteSymbol extends SWFSymbol {
 					
 				}
 				
-				//object.filters = 
+				if (object.filters != null) {
+					
+					objectData.filters = [];
+					
+					for (filter in object.filters) {
+						
+						var filterData:Dynamic = { };
+						filterData.className = Type.getClassName (Type.getClass (filter));
+						
+						for (field in Reflect.fields (filter)) {
+							
+							Reflect.setField (filterData, field, Reflect.field (filter, field));
+							
+						}
+						
+						objectData.filters.push (filterData);
+						
+					}
+					
+				}
+				
 				objectData.id = object.id;
 				
 				if (object.matrix != null) {
@@ -136,6 +179,25 @@ class SpriteSymbol extends SWFSymbol {
 		}
 		
 		return data;
+		
+	}
+	
+	
+	private function resolveClass (name:String):Class <Dynamic> {
+		
+		var value = Type.resolveClass (name);
+		
+		if (value == null) {
+			
+			#if flash
+			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
+			#else
+			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "openfl"));
+			#end
+			
+		}
+		
+		return value;
 		
 	}
 	

@@ -59,12 +59,7 @@ class ShapeSymbol extends SWFSymbol {
 					
 					case BEGIN_GRADIENT_FILL:
 						
-						params[0] = switch (params[0]) {
-							
-							case 1: GradientType.RADIAL;
-							default: GradientType.LINEAR;
-							
-						}
+						params[0] = if (params[0] != null) Type.createEnum (GradientType, params[0]);
 						
 						if (params[4] != null) {
 							
@@ -78,50 +73,14 @@ class ShapeSymbol extends SWFSymbol {
 							
 						}
 						
-						params[5] = switch (params[5]) {
-							
-							case 1: SpreadMethod.REFLECT;
-							case 2: SpreadMethod.REPEAT;
-							default: SpreadMethod.PAD;
-							
-						}
-						
-						params[6] = switch (params[6]) {
-							
-							case 0: InterpolationMethod.LINEAR_RGB;
-							default: InterpolationMethod.RGB;
-							
-						}
-						
-						trace (params);
+						params[5] = if (params[5] != null) Type.createEnum (SpreadMethod, params[5]);
+						params[6] = if (params[6] != null) Type.createEnum (InterpolationMethod, params[6]);
 					
 					case LINE_STYLE:
 						
-						params[4] = switch (params[4]) {
-							
-							case 0: LineScaleMode.HORIZONTAL;
-							case 1: LineScaleMode.NONE;
-							case 3: LineScaleMode.VERTICAL;
-							default: LineScaleMode.NORMAL;
-							
-							
-						}
-						
-						params[5] = switch (params[5]) {
-							
-							case 0: CapsStyle.NONE;
-							case 2: CapsStyle.SQUARE;
-							default: CapsStyle.ROUND;
-							
-						}
-						
-						params[6] = switch (params[6]) {
-							
-							case 0: JointStyle.BEVEL;
-							case 1: JointStyle.MITER;
-							default: JointStyle.ROUND;
-							
-						}
+						params[4] = if (params[4] != null) Type.createEnum (LineScaleMode, params[4]);
+						params[5] = if (params[5] != null) Type.createEnum (CapsStyle, params[5]);
+						params[6] = if (params[6] != null) Type.createEnum (JointStyle, params[6]);
 					
 					default:
 						
@@ -176,7 +135,7 @@ class ShapeSymbol extends SWFSymbol {
 						
 						if (command.params[0] != null) {
 							
-							commandData.params[0] = Type.enumIndex (command.params[0]);
+							commandData.params[0] = Std.string (command.params[0]);
 							
 						}
 						
@@ -194,13 +153,13 @@ class ShapeSymbol extends SWFSymbol {
 						
 						if (command.params[5] != null) {
 							
-							commandData.params[5] = Type.enumIndex (command.params[5]);
+							commandData.params[5] = Std.string (command.params[5]);
 							
 						}
 						
 						if (command.params[6] != null) {
 							
-							commandData.params[6] = Type.enumIndex (command.params[6]);
+							commandData.params[6] = Std.string (command.params[6]);
 							
 						}
 					
@@ -210,19 +169,19 @@ class ShapeSymbol extends SWFSymbol {
 						
 						if (command.params[4] != null) {
 							
-							commandData.params[4] = Type.enumIndex (command.params[4]);
+							commandData.params[4] = Std.string (command.params[4]);
 							
 						}
 						
 						if (command.params[5] != null) {
 							
-							commandData.params[5] = Type.enumIndex (command.params[5]);
+							commandData.params[5] = Std.string (command.params[5]);
 							
 						}
 						
 						if (command.params[6] != null) {
 							
-							commandData.params[6] = Type.enumIndex (command.params[6]);
+							commandData.params[6] = Std.string (command.params[6]);
 							
 						}
 					
