@@ -64,6 +64,8 @@ class DynamicTextField extends TextField {
 		
 		defaultTextFormat = format;
 		
+		embedFonts = true;
+		
 		#if (cpp || neko)
 		
 		var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
