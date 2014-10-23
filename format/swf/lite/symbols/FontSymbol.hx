@@ -49,7 +49,7 @@ class FontSymbol extends SWFSymbol {
 				for (commandData in cast (glyphData, Array<Dynamic>)) {
 					
 					var type = Type.createEnumIndex (CommandType, commandData.type);
-					var params = cast (commandData.params, Array<Dynamic>).copy ();
+					var params:Array<Dynamic> = commandData.params.copy ();
 					
 					switch (type) {
 						
@@ -166,63 +166,63 @@ class FontSymbol extends SWFSymbol {
 							
 							if (command.params[1] != null) {
 								
-								var matrix:Dynamic = {};
-								matrix.a = command.params[1].a;
-								matrix.b = command.params[1].b;
-								matrix.c = command.params[1].c;
-								matrix.d = command.params[1].d;
-								matrix.tx = command.params[1].tx;
-								matrix.ty = command.params[1].ty;
-								command.params[1] = matrix;
+								commandData.params[1] = {};
+								commandData.params[1].a = command.params[1].a;
+								commandData.params[1].b = command.params[1].b;
+								commandData.params[1].c = command.params[1].c;
+								commandData.params[1].d = command.params[1].d;
+								commandData.params[1].tx = command.params[1].tx;
+								commandData.params[1].ty = command.params[1].ty;
 								
 							}
 						
 						case BEGIN_GRADIENT_FILL:
 							
-							commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, command.params[5], command.params[6], command.params[7] ];
+							commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, null, null, command.params[7] ];
 							
 							if (command.params[4] != null) {
 								
-								var matrix:Dynamic = {};
-								matrix.a = command.params[4].a;
-								matrix.b = command.params[4].b;
-								matrix.c = command.params[4].c;
-								matrix.d = command.params[4].d;
-								matrix.tx = command.params[4].tx;
-								matrix.ty = command.params[4].ty;
-								command.params[4] = matrix;
+								commandData.params[4] = {};
+								commandData.params[4].a = command.params[4].a;
+								commandData.params[4].b = command.params[4].b;
+								commandData.params[4].c = command.params[4].c;
+								commandData.params[4].d = command.params[4].d;
+								commandData.params[4].tx = command.params[4].tx;
+								commandData.params[4].ty = command.params[4].ty;
 								
 							}
 							
 							if (command.params[5] != null) {
 								
-								command.params[5] = Type.enumIndex (command.params[5]);
+								commandData.params[5] = Type.enumIndex (command.params[5]);
 								
 							}
 							
 							if (command.params[6] != null) {
 								
-								command.params[6] = Type.enumIndex (command.params[6]);
+								commandData.params[6] = Type.enumIndex (command.params[6]);
 								
 							}
 						
 						case LINE_STYLE:
 							
+							commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, null, null, command.params[7] ];
+							
 							if (command.params[4] != null) {
 								
-								command.params[4] = Type.enumIndex (command.params[4]);
+								commandData.params[4] = Type.enumIndex (command.params[4]);
 								
 							}
 							
 							if (command.params[5] != null) {
 								
-								command.params[5] = Type.enumIndex (command.params[5]);
+								commandData.params[5] = Type.enumIndex (command.params[5]);
 								
 							}
 							
 							if (command.params[6] != null) {
 								
-								command.params[6] = Type.enumIndex (command.params[6]);
+								commandData.params[6] = Type.enumIndex (command.params[6]);
 								
 							}
 						
@@ -243,7 +243,11 @@ class FontSymbol extends SWFSymbol {
 		}
 		
 		data.italic = italic;
+		#if neko
+		data.leading = (leading != null) ? leading : 0;
+		#else
 		data.leading = leading;
+		#end
 		
 		return data;
 		

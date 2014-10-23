@@ -151,7 +151,7 @@ class ShapeSymbol extends SWFSymbol {
 					
 					case BEGIN_GRADIENT_FILL:
 						
-						commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, command.params[5], command.params[6], command.params[7] ];
+						commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, null, null, command.params[7] ];
 						
 						if (command.params[4] != null) {
 							
@@ -167,33 +167,35 @@ class ShapeSymbol extends SWFSymbol {
 						
 						if (command.params[5] != null) {
 							
-							command.params[5] = Type.enumIndex (command.params[5]);
+							commandData.params[5] = Type.enumIndex (command.params[5]);
 							
 						}
 						
 						if (command.params[6] != null) {
 							
-							command.params[6] = Type.enumIndex (command.params[6]);
+							commandData.params[6] = Type.enumIndex (command.params[6]);
 							
 						}
 					
 					case LINE_STYLE:
 						
+						commandData.params = [ command.params[0], command.params[1], command.params[2], command.params[3], null, null, null, command.params[7] ];
+						
 						if (command.params[4] != null) {
 							
-							command.params[4] = Type.enumIndex (command.params[4]);
+							commandData.params[4] = Type.enumIndex (command.params[4]);
 							
 						}
 						
 						if (command.params[5] != null) {
 							
-							command.params[5] = Type.enumIndex (command.params[5]);
+							commandData.params[5] = Type.enumIndex (command.params[5]);
 							
 						}
 						
 						if (command.params[6] != null) {
 							
-							command.params[6] = Type.enumIndex (command.params[6]);
+							commandData.params[6] = Type.enumIndex (command.params[6]);
 							
 						}
 					

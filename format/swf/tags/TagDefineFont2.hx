@@ -24,7 +24,7 @@ class TagDefineFont2 extends TagDefineFont #if !haxe3 , #end implements IDefinit
 	public var ascent:Int;
 	public var descent:Int;
 	public var leading:Int;
-
+	
 	public var codeTable (default, null):Array<Int>;
 	public var fontAdvanceTable (default, null):Array<Int>;
 	public var fontBoundsTable (default, null):Array<SWFRectangle>;
