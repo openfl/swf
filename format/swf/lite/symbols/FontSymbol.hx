@@ -81,35 +81,46 @@ class FontSymbol extends SWFSymbol {
 								
 							}
 							
-							if (params[5] != null) {
+							params[5] = switch (params[5]) {
 								
-								params[5] = Type.createEnumIndex (SpreadMethod, params[5]);
+								case 1: SpreadMethod.REFLECT;
+								case 2: SpreadMethod.REPEAT;
+								default: SpreadMethod.PAD;
 								
 							}
 							
-							if (params[6] != null) {
+							params[6] = switch (params[6]) {
 								
-								params[6] = Type.createEnumIndex (InterpolationMethod, params[6]);
+								case 0: InterpolationMethod.LINEAR_RGB;
+								default: InterpolationMethod.RGB;
 								
 							}
 						
 						case LINE_STYLE:
 							
-							if (params[4] != null) {
+							params[4] = switch (params[4]) {
 								
-								params[4] = Type.createEnumIndex (LineScaleMode, params[4]);
+								case 0: LineScaleMode.HORIZONTAL;
+								case 1: LineScaleMode.NONE;
+								case 3: LineScaleMode.VERTICAL;
+								default: LineScaleMode.NORMAL;
 								
-							}
-							
-							if (params[5] != null) {
-								
-								params[5] = Type.createEnumIndex (CapsStyle, params[5]);
 								
 							}
 							
-							if (params[6] != null) {
+							params[5] = switch (params[5]) {
 								
-								params[6] = Type.createEnumIndex (JointStyle, params[6]);
+								case 0: CapsStyle.NONE;
+								case 2: CapsStyle.SQUARE;
+								default: CapsStyle.ROUND;
+								
+							}
+							
+							params[6] = switch (params[6]) {
+								
+								case 0: JointStyle.BEVEL;
+								case 1: JointStyle.MITER;
+								default: JointStyle.ROUND;
 								
 							}
 						
