@@ -378,7 +378,7 @@ class Tools {
 					
 					var bitmapData = exporter.bitmaps.get (id);
 					var symbol:BitmapSymbol = cast swfLite.symbols.get (id);
-					symbol.path = "libraries/bin/" + id + ".png";
+					symbol.path = "libraries/bin/" + library.name + "/" + id + ".png";
 					swfLite.symbols.set (id, symbol);
 					
 					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
