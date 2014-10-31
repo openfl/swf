@@ -44,7 +44,8 @@ class Shape extends flash.display.Shape {
 						
 						if (command.params.length > 0) {
 							
-							graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+							graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[7]);
+							//graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
 							
 						} else {
 							
