@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.6.5",
-  "releasenote": "Add SWFLite filters and mask support",
+  "version": "1.6.6",
+  "releasenote": "Minor patch",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
