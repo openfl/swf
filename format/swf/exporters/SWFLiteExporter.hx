@@ -306,7 +306,7 @@ class SWFLiteExporter {
 		
 		var bounds = tag.bounds.rect;
 		symbol.x = bounds.x;
-		symbol.y = bounds.y - 2;
+		symbol.y = bounds.y;
 		symbol.width = bounds.width;
 		symbol.height = bounds.height;
 		
