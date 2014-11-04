@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.6.6",
-  "releasenote": "Minor patch",
+  "version": "1.6.7",
+  "releasenote": "Minor SWFLite consistency improvements",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
