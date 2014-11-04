@@ -60,11 +60,13 @@ class SpriteSymbol extends SWFSymbol {
 					
 					for (filterData in cast (objectData.filters, Array<Dynamic>)) {
 						
-						var filter = Type.createInstance (resolveClass (filterData.className), []);
+						var filterClass = resolveClass (filterData.className);
+						var filter = Type.createInstance (filterClass, []);
+						var instanceFields = Type.getInstanceFields (filterClass);
 						
 						for (field in Reflect.fields (filterData)) {
 							
-							if (Reflect.hasField (filter, field)) {
+							if (instanceFields.indexOf (field) > -1 || Reflect.hasField (filter, field)) {
 								
 								Reflect.setField (filter, field, Reflect.field (filterData, field));
 								
