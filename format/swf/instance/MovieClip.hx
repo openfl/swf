@@ -36,31 +36,31 @@ typedef ChildObject = {
 class MovieClip extends flash.display.MovieClip {
 	
 	
-	private static var clips:Array <MovieClip>;
-	private static var initialized:Bool;
+	@:noCompletion private static var clips:Array <MovieClip>;
+	@:noCompletion private static var initialized:Bool;
 	
-	private var data:SWFTimelineContainer;
-	private var lastUpdate:Int;
-	private var playing:Bool;
+	@:noCompletion private var data:SWFTimelineContainer;
+	@:noCompletion private var lastUpdate:Int;
+	@:noCompletion private var playing:Bool;
 	
-	private var objectPool:Map<Int, List<ChildObject>>;
-	private var activeObjects:Array<ChildObject>;
+	@:noCompletion private var objectPool:Map<Int, List<ChildObject>>;
+	@:noCompletion private var activeObjects:Array<ChildObject>;
 	
 	#if flash
-	private var __currentFrame:Int;
-	private var __currentFrameLabel:String;
-	private var __totalFrames:Int;
-	private var __currentLabel:String;
-	private var __currentLabels:Array<FrameLabel>;
+	@:noCompletion private var __currentFrame:Int;
+	@:noCompletion private var __currentFrameLabel:String;
+	@:noCompletion private var __totalFrames:Int;
+	@:noCompletion private var __currentLabel:String;
+	@:noCompletion private var __currentLabels:Array<FrameLabel>;
 	#end
 	
-	public var scale9BitmapGrid(get, set):Rectangle;
-	private var _scale9BitmapGrid:Rectangle;
-	private var _scale9BitmapData:BitmapData;
-	private var _scale9ScaleX:Float = 1;
-	private var _scale9ScaleY:Float = 1;
+	@:noCompletion public var scale9BitmapGrid(get, set):Rectangle;
+	@:noCompletion private var _scale9BitmapGrid:Rectangle;
+	@:noCompletion private var _scale9BitmapData:BitmapData;
+	@:noCompletion private var _scale9ScaleX:Float = 1;
+	@:noCompletion private var _scale9ScaleY:Float = 1;
 	
-	public static function stopAllClips() {
+	@:noCompletion public static function stopAllClips() {
 		if (clips != null) {
 			while (clips.length > 0) {
 				clips[0].stop();
@@ -108,14 +108,14 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private inline function applyTween (start:Float, end:Float, ratio:Float):Float {
+	@:noCompletion private inline function applyTween (start:Float, end:Float, ratio:Float):Float {
 		
 		return start + ((end - start) * ratio);
 		
 	}
 	
 	
-	private function enterFrame ():Void {
+	@:noCompletion private function enterFrame ():Void {
 		
 		if (lastUpdate == __currentFrame) {
 			
@@ -179,7 +179,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function getFrame (frame:Dynamic):Int {
+	@:noCompletion private function getFrame (frame:Dynamic):Int {
 		
 		var value = 1;
 		
@@ -234,7 +234,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private inline function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
+	@:noCompletion private inline function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
 		
 		var firstTag:TagPlaceObject = cast data.tags [frameObject.placedAtIndex];
 		var lastTag:TagPlaceObject = null;
@@ -404,7 +404,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private inline function renderFrame (index:Int):Void {
+	@:noCompletion private inline function renderFrame (index:Int):Void {
 		
 		var frame:Frame = data.frames[index];
 		var sameCharIdList:List<ChildObject>;
@@ -538,7 +538,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 	}
 	
-	private inline function getDisplayObject(charId:Int):DisplayObject {
+	@:noCompletion private inline function getDisplayObject(charId:Int):DisplayObject {
 		
 		var displayObject:DisplayObject = null;
 		
@@ -620,7 +620,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function update ():Void {
+	@:noCompletion private function update ():Void {
 		
 		if (__currentFrame != lastUpdate) {
 			
@@ -653,7 +653,7 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	
-	private inline function drawScale9BitmapData():Void {
+	@:noCompletion private inline function drawScale9BitmapData():Void {
 
 		if (_scale9BitmapData != null) {
 
@@ -665,7 +665,7 @@ class MovieClip extends flash.display.MovieClip {
 
 
 
-	private function drawScale9Bitmap(bitmap : BitmapData, drawWidth:Float, drawHeight:Float, scale9Rect:Rectangle):Void {
+	@:noCompletion private function drawScale9Bitmap(bitmap : BitmapData, drawWidth:Float, drawHeight:Float, scale9Rect:Rectangle):Void {
 
 		graphics.clear();
 
@@ -728,17 +728,17 @@ class MovieClip extends flash.display.MovieClip {
 	
 	// Get & Set Methods
 	#if flash
-	@:getter public function get_currentFrame():Int {
+	@:noCompletion @:getter public function get_currentFrame():Int {
 		
 		return __currentFrame;
 		
 	}
 	
-	@:getter(currentLabel) private function get_currentLabel():String {
+	@:noCompletion @:getter(currentLabel) private function get_currentLabel():String {
 		return __currentLabel;
 	}
 	
-	@:getter public function get___totalFrames():Int {
+	@:noCompletion @:getter public function get___totalFrames():Int {
 		
 		return __totalFrames;
 		
@@ -748,7 +748,7 @@ class MovieClip extends flash.display.MovieClip {
 	
 	// Overriding properties for scale9Grid to work
 	@:setter(scaleX)
-	#if (!flash) override #end private function set_scaleX(val:Float):#if (!flash) Float #else Void #end
+	@:noCompletion #if (!flash) override #end private function set_scaleX(val:Float):#if (!flash) Float #else Void #end
 	{
 		if (_scale9BitmapGrid == null) super.scaleX = val;
 		else {
@@ -759,13 +759,13 @@ class MovieClip extends flash.display.MovieClip {
 		#if (!flash) return val; #end
 	}
 	@:getter(scaleX)
-	#if (!flash) override #end private function get_scaleX():Float {
+	@:noCompletion #if (!flash) override #end private function get_scaleX():Float {
 		if (_scale9BitmapGrid == null) return super.scaleX;
 		else return _scale9ScaleX;
 	}
 	
 	@:setter(scaleY)
-	#if (!flash) override #end private function set_scaleY(val:Float):#if (!flash) Float #else Void #end
+	@:noCompletion #if (!flash) override #end private function set_scaleY(val:Float):#if (!flash) Float #else Void #end
 	{
 		if (_scale9BitmapGrid == null) super.scaleY = val;
 		else {
@@ -776,14 +776,14 @@ class MovieClip extends flash.display.MovieClip {
 		#if (!flash) return val; #end
 	}
 	@:getter(scaleY)
-	#if (!flash) override #end private function get_scaleY():Float {
+	@:noCompletion #if (!flash) override #end private function get_scaleY():Float {
 		if (_scale9BitmapGrid == null) return super.scaleY;
 		else return _scale9ScaleY;
 	}
 	
 	
 	@:setter(width)
-	#if (!flash) override #end private function set_width(val:Float):#if (!flash) Float #else Void #end
+	@:noCompletion #if (!flash) override #end private function set_width(val:Float):#if (!flash) Float #else Void #end
 	{
 		if (_scale9BitmapGrid == null) super.width = val;
 		else {
@@ -794,7 +794,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	@:setter(height)
-	#if (!flash) override #end private function set_height(val:Float):#if (!flash) Float #else Void #end
+	@:noCompletion #if (!flash) override #end private function set_height(val:Float):#if (!flash) Float #else Void #end
 	{
 		if (_scale9BitmapGrid == null) super.height = val;
 		else {
@@ -805,10 +805,10 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function get_scale9BitmapGrid():Rectangle {
+	@:noCompletion private function get_scale9BitmapGrid():Rectangle {
 		return _scale9BitmapGrid;
 	}
-	private function set_scale9BitmapGrid(value:Rectangle):Rectangle {
+	@:noCompletion private function set_scale9BitmapGrid(value:Rectangle):Rectangle {
 		
 		_scale9BitmapGrid = value;
 		if (_scale9BitmapGrid != null) { 
@@ -835,7 +835,7 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	
-	private static function stage_onEnterFrame (event:Event):Void {
+	@:noCompletion private static function stage_onEnterFrame (event:Event):Void {
 		
 		for (clip in clips) {
 			

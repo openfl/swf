@@ -28,11 +28,11 @@ import format.swf.timeline.FrameObject;
 class SimpleButton extends flash.display.SimpleButton {
 	
 	
-	private var data:SWFTimelineContainer;
-	private var tag:TagDefineButton2;
+	@:noCompletion private var data:SWFTimelineContainer;
+	@:noCompletion private var tag:TagDefineButton2;
 	
 	//TODO: Check why BlendModes in the SWF spec follow this order, and why the difference between cpp and flash order
-	static private var blendModes:Array<BlendMode> = [BlendMode.NORMAL, BlendMode.NORMAL, BlendMode.LAYER, BlendMode.MULTIPLY, BlendMode.SCREEN, BlendMode.LIGHTEN, BlendMode.DARKEN, BlendMode.DIFFERENCE, BlendMode.ADD, 	BlendMode.SUBTRACT,	BlendMode.INVERT, BlendMode.ALPHA, BlendMode.ERASE, BlendMode.OVERLAY, BlendMode.HARDLIGHT #if flash, BlendMode.SHADER #end];
+	@:noCompletion static private var blendModes:Array<BlendMode> = [BlendMode.NORMAL, BlendMode.NORMAL, BlendMode.LAYER, BlendMode.MULTIPLY, BlendMode.SCREEN, BlendMode.LIGHTEN, BlendMode.DARKEN, BlendMode.DIFFERENCE, BlendMode.ADD, 	BlendMode.SUBTRACT,	BlendMode.INVERT, BlendMode.ALPHA, BlendMode.ERASE, BlendMode.OVERLAY, BlendMode.HARDLIGHT #if flash, BlendMode.SHADER #end];
 	
 	public function new (data:SWFTimelineContainer, tag:TagDefineButton2) {
 		
@@ -75,7 +75,7 @@ class SimpleButton extends flash.display.SimpleButton {
 		}
 	}
 	
-	private inline function getDisplayObject(charId:Int):DisplayObject {
+	@:noCompletion private inline function getDisplayObject(charId:Int):DisplayObject {
 		var symbol = data.getCharacter (charId);
 		//var grid = data.getScalingGrid (charId);
 		var displayObject:DisplayObject = null;
@@ -118,7 +118,7 @@ class SimpleButton extends flash.display.SimpleButton {
 		
 	}
 	
-	private inline function placeButtonRecord(displayObject:DisplayObject, record:SWFButtonRecord, container:DisplayObject) :Void {
+	@:noCompletion private inline function placeButtonRecord(displayObject:DisplayObject, record:SWFButtonRecord, container:DisplayObject) :Void {
 		if (record.placeMatrix != null) {
 			displayObject.transform.matrix = new Matrix(record.placeMatrix.matrix.a, record.placeMatrix.matrix.b, record.placeMatrix.matrix.c, record.placeMatrix.matrix.d, record.placeMatrix.matrix.tx / 20, record.placeMatrix.matrix.ty / 20);
 		}

@@ -24,17 +24,17 @@ import openfl.Assets;
 class MovieClip extends flash.display.MovieClip {
 	
 	
-	private static var clips:Array <MovieClip>;
-	private static var initialized:Bool;
+	@:noCompletion private static var clips:Array <MovieClip>;
+	@:noCompletion private static var initialized:Bool;
 	
-	private var lastUpdate:Int;
-	private var playing:Bool;
-	private var swf:SWFLite;
-	private var symbol:SpriteSymbol;
+	@:noCompletion private var lastUpdate:Int;
+	@:noCompletion private var playing:Bool;
+	@:noCompletion private var swf:SWFLite;
+	@:noCompletion private var symbol:SpriteSymbol;
 	
 	#if flash
-	private var __currentFrame:Int;
-	private var __totalFrames:Int;
+	@:noCompletion private var __currentFrame:Int;
+	@:noCompletion private var __totalFrames:Int;
 	#end
 	
 	
@@ -67,7 +67,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private inline function applyTween (start:Float, end:Float, ratio:Float):Float {
+	@:noCompletion private inline function applyTween (start:Float, end:Float, ratio:Float):Float {
 		
 		return start + ((end - start) * ratio);
 		
@@ -113,7 +113,7 @@ class MovieClip extends flash.display.MovieClip {
 	//}
 	
 	
-	private function createShape (symbol:ShapeSymbol):Shape {
+	@:noCompletion private function createShape (symbol:ShapeSymbol):Shape {
 		
 		var shape = new Shape ();
 		
@@ -267,7 +267,7 @@ class MovieClip extends flash.display.MovieClip {
 	}*/
 	
 	
-	private function enterFrame ():Void {
+	@:noCompletion private function enterFrame ():Void {
 		
 		if (lastUpdate == __currentFrame) {
 			
@@ -327,7 +327,7 @@ class MovieClip extends flash.display.MovieClip {
 	}*/
 	
 	
-	private function getFrame (frame:Dynamic):Int {
+	@:noCompletion private function getFrame (frame:Dynamic):Int {
 		
 		if (Std.is (frame, Int)) {
 			
@@ -377,7 +377,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
+	@:noCompletion private function placeObject (displayObject:DisplayObject, frameObject:FrameObject):Void {
 		
 		if (frameObject.name != null) {
 			
@@ -440,7 +440,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function renderFrame (index:Int):Void {
+	@:noCompletion private function renderFrame (index:Int):Void {
 		
 		var frame = symbol.frames[index];
 		
@@ -696,7 +696,7 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	private function update ():Void {
+	@:noCompletion private function update ():Void {
 		
 		if (__currentFrame != lastUpdate) {
 			
@@ -749,14 +749,14 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	#if flash
-	@:getter public function get_currentFrame():Int {
+	@:noCompletion @:getter public function get_currentFrame():Int {
 		
 		return __currentFrame;
 		
 	}
 	
 	
-	@:getter public function get___totalFrames():Int {
+	@:noCompletion @:getter public function get___totalFrames():Int {
 		
 		return __totalFrames;
 		
@@ -771,7 +771,7 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	
-	private static function stage_onEnterFrame (event:Event):Void {
+	@:noCompletion private static function stage_onEnterFrame (event:Event):Void {
 		
 		for (clip in clips) {
 			
