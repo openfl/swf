@@ -39,7 +39,7 @@ class ShapeCommandExporter extends DefaultShapeExporter {
 	
 	override public function beginFills ():Void {
 		
-		commands.push ( { type: CommandType.LINE_STYLE, params: [] } );
+		commands.push (LineStyle (null, null, null, null, null, null, null, null));
 		
 	}
 	
@@ -53,50 +53,50 @@ class ShapeCommandExporter extends DefaultShapeExporter {
 	
 	override public function beginFill (color:Int, alpha:Float = 1.0):Void {
 		
-		commands.push ( { type: CommandType.BEGIN_FILL, params: [ color, alpha ] } );
+		commands.push (BeginFill (color, alpha));
 		
 	}
 	
-	override public function beginGradientFill(type:GradientType, colors:Array<Int>, alphas:Array<Float>, ratios:Array<Float>, matrix:Matrix = null, spreadMethod:SpreadMethod = null, interpolationMethod:InterpolationMethod = null, focalPointRatio:Float = 0):Void {
+	override public function beginGradientFill (type:GradientType, colors:Array<Int>, alphas:Array<Float>, ratios:Array<Float>, matrix:Matrix = null, spreadMethod:SpreadMethod = null, interpolationMethod:InterpolationMethod = null, focalPointRatio:Float = 0):Void {
 		
-		commands.push ( { type: CommandType.BEGIN_GRADIENT_FILL, params: [ type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio ] } );
+		commands.push (BeginGradientFill (type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio));
 		
 	}
 
-	override public function beginBitmapFill(bitmapId:Int, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
+	override public function beginBitmapFill (bitmapId:Int, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
 		
-		commands.push ( { type: CommandType.BEGIN_BITMAP_FILL, params: [ bitmapId, matrix, repeat, smooth ] } );
-		
-	}
-	
-	override public function endFill():Void {
-		
-		commands.push ( { type: CommandType.END_FILL, params: [] } );
+		commands.push (BeginBitmapFill (bitmapId, matrix, repeat, smooth));
 		
 	}
 	
-	override public function lineStyle(thickness:Float = 0, color:Int = 0, alpha:Float = 1.0, pixelHinting:Bool = false, scaleMode:LineScaleMode = null, startCaps:CapsStyle = null, endCaps:CapsStyle = null, joints:JointStyle = null, miterLimit:Float = 3):Void {
+	override public function endFill ():Void {
 		
-		commands.push ( { type: CommandType.LINE_STYLE, params: [ thickness, color, alpha, pixelHinting, scaleMode, startCaps, endCaps, joints, miterLimit ] } );
+		commands.push (EndFill);
+		
+	}
+	
+	override public function lineStyle (thickness:Float = 0, color:Int = 0, alpha:Float = 1.0, pixelHinting:Bool = false, scaleMode:LineScaleMode = null, startCaps:CapsStyle = null, endCaps:CapsStyle = null, joints:JointStyle = null, miterLimit:Float = 3):Void {
+		
+		commands.push (LineStyle (thickness, color, alpha, pixelHinting, scaleMode, startCaps, /*endCaps,*/ joints, miterLimit));
 		
 	}
 	
 	
-	override public function moveTo(x:Float, y:Float):Void {
+	override public function moveTo (x:Float, y:Float):Void {
 		
-		commands.push ( { type: CommandType.MOVE_TO, params: [ x, y ] } );
-		
-	}
-	
-	override public function lineTo(x:Float, y:Float):Void {
-		
-		commands.push ( { type: CommandType.LINE_TO, params: [ x, y ] } );
+		commands.push (MoveTo (x, y));
 		
 	}
 	
-	override public function curveTo(controlX:Float, controlY:Float, anchorX:Float, anchorY:Float):Void {
+	override public function lineTo (x:Float, y:Float):Void {
 		
-		commands.push ( { type: CommandType.CURVE_TO, params: [ controlX, controlY, anchorX, anchorY ] } );
+		commands.push (LineTo (x, y));
+		
+	}
+	
+	override public function curveTo (controlX:Float, controlY:Float, anchorX:Float, anchorY:Float):Void {
+		
+		commands.push (CurveTo (controlX, controlY, anchorX, anchorY));
 		
 	}
 	

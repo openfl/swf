@@ -401,7 +401,7 @@ class Tools {
 				data.type = "format.swf.lite.SWFLiteLibrary";
 				data.args = [ "libraries/" + library.name + ".dat" ];
 				
-				var swfLiteAsset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
+				var swfLiteAsset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.BINARY);
 				swfLiteAsset.data = swfLite.serialize ();
 				output.assets.push (swfLiteAsset);
 				

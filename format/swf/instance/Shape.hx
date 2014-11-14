@@ -21,31 +21,45 @@ class Shape extends flash.display.Shape {
 			
 			for (command in handler.commands) {
 				
-				switch (command.type) {
+				switch (command) {
 					
-					case BEGIN_FILL: graphics.beginFill (command.params[0], command.params[1]);
-					case BEGIN_GRADIENT_FILL: 
+					case BeginFill (color, alpha):
 						
-						cacheAsBitmap = true;
-						graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+						graphics.beginFill (color, alpha);
 					
-					case BEGIN_BITMAP_FILL: 
+					case BeginBitmapFill (bitmapID, matrix, repeat, smooth):
 						
-						var bitmap = new Bitmap (cast data.getCharacter (command.params[0]));
+						var bitmap = new Bitmap (cast data.getCharacter (bitmapID));
 						
 						if (bitmap.bitmapData != null) {
 							
-							graphics.beginBitmapFill (bitmap.bitmapData, command.params[1], command.params[2], command.params[3]);
+							graphics.beginBitmapFill (bitmap.bitmapData, matrix, repeat, smooth);
 							
 						}
+					
+					case BeginGradientFill (fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
 						
-					case END_FILL: graphics.endFill ();
-					case LINE_STYLE: 
+						#if (cpp || neko)
+						cacheAsBitmap = true;
+						#end
+						graphics.beginGradientFill (fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
+					
+					case CurveTo (controlX, controlY, anchorX, anchorY):
 						
-						if (command.params.length > 0) {
+						#if (cpp || neko)
+						cacheAsBitmap = true;
+						#end
+						graphics.curveTo (controlX, controlY, anchorX, anchorY);
+					
+					case EndFill:
+						
+						graphics.endFill ();
+					
+					case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+						
+						if (thickness != null) {
 							
-							graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[7]);
-							//graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+							graphics.lineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 							
 						} else {
 							
@@ -53,12 +67,13 @@ class Shape extends flash.display.Shape {
 							
 						}
 					
-					case MOVE_TO: graphics.moveTo (command.params[0], command.params[1]);
-					case LINE_TO: graphics.lineTo (command.params[0], command.params[1]);
-					case CURVE_TO: 
+					case LineTo (x, y):
 						
-						cacheAsBitmap = true;
-						graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
+						graphics.lineTo (x, y);
+					
+					case MoveTo (x, y):
+						
+						graphics.moveTo (x, y);
 					
 				}
 				

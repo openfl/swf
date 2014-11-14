@@ -1,7 +1,7 @@
 package format.swf.lite.symbols;
 
 
-import flash.text.TextFormatAlign;
+//import flash.text.TextFormatAlign;
 
 
 class DynamicTextSymbol extends SWFSymbol {
@@ -32,36 +32,6 @@ class DynamicTextSymbol extends SWFSymbol {
 	public function new () {
 		
 		super ();
-		
-		type = "dynamictext";
-		
-	}
-	
-	
-	public override function parse (data:Dynamic):Void {
-		
-		super.parse (data);
-		
-		align = data.align;
-		border = data.border;
-		color = data.color;
-		fontHeight = data.fontHeight;
-		fontID = data.fontID;
-		fontName = data.fontName;
-		height = data.height;
-		html = data.html;
-		indent = data.indent;
-		leading = data.leading;
-		leftMargin = data.leftMargin;
-		multiline = data.multiline;
-		password = data.password;
-		rightMargin = data.rightMargin;
-		selectable = data.selectable;
-		text = data.text;
-		width = data.width;
-		wordWrap = data.wordWrap;
-		x = data.x;
-		y = data.y;
 		
 	}
 	

@@ -255,34 +255,38 @@ class SWFFont extends AbstractFont {
 				var scale = (height / 1024);
 				var offsetX = 0;
 				var offsetY = font.ascent * scale * 0.05;
-
+				
+				var graphics = shape.graphics;
+				
 				for (command in handler.commands) {
 					
-					switch (command.type) {
+					switch (command) {
 						
-						case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-						case END_FILL: shape.graphics.endFill ();
-						case LINE_STYLE: 
+						case BeginFill (color, alpha): graphics.beginFill (color, alpha);
+						case EndFill: shape.graphics.endFill ();
+						case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 							
-							if (command.params.length > 0) {
+							if (thickness != null) {
 								
-								shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+								graphics.lineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 								
 							} else {
 								
-								shape.graphics.lineStyle ();
+								graphics.lineStyle ();
 								
 							}
-							
-						case MOVE_TO: shape.graphics.moveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
-						case LINE_TO: shape.graphics.lineTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
-						case CURVE_TO: 
-							
-							shape.graphics.curveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY, command.params[2] * scale + offsetX, command.params[3] * scale + offsetY);
 						
+						case MoveTo (x, y): graphics.moveTo (x * scale + offsetX, y * scale + offsetY);
+						case LineTo (x, y): graphics.lineTo (x * scale + offsetX, y * scale + offsetY);
+						case CurveTo (controlX, controlY, anchorX, anchorY):
+							
+							//cacheAsBitmap = true;
+							graphics.curveTo (controlX * scale + offsetX, controlY * scale + offsetY, anchorX * scale + offsetX, anchorY * scale + offsetY);
+							
 						default:
 						
 					}
+					
 					
 				}
 				

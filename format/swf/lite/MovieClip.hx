@@ -116,55 +116,68 @@ class MovieClip extends flash.display.MovieClip {
 	@:noCompletion private function createShape (symbol:ShapeSymbol):Shape {
 		
 		var shape = new Shape ();
+		var graphics = shape.graphics;
 		
 		for (command in symbol.commands) {
 			
-			switch (command.type) {
+			switch (command) {
 				
-				case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-				case BEGIN_GRADIENT_FILL: 
+				case BeginFill (color, alpha):
 					
-					#if (cpp || neko)
-					shape.cacheAsBitmap = true;
-					#end
-					shape.graphics.beginGradientFill (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+					graphics.beginFill (color, alpha);
 				
-				case BEGIN_BITMAP_FILL: 
+				case BeginBitmapFill (bitmapID, matrix, repeat, smooth):
 					
 					#if openfl
 					
-					var bitmap:BitmapSymbol = cast swf.symbols.get (command.params[0]);
+					var bitmap:BitmapSymbol = cast swf.symbols.get (bitmapID);
 					
 					if (bitmap != null && bitmap.path != "") {
 						
 						var bitmapData = Assets.getBitmapData (bitmap.path);
-						shape.graphics.beginBitmapFill (bitmapData, command.params[1], command.params[2], command.params[3]);
+						graphics.beginBitmapFill (bitmapData, matrix, repeat, smooth);
 						
 					}
 					
 					#end
-					
-				case END_FILL: shape.graphics.endFill ();
-				case LINE_STYLE: 
-					
-					if (command.params.length > 0) {
-						
-						shape.graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
-						
-					} else {
-						
-						shape.graphics.lineStyle ();
-						
-					}
 				
-				case MOVE_TO: shape.graphics.moveTo (command.params[0], command.params[1]);
-				case LINE_TO: shape.graphics.lineTo (command.params[0], command.params[1]);
-				case CURVE_TO:
+				case BeginGradientFill (fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
 					
 					#if (cpp || neko)
 					shape.cacheAsBitmap = true;
 					#end
-					shape.graphics.curveTo (command.params[0], command.params[1], command.params[2], command.params[3]);
+					graphics.beginGradientFill (fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
+				
+				case CurveTo (controlX, controlY, anchorX, anchorY):
+					
+					#if (cpp || neko)
+					shape.cacheAsBitmap = true;
+					#end
+					graphics.curveTo (controlX, controlY, anchorX, anchorY);
+				
+				case EndFill:
+					
+					graphics.endFill ();
+				
+				case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+					
+					if (thickness != null) {
+						
+						graphics.lineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
+						
+					} else {
+						
+						graphics.lineStyle ();
+						
+					}
+				
+				case LineTo (x, y):
+					
+					graphics.lineTo (x, y);
+				
+				case MoveTo (x, y):
+					
+					graphics.moveTo (x, y);
 				
 			}
 			
@@ -404,11 +417,11 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		if (frameObject.filters != null) {
+		//if (frameObject.filters != null) {
 			
-			displayObject.filters = frameObject.filters;
+			//displayObject.filters = frameObject.filters;
 			
-		}
+		//}
 		
 	}
 	

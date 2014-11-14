@@ -83,15 +83,15 @@ class StaticText extends Shape {
 		
 		for (command in handler.commands) {
 			
-			switch (command.type) {
+			switch (command) {
 				
-				//case BEGIN_FILL: graphics.beginFill (command.params[0], command.params[1]);
-				//case END_FILL: graphics.endFill ();
-				case LINE_STYLE: 
+				//case BeginFill (color, alpha): graphics.beginFill (color, alpha);
+				//case EndFill: graphics.endFill ();
+				case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 					
-					if (command.params.length > 0) {
+					if (thickness != null) {
 						
-						graphics.lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+						graphics.lineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 						
 					} else {
 						
@@ -99,12 +99,12 @@ class StaticText extends Shape {
 						
 					}
 				
-				case MOVE_TO: graphics.moveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
-				case LINE_TO: graphics.lineTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
-				case CURVE_TO: 
+				case MoveTo (x, y): graphics.moveTo (x * scale + offsetX, y * scale + offsetY);
+				case LineTo (x, y): graphics.lineTo (x * scale + offsetX, y * scale + offsetY);
+				case CurveTo (controlX, controlY, anchorX, anchorY):
 					
 					cacheAsBitmap = true;
-					graphics.curveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY, command.params[2] * scale + offsetX, command.params[3] * scale + offsetY);
+					graphics.curveTo (controlX * scale + offsetX, controlY * scale + offsetY, anchorX * scale + offsetX, anchorY * scale + offsetY);
 					
 				default:
 				

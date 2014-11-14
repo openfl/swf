@@ -14,20 +14,6 @@ class StaticTextSymbol extends SWFSymbol {
 		
 		super ();
 		
-		type = "statictext";
-		
-	}
-	
-	
-	public override function parse (data:Dynamic):Void {
-		
-		super.parse (data);
-		
-		color = data.color;
-		fontHeight = data.fontHeight;
-		fontID = data.fontID;
-		text = data.text;
-		
 	}
 	
 	

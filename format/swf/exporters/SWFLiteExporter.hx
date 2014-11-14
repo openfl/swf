@@ -152,9 +152,13 @@ class SWFLiteExporter {
 		
 		for (command in handler.commands) {
 			
-			if (command.type == CommandType.BEGIN_BITMAP_FILL) {
+			switch (command) {
 				
-				processTag (cast data.getCharacter (command.params[0]));
+				case BeginBitmapFill (bitmapID, _, _, _):
+					
+					processTag (cast data.getCharacter (bitmapID));
+				
+				default:
 				
 			}
 			
@@ -220,7 +224,7 @@ class SWFLiteExporter {
 					
 				}
 				
-				frameObject.filters = filters;
+				//frameObject.filters = filters;
 				
 			}
 			
@@ -295,7 +299,7 @@ class SWFLiteExporter {
 			
 			if (font != null) {
 				
-				processTag (font);
+				//processTag (font);
 				
 			}
 			

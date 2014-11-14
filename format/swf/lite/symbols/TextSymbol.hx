@@ -21,27 +21,6 @@ class TextSymbol extends SWFSymbol {
 		
 		super ();
 		
-		type = "text";
-		
-	}
-	
-	
-	public override function parse (data:Dynamic):Void {
-		
-		super.parse (data);
-		
-		border = data.border;
-		color = data.color;
-		fontHeight = data.fontHeight;
-		fontID = data.fontID;
-		height = data.height;
-		multiline = data.multiline;
-		password = data.password;
-		selectable = data.selectable;
-		text = data.text;
-		width = data.width;
-		wordWrap = data.wordWrap;
-		
 	}
 	
 	

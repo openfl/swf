@@ -7,14 +7,21 @@ import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
 import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.MovieClip;
+import haxe.io.Bytes;
 import haxe.Json;
+import haxe.Serializer;
+import haxe.Unserializer;
 import openfl.Assets;
+//import org.msgpack.MsgPack;
 
 
 class SWFLite {
 	
 	
 	public static var instances = new Map<String, SWFLite> ();
+	
+	private static var serializer:Serializer;
+	private static var unserializer:Unserializer;
 	
 	public var frameRate:Float;
 	public var root:SpriteSymbol;
@@ -25,8 +32,7 @@ class SWFLite {
 		
 		symbols = new Map <Int, SWFSymbol> ();
 		
-		// distinction of symbol by class name ad characters by ID somewhere?
-		
+		// distinction of symbol by class name and characters by ID somewhere?
 		
 	}
 	
@@ -106,45 +112,75 @@ class SWFLite {
 	}
 	
 	
-	public function serialize ():String {
+	private static function resolveClass (name:String):Class <Dynamic> {
 		
-		var object:Dynamic = {};
-		object.frameRate = frameRate;
-		object.root = root.prepare ();
+		var value = Type.resolveClass (name);
 		
-		var symbolData = [];
-		
-		for (id in symbols.keys ()) {
+		if (value == null) {
 			
-			var character:Dynamic = {};
-			character.id = id;
-			character.symbol = symbols.get (id).prepare ();
-			
-			symbolData.push (character);
+			#if flash
+			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
+			#else
+			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "openfl"));
+			#end
 			
 		}
 		
-		object.symbols = symbolData;
+		return value;
 		
-		return Json.stringify (object);
+	}
+	
+	
+	private static function resolveEnum (name:String):Enum <Dynamic> {
+		
+		var value = Type.resolveEnum (name);
+		
+		if (value == null) {
+			
+			#if flash
+			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "flash"));
+			#else
+			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "openfl"));
+			#end
+			
+		}
+		
+		#if flash
+		
+		if (value == null) {
+			
+			return cast Type.resolveClass (name);
+			
+		}
+		
+		#end
+		
+		return value;
+		
+	}
+	
+	
+	public function serialize ():String {
+		
+		if (serializer == null) {
+			
+			serializer = new Serializer ();
+			serializer.useCache = true;
+			
+		}
+		
+		serializer.serialize (this);
+		return serializer.toString ();
 		
 	}
 	
 	
 	public static function unserialize (data:String):SWFLite {
 		
-		var object:Dynamic = Json.parse (data);
-		var swfLite = new SWFLite ();
-		swfLite.frameRate = object.frameRate;
-		swfLite.root = cast SWFSymbol.unserialize (object.root);
+		var unserializer = new Unserializer (data);
+		unserializer.setResolver ({ resolveClass: resolveClass, resolveEnum: resolveEnum });
 		
-		for (character in cast (object.symbols, Array<Dynamic>)) {
-			
-			swfLite.symbols.set (character.id, SWFSymbol.unserialize (character.symbol));
-			
-		}
-		
-		return swfLite;
+		return cast unserializer.unserialize ();
 		
 	}
 	

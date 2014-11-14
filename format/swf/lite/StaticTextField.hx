@@ -59,30 +59,43 @@ class StaticTextField extends Shape {
 		
 		for (command in font.glyphs[character]) {
 			
-			switch (command.type) {
+			switch (command) {
 				
-				//case BEGIN_FILL: shape.graphics.beginFill (command.params[0], command.params[1]);
-				case BEGIN_FILL: beginFill (symbol.color != null ? symbol.color & 0xFFFFFF : 0x000000, symbol.color != null ? ((symbol.color >> 24) & 0xFF) / 0xFF : 1);
-				case END_FILL: endFill ();
-				case LINE_STYLE: 
+				case BeginFill (color, alpha):
 					
-					if (command.params.length > 0) {
+					beginFill (color != null ? color & 0xFFFFFF : 0x000000, color != null ? ((color >> 24) & 0xFF) / 0xFF : 1);
+				
+				case CurveTo (controlX, controlY, anchorX, anchorY):
+					
+					#if (cpp || neko)
+					cacheAsBitmap = true;
+					#end
+					curveTo (controlX * scale + offsetX, controlY * scale + offsetY, anchorX * scale + offsetX, anchorY * scale + offsetY);
+				
+				case EndFill:
+					
+					graphics.endFill ();
+				
+				case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+					
+					if (thickness != null) {
 						
-						lineStyle (command.params[0], command.params[1], command.params[2], command.params[3], command.params[4], command.params[5], command.params[6], command.params[7]);
+						graphics.lineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 						
 					} else {
 						
-						lineStyle ();
+						graphics.lineStyle ();
 						
 					}
 				
-				case MOVE_TO: moveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
-				case LINE_TO: lineTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY);
-				case CURVE_TO: 
+				case LineTo (x, y):
 					
-					cacheAsBitmap = true;
-					curveTo (command.params[0] * scale + offsetX, command.params[1] * scale + offsetY, command.params[2] * scale + offsetX, command.params[3] * scale + offsetY);
+					lineTo (x * scale + offsetX, y * scale + offsetY);
+				
+				case MoveTo (x, y):
 					
+					moveTo (x * scale + offsetX, y * scale + offsetY);
+				
 				default:
 				
 			}
