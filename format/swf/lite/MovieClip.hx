@@ -7,6 +7,7 @@ import flash.display.DisplayObject;
 import flash.display.PixelSnapping;
 import flash.display.Shape;
 import flash.events.Event;
+import flash.filters.*;
 import flash.Lib;
 import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.symbols.DynamicTextSymbol;
@@ -417,11 +418,37 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		//if (frameObject.filters != null) {
+		if (frameObject.filters != null) {
 			
-			//displayObject.filters = frameObject.filters;
+			var filters:Array<BitmapFilter> = [];
 			
-		//}
+			for (filter in frameObject.filters) {
+				
+				switch (filter) {
+					
+					case BlurFilter (blurX, blurY, quality):
+						
+						filters.push (new BlurFilter (blurX, blurY, quality));
+					
+					case ColorMatrixFilter (matrix):
+						
+						filters.push (new ColorMatrixFilter (matrix));
+					
+					case DropShadowFilter (distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject):
+						
+						filters.push (new DropShadowFilter (distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject));
+					
+					case GlowFilter (color, alpha, blurX, blurY, strength, quality, inner, knockout):
+						
+						filters.push (new GlowFilter (color, alpha, blurX, blurY, strength, quality, inner, knockout));
+					
+				}
+				
+			}
+			
+			displayObject.filters = filters;
+			
+		}
 		
 	}
 	

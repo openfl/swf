@@ -35,9 +35,9 @@ import lime.graphics.Image;
 		
 		// Hack to include filter classes, macro.include is not working properly
 		
-		var filter = flash.filters.BlurFilter;
-		var filter = flash.filters.DropShadowFilter;
-		var filter = flash.filters.GlowFilter;
+		//var filter = flash.filters.BlurFilter;
+		//var filter = flash.filters.DropShadowFilter;
+		//var filter = flash.filters.GlowFilter;
 		
 	}
 	

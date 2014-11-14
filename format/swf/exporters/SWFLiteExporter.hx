@@ -3,6 +3,7 @@ package format.swf.exporters;
 
 import flash.display.BitmapData;
 import flash.text.TextFormatAlign;
+import format.swf.exporters.core.FilterType;
 import format.swf.exporters.core.ShapeCommand;
 import format.swf.instance.Bitmap;
 import format.swf.lite.SWFLite;
@@ -215,16 +216,22 @@ class SWFLiteExporter {
 			
 			if (placeTag.hasFilterList) {
 				
-				var filters = [];
+				var filters:Array<FilterType> = [];
 				
 				for (surfaceFilter in placeTag.surfaceFilterList) {
 					
-					filters.push (surfaceFilter.filter);
-					filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
+					var type = surfaceFilter.type;
+					
+					if (type != null) {
+						
+						filters.push (surfaceFilter.type);
+						//filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
+						
+					}
 					
 				}
 				
-				//frameObject.filters = filters;
+				frameObject.filters = filters;
 				
 			}
 			

@@ -1,5 +1,6 @@
 ﻿package format.swf.data.filters;
 
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 
@@ -35,6 +36,22 @@ class FilterDropShadow extends Filter #if !haxe3 , #end implements IFilter
 			passes,
 			innerShadow,
 			knockout
+		);
+	}
+	
+	override private function get_type():FilterType {
+		return DropShadowFilter(
+			distance,
+			angle * 180 / Math.PI,
+			ColorUtils.rgb(dropShadowColor),
+			ColorUtils.alpha(dropShadowColor),
+			blurX,
+			blurY,
+			strength,
+			passes,
+			innerShadow,
+			knockout,
+			false
 		);
 	}
 	

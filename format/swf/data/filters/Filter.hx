@@ -1,5 +1,6 @@
 ﻿package format.swf.data.filters;
 
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 
 import flash.filters.BitmapFilter;
@@ -9,6 +10,7 @@ class Filter implements IFilter
 {
 	public var filter (get_filter, null):BitmapFilter;
 	public var id (default, null):Int;
+	public var type (get_type, null):FilterType;
 	
 	public function new(id:Int) {
 		this.id = id;
@@ -16,6 +18,10 @@ class Filter implements IFilter
 
 	private function get_filter():BitmapFilter {
 		throw(new Error("Implement in subclasses!"));
+		return null;
+	}
+	
+	private function get_type():FilterType {
 		return null;
 	}
 	

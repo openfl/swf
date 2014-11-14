@@ -312,7 +312,7 @@ class Tools {
 		var output = new HXProject ();
 		var embeddedSWF = false;
 		var embeddedSWFLite = false;
-		var filterClasses = [];
+		//var filterClasses = [];
 		
 		for (library in project.libraries) {
 			
@@ -389,12 +389,12 @@ class Tools {
 					
 				}
 				
-				for (filterClass in exporter.filterClasses.keys ()) {
+				//for (filterClass in exporter.filterClasses.keys ()) {
 					
-					filterClasses.remove (filterClass);
-					filterClasses.push (filterClass);
+					//filterClasses.remove (filterClass);
+					//filterClasses.push (filterClass);
 					
-				}
+				//}
 				
 				var data:Dynamic = {};
 				data.version = 0.1;
@@ -432,11 +432,11 @@ class Tools {
 			
 			output.haxeflags.push ("format.swf.lite.SWFLiteLibrary");
 			
-			for (filterClass in filterClasses) {
+			//for (filterClass in filterClasses) {
 				
-				output.haxeflags.push (StringTools.replace (filterClass, "._v2", ""));
+				//output.haxeflags.push (StringTools.replace (filterClass, "._v2", ""));
 				
-			}
+			//}
 			
 		}
 		

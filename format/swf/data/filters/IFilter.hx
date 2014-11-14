@@ -1,5 +1,6 @@
 ﻿package format.swf.data.filters;
 
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 
 import flash.filters.BitmapFilter;
@@ -8,6 +9,7 @@ interface IFilter
 {
 	var id(default, null):Int;
 	var filter(get_filter, null):BitmapFilter;
+	var type(get_type, null):FilterType;
 	
 	function parse(data:SWFData):Void;
 	function publish(data:SWFData):Void;

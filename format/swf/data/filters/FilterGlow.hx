@@ -1,5 +1,6 @@
 ﻿package format.swf.data.filters;
 
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 
@@ -23,6 +24,19 @@ class FilterGlow extends Filter #if !haxe3 , #end implements IFilter
 	
 	override private function get_filter():BitmapFilter {
 		return new GlowFilter(
+			ColorUtils.rgb(glowColor),
+			ColorUtils.alpha(glowColor),
+			blurX,
+			blurY,
+			strength,
+			passes,
+			innerGlow,
+			knockout
+		);
+	}
+	
+	override private function get_type():FilterType {
+		return GlowFilter(
 			ColorUtils.rgb(glowColor),
 			ColorUtils.alpha(glowColor),
 			blurX,

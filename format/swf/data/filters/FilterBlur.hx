@@ -1,5 +1,6 @@
 ﻿package format.swf.data.filters;
 
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 
 import flash.filters.BitmapFilter;
@@ -21,6 +22,10 @@ class FilterBlur extends Filter #if !haxe3 , #end implements IFilter
 			blurY,
 			passes
 		);
+	}
+	
+	override private function get_type():FilterType {
+		return BlurFilter(blurX, blurY, passes);
 	}
 	
 	override public function parse(data:SWFData):Void {
