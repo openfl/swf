@@ -11,12 +11,15 @@ import flash.system.ApplicationDomain;
 import flash.system.LoaderContext;
 import flash.text.Font;
 import flash.utils.ByteArray;
-import format.SWF;
 import haxe.Unserializer;
 import openfl.Assets;
 
 #if (lime && !lime_legacy)
 import lime.graphics.Image;
+#end
+
+#if !flash
+import format.SWF;
 #end
 
 
@@ -26,7 +29,10 @@ import lime.graphics.Image;
 	private var context:LoaderContext;
 	private var id:String;
 	private var loader:Loader;
+	
+	#if !flash
 	private var swf:SWF;
+	#end
 	
 	
 	public function new (id:String) {

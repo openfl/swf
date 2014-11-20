@@ -116,15 +116,16 @@ class SWFLite {
 		
 		var value = Type.resolveClass (name);
 		
-		if (value == null) {
-			
-			#if flash
-			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
-			#else
-			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "openfl"));
-			#end
-			
-		}
+		#if flash
+		
+		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl", "flash"));
+		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
+		
+		#else
+		
+		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "openfl"));
+		
+		#end
 		
 		return value;
 		
@@ -135,23 +136,17 @@ class SWFLite {
 		
 		var value = Type.resolveEnum (name);
 		
-		if (value == null) {
-			
-			#if flash
-			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "flash"));
-			#else
-			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "openfl"));
-			#end
-			
-		}
-		
 		#if flash
 		
-		if (value == null) {
-			
-			return cast Type.resolveClass (name);
-			
-		}
+		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl", "flash"));
+		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "flash"));
+		if (value == null) value = cast Type.resolveClass (name);
+		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl", "flash"));
+		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
+		
+		#else
+		
+		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "openfl"));
 		
 		#end
 		
@@ -176,6 +171,12 @@ class SWFLite {
 	
 	
 	public static function unserialize (data:String):SWFLite {
+		
+		if (data == null) {
+			
+			return null;
+			
+		}
 		
 		var unserializer = new Unserializer (data);
 		unserializer.setResolver ({ resolveClass: resolveClass, resolveEnum: resolveEnum });

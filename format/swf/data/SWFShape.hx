@@ -378,7 +378,7 @@ class SWFShape
 									handler.beginFill(ColorUtils.rgb(fillStyle.rgb), ColorUtils.alpha(fillStyle.rgb));
 								case 0x10, 0x12, 0x13:
 									// Gradient fill
-									var colors:Array<Int> = [];
+									var colors:Array<UInt> = [];
 									var alphas:Array<Float> = [];
 									var ratios:Array<Float> = [];
 									var gradientRecord:SWFGradientRecord;

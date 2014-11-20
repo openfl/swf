@@ -46,7 +46,7 @@ class AS3GraphicsDataShapeExporter extends DefaultShapeExporter
 		graphicsData.push(new GraphicsSolidFill(color, alpha));
 	}
 	
-	override public function beginGradientFill(type:GradientType, colors:Array<Int>, alphas:Array<Float>, ratios:Array<Float>, matrix:Matrix = null, spreadMethod:SpreadMethod = null/*SpreadMethod.PAD*/, interpolationMethod:InterpolationMethod = null/*InterpolationMethod.RGB*/, focalPointRatio:Float = 0):Void {
+	override public function beginGradientFill(type:GradientType, colors:Array<UInt>, alphas:Array<Float>, ratios:Array<Float>, matrix:Matrix = null, spreadMethod:SpreadMethod = null/*SpreadMethod.PAD*/, interpolationMethod:InterpolationMethod = null/*InterpolationMethod.RGB*/, focalPointRatio:Float = 0):Void {
 		cleanUpGraphicsPath();
 		
 		#if flash
