@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.6.8",
-  "releasenote": "Improvements to SWFLite",
+  "version": "1.6.9",
+  "releasenote": "Flash target fixes",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
