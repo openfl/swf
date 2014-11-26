@@ -309,7 +309,7 @@ class SWFData extends BitArray
 		var index:Int = position;
 		while (this[index++] > 0) {}
 		resetBitsPending();
-		#if (neko || ios) //TODO: Check for other targets that might require this
+		#if (neko || cpp) //TODO: Check for other targets that might require this
 		var result = readUTFBytes(index - position - 1);
 		position++;
 		return result;
