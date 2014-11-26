@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.6.9",
-  "releasenote": "Flash target fixes",
+  "version": "1.7.0",
+  "releasenote": "Fix non-printable character on C++",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
