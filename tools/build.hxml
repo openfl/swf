@@ -7,5 +7,3 @@
 -lib format
 -D lime-legacy
 --remap flash:openfl
--lib openfl
--lib msgpack-haxe
