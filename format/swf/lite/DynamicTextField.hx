@@ -98,6 +98,8 @@ class DynamicTextField extends TextField {
 		plain = new EReg ("<br>", "g").replace (symbol.text, "\n");
 		text = new EReg ("<.*?>", "g").replace (plain, "");
 		
+		text = StringTools.htmlUnescape (text);
+		
 		#else
 		
 		if (symbol.html) {
