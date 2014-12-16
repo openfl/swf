@@ -347,7 +347,7 @@ class Tools {
 				var data:Dynamic = {};
 				data.version = 0.1;
 				data.type = "format.swf.SWFLibrary";
-				data.args = [ "libraries/" + library.name + ".swf" ];
+				data.args = [ "libraries/" + library.name + "/" + library.name + ".swf" ];
 				
 				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
 				asset.data = Json.stringify (data);
@@ -378,7 +378,7 @@ class Tools {
 					
 					var bitmapData = exporter.bitmaps.get (id);
 					var symbol:BitmapSymbol = cast swfLite.symbols.get (id);
-					symbol.path = "libraries/bin/" + library.name + "/" + id + ".png";
+					symbol.path = "libraries/" + library.name + "/" + id + ".png";
 					swfLite.symbols.set (id, symbol);
 					
 					var asset = new Asset ("", symbol.path, AssetType.IMAGE);
@@ -399,9 +399,9 @@ class Tools {
 				var data:Dynamic = {};
 				data.version = 0.1;
 				data.type = "format.swf.lite.SWFLiteLibrary";
-				data.args = [ "libraries/" + library.name + ".dat" ];
+				data.args = [ "libraries/" + library.name + "/" + library.name + ".dat" ];
 				
-				var swfLiteAsset = new Asset ("", "libraries/" + library.name + ".dat", AssetType.TEXT);
+				var swfLiteAsset = new Asset ("", "libraries/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
 				swfLiteAsset.data = swfLite.serialize ();
 				output.assets.push (swfLiteAsset);
 				
