@@ -20,9 +20,6 @@ class SWFLite {
 	
 	public static var instances = new Map<String, SWFLite> ();
 	
-	private static var serializer:Serializer;
-	private static var unserializer:Unserializer;
-	
 	public var frameRate:Float;
 	public var root:SpriteSymbol;
 	public var symbols:Map <Int, SWFSymbol>;
@@ -157,13 +154,8 @@ class SWFLite {
 	
 	public function serialize ():String {
 		
-		if (serializer == null) {
-			
-			serializer = new Serializer ();
-			serializer.useCache = true;
-			
-		}
-		
+		var serializer = new Serializer ();
+		serializer.useCache = true;
 		serializer.serialize (this);
 		return serializer.toString ();
 		
