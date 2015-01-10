@@ -1,4 +1,5 @@
-[![Stories in Ready](https://badge.waffle.io/openfl/swf.png?label=ready)](https://waffle.io/openfl/swf)
+[![Haxelib Version](https://img.shields.io/github/tag/openfl/swf.svg?style=flat&label=release)](http://lib.haxe.org/p/swf)
+
 SWF
 ===
 
