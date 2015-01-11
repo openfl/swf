@@ -1,4 +1,4 @@
-[![Haxelib Version](https://img.shields.io/github/tag/openfl/swf.svg?style=flat&label=release)](http://lib.haxe.org/p/swf)
+[![Haxelib Version](https://img.shields.io/github/tag/openfl/swf.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/swf)
 
 SWF
 ===
