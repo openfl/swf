@@ -55,15 +55,26 @@ class DynamicTextField extends TextField {
 		}
 		
 		format.font = symbol.fontName;
-		var found = false;
 		
-		for (font in Font.enumerateFonts ()) {
+		var found = switch (format.font) {
 			
-			if (font.fontName == format.font) {
+			case "_sans", "_serif", "_typewriter", "", null:
 				
-				found = true;
+				true;
+			
+			default:
 				
-			}
+				for (font in Font.enumerateFonts ()) {
+					
+					if (font.fontName == format.font) {
+						
+						true;
+						
+					}
+					
+				}
+				
+				false;
 			
 		}
 		
