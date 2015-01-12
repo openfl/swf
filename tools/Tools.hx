@@ -165,7 +165,7 @@ class Tools {
 				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID };
 				var template = new Template (templateData);
 				
-				var templateFile = new Asset ("", PathHelper.combine ("../haxe", Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				var templateFile = new Asset ("", PathHelper.combine (targetDirectory + "/haxe", Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
 				templateFile.data = template.execute (context);
 				project.assets.push (templateFile);
 				
@@ -216,7 +216,7 @@ class Tools {
 				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfLiteAsset.id, SYMBOL_ID: symbolID };
 				var template = new Template (templateData);
 				
-				var templateFile = new Asset ("", PathHelper.combine ("../haxe", Path.directory (symbol.className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				var templateFile = new Asset ("", PathHelper.combine (targetDirectory + "/haxe", Path.directory (symbol.className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
 				templateFile.data = template.execute (context);
 				project.assets.push (templateFile);
 				
