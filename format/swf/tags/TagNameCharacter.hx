@@ -17,7 +17,7 @@ class TagNameCharacter implements ITag
 	public var binaryData(default, null):ByteArray;
 	public var characterId:Int;
 	
-	public function TagNameCharacter() {
+	public function new() {
 		binaryData = new ByteArray();
 	}
 	
