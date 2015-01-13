@@ -9,8 +9,8 @@
 		
 		public var label:String;
 		
-		public function ActionGotoLabel(code:Int, length:Int) {
-			super(code, length);
+		public function ActionGotoLabel(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function parse(data:SWFData):Void {
@@ -24,7 +24,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionGotoLabel = new ActionGotoLabel(code, length);
+			var action:ActionGotoLabel = new ActionGotoLabel(code, length, pos);
 			action.label = label;
 			return action;
 		}

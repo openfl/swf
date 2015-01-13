@@ -31,8 +31,8 @@ class TagPlaceObject3 extends TagPlaceObject2 #if !haxe3 , #end implements IDisp
 		hasCharacter = (flags1 & 0x02) != 0;
 		hasMove = (flags1 & 0x01) != 0;
 		var flags2:Int = data.readUI8();
-		hasBitmapBackgroundColor = (flags2 & 0x40) != 0; // Undocumented feature (SWF11)
-		hasVisibility = (flags2 & 0x20) != 0; // Undocumented feature (SWF11)
+		hasOpaqueBackground = (flags2 & 0x40) != 0;
+		hasVisible = (flags2 & 0x20) != 0;
 		hasImage = (flags2 & 0x10) != 0;
 		hasClassName = (flags2 & 0x08) != 0;
 		hasCacheAsBitmap = (flags2 & 0x04) != 0;
@@ -72,20 +72,18 @@ class TagPlaceObject3 extends TagPlaceObject2 #if !haxe3 , #end implements IDisp
 		if (hasCacheAsBitmap) {
 			bitmapCache = data.readUI8();
 		}
+		if (hasVisible) {
+			visible = data.readUI8();
+ 		}
+ 		if (hasOpaqueBackground) {
+			bitmapBackgroundColor = data.readRGBA();
+ 		}
 		if (hasClipActions) {
 			clipActions = data.readCLIPACTIONS(version);
 		}
-		// Undocumented feature (SWF11)
-		if (hasBitmapBackgroundColor) {
-			bitmapBackgroundColor = data.readARGB();
-		}
-		// Undocumented feature (SWF11)
-		if (hasVisibility) {
-			visibility = data.readUI8();
-		}
 	}
 	
-	override public function publish(data:SWFData, version:Int):Void {
+	private function prepareBody():SWFData {
 		var body:SWFData = new SWFData();
 		var flags1:Int = 0;
 		if (hasClipActions) { flags1 |= 0x80; }
@@ -98,6 +96,8 @@ class TagPlaceObject3 extends TagPlaceObject2 #if !haxe3 , #end implements IDisp
 		if (hasMove) { flags1 |= 0x01; }
 		body.writeUI8(flags1);
 		var flags2:Int = 0;
+		if (hasOpaqueBackground) { flags2 |= 0x40; }
+		if (hasVisible) { flags2 |= 0x20; }
 		if (hasImage) { flags2 |= 0x10; }
 		if (hasClassName) { flags2 |= 0x08; }
 		if (hasCacheAsBitmap) { flags2 |= 0x04; }
@@ -139,20 +139,28 @@ class TagPlaceObject3 extends TagPlaceObject2 #if !haxe3 , #end implements IDisp
 		if (hasCacheAsBitmap) {
 			body.writeUI8(bitmapCache);
 		}
+		if (hasVisible) {
+			body.writeUI8(visible);
+ 		}
+ 		if (hasOpaqueBackground) {
+			body.writeRGBA(bitmapBackgroundColor);
+ 		}
 		if (hasClipActions) {
 			body.writeCLIPACTIONS(clipActions, version);
 		}
-		// Undocumented feature (SWF11)
-		if (hasBitmapBackgroundColor) {
-			body.writeARGB(bitmapBackgroundColor);
-		}
-		// Undocumented feature (SWF11)
-		if (hasVisibility) {
-			body.writeUI8(visibility);
-		}
+		
+		
+		return body;
+	}
+	
+	
+	override public function publish(data:SWFData, version:Int):Void {
+		var body:SWFData = prepareBody();
+		
 		data.writeTagHeader(type, body.length);
 		data.writeBytes(body);
 	}
+	
 	
 	override public function toString(indent:Int = 0):String {
 		var str:String = Tag.toStringCommon(type, name, indent) +
@@ -166,8 +174,8 @@ class TagPlaceObject3 extends TagPlaceObject2 #if !haxe3 , #end implements IDisp
 		if (hasClipDepth) { str += ", ClipDepth: " + clipDepth; }
 		if (hasBlendMode) { str += ", BlendMode: " + BlendMode.toString(blendMode); }
 		if (hasCacheAsBitmap) { str += ", CacheAsBitmap: " + bitmapCache; }
-		if (hasVisibility) { str += ", Visibility: " + visibility; }
-		if (hasBitmapBackgroundColor) { str += ", BitmapBackgroundColor: " + ColorUtils.argbToString(bitmapBackgroundColor); }
+		if (hasVisible) { str += ", Visible: " + visible; }
+		if (hasOpaqueBackground) { str += ", BackgroundColor: " + ColorUtils.rgbaToString(bitmapBackgroundColor); }
 		if (hasFilterList) {
 			str += "\n" + StringUtils.repeat(indent + 2) + "Filters:";
 			for(i in 0...surfaceFilterList.length) {

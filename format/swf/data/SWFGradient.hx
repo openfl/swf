@@ -53,6 +53,6 @@ class SWFGradient
 	}
 
 	public function toString():String {
-		return "(" + records.join(",") + ")";
+		return "(" + records.join(",") + "), SpreadMode: " + spreadMode + ", InterpolationMode: " + interpolationMode;
 	}
 }

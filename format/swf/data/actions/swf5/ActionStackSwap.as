@@ -6,8 +6,8 @@
 	{
 		public static inline var CODE:Int = 0x4d;
 		
-		public function ActionStackSwap(code:Int, length:Int) {
-			super(code, length);
+		public function ActionStackSwap(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function toString(indent:Int = 0):String {

@@ -21,6 +21,6 @@ class SWFErrorEvent extends Event
 	}
 	
 	override public function toString():String {
-		return "[SWFParseErrorEvent] reason: " + reason;
+		return "[SWFErrorEvent] reason: " + reason;
 	}
 }

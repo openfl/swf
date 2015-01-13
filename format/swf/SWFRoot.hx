@@ -17,6 +17,7 @@ import format.swf.tags.TagSymbolClass;
 
 class SWFRoot extends SWFTimelineContainer
 {
+	public var signature:String;
 	public var version:Int;
 	public var fileLength:Int;
 	public var fileLengthCompressed:Int;
@@ -223,6 +224,7 @@ class SWFRoot extends SWFTimelineContainer
 	}
 	
 	private function parseHeader():Void {
+		signature = "";
 		compressed = false;
 		compressionMethod = CompressionAlgorithm.ZLIB;
 		bytes.position = 0;
@@ -235,14 +237,17 @@ class SWFRoot extends SWFTimelineContainer
 		} else if (signatureByte != 0x46) {
 			throw(new Error("Not a SWF. First signature byte is 0x" + StringTools.hex (signatureByte) + " (expected: 0x43 or 0x5A or 0x46)"));
 		}
+		signature += String.fromCharCode(signatureByte);
 		signatureByte = bytes.readUI8();
 		if (signatureByte != 0x57) {
 			throw(new Error("Not a SWF. Second signature byte is 0x" + StringTools.hex (signatureByte) + " (expected: 0x57)"));
 		}
+		signature += String.fromCharCode(signatureByte);
 		signatureByte = bytes.readUI8();
 		if (signatureByte != 0x53) {
 			throw(new Error("Not a SWF. Third signature byte is 0x" + StringTools.hex (signatureByte) + " (expected: 0x53)"));
 		}
+		signature += String.fromCharCode(signatureByte);
 		version = bytes.readUI8();
 		fileLength = bytes.readUI32();
 		fileLengthCompressed = bytes.length;

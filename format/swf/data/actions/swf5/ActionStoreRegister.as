@@ -9,8 +9,8 @@
 		
 		public var registerNumber:Int;
 		
-		public function ActionStoreRegister(code:Int, length:Int) {
-			super(code, length);
+		public function ActionStoreRegister(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function parse(data:SWFData):Void {
@@ -24,7 +24,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionStoreRegister = new ActionStoreRegister(code, length);
+			var action:ActionStoreRegister = new ActionStoreRegister(code, length, pos);
 			action.registerNumber = registerNumber;
 			return action;
 		}

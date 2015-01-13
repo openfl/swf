@@ -9,8 +9,8 @@
 		
 		public var branchOffset:Int;
 		
-		public function ActionIf(code:Int, length:Int) {
-			super(code, length);
+		public function ActionIf(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function parse(data:SWFData):Void {
@@ -24,7 +24,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionIf = new ActionIf(code, length);
+			var action:ActionIf = new ActionIf(code, length, pos);
 			action.branchOffset = branchOffset;
 			return action;
 		}

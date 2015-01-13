@@ -72,6 +72,6 @@ class SWFMatrix
 	}
 	
 	public function toString():String {
-		return "(" + scaleX + "," + scaleY + "," + rotateSkew0 + "," + rotateSkew1 + "," + translateX + "," + translateY + ")";
+		return "(" + scaleX + "," + rotateSkew0 + "," + rotateSkew1 + "," + scaleY + "," + translateX + "," + translateY + ")";
 	}
 }

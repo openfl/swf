@@ -12,8 +12,8 @@
 		public var loadTargetFlag:Bool;
 		public var loadVariablesFlag:Bool;
 		
-		public function ActionGetURL2(code:Int, length:Int) {
-			super(code, length);
+		public function ActionGetURL2(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function parse(data:SWFData):Void {
@@ -33,7 +33,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionGetURL2 = new ActionGetURL2(code, length);
+			var action:ActionGetURL2 = new ActionGetURL2(code, length, pos);
 			action.sendVarsMethod = sendVarsMethod;
 			action.reserved = reserved;
 			action.loadTargetFlag = loadTargetFlag;

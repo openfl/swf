@@ -1,8 +1,8 @@
-package com.codeazur.hxswf.exporters
+package com.codeazur.as3swf.exporters
 {
-	import com.codeazur.hxswf.SWF;
-	import com.codeazur.hxswf.utils.ColorUtils;
-	import com.codeazur.hxswf.utils.NumberUtils;
+	import com.codeazur.as3swf.SWF;
+	import com.codeazur.as3swf.utils.ColorUtils;
+	import com.codeazur.as3swf.utils.NumberUtils;
 	
 	import flash.display.CapsStyle;
 	import flash.display.InterpolationMethod;
@@ -11,30 +11,30 @@ package com.codeazur.hxswf.exporters
 	import flash.display.SpreadMethod;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
-	import com.codeazur.hxswf.exporters.core.DefaultShapeExporter;
+	import com.codeazur.as3swf.exporters.core.DefaultShapeExporter;
 
-	class JSCanvasShapeExporter extends DefaultShapeExporter
+	public class JSCanvasShapeExporter extends DefaultShapeExporter
 	{
-		private static inline var NOT_ACTIVE:String = "notActive";
-		private static inline var FILL_ACTIVE:String = "fillActive";
-		private static inline var BITMAP_FILL_ACTIVE:String = "bitmapFillActive";
-		private static inline var STROKE_ACTIVE:String = "strokeActive";
+		protected static const NOT_ACTIVE:String = "notActive";
+		protected static const FILL_ACTIVE:String = "fillActive";
+		protected static const BITMAP_FILL_ACTIVE:String = "bitmapFillActive";
+		protected static const STROKE_ACTIVE:String = "strokeActive";
 		
-		private var _js:String = "";
+		protected var _js:String = "";
 		
-		private var fills:Array<String>;
-		private var strokes:Array<String>;
+		protected var fills:Vector.<String>;
+		protected var strokes:Vector.<String>;
 		
-		private var geometry:Array;
-		private var prefix:Array;
-		private var suffix:Array;
+		protected var geometry:Array;
+		protected var prefix:Array;
+		protected var suffix:Array;
 		
-		private var active:String = NOT_ACTIVE;
+		protected var active:String = NOT_ACTIVE;
 		
-		private var condensed:Bool;
-		private var lineSep:String = "";
+		protected var condensed:Boolean;
+		protected var lineSep:String = "";
 		
-		public function JSCanvasShapeExporter(swf:SWF, condensed:Bool = true)
+		public function JSCanvasShapeExporter(swf:SWF, condensed:Boolean = true)
 		{
 			super(swf);
 			this.condensed = condensed;
@@ -46,30 +46,30 @@ package com.codeazur.hxswf.exporters
 		public function get js():String { return _js; }
 		
 
-		override public function beginShape():Void {
+		override public function beginShape():void {
 			_js = "";
 		}
 		
 		
-		override public function beginFills():Void {
-			fills = new Array<String>();
+		override public function beginFills():void {
+			fills = new Vector.<String>();
 		}
 
-		override public function endFills():Void {
+		override public function endFills():void {
 		}
 
 		
-		override public function beginLines():Void {
-			strokes = new Array<String>();
+		override public function beginLines():void {
+			strokes = new Vector.<String>();
 		}
 		
-		override public function endLines():Void {
+		override public function endLines():void {
 			processPreviousStroke();
 		}
 		
 		
-		override public function endShape():Void {
-			var i:Int;
+		override public function endShape():void {
+			var i:uint;
 			if (fills != null) {
 				_js += fills.join(lineSep);
 			}
@@ -81,22 +81,22 @@ package com.codeazur.hxswf.exporters
 		}
 		
 		
-		override public function beginFill(color:Int, alpha:Float = 1.0):Void {
+		override public function beginFill(color:uint, alpha:Number = 1.0):void {
 			processPreviousFill();
 			active = FILL_ACTIVE;
 			prefix = ["c.save();"];
 			geometry = ["c.beginPath();"];
 			suffix = ["c.fillStyle=\"rgba(" + 
-				ColorUtils.r(color) * 255 + "," +
-				ColorUtils.g(color) * 255 + "," +
-				ColorUtils.b(color) * 255 + "," +
+				ColorUtils.r(color) * 255 + ", " +
+				ColorUtils.g(color) * 255 + ", " +
+				ColorUtils.b(color) * 255 + ", " +
 				alpha +
 				")\";",
 				"c.fill();", 
 				"c.restore();"];
 		}
 		
-		override public function beginGradientFill(type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix = null, spreadMethod:String = SpreadMethod.PAD, interpolationMethod:String = InterpolationMethod.RGB, focalPointRatio:Float = 0):Void {
+		override public function beginGradientFill(type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix = null, spreadMethod:String = SpreadMethod.PAD, interpolationMethod:String = InterpolationMethod.RGB, focalPointRatio:Number = 0):void {
 			processPreviousFill();
 			active = NOT_ACTIVE;
 			// TODO
@@ -105,13 +105,13 @@ package com.codeazur.hxswf.exporters
 			active = FILL_ACTIVE;
 			prefix = "\tCGContextSaveGState(ctx);\r\r";
 			geometry = "\tCGContextBeginPath(ctx);\r";
-			var i:Int;
-			var len:Int = uint(Math.min(Math.min(colors.length, alphas.length), ratios.length));
+			var i:uint;
+			var len:uint = uint(Math.min(Math.min(colors.length, alphas.length), ratios.length));
 			if (type == GradientType.LINEAR) {
 				suffix = "\tCGColorSpaceRef cs = CGColorSpaceCreateDeviceRGB();\r"
 				suffix += "\tCGFloat colors[" + (len * 4) + "] = {\r";
 				for (i = 0; i < len; i++) {
-					var color:Int = colors[i];
+					var color:uint = colors[i];
 					suffix += "\t\t" +
 						ObjCUtils.num2str(ColorUtils.r(color)) + ", " +
 						ObjCUtils.num2str(ColorUtils.g(color)) + ", " +
@@ -148,7 +148,7 @@ package com.codeazur.hxswf.exporters
 			*/
 		}
 
-		override public function beginBitmapFill(bitmapId:Int, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
+		override public function beginBitmapFill(bitmapId:uint, matrix:Matrix = null, repeat:Boolean = true, smooth:Boolean = false):void {
 			processPreviousFill();
 			active = BITMAP_FILL_ACTIVE;
 			prefix = ["c.save();"];
@@ -167,68 +167,68 @@ package com.codeazur.hxswf.exporters
 				"c.restore();"]
 		}
 		
-		override public function endFill():Void {
+		override public function endFill():void {
 			processPreviousFill();
 			active = NOT_ACTIVE;
 		}
 		
-		override public function lineStyle(thickness:Float = NaN, color:Int = 0, alpha:Float = 1.0, pixelHinting:Bool = false, scaleMode:String = LineScaleMode.NORMAL, startCaps:String = null, endCaps:String = null, joints:String = null, miterLimit:Float = 3):Void {
+		override public function lineStyle(thickness:Number = NaN, color:uint = 0, alpha:Number = 1.0, pixelHinting:Boolean = false, scaleMode:String = LineScaleMode.NORMAL, startCaps:String = null, endCaps:String = null, joints:String = null, miterLimit:Number = 3):void {
 			processPreviousStroke();
 			active = STROKE_ACTIVE;
 			prefix = ["c.save();"];
 			if (startCaps == null || startCaps == CapsStyle.ROUND) {
-				prefix.push("c.lineCap=\"round\";");
+				prefix.push("c.lineCap = \"round\";");
 			} else if (startCaps == CapsStyle.SQUARE) {
-				prefix.push("c.lineCap=\"square\";");
+				prefix.push("c.lineCap = \"square\";");
 			}
 			if (joints == null || joints == JointStyle.ROUND) {
-				prefix.push("c.lineJoin=\"round\";");
+				prefix.push("c.lineJoin = \"round\";");
 			} else if (joints == JointStyle.BEVEL) {
-				prefix.push("c.lineJoin=\"miter\";");
-				prefix.push("c.miterLimit=" + miterLimit + ";");
+				prefix.push("c.lineJoin = \"miter\";");
+				prefix.push("c.miterLimit = " + miterLimit + ";");
 			} else {
-				prefix.push("c.miterLimit=" + miterLimit + ";");
+				prefix.push("c.miterLimit = " + miterLimit + ";");
 			}
 			geometry = ["c.beginPath();"];
 			suffix = ["c.strokeStyle=\"rgba(" + 
-				ColorUtils.r(color) * 255 + "," +
-				ColorUtils.g(color) * 255 + "," +
-				ColorUtils.b(color) * 255 + "," +
+				ColorUtils.r(color) * 255 + ", " +
+				ColorUtils.g(color) * 255 + ", " +
+				ColorUtils.b(color) * 255 + ", " +
 				alpha +
 				")\";",
-				"c.lineWidth=" + thickness + ";",
+				"c.lineWidth = " + thickness + ";",
 				"c.stroke();",
 				"c.restore();"];
 		}
 		
-		override public function moveTo(x:Float, y:Float):Void {
+		override public function moveTo(x:Number, y:Number):void {
 			if (active != NOT_ACTIVE && active != BITMAP_FILL_ACTIVE) {
 				geometry.push("c.moveTo(" + 
-					NumberUtils.roundPixels20(x) + "," + 
+					NumberUtils.roundPixels20(x) + ", " + 
 					NumberUtils.roundPixels20(y) + ");");
 			}
 		}
 		
-		override public function lineTo(x:Float, y:Float):Void {
+		override public function lineTo(x:Number, y:Number):void {
 			if (active != NOT_ACTIVE && active != BITMAP_FILL_ACTIVE) {
 				geometry.push("c.lineTo(" + 
-					NumberUtils.roundPixels20(x) + "," + 
+					NumberUtils.roundPixels20(x) + ", " + 
 					NumberUtils.roundPixels20(y) + ");");
 			}
 		}
 		
-		override public function curveTo(controlX:Float, controlY:Float, anchorX:Float, anchorY:Float):Void {
+		override public function curveTo(controlX:Number, controlY:Number, anchorX:Number, anchorY:Number):void {
 			if (active != NOT_ACTIVE && active != BITMAP_FILL_ACTIVE) {
 				geometry.push("c.quadraticCurveTo(" + 
-					NumberUtils.roundPixels20(controlX) + "," + 
-					NumberUtils.roundPixels20(controlY) + "," + 
-					NumberUtils.roundPixels20(anchorX) + "," + 
+					NumberUtils.roundPixels20(controlX) + ", " + 
+					NumberUtils.roundPixels20(controlY) + ", " + 
+					NumberUtils.roundPixels20(anchorX) + ", " + 
 					NumberUtils.roundPixels20(anchorY) + ");");
 			}
 		}
 
 		
-		private function processPreviousFill():Void {
+		protected function processPreviousFill():void {
 			if (active == FILL_ACTIVE) {
 				active = NOT_ACTIVE;
 				geometry.push("c.closePath();");
@@ -246,7 +246,7 @@ package com.codeazur.hxswf.exporters
 			}
 		}
 		
-		private function processPreviousStroke():Void {
+		protected function processPreviousStroke():void {
 			if (active == STROKE_ACTIVE) {
 				active = NOT_ACTIVE;
 				strokes.push(

@@ -49,10 +49,14 @@ class SWFMorphFillStyle
 			case 0x00:
 				data.writeRGBA(startColor);
 				data.writeRGBA(endColor);
-			case 0x10, 0x12:
+			case 0x10, 0x12, 0x13:
 				data.writeMATRIX(startGradientMatrix);
 				data.writeMATRIX(endGradientMatrix);
-				data.writeMORPHGRADIENT(gradient, level);
+				if (type == 0x13) {
+					data.writeMORPHFOCALGRADIENT(cast (gradient, SWFMorphFocalGradient), level);
+				} else {
+					data.writeMORPHGRADIENT(gradient, level);
+				}
 			case 0x40, 0x41, 0x42, 0x43:
 				data.writeUI16(bitmapId);
 				data.writeMATRIX(startBitmapMatrix);

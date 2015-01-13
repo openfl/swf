@@ -6,8 +6,8 @@
 	{
 		public static inline var CODE:Int = 0x4a;
 		
-		public function ActionToNumber(code:Int, length:Int) {
-			super(code, length);
+		public function ActionToNumber(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function toString(indent:Int = 0):String {

@@ -27,9 +27,9 @@ class SWFShapeWithStyle extends SWFShape
 		for (i in 0...lineStylesLen) {
 			initialLineStyles.push(level <= 3 ? data.readLINESTYLE(level) : data.readLINESTYLE2(level));
 		}
+		data.resetBitsPending();
 		var numFillBits:Int = data.readUB(4);
 		var numLineBits:Int = data.readUB(4);
-		data.resetBitsPending();
 		readShapeRecords(data, numFillBits, numLineBits, level);
 	}
 	
@@ -48,9 +48,9 @@ class SWFShapeWithStyle extends SWFShape
 		}
 		var fillBits:Int = data.calculateMaxBits(false, [getMaxFillStyleIndex()]);
 		var lineBits:Int = data.calculateMaxBits(false, [getMaxLineStyleIndex()]);
+		data.resetBitsPending();
 		data.writeUB(4, fillBits);
 		data.writeUB(4, lineBits);
-		data.resetBitsPending();
 		writeShapeRecords(data, fillBits, lineBits, level);
 	}
 	

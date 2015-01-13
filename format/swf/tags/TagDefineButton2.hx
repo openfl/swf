@@ -62,13 +62,13 @@ class TagDefineButton2 implements IDefinitionTag
 			buttonRecordsBytes.writeBUTTONRECORD(characters[i], 2);
 		}
 		buttonRecordsBytes.writeUI8(0);
-		body.writeUI16(hasCondActions ? buttonRecordsBytes.length : 0);
+		body.writeUI16(hasCondActions ? buttonRecordsBytes.length + 2 : 0);
 		body.writeBytes(buttonRecordsBytes);
 		if(hasCondActions) {
 			for(i in 0...condActions.length) {
 				var condActionBytes:SWFData = new SWFData();
 				condActionBytes.writeBUTTONCONDACTION(condActions[i]);
-				body.writeUI16((i < condActions.length - 1) ? condActionBytes.length : 0);
+				body.writeUI16((i < condActions.length - 1) ? condActionBytes.length + 2 : 0);
 				body.writeBytes(condActionBytes);
 			}
 		}

@@ -4,6 +4,8 @@ import format.swf.SWFData;
 
 class SWFMorphGradient
 {
+	public var spreadMode:Int;
+	public var interpolationMode:Int;
 	// Forward declarations of properties in SWFMorphFocalGradient
 	public var startFocalPoint:Float;
 	public var endFocalPoint:Float;
@@ -18,7 +20,10 @@ class SWFMorphGradient
 	}
 	
 	public function parse(data:SWFData, level:Int):Void {
-		var numGradients:Int = data.readUI8();
+		data.resetBitsPending();
+		spreadMode = data.readUB(2);
+		interpolationMode = data.readUB(2);
+		var numGradients:Int = data.readUB(4);
 		for (i in 0...numGradients) {
 			records.push(data.readMORPHGRADIENTRECORD());
 		}
@@ -26,7 +31,10 @@ class SWFMorphGradient
 	
 	public function publish(data:SWFData, level:Int):Void {
 		var numGradients:Int = records.length;
-		data.writeUI8(numGradients);
+		data.resetBitsPending();
+		data.writeUB(2, spreadMode);
+		data.writeUB(2, interpolationMode);
+		data.writeUB(4, numGradients);
 		for (i in 0...numGradients) {
 			data.writeMORPHGRADIENTRECORD(records[i]);
 		}
@@ -41,6 +49,6 @@ class SWFMorphGradient
 	}
 	
 	public function toString():String {
-		return "(" + records.join(",") + ")";
+		return "(" + records.join(",") + "), spread:" + spreadMode + ", interpolation:" + interpolationMode;
 	}
 }

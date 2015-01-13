@@ -43,6 +43,7 @@ import format.swf.tags.TagDoAction;
 import format.swf.tags.TagDoInitAction;
 import format.swf.tags.TagEnableDebugger;
 import format.swf.tags.TagEnableDebugger2;
+import format.swf.tags.TagEnableTelemetry;
 import format.swf.tags.TagEnd;
 import format.swf.tags.TagExportAssets;
 import format.swf.tags.TagFileAttributes;
@@ -51,9 +52,11 @@ import format.swf.tags.TagImportAssets;
 import format.swf.tags.TagImportAssets2;
 import format.swf.tags.TagJPEGTables;
 import format.swf.tags.TagMetadata;
+import format.swf.tags.TagNameCharacter;
 import format.swf.tags.TagPlaceObject;
 import format.swf.tags.TagPlaceObject2;
 import format.swf.tags.TagPlaceObject3;
+import format.swf.tags.TagPlaceObject4;
 import format.swf.tags.TagProductInfo;
 import format.swf.tags.TagProtect;
 import format.swf.tags.TagRemoveObject;
@@ -116,6 +119,7 @@ class SWFTagFactory implements ISWFTagFactory
 			/*  36 */ case TagDefineBitsLossless2.TYPE: return createTagDefineBitsLossless2();
 			/*  37 */ case TagDefineEditText.TYPE: return createTagDefineEditText();
 			/*  39 */ case TagDefineSprite.TYPE: return createTagDefineSprite();
+			/*  40 */ case TagNameCharacter.TYPE: return createTagNameCharacter();
 			/*  41 */ case TagProductInfo.TYPE: return createTagProductInfo();
 			/*  43 */ case TagFrameLabel.TYPE: return createTagFrameLabel();
 			/*  45 */ case TagSoundStreamHead2.TYPE: return createTagSoundStreamHead2();
@@ -151,7 +155,10 @@ class SWFTagFactory implements ISWFTagFactory
 			/*  89 */ case TagStartSound2.TYPE: return createTagStartSound2();
 			/*  90 */ case TagDefineBitsJPEG4.TYPE: return createTagDefineBitsJPEG4();
 			/*  91 */ case TagDefineFont4.TYPE: return createTagDefineFont4();
-
+			
+			/*  93 */ case TagEnableTelemetry.TYPE: return createTagEnableTelemetry();
+			/*  94 */ case TagPlaceObject4.TYPE: return createTagPlaceObject4();
+			
 			/* 253 */ case TagSWFEncryptActions.TYPE: return createTagSWFEncryptActions();
 			/* 255 */ case TagSWFEncryptSignature.TYPE: return createTagSWFEncryptSignature();
 
@@ -191,6 +198,7 @@ class SWFTagFactory implements ISWFTagFactory
 	private function createTagDefineBitsLossless2():ITag { return new TagDefineBitsLossless2(); }
 	private function createTagDefineEditText():ITag { return new TagDefineEditText(); }
 	private function createTagDefineSprite():ITag { return new TagDefineSprite(); }
+	private function createTagNameCharacter():ITag { return new TagNameCharacter(); }
 	private function createTagProductInfo():ITag { return new TagProductInfo(); }
 	private function createTagFrameLabel():ITag { return new TagFrameLabel(); }
 	private function createTagSoundStreamHead2():ITag { return new TagSoundStreamHead2(); }
@@ -226,6 +234,8 @@ class SWFTagFactory implements ISWFTagFactory
 	private function createTagStartSound2():ITag { return new TagStartSound2(); }
 	private function createTagDefineBitsJPEG4():ITag { return new TagDefineBitsJPEG4(); }
 	private function createTagDefineFont4():ITag { return new TagDefineFont4(); }
+	private function createTagEnableTelemetry():ITag { return new TagEnableTelemetry(); }
+	private function createTagPlaceObject4():ITag { return new TagPlaceObject4(); }
 	
 	private function createTagSWFEncryptActions():ITag { return new TagSWFEncryptActions(); }
 	private function createTagSWFEncryptSignature():ITag { return new TagSWFEncryptSignature(); }

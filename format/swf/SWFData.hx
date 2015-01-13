@@ -715,11 +715,12 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 	
 	public function readACTIONRECORD():IAction {
+		var pos:Int = position;
 		var action:IAction = null;
 		var actionCode:Int = readUI8();
 		if (actionCode != 0) {
 			var actionLength:Int = (actionCode >= 0x80) ? readUI16() : 0;
-			action = SWFActionFactory.create(actionCode, actionLength);
+			action = SWFActionFactory.create(actionCode, actionLength, pos);
 			action.parse(this);
 		}
 		return action;

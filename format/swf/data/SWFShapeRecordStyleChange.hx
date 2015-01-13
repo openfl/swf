@@ -58,6 +58,7 @@ class SWFShapeRecordStyleChange extends SWFShapeRecord
 			for (i in 0...lineStylesLen) {
 				lineStyles.push(level <= 3 ? data.readLINESTYLE(level) : data.readLINESTYLE2(level));
 			}
+			data.resetBitsPending();
 			numFillBits = data.readUB(4);
 			numLineBits = data.readUB(4);
 		}
@@ -88,6 +89,7 @@ class SWFShapeRecordStyleChange extends SWFShapeRecord
 			}
 			numFillBits = data.calculateMaxBits(false, [fillStylesLen]);
 			numLineBits = data.calculateMaxBits(false, [lineStylesLen]);
+			data.resetBitsPending();
 			data.writeUB(4, numFillBits);
 			data.writeUB(4, numLineBits);
 		}

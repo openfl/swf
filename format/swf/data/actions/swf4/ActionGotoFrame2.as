@@ -11,8 +11,8 @@
 		public var playFlag:Bool;
 		public var sceneBias:Int;
 		
-		public function ActionGotoFrame2(code:Int, length:Int) {
-			super(code, length);
+		public function ActionGotoFrame2(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function parse(data:SWFData):Void {
@@ -37,7 +37,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionGotoFrame2 = new ActionGotoFrame2(code, length);
+			var action:ActionGotoFrame2 = new ActionGotoFrame2(code, length, pos);
 			action.sceneBiasFlag = sceneBiasFlag;
 			action.playFlag = playFlag;
 			action.sceneBias = sceneBias;

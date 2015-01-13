@@ -64,15 +64,17 @@ class TagDefineFont2 extends TagDefineFont #if !haxe3 , #end implements IDefinit
 		#end
 		var i:Int;
 		var numGlyphs:Int = data.readUI16();
-		// Skip offsets. We don't need them.
-		data.skipBytes(numGlyphs << (wideOffsets ? 2 : 1));
-		// Not used
-		var codeTableOffset:Int = (wideOffsets ? data.readUI32() : data.readUI16());
-		for (i in 0...numGlyphs) {
-			glyphShapeTable.push(data.readSHAPE());
-		}
-		for (i in 0...numGlyphs) {
-			codeTable.push(wideCodes ? data.readUI16() : data.readUI8());
+		if(numGlyphs > 0) {
+			// Skip offsets. We don't need them.
+			data.skipBytes(numGlyphs << (wideOffsets ? 2 : 1));
+			// Not used
+			var codeTableOffset:Int = (wideOffsets ? data.readUI32() : data.readUI16());
+			for (i in 0...numGlyphs) {
+				glyphShapeTable.push(data.readSHAPE());
+			}
+			for (i in 0...numGlyphs) {
+				codeTable.push(wideCodes ? data.readUI16() : data.readUI8());
+			}
 		}
 		if (hasLayout) {
 			ascent = data.readUI16();
@@ -112,37 +114,39 @@ class TagDefineFont2 extends TagDefineFont #if !haxe3 , #end implements IDefinit
 		body.writeUI8(fontNameRaw.length);
 		body.writeBytes(fontNameRaw);
 		body.writeUI16(numGlyphs);
-		var offsetTableLength:Int = (numGlyphs << (wideOffsets ? 2 : 1));
-		var codeTableOffsetLength:Int = (wideOffsets ? 4 : 2);
-		var codeTableLength:Int = (wideOffsets ? (numGlyphs << 1) : numGlyphs);
-		var offset:Int = offsetTableLength + codeTableOffsetLength;
-		var shapeTable:SWFData = new SWFData();
-		for (i in 0...numGlyphs) {
-			// Write out the offset table for the current glyph
-			if(wideOffsets) {
-				body.writeUI32(offset + shapeTable.position);
-			} else {
-				body.writeUI16(offset + shapeTable.position);
+		if(numGlyphs > 0) {
+			var offsetTableLength:Int = (numGlyphs << (wideOffsets ? 2 : 1));
+			var codeTableOffsetLength:Int = (wideOffsets ? 4 : 2);
+			var codeTableLength:Int = (wideOffsets ? (numGlyphs << 1) : numGlyphs);
+			var offset:Int = offsetTableLength + codeTableOffsetLength;
+			var shapeTable:SWFData = new SWFData();
+			for (i in 0...numGlyphs) {
+				// Write out the offset table for the current glyph
+				if(wideOffsets) {
+					body.writeUI32(offset + shapeTable.position);
+				} else {
+					body.writeUI16(offset + shapeTable.position);
+				}
+				// Serialize the glyph's shape to a separate bytearray
+				shapeTable.writeSHAPE(glyphShapeTable[i]);
 			}
-			// Serialize the glyph's shape to a separate bytearray
-			shapeTable.writeSHAPE(glyphShapeTable[i]);
-		}
-		// Code table offset
-		if(wideOffsets) {
-			body.writeUI32(offset + shapeTable.length);
-		} else {
-			body.writeUI16(offset + shapeTable.length);
-		}
-		// Now concatenate the glyph shape table to the end (after
-		// the offset table that we were previously writing inside
-		// the for loop above).
-		body.writeBytes(shapeTable);
-		// Write the code table
-		for (i in 0...numGlyphs) {
-			if(wideCodes) {
-				body.writeUI16(codeTable[i]);
+			// Code table offset
+			if(wideOffsets) {
+				body.writeUI32(offset + shapeTable.length);
 			} else {
-				body.writeUI8(codeTable[i]);
+				body.writeUI16(offset + shapeTable.length);
+			}
+			// Now concatenate the glyph shape table to the end (after
+			// the offset table that we were previously writing inside
+			// the for loop above).
+			body.writeBytes(shapeTable);
+			// Write the code table
+			for (i in 0...numGlyphs) {
+				if(wideCodes) {
+					body.writeUI16(codeTable[i]);
+				} else {
+					body.writeUI8(codeTable[i]);
+				}
 			}
 		}
 		if (hasLayout) {

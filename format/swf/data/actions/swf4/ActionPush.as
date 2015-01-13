@@ -11,8 +11,8 @@
 		
 		public var values:Array<SWFActionValue>;
 		
-		public function ActionPush(code:Int, length:Int) {
-			super(code, length);
+		public function ActionPush(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 			values = new Array<SWFActionValue>();
 		}
 		
@@ -32,7 +32,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionPush = new ActionPush(code, length);
+			var action:ActionPush = new ActionPush(code, length, pos);
 			for (var i:Int = 0; i < values.length; i++) {
 				action.values.push(values[i].clone());
 			}

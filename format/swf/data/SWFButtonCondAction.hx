@@ -1,6 +1,7 @@
 ﻿package format.swf.data;
 
 import format.swf.SWFData;
+import format.swf.data.actions.Action;
 import format.swf.data.actions.IAction;
 import format.swf.utils.StringUtils;
 
@@ -43,6 +44,7 @@ class SWFButtonCondAction
 		while ((action = data.readACTIONRECORD()) != null) {
 			actions.push(action);
 		}
+		Action.resolveOffsets(actions);
 	}
 	
 	public function publish(data:SWFData):Void {

@@ -18,6 +18,7 @@ import format.swf.data.consts.SoundCompression;
 import format.swf.events.SWFErrorEvent;
 import format.swf.events.SWFEventDispatcher;
 import format.swf.events.SWFProgressEvent;
+import format.swf.events.SWFWarningEvent;
 import format.swf.factories.ISWFTagFactory;
 import format.swf.factories.SWFTagFactory;
 import format.swf.tags.IDefinitionTag;
@@ -199,7 +200,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	private function parseTag(data:SWFData, async:Bool = false):ITag {
 		var pos = data.position;
 		// Bail out if eof
-		eof = (pos > data.length);
+		eof = (pos >= data.length);
 		if(eof) {
 			trace("WARNING: end of file encountered, no end tag.");
 			return null;
@@ -235,11 +236,31 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		// Adjust position (just in case the parser under- or overflows)
 		var position = pos + tagHeader.tagLength;
 		if(data.position != position) {
-			trace("WARNING: excess bytes: " + 
-				(data.position - (pos + tagHeader.tagLength)) + ", " +
-				"Tag: " + tag.name + ", " +
-				"Index: " + (tags.length - 1)
-			);
+			var index:Int = tags.length - 1;
+			var excessBytes:Int = data.position - (pos + tagHeader.tagLength);
+			var eventType:String = (excessBytes < 0) ? SWFWarningEvent.UNDERFLOW : SWFWarningEvent.OVERFLOW;
+			var eventData:Dynamic = {
+				pos: pos,
+				bytes: (excessBytes < 0) ? -excessBytes : excessBytes
+			};
+			if(rootTimelineContainer == this) {
+				trace("WARNING: excess bytes: " + excessBytes + ", " +
+					"Tag: " + tag.name + ", " +
+					"Index: " + index
+				);
+			} else {
+				eventData.indexRoot = rootTimelineContainer.tags.length;
+				trace("WARNING: excess bytes: " + excessBytes + ", " +
+					"Tag: " + tag.name + ", " +
+					"Index: " + index + ", " +
+					"IndexRoot: " + eventData.indexRoot
+				);
+			}
+			var event:SWFWarningEvent = new SWFWarningEvent(eventType, index, eventData, false, true);
+			var cancelled:Bool = !dispatchEvent(event);
+			if (cancelled) {
+				tag = null;
+			}
 			data.position = pos + tagHeader.tagLength;
 		}
 		return tag;

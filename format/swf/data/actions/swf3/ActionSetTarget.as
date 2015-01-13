@@ -9,8 +9,8 @@
 		
 		public var targetName:String;
 		
-		public function ActionSetTarget(code:Int, length:Int) {
-			super(code, length);
+		public function ActionSetTarget(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 		}
 		
 		override public function parse(data:SWFData):Void {
@@ -24,7 +24,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionSetTarget = new ActionSetTarget(code, length);
+			var action:ActionSetTarget = new ActionSetTarget(code, length, pos);
 			action.targetName = targetName;
 			return action;
 		}

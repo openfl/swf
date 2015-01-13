@@ -1,38 +1,39 @@
-﻿package format.swf.data.actions.swf5
+﻿package com.codeazur.as3swf.data.actions.swf5
 {
-	import com.codeazur.hxswf.SWFData;
-	import format.swf.data.actions.*;
+	import com.codeazur.as3swf.SWFData;
+	import com.codeazur.as3swf.data.actions.Action;
+	import com.codeazur.as3swf.data.actions.IAction;
 	import com.codeazur.utils.StringUtils;
 	
-	class ActionDefineFunction extends Action implements IAction
+	public class ActionDefineFunction extends Action implements IAction
 	{
-		public static inline var CODE:Int = 0x9b;
+		public static const CODE:uint = 0x9b;
 		
 		public var functionName:String;
-		public var functionParams:Array<String>;
-		public var functionBody:Array<IAction>;
+		public var functionParams:Vector.<String>;
+		public var functionBody:Vector.<IAction>;
 		
-		public function ActionDefineFunction(code:Int, length:Int) {
-			super(code, length);
-			functionParams = new Array<String>();
-			functionBody = new Array<IAction>();
+		public function ActionDefineFunction(code:uint, length:uint, pos:uint) {
+			super(code, length, pos);
+			functionParams = new Vector.<String>();
+			functionBody = new Vector.<IAction>();
 		}
 		
-		override public function parse(data:SWFData):Void {
+		override public function parse(data:SWFData):void {
 			functionName = data.readString();
-			var count:Int = data.readUI16();
-			for (var i:Int = 0; i < count; i++) {
+			var count:uint = data.readUI16();
+			for (var i:uint = 0; i < count; i++) {
 				functionParams.push(data.readString());
 			}
-			var codeSize:Int = data.readUI16();
-			var bodyEndPosition:Int = data.position + codeSize;
+			var codeSize:uint = data.readUI16();
+			var bodyEndPosition:uint = data.position + codeSize;
 			while (data.position < bodyEndPosition) {
 				functionBody.push(data.readACTIONRECORD());
 			}
 		}
 		
-		override public function publish(data:SWFData):Void {
-			var i:Int;
+		override public function publish(data:SWFData):void {
+			var i:uint;
 			var body:SWFData = new SWFData();
 			body.writeString(functionName);
 			body.writeUI16(functionParams.length);
@@ -44,13 +45,13 @@
 				bodyActions.writeACTIONRECORD(functionBody[i]);
 			}
 			body.writeUI16(bodyActions.length);
-			body.writeBytes(bodyActions);
 			write(data, body);
+			data.writeBytes(bodyActions);
 		}
 		
 		override public function clone():IAction {
-			var i:Int;
-			var action:ActionDefineFunction = new ActionDefineFunction(code, length);
+			var i:uint;
+			var action:ActionDefineFunction = new ActionDefineFunction(code, length, pos);
 			action.functionName = functionName;
 			for (i = 0; i < functionParams.length; i++) {
 				action.functionParams.push(functionParams[i]);
@@ -61,11 +62,11 @@
 			return action;
 		}
 		
-		override public function toString(indent:Int = 0):String {
+		override public function toString(indent:uint = 0):String {
 			var str:String = "[ActionDefineFunction] " + 
 				((functionName == null || functionName.length == 0) ? "<anonymous>" : functionName) +
 				"(" + functionParams.join(", ") + ")";
-			for (var i:Int = 0; i < functionBody.length; i++) {
+			for (var i:uint = 0; i < functionBody.length; i++) {
 				if(functionBody[i]) {
 					str += "\n" + StringUtils.repeat(indent + 4) + "[" + i + "] " + functionBody[i].toString(indent + 4);
 				}

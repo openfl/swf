@@ -17,9 +17,9 @@
 		public var catchBody:Array<IAction>;
 		public var finallyBody:Array<IAction>;
 		
-		public function ActionTry(code:Int, length:Int)
+		public function ActionTry(code:Int, length:Int, pos:Int)
 		{
-			super(code, length);
+			super(code, length, pos);
 			tryBody = new Array<IAction>();
 			catchBody = new Array<IAction>();
 			finallyBody = new Array<IAction>();
@@ -88,7 +88,7 @@
 		
 		override public function clone():IAction {
 			var i:Int;
-			var action:ActionTry = new ActionTry(code, length);
+			var action:ActionTry = new ActionTry(code, length, pos);
 			action.catchInRegisterFlag = catchInRegisterFlag;
 			action.finallyBlockFlag = finallyBlockFlag;
 			action.catchBlockFlag = catchBlockFlag;

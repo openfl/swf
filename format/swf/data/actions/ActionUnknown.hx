@@ -4,8 +4,8 @@ import format.swf.SWFData;
 
 class ActionUnknown extends Action #if !haxe3 , #end implements IAction
 {
-	public function new(code:Int, length:Int) {
-		super(code, length);
+	public function new(code:Int, length:Int, pos:Int) {
+		super(code, length, pos);
 		//trace("Hello ActionUnknown");
 	}
 	

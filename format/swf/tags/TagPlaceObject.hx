@@ -23,8 +23,8 @@ class TagPlaceObject implements IDisplayListTag
 	public var hasMatrix:Bool;
 	public var hasCharacter:Bool;
 	public var hasMove:Bool;
-	public var hasBitmapBackgroundColor:Bool; // Undocumented feature (SWF11)
-	public var hasVisibility:Bool; // Undocumented feature (SWF11)
+	public var hasOpaqueBackground:Bool;
+	public var hasVisible:Bool;
 	public var hasImage:Bool;
 	public var hasClassName:Bool;
 	public var hasCacheAsBitmap:Bool;
@@ -46,8 +46,11 @@ class TagPlaceObject implements IDisplayListTag
 	public var className:String;
 	public var blendMode:Int;
 	public var bitmapCache:Int;
-	public var bitmapBackgroundColor:Int; // Undocumented feature (SWF11)
-	public var visibility:Int; // Undocumented feature (SWF11)
+	public var bitmapBackgroundColor:Int;
+	public var visible:Int;
+	
+	// Forward declarations for TagPlaceObject4
+	public var metaData:Dynamic;
 	
 	public var surfaceFilterList(default, null):Array<IFilter>;
 	

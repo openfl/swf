@@ -10,8 +10,8 @@
 		
 		public var withBody:Array<IAction>;
 		
-		public function ActionWith(code:Int, length:Int) {
-			super(code, length);
+		public function ActionWith(code:Int, length:Int, pos:Int) {
+			super(code, length, pos);
 			withBody = new Array<IAction>();
 		}
 		
@@ -35,7 +35,7 @@
 		}
 		
 		override public function clone():IAction {
-			var action:ActionWith = new ActionWith(code, length);
+			var action:ActionWith = new ActionWith(code, length, pos);
 			for (var i:Int = 0; i < withBody.length; i++) {
 				action.withBody.push(withBody[i].clone());
 			}

@@ -2,15 +2,21 @@
 
 import format.swf.SWFData;
 import flash.errors.Error;
+import flash.Vector;
 
 class Action implements IAction
 {
 	public var code (default, null):Int;
 	public var length(default, null):Int;
+	public var lengthWithHeader(get, null):Int;
+	public var pos(default, null):Int;
 	
-	public function new(code:Int, length:Int) {
+	private function get_lengthWithHeader():Int { return length + (code >= 0x80 ? 3 : 1); }
+	
+	public function new(code:Int, length:Int, pos:Int) {
 		this.code = code;
 		this.length = length;
+		this.pos = pos;
 	}
 
 	public function parse(data:SWFData):Void {
@@ -23,7 +29,7 @@ class Action implements IAction
 	}
 	
 	public function clone():IAction {
-		return new Action(code, length);
+		return new Action(code, length, pos);
 	}
 	
 	private function write(data:SWFData, body:SWFData = null):Void {
@@ -44,5 +50,45 @@ class Action implements IAction
 	
 	public function toString(indent:Int = 0):String {
 		return "[Action] Code: " + StringTools.hex (code) + ", Length: " + length;
+	}
+	
+	public static function resolveOffsets(actions:Vector<IAction>):Void {
+		var action:IAction;
+		var n:Int = actions.length;
+		for (i in 0...n) {
+			action = actions[i];
+			if (Std.is (action, IActionBranch)) {
+				var j:Int = 0;
+				var found:Bool = false;
+				var actionBranch:IActionBranch = cast action;
+				var targetPos:Int = actionBranch.pos + actionBranch.lengthWithHeader + actionBranch.branchOffset;
+				if (targetPos <= actionBranch.pos) {
+					j = i;
+					while (j >= 0) {
+						if (targetPos == actions[j].pos) {
+							found = true;
+							break;
+						}
+						j--;
+					}
+				} else {
+					while (j < n) {
+						if (targetPos == actions[j].pos) {
+							found = true;
+							break;
+						}
+						j++;
+					}
+					if (!found) {
+						action = actions[j - 1];
+						if (targetPos == action.pos + action.lengthWithHeader) {
+							j = -1; // End of execution block
+							found = true;
+						}
+					}
+				}
+				actionBranch.branchIndex = found ? j : -2;
+			}
+		}
 	}
 }
