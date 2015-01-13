@@ -56,11 +56,13 @@ class DynamicTextField extends TextField {
 		
 		format.font = symbol.fontName;
 		
-		var found = switch (format.font) {
+		var found = false;
+		
+		switch (format.font) {
 			
 			case "_sans", "_serif", "_typewriter", "", null:
 				
-				true;
+				found = true;
 			
 			default:
 				
@@ -68,13 +70,12 @@ class DynamicTextField extends TextField {
 					
 					if (font.fontName == format.font) {
 						
-						true;
+						found = true;
+						break;
 						
 					}
 					
 				}
-				
-				false;
 			
 		}
 		
