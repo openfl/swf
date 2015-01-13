@@ -118,7 +118,7 @@ class Tools {
 	#end
 	
 	
-	private static function generateSWFClasses (project:HXProject, swfAsset:Asset):Void {
+	private static function generateSWFClasses (project:HXProject, output:HXProject, swfAsset:Asset):Void {
 		
 		var movieClipTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/MovieClip.mtt");
 		var simpleButtonTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/SimpleButton.mtt");
@@ -164,10 +164,21 @@ class Tools {
 				
 				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID };
 				var template = new Template (templateData);
+				var targetPath;
 				
-				var templateFile = new Asset ("", PathHelper.combine (PathHelper.tryFullPath (targetDirectory) + "/haxe", Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				if (project.target == IOS) {
+					
+					targetPath = PathHelper.tryFullPath (targetDirectory) + "/" + project.app.file + "/" + "/haxe";
+					
+				} else {
+					
+					targetPath = PathHelper.tryFullPath (targetDirectory) + "/haxe";
+					
+				}
+				
+				var templateFile = new Asset ("", PathHelper.combine (targetPath, Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
 				templateFile.data = template.execute (context);
-				project.assets.push (templateFile);
+				output.assets.push (templateFile);
 				
 			}
 			
@@ -176,7 +187,7 @@ class Tools {
 	}
 	
 	
-	private static function generateSWFLiteClasses (project:HXProject, swfLite:SWFLite, swfLiteAsset:Asset):Void {
+	private static function generateSWFLiteClasses (project:HXProject, output:HXProject, swfLite:SWFLite, swfLiteAsset:Asset):Void {
 		
 		var movieClipTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/lite/MovieClip.mtt");
 		var simpleButtonTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/lite/SimpleButton.mtt");
@@ -215,10 +226,21 @@ class Tools {
 				
 				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfLiteAsset.id, SYMBOL_ID: symbolID };
 				var template = new Template (templateData);
+				var targetPath;
 				
-				var templateFile = new Asset ("", PathHelper.combine (PathHelper.tryFullPath (targetDirectory) + "/haxe", Path.directory (symbol.className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				if (project.target == IOS) {
+					
+					targetPath = PathHelper.tryFullPath (targetDirectory) + "/" + project.app.file + "/" + "/haxe";
+					
+				} else {
+					
+					targetPath = PathHelper.tryFullPath (targetDirectory) + "/haxe";
+					
+				}
+				
+				var templateFile = new Asset ("", PathHelper.combine (targetPath, Path.directory (symbol.className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
 				templateFile.data = template.execute (context);
-				project.assets.push (templateFile);
+				output.assets.push (templateFile);
 				
 			}
 			
@@ -379,7 +401,7 @@ class Tools {
 				
 				if (library.generate) {
 					
-					generateSWFClasses (output, swf);
+					generateSWFClasses (project, output, swf);
 					
 				}
 				
@@ -517,7 +539,7 @@ class Tools {
 					
 					if (library.generate) {
 						
-						generateSWFLiteClasses (output, swfLite, swfLiteAsset);
+						generateSWFLiteClasses (project, output, swfLite, swfLiteAsset);
 						
 					}
 					
