@@ -4,6 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.actions.Action;
 import format.swf.data.actions.IAction;
 import format.swf.utils.StringUtils;
+import flash.Vector;
 
 class SWFButtonCondAction
 {
@@ -19,10 +20,10 @@ class SWFButtonCondAction
 	public var condOverDownToIdle:Bool;
 	public var condKeyPress:Int;
 
-	public var actions(default, null):Array<IAction>;
+	public var actions(default, null):Vector<IAction>;
 	
 	public function new(data:SWFData = null) {
-		actions = new Array<IAction>();
+		actions = new Vector<IAction>();
 		if (data != null) {
 			parse(data);
 		}

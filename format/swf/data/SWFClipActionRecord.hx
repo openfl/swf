@@ -4,16 +4,17 @@ import format.swf.SWFData;
 import format.swf.data.actions.Action;
 import format.swf.data.actions.IAction;
 import format.swf.utils.StringUtils;
+import flash.Vector;
 
 class SWFClipActionRecord
 {
 	public var eventFlags:SWFClipEventFlags;
 	public var keyCode:Int;
 	
-	public var actions(default, null):Array<IAction>;
+	public var actions(default, null):Vector<IAction>;
 	
 	public function new(data:SWFData = null, version:Int = 0) {
-		actions = new Array <IAction>();
+		actions = new Vector <IAction>();
 		if (data != null) {
 			parse(data, version);
 		}
