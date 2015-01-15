@@ -4,8 +4,8 @@ import flash.events.Event;
 
 class SWFWarningEvent extends Event
 {
-	public static inline var OVERFLOW:String = "overflow";
-	public static inline var UNDERFLOW:String = "underflow";
+	public static inline var WARN_OVERFLOW:String = "overflow";
+	public static inline var WARN_UNDERFLOW:String = "underflow";
 	
 	public var index:Int;
 	public var data:Dynamic;

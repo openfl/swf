@@ -238,7 +238,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		if(data.position != position) {
 			var index:Int = tags.length - 1;
 			var excessBytes:Int = data.position - (pos + tagHeader.tagLength);
-			var eventType:String = (excessBytes < 0) ? SWFWarningEvent.UNDERFLOW : SWFWarningEvent.OVERFLOW;
+			var eventType:String = (excessBytes < 0) ? SWFWarningEvent.WARN_UNDERFLOW : SWFWarningEvent.WARN_OVERFLOW;
 			var eventData:Dynamic = {
 				pos: pos,
 				bytes: (excessBytes < 0) ? -excessBytes : excessBytes
