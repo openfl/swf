@@ -380,6 +380,12 @@ class Tools {
 				
 				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
 				
+				if (!FileSystem.exists (library.sourcePath)) {
+					
+					continue;
+					
+				}
+				
 				var swf = new Asset (library.sourcePath, "libraries/" + library.name + "/" + library.name + ".swf", AssetType.BINARY);
 				
 				if (library.embed != null) {
@@ -412,6 +418,12 @@ class Tools {
 			} else if (type == "swf_lite" || type == "swflite") {
 				
 				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWFLite]");
+				
+				if (!FileSystem.exists (library.sourcePath)) {
+					
+					continue;
+					
+				}
 				
 				//project.haxelibs.push (new Haxelib ("swf"));
 				
