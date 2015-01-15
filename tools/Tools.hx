@@ -378,13 +378,14 @@ class Tools {
 			
 			if (type == "swf" && project.target != Platform.HTML5) {
 				
-				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
-				
 				if (!FileSystem.exists (library.sourcePath)) {
 					
+					LogHelper.warn ("Could not find library file: " + library.sourcePath);
 					continue;
 					
 				}
+				
+				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
 				
 				var swf = new Asset (library.sourcePath, "libraries/" + library.name + "/" + library.name + ".swf", AssetType.BINARY);
 				
@@ -417,13 +418,14 @@ class Tools {
 				
 			} else if (type == "swf_lite" || type == "swflite") {
 				
-				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWFLite]");
-				
 				if (!FileSystem.exists (library.sourcePath)) {
 					
+					LogHelper.warn ("Could not find library file: " + library.sourcePath);
 					continue;
 					
 				}
+				
+				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWFLite]");
 				
 				//project.haxelibs.push (new Haxelib ("swf"));
 				
