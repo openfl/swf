@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.7.4",
-  "releasenote": "Improved SWFLite font handling, fixed iOS 'generate' support, updated SWF parser version",
+  "version": "1.7.5",
+  "releasenote": "Windows compile fix",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
