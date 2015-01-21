@@ -57,7 +57,7 @@ class TagDefineFont2 extends TagDefineFont #if !haxe3 , #end implements IDefinit
 		var fontNameLen:Int = data.readUI8();
 		var fontNameRaw:ByteArray = new ByteArray();
 		data.readBytes(fontNameRaw, 0, fontNameLen);
-		#if neko
+		#if (cpp || neko)
 		fontName = fontNameRaw.readUTFBytes(fontNameLen - 1);
 		#else
 		fontName = fontNameRaw.readUTFBytes(fontNameLen);
