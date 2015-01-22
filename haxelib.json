@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.7.5",
-  "releasenote": "Windows compile fix",
+  "version": "1.7.6",
+  "releasenote": "Fix minor issues for Flash, Neko and C++ targets",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
