@@ -15,7 +15,7 @@ import openfl.Assets;
 //import org.msgpack.MsgPack;
 
 
-class SWFLite {
+@:keep class SWFLite {
 	
 	
 	public static var instances = new Map<String, SWFLite> ();

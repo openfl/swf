@@ -1,7 +1,7 @@
 package format.swf.lite.symbols;
 
 
-class SWFSymbol {
+@:keepSub class SWFSymbol {
 	
 	
 	public var className:String;

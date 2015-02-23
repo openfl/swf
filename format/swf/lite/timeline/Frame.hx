@@ -1,7 +1,7 @@
 package format.swf.lite.timeline;
 
 
-class Frame {
+@:keep class Frame {
 	
 	
 	public var label:String;
