@@ -5,4 +5,5 @@
 -lib swf
 -lib format
 -D lime-legacy
+-D openfl-legacy
 --remap flash:openfl
