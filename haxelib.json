@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.7.7",
-  "releasenote": "Update for Lime 2.1",
+  "version": "1.8.0",
+  "releasenote": "Add Haxe 3 support, update for Lime 2.2",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
