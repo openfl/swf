@@ -116,10 +116,12 @@ import openfl.Assets;
 		#if flash
 		
 		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl", "flash"));
+		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "flash"));
 		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
 		
 		#else
 		
+		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "openfl"));
 		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "openfl"));
 		
 		#end
@@ -136,13 +138,16 @@ import openfl.Assets;
 		#if flash
 		
 		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl", "flash"));
+		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl._legacy", "flash"));
 		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "flash"));
 		if (value == null) value = cast Type.resolveClass (name);
 		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl", "flash"));
+		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl._legacy", "flash"));
 		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
 		
 		#else
 		
+		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl._legacy", "openfl"));
 		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "openfl"));
 		
 		#end
