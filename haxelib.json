@@ -4,8 +4,8 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.8.0",
-  "releasenote": "Add Haxe 3 support, update for Lime 2.2",
+  "version": "1.8.1",
+  "releasenote": "Fixes for OpenFL 3",
   "contributors": [ "singmajesty" ],
   "dependencies": { }
 }
