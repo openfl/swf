@@ -6,4 +6,5 @@
 -lib format
 -D lime-legacy
 -D openfl-legacy
+-D optional_cffi
 --remap flash:openfl
