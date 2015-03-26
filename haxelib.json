@@ -6,6 +6,5 @@
   "description": "Provides support for parsing and displaying SWF content",
   "version": "1.8.1",
   "releasenote": "Fixes for OpenFL 3",
-  "contributors": [ "singmajesty" ],
-  "dependencies": { }
+  "contributors": [ "singmajesty" ]
 }
