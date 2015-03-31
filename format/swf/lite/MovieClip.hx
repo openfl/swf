@@ -514,7 +514,7 @@ class MovieClip extends flash.display.MovieClip {
 					
 				} else if (Std.is (symbol, StaticTextSymbol)) {
 					
-					//
+					displayObject = new StaticTextField (swf, cast symbol);
 					
 				}
 				

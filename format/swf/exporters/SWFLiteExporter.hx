@@ -335,6 +335,48 @@ class SWFLiteExporter {
 		symbol.className = tag.name;
 		symbol.id = tag.characterId;
 		
+		var records = [];
+		
+		for (record in tag.records) {
+			
+			var textRecord = new StaticTextRecord ();
+			
+			if (record.hasFont) {
+				
+				textRecord.fontID = record.fontId;
+				processTag (data.getCharacter (record.fontId));
+				
+			}
+			
+			if (record.hasColor) textRecord.color = record.textColor;
+			if (record.hasXOffset) textRecord.offsetX = record.xOffset;
+			if (record.hasYOffset) textRecord.offsetY= record.yOffset;
+			textRecord.fontHeight = record.textHeight;
+			
+			var advances = [];
+			var glyphs = [];
+			
+			for (glyphEntry in record.glyphEntries) {
+				
+				advances.push (glyphEntry.advance);
+				glyphs.push (glyphEntry.index);
+				
+			}
+			
+			textRecord.advances = advances;
+			textRecord.glyphs = glyphs;
+			records.push (textRecord);
+			
+		}
+		
+		symbol.records = records;
+		
+		var matrix = tag.textMatrix.matrix;
+		matrix.tx *= (1 / 20);
+		matrix.ty *= (1 / 20);
+		
+		symbol.matrix = matrix;
+		
 		swfLite.symbols.set (symbol.id, symbol);
 		
 		return symbol;

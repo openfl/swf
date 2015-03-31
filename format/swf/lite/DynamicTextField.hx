@@ -104,7 +104,7 @@ class DynamicTextField extends TextField {
 		
 		defaultTextFormat = format;
 		
-		#if (cpp || neko)
+		#if !flash
 		
 		var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
 		plain = new EReg ("<br>", "g").replace (symbol.text, "\n");

@@ -4,47 +4,50 @@ package format.swf.lite;
 import flash.display.Shape;
 import flash.geom.Point;
 import format.swf.lite.symbols.FontSymbol;
-import format.swf.lite.symbols.TextSymbol;
+import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.SWFLite;
 
 
 class StaticTextField extends Shape {
 	
 	
-	private var symbol:TextSymbol;
+	private var symbol:StaticTextSymbol;
 	
 	
-	public function new (swf:SWFLite, symbol:TextSymbol) {
+	public function new (swf:SWFLite, symbol:StaticTextSymbol) {
 		
 		super ();
 		
 		this.symbol = symbol;
 		
-		if (symbol.text != null && swf.symbols.exists (symbol.fontID)) {
+		if (symbol.records != null) {
 			
-			var font:FontSymbol = cast swf.symbols.get (symbol.fontID);
-			var scale = (symbol.fontHeight / 1024) * 0.05;
-			var x = 0.0;
-			var y = font.ascent * scale * 0.05;
+			var font:FontSymbol = null;
+			var color = 0xFFFFFF;
+			var x = symbol.matrix.tx;
+			var y = symbol.matrix.ty;
 			
-			for (i in 0...symbol.text.length) {
+			for (record in symbol.records) {
 				
-				var index = -1;
+				if (record.fontID != null) font = cast swf.symbols.get (record.fontID);
+				if (record.offsetX != null) x = symbol.matrix.tx + record.offsetX * 0.05;
+				if (record.offsetY != null) y = symbol.matrix.ty + record.offsetY * 0.05;
+				if (record.color != null) color = record.color;
 				
-				for (j in 0...font.codes.length) {
+				if (font != null) {
 					
-					if (font.codes[j] == symbol.text.charCodeAt (i)) {
+					var scale = (record.fontHeight / 1024) * 0.05;
+					
+					var index;
+					var code;
+					
+					for (i in 0...record.glyphs.length) {
 						
-						index = j;
+						index = record.glyphs[i];
+						renderGlyph (font, index, color, scale, x, y);
+						x += record.advances[i] * 0.05;
 						
 					}
-					
-				}
-				
-				if (index > -1) {
-					
-					renderGlyph (font, index, scale, x, y);
-					x += scale * font.advances[index] * 0.05;
 					
 				}
 				
@@ -55,22 +58,22 @@ class StaticTextField extends Shape {
 	}
 	
 	
-	private function renderGlyph (font:FontSymbol, character:Int, scale:Float, offsetX:Float, offsetY:Float):Void {
+	private function renderGlyph (font:FontSymbol, character:Int, color:Int, scale:Float, offsetX:Float, offsetY:Float):Void {
 		
 		for (command in font.glyphs[character]) {
 			
 			switch (command) {
 				
-				case BeginFill (color, alpha):
+				case BeginFill (_, alpha):
 					
-					beginFill (color != null ? color & 0xFFFFFF : 0x000000, color != null ? ((color >> 24) & 0xFF) / 0xFF : 1);
+					graphics.beginFill (color & 0xFFFFFF, ((color >> 24) & 0xFF) / 0xFF);
 				
 				case CurveTo (controlX, controlY, anchorX, anchorY):
 					
 					#if (cpp || neko)
 					cacheAsBitmap = true;
 					#end
-					curveTo (controlX * scale + offsetX, controlY * scale + offsetY, anchorX * scale + offsetX, anchorY * scale + offsetY);
+					graphics.curveTo (controlX * scale + offsetX, controlY * scale + offsetY, anchorX * scale + offsetX, anchorY * scale + offsetY);
 				
 				case EndFill:
 					
@@ -90,11 +93,11 @@ class StaticTextField extends Shape {
 				
 				case LineTo (x, y):
 					
-					lineTo (x * scale + offsetX, y * scale + offsetY);
+					graphics.lineTo (x * scale + offsetX, y * scale + offsetY);
 				
 				case MoveTo (x, y):
 					
-					moveTo (x * scale + offsetX, y * scale + offsetY);
+					graphics.moveTo (x * scale + offsetX, y * scale + offsetY);
 				
 				default:
 				
