@@ -406,7 +406,7 @@ class MovieClip extends flash.display.MovieClip {
 			if (Std.is (displayObject, DynamicTextField)) {
 				
 				displayObject.x += untyped displayObject.symbol.x;
-				displayObject.y += untyped displayObject.symbol.y;
+				displayObject.y += untyped displayObject.symbol.y #if flash + 4 #end;
 				
 			}
 			
