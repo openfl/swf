@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.8.3",
-  "releasenote": "Improved SWF lite text",
+  "version": "1.8.4",
+  "releasenote": "Optional CFFI fix",
   "contributors": [ "singmajesty" ]
 }
