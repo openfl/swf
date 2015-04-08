@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.8.2",
-  "releasenote": "Make tools more resilient to Lime changes",
+  "version": "1.8.3",
+  "releasenote": "Improved SWF lite text",
   "contributors": [ "singmajesty" ]
 }
