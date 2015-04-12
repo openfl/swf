@@ -87,7 +87,6 @@ class SWFLiteExporter {
 		if (bitmap.bitmapData != null) {
 			
 			var symbol = new BitmapSymbol ();
-			symbol.className = tag.name;
 			symbol.id = tag.characterId;
 			
 			bitmaps.set (symbol.id, bitmap.bitmapData);
@@ -110,7 +109,6 @@ class SWFLiteExporter {
 			
 			var defineFont:TagDefineFont2 = cast tag;
 			var symbol = new FontSymbol ();
-			symbol.className = defineFont.name;
 			symbol.id = defineFont.characterId;
 			symbol.glyphs = new Array<Array<ShapeCommand>> ();
 			
@@ -143,7 +141,6 @@ class SWFLiteExporter {
 	private function addShape (tag:TagDefineShape):ShapeSymbol {
 		
 		var symbol = new ShapeSymbol ();
-		symbol.className = tag.name;
 		symbol.id = tag.characterId;
 		
 		var handler = new ShapeCommandExporter (data);
@@ -178,7 +175,6 @@ class SWFLiteExporter {
 		
 		if (Std.is (tag, IDefinitionTag)) {
 			
-			symbol.className = untyped tag.name;
 			symbol.id = untyped tag.characterId;
 			
 		}
@@ -263,7 +259,6 @@ class SWFLiteExporter {
 		
 		var symbol = new DynamicTextSymbol ();
 		
-		symbol.className = tag.name;
 		symbol.id = tag.characterId;
 		symbol.border = tag.border;
 		
@@ -331,8 +326,6 @@ class SWFLiteExporter {
 	private function addStaticText (tag:TagDefineText):StaticTextSymbol {
 		
 		var symbol = new StaticTextSymbol ();
-		
-		symbol.className = tag.name;
 		symbol.id = tag.characterId;
 		
 		var records = [];

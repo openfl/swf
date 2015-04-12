@@ -4,7 +4,10 @@ package;
 import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.DynamicTextSymbol;
+import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
+import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.SWFLiteLibrary;
 import format.swf.lite.SWFLite;
 import format.swf.tags.TagDefineButton2;
@@ -203,7 +206,7 @@ class Tools {
 				
 			}
 			
-			if (templateData != null) {
+			if (templateData != null && symbol.className != null) {
 				
 				var lastIndexOfPeriod = symbol.className.lastIndexOf (".");
 				
@@ -224,7 +227,62 @@ class Tools {
 				packageName = packageName.toLowerCase ();
 				name = name.substr (0, 1).toUpperCase () + name.substr (1);
 				
-				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfLiteAsset.id, SYMBOL_ID: symbolID };
+				var classProperties = [];
+				
+				if (Std.is (symbol, SpriteSymbol)) {
+					
+					var spriteSymbol:SpriteSymbol = cast symbol;
+					
+					if (spriteSymbol.frames.length > 0) {
+						
+						for (object in spriteSymbol.frames[0].objects) {
+							
+							if (object.name != null) {
+							
+								if (swfLite.symbols.exists (object.id)) {
+									
+									var childSymbol = swfLite.symbols.get (object.id);
+									var className = childSymbol.className;
+									
+									if (className == null) {
+										
+										if (Std.is (childSymbol, SpriteSymbol)) {
+											
+											className = "openfl.display.MovieClip";
+											
+										} else if (Std.is (childSymbol, ShapeSymbol)) {
+											
+											className = "openfl.display.Shape";
+											
+										} else if (Std.is (childSymbol, BitmapSymbol)) {
+											
+											className = "openfl.display.Bitmap";
+											
+										} else if (Std.is (childSymbol, DynamicTextSymbol) || Std.is (childSymbol, StaticTextSymbol)) {
+											
+											className = "openfl.text.TextField";
+											
+										}
+										
+									}
+									
+									if (className != null) {
+										
+										classProperties.push ( { name: object.name, type: className } );
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfLiteAsset.id, SYMBOL_ID: symbolID, CLASS_PROPERTIES: classProperties };
 				var template = new Template (templateData);
 				var targetPath;
 				

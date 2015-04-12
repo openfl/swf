@@ -10,6 +10,12 @@ import openfl.Assets;
 class ::CLASS_NAME:: extends MovieClip {
 	
 	
+	::foreach CLASS_PROPERTIES::public var ::name:: (get, never):::type::;
+	::end::
+	::foreach CLASS_PROPERTIES::@:noCompletion private var __::name:::::type::;
+	::end::
+	
+	
 	public function new () {
 		
 		if (!SWFLite.instances.exists ("::SWF_ID::")) {
@@ -33,9 +39,9 @@ class ::CLASS_NAME:: extends MovieClip {
 		if (value == null) {
 			
 			#if flash
-			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
+			value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "flash"));
 			#else
-			value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "openfl"));
+			value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "openfl"));
 			#end
 			
 		}
@@ -52,9 +58,9 @@ class ::CLASS_NAME:: extends MovieClip {
 		if (value == null) {
 			
 			#if flash
-			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "flash"));
+			value = Type.resolveEnum (StringTools.replace (name, "openfl._legacy", "flash"));
 			#else
-			value = Type.resolveEnum (StringTools.replace (name, "openfl._v2", "openfl"));
+			value = Type.resolveEnum (StringTools.replace (name, "openfl._legacy", "openfl"));
 			#end
 			
 		}
@@ -72,6 +78,17 @@ class ::CLASS_NAME:: extends MovieClip {
 		return value;
 		
 	}
+	
+	
+	::foreach CLASS_PROPERTIES::private function get_::name:: ():::type:: {
+		
+		if (__::name:: != null) return __::name::;
+		return __::name:: = cast getChildByName ("::name::");
+		
+	}
+	
+	
+	::end::
 	
 	
 }
