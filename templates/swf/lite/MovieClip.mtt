@@ -10,9 +10,7 @@ import openfl.Assets;
 class ::CLASS_NAME:: extends MovieClip {
 	
 	
-	::foreach CLASS_PROPERTIES::public var ::name:: (get, never):::type::;
-	::end::
-	::foreach CLASS_PROPERTIES::@:noCompletion private var __::name:::::type::;
+	::foreach CLASS_PROPERTIES::public var ::name:: (default, null):::type::;
 	::end::
 	
 	
@@ -78,17 +76,6 @@ class ::CLASS_NAME:: extends MovieClip {
 		return value;
 		
 	}
-	
-	
-	::foreach CLASS_PROPERTIES::private function get_::name:: ():::type:: {
-		
-		if (__::name:: != null) return __::name::;
-		return __::name:: = cast getChildByName ("::name::");
-		
-	}
-	
-	
-	::end::
 	
 	
 }
