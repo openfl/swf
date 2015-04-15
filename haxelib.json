@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.8.4",
-  "releasenote": "Optional CFFI fix",
+  "version": "1.8.5",
+  "releasenote": "Improved handling of child clips in generated symbol classes",
   "contributors": [ "singmajesty" ]
 }
