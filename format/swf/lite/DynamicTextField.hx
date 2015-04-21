@@ -49,7 +49,7 @@ class DynamicTextField extends TextField {
 			
 			format.bold = font.bold;
 			format.italic = font.italic;
-			format.leading = font.leading / 20 - 4;
+			format.leading = font.leading / 20 + 4;
 			//embedFonts = true;
 			
 		}
@@ -92,7 +92,7 @@ class DynamicTextField extends TextField {
 		format.leftMargin = symbol.leftMargin / 20;
 		format.rightMargin = symbol.rightMargin / 20;
 		format.indent = symbol.indent / 20;
-		format.leading = symbol.leading / 20 - 4;
+		format.leading = symbol.leading / 20 + 4;
 		
 		//#if (flash || html5)
 		if (symbol.align == "center") format.align = TextFormatAlign.CENTER;
