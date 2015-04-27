@@ -47,8 +47,11 @@ class DynamicTextField extends TextField {
 		
 		if (font != null) {
 			
-			format.bold = font.bold;
-			format.italic = font.italic;
+			// TODO: Bold and italic are handled in the font already
+			// Setting this can cause "extra" bold in HTML5
+			
+			//format.bold = font.bold;
+			//format.italic = font.italic;
 			format.leading = font.leading / 20 + (format.size * 0.2) #if flash + 2 #end;
 			//embedFonts = true;
 			
