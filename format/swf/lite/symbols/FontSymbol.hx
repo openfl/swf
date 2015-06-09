@@ -7,7 +7,7 @@ import format.swf.exporters.core.ShapeCommand;
 class FontSymbol extends SWFSymbol {
 	
 	
-	public var advances:Array<Float>;
+	public var advances:Array<Int>;
 	public var bold:Bool;
 	public var codes:Array<Int>;
 	public var glyphs:Array<Array<ShapeCommand>>;

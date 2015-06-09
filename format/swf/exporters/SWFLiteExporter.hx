@@ -112,15 +112,16 @@ class SWFLiteExporter {
 			symbol.id = defineFont.characterId;
 			symbol.glyphs = new Array<Array<ShapeCommand>> ();
 			
-			for (i in 0...defineFont.glyphShapeTable.length) {
-				
-				var handler = new ShapeCommandExporter (data);
-				defineFont.export (handler, i);
-				symbol.glyphs.push (handler.commands);
-				
-			}
+			//for (i in 0...defineFont.glyphShapeTable.length) {
+				//
+				//var handler = new ShapeCommandExporter (data);
+				//defineFont.export (handler, i);
+				//symbol.glyphs.push (handler.commands);
+				//
+			//}
 			
-			symbol.advances = cast defineFont.fontAdvanceTable.copy ();
+			symbol.advances = new Array<Int> ();
+			//symbol.advances = cast defineFont.fontAdvanceTable.copy ();
 			symbol.bold = defineFont.bold;
 			symbol.codes = defineFont.codeTable.copy ();
 			symbol.italic = defineFont.italic;
@@ -333,11 +334,16 @@ class SWFLiteExporter {
 		for (record in tag.records) {
 			
 			var textRecord = new StaticTextRecord ();
+			var font:FontSymbol = null;
+			var defineFont:TagDefineFont2 = null;
 			
 			if (record.hasFont) {
 				
 				textRecord.fontID = record.fontId;
-				processTag (data.getCharacter (record.fontId));
+				
+				defineFont = cast data.getCharacter (record.fontId);
+				processTag (defineFont);
+				font = cast swfLite.symbols.get (record.fontId);
 				
 			}
 			
@@ -349,10 +355,27 @@ class SWFLiteExporter {
 			var advances = [];
 			var glyphs = [];
 			
-			for (glyphEntry in record.glyphEntries) {
+			if (font != null) {
 				
-				advances.push (glyphEntry.advance);
-				glyphs.push (glyphEntry.index);
+				var handler = new ShapeCommandExporter (data);
+				
+				for (glyphEntry in record.glyphEntries) {
+					
+					var index = glyphEntry.index;
+					
+					advances.push (glyphEntry.advance);
+					glyphs.push (index);
+					
+					if (font.glyphs[index] == null) {
+						
+						handler.beginShape ();
+						defineFont.export (handler, index);
+						font.glyphs[index] = handler.commands.copy ();
+						font.advances[index] = defineFont.fontAdvanceTable[index];
+						
+					}
+					
+				}
 				
 			}
 			
