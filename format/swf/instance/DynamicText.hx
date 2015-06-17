@@ -51,7 +51,7 @@ class DynamicText extends TextField {
 		
 		var format = new TextFormat ();
 		if (tag.hasTextColor) format.color = (tag.textColor & 0x00FFFFFF);
-		format.size = (tag.fontHeight / 20);
+		format.size = Std.int (tag.fontHeight / 20);
 		
 		if (tag.hasFont) {
 			
@@ -102,17 +102,25 @@ class DynamicText extends TextField {
 			
 		}
 		
-		format.leftMargin = tag.leftMargin / 20;
-		format.rightMargin = tag.rightMargin / 20;
-		format.indent = tag.indent / 20;
-		format.leading = tag.leading / 20;
-		
-		switch (tag.align) {
+		if (tag.hasLayout) {
 			
-			case 0: format.align = TextFormatAlign.LEFT;
-			case 1: format.align = TextFormatAlign.RIGHT;
-			case 2: format.align = TextFormatAlign.CENTER;
-			case 3: format.align = TextFormatAlign.JUSTIFY;
+			switch (tag.align) {
+				
+				case 0: format.align = TextFormatAlign.LEFT;
+				case 1: format.align = TextFormatAlign.RIGHT;
+				case 2: format.align = TextFormatAlign.CENTER;
+				case 3: format.align = TextFormatAlign.JUSTIFY;
+				
+			}
+			
+			format.leftMargin = Std.int (tag.leftMargin / 20);
+			format.rightMargin = Std.int (tag.rightMargin / 20);
+			format.indent = Std.int (tag.indent / 20);
+			format.leading = Std.int (tag.leading / 20);
+			
+			#if flash
+			if (embedFonts) format.leading += 6; // TODO: Is this an issue of Flash fonts are embedded?
+			#end
 			
 		}
 		
@@ -122,9 +130,10 @@ class DynamicText extends TextField {
 			
 			#if (cpp || neko)
 			
-			var plain = new EReg ("</p>", "g").replace (tag.initialText, "\n");
-			plain = new EReg ("<br>", "g").replace (tag.initialText, "\n");
-			text = new EReg ("<.*?>", "g").replace (plain, "");
+			var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
+			plain = new EReg ("<br>", "g").replace (plain, "\n");
+			plain = new EReg ("<.*?>", "g").replace (plain, "");
+			text = StringTools.htmlUnescape (plain);
 			
 			#else
 			

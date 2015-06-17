@@ -41,9 +41,21 @@ class DynamicTextField extends TextField {
 		
 		var format = new TextFormat ();
 		if (symbol.color != null) format.color = (symbol.color & 0x00FFFFFF);
-		format.size = (symbol.fontHeight / 20);
+		format.size = Std.int (symbol.fontHeight / 20);
 		
 		var font:FontSymbol = cast swf.symbols.get (symbol.fontID);
+		
+		if (font != null) {
+			
+			// TODO: Bold and italic are handled in the font already
+			// Setting this can cause "extra" bold in HTML5
+			
+			//format.bold = font.bold;
+			//format.italic = font.italic;
+			//format.leading = Std.int (font.leading / 20 + (format.size * 0.2) #if flash + 2 #end);
+			//embedFonts = true;
+			
+		}
 		
 		format.font = symbol.fontName;
 		
@@ -80,28 +92,31 @@ class DynamicTextField extends TextField {
 			
 		}
 		
-		format.leftMargin = symbol.leftMargin / 20;
-		format.rightMargin = symbol.rightMargin / 20;
-		format.indent = symbol.indent / 20;
-		format.leading = symbol.leading;
-		
-		//#if (flash || html5)
-		if (symbol.align == "center") format.align = TextFormatAlign.CENTER;
-		else if (symbol.align == "right") format.align = TextFormatAlign.RIGHT;
-		else if (symbol.align == "justify") format.align = TextFormatAlign.JUSTIFY;
-		//#else
-		//format.align = symbol.align;
-		//#end
+		if (symbol.align != null) {
+			
+			if (symbol.align == "center") format.align = TextFormatAlign.CENTER;
+			else if (symbol.align == "right") format.align = TextFormatAlign.RIGHT;
+			else if (symbol.align == "justify") format.align = TextFormatAlign.JUSTIFY;
+			
+			format.leftMargin = Std.int (symbol.leftMargin / 20);
+			format.rightMargin = Std.int (symbol.rightMargin / 20);
+			format.indent = Std.int (symbol.indent / 20);
+			format.leading = Std.int (symbol.leading / 20);
+			
+			#if flash
+			if (embedFonts) format.leading += 6; // TODO: Is this an issue of Flash fonts are embedded?
+			#end
+			
+		}
 		
 		defaultTextFormat = format;
 		
 		#if !flash
 		
 		var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
-		plain = new EReg ("<br>", "g").replace (symbol.text, "\n");
-		text = new EReg ("<.*?>", "g").replace (plain, "");
-		
-		text = StringTools.htmlUnescape (text);
+		plain = new EReg ("<br>", "g").replace (plain, "\n");
+		plain = new EReg ("<.*?>", "g").replace (plain, "");
+		text = StringTools.htmlUnescape (plain);
 		
 		#else
 		

@@ -15,12 +15,12 @@ class DynamicTextSymbol extends SWFSymbol {
 	public var fontName:String;
 	public var height:Float;
 	public var html:Bool;
-	public var indent:Int;
-	public var leading:Int;
-	public var leftMargin:Int;
+	public var indent:Null<Int>;
+	public var leading:Null<Int>;
+	public var leftMargin:Null<Int>;
 	public var multiline:Bool;
 	public var password:Bool;
-	public var rightMargin:Int;
+	public var rightMargin:Null<Int>;
 	public var selectable:Bool;
 	public var text:String;
 	public var width:Float;
