@@ -126,4 +126,20 @@ import lime.graphics.Image;
 	}
 	
 	
+	public override function unload ():Void {
+		
+		for (symbol in swf.symbols) {
+			
+			if (Std.is (symbol, BitmapSymbol)) {
+				
+				var bitmap:BitmapSymbol = cast symbol;
+				Assets.cache.removeBitmapData (bitmap.path);
+				
+			}
+			
+		}
+		
+	}
+	
+	
 }
