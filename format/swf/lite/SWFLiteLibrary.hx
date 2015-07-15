@@ -8,6 +8,7 @@ import flash.events.Event;
 import flash.media.Sound;
 import flash.text.Font;
 import flash.utils.ByteArray;
+import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.SWFLite;
 import haxe.Unserializer;
 import openfl.Assets;
@@ -89,7 +90,38 @@ import lime.graphics.Image;
 	
 	public override function load (handler:AssetLibrary -> Void):Void {
 		
-		handler (this);
+		var loaded = 0;
+		var total = 0;
+		
+		var onLoad = function (_) {
+			
+			loaded++;
+			
+			if (loaded == total) {
+				
+				handler (this);
+				
+			}
+			
+		};
+		
+		for (symbol in swf.symbols) {
+			
+			if (Std.is (symbol, BitmapSymbol)) {
+				
+				total++;
+				var bitmap:BitmapSymbol = cast symbol;
+				Assets.loadBitmapData (bitmap.path, onLoad);
+				
+			}
+			
+		}
+		
+		if (total == 0) {
+			
+			handler (this);
+			
+		}
 		
 	}
 	
