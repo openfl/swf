@@ -90,36 +90,45 @@ import lime.graphics.Image;
 	
 	public override function load (handler:AssetLibrary -> Void):Void {
 		
-		var loaded = 0;
-		var total = 0;
-		
-		var onLoad = function (_) {
-			
-			loaded++;
-			
-			if (loaded == total) {
-				
-				handler (this);
-				
-			}
-			
-		};
+		var paths = [];
+		var bitmap:BitmapSymbol;
 		
 		for (symbol in swf.symbols) {
 			
 			if (Std.is (symbol, BitmapSymbol)) {
 				
-				total++;
-				var bitmap:BitmapSymbol = cast symbol;
-				Assets.loadBitmapData (bitmap.path, onLoad);
+				bitmap = cast symbol;
+				paths.push (bitmap.path);
 				
 			}
 			
 		}
 		
-		if (total == 0) {
+		if (paths.length == 0) {
 			
 			handler (this);
+			
+		} else {
+			
+			var loaded = 0;
+			
+			var onLoad = function (_) {
+				
+				loaded++;
+				
+				if (loaded == paths.length) {
+					
+					handler (this);
+					
+				}
+				
+			};
+			
+			for (path in paths) {
+				
+				Assets.loadBitmapData (path, onLoad);
+				
+			}
 			
 		}
 		
@@ -128,11 +137,13 @@ import lime.graphics.Image;
 	
 	public override function unload ():Void {
 		
+		var bitmap:BitmapSymbol;
+		
 		for (symbol in swf.symbols) {
 			
 			if (Std.is (symbol, BitmapSymbol)) {
 				
-				var bitmap:BitmapSymbol = cast symbol;
+				bitmap = cast symbol;
 				Assets.cache.removeBitmapData (bitmap.path);
 				
 			}
