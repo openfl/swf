@@ -119,7 +119,7 @@ class DynamicText extends TextField {
 			format.leading = Std.int (tag.leading / 20);
 			
 			#if flash
-			if (embedFonts) format.leading += 6; // TODO: Is this an issue of Flash fonts are embedded?
+			if (embedFonts) format.leading += 4; // TODO: Is this an issue of Flash fonts are embedded?
 			#end
 			
 		}

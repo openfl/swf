@@ -103,8 +103,8 @@ class DynamicTextField extends TextField {
 			format.indent = Std.int (symbol.indent / 20);
 			format.leading = Std.int (symbol.leading / 20);
 			
-			#if flash
-			if (embedFonts) format.leading += 6; // TODO: Is this an issue of Flash fonts are embedded?
+			#if (flash || lime_legacy)
+			if (embedFonts) format.leading += 4; // TODO: Is this an issue of Flash fonts are embedded?
 			#end
 			
 		}
