@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.8.9",
-  "releasenote": "Improvements to font leading",
+  "version": "1.9.0",
+  "releasenote": "Updated for Lime 2.5, improved SWFLite library",
   "contributors": [ "singmajesty" ]
 }
