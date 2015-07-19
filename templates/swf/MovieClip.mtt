@@ -6,7 +6,7 @@ import format.SWF;
 import openfl.Assets;
 
 
-class ::CLASS_NAME:: extends MovieClip {
+class ::PREFIX::::CLASS_NAME:: extends MovieClip {
 	
 	
 	public function new () {
@@ -29,7 +29,7 @@ class ::CLASS_NAME:: extends MovieClip {
 
 
 #else
-@:bind class ::CLASS_NAME:: extends flash.display.MovieClip {
+@:bind @:native("::CLASS_NAME::") class ::PREFIX::::CLASS_NAME:: extends flash.display.MovieClip {
 	
 	
 	public function new () {

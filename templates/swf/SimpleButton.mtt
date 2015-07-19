@@ -1,4 +1,4 @@
-package ::PACKAGE_NAME::;
+package ::PACKAGE_NAME::; #if !flash
 
 
 import format.swf.instance.SimpleButton;
@@ -6,7 +6,7 @@ import format.SWF;
 import openfl.Assets;
 
 
-class ::CLASS_NAME:: extends SimpleButton {
+class ::PREFIX::::CLASS_NAME:: extends SimpleButton {
 	
 	
 	public function new () {
@@ -20,9 +20,24 @@ class ::CLASS_NAME:: extends SimpleButton {
 		var swf = SWF.instances.get ("::SWF_ID::");
 		var symbol = swf.data.getCharacter (::SYMBOL_ID::);
 		
-		super (cast symbol);
+		super (swf.data, cast symbol);
 		
 	}
 	
 	
 }
+
+
+#else
+@:bind @:native("::CLASS_NAME::") class ::PREFIX::::CLASS_NAME:: extends flash.display.SimpleButton {
+	
+	
+	public function new () {
+		
+		super ();
+		
+	}
+	
+	
+}
+#end

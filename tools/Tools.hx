@@ -121,7 +121,7 @@ class Tools {
 	#end
 	
 	
-	private static function generateSWFClasses (project:HXProject, output:HXProject, swfAsset:Asset):Void {
+	private static function generateSWFClasses (project:HXProject, output:HXProject, swfAsset:Asset, prefix:String = ""):Void {
 		
 		var movieClipTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/MovieClip.mtt");
 		var simpleButtonTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/SimpleButton.mtt");
@@ -149,6 +149,12 @@ class Tools {
 			packageName = packageName.toLowerCase ();
 			name = name.substr (0, 1).toUpperCase () + name.substr (1);
 			
+			if (prefix != "" && prefix != null) {
+				
+				prefix = prefix.substr (0, 1).toUpperCase () + prefix.substr (1);
+				
+			}
+			
 			var symbolID = swf.symbols.get (className);
 			var templateData = null;
 			var symbol = swf.data.getCharacter (symbolID);
@@ -165,7 +171,7 @@ class Tools {
 			
 			if (templateData != null) {
 				
-				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID };
+				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID, PREFIX: prefix };
 				var template = new Template (templateData);
 				var targetPath;
 				
@@ -179,7 +185,7 @@ class Tools {
 					
 				}
 				
-				var templateFile = new Asset ("", PathHelper.combine (targetPath, Path.directory (className.split (".").join ("/"))) + "/" + name + ".hx", AssetType.TEMPLATE);
+				var templateFile = new Asset ("", PathHelper.combine (targetPath, Path.directory (className.split (".").join ("/"))) + "/" + prefix + name + ".hx", AssetType.TEMPLATE);
 				templateFile.data = template.execute (context);
 				output.assets.push (templateFile);
 				
@@ -190,7 +196,7 @@ class Tools {
 	}
 	
 	
-	private static function generateSWFLiteClasses (project:HXProject, output:HXProject, swfLite:SWFLite, swfLiteAsset:Asset):Void {
+	private static function generateSWFLiteClasses (project:HXProject, output:HXProject, swfLite:SWFLite, swfLiteAsset:Asset, prefix:String = ""):Void {
 		
 		var movieClipTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/lite/MovieClip.mtt");
 		var simpleButtonTemplate = File.getContent (PathHelper.getHaxelib (new Haxelib ("swf")) + "/templates/swf/lite/SimpleButton.mtt");
@@ -215,12 +221,12 @@ class Tools {
 				
 				if (lastIndexOfPeriod == -1) {
 					
-					name = symbol.className;
+					name = prefix + symbol.className;
 					
 				} else {
 					
 					packageName = symbol.className.substr (0, lastIndexOfPeriod);
-					name = symbol.className.substr (lastIndexOfPeriod + 1);
+					name = prefix + symbol.className.substr (lastIndexOfPeriod + 1);
 					
 				}
 				
@@ -467,7 +473,7 @@ class Tools {
 				
 				if (library.generate) {
 					
-					generateSWFClasses (project, output, swf);
+					generateSWFClasses (project, output, swf, library.prefix);
 					
 				}
 				
@@ -612,7 +618,7 @@ class Tools {
 					
 					if (library.generate) {
 						
-						generateSWFLiteClasses (project, output, swfLite, swfLiteAsset);
+						generateSWFLiteClasses (project, output, swfLite, swfLiteAsset, library.prefix);
 						
 					}
 					
