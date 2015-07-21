@@ -57,10 +57,6 @@ import flash.utils.ByteArray;
 import flash.utils.Endian;
 //import flash.utils.getTimer;
 
-#if !haxe3
-typedef Hash<Int, T> = IntHash<T>;
-#end
-
 class SWFTimelineContainer extends SWFEventDispatcher
 {
 	// We're just being lazy here.
@@ -68,7 +64,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	public static var AUTOBUILD_LAYERS:Bool = false;
 	public static var EXTRACT_SOUND_STREAM:Bool = true;
 	public static var scalingGrids(default, null):Map<Int, Int>;
-	
+
 	public var tags(default, null):Array<ITag>;
 	public var tagsRaw(default, null):Array<SWFRawTag>;
 	public var dictionary(default, null):Map<Int, Int>;
@@ -79,7 +75,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 
 	public var frameLabels(default, null):Map<Int, String>;
 	public var frameIndexes(default, null):Map<String, Int>;
-	
+
 	private var currentFrame:Frame;
 	private var hasSoundStream:Bool;
 
@@ -93,23 +89,23 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	public var tagFactory:ISWFTagFactory;
 
 	private var rootTimelineContainer:SWFTimelineContainer;
-	
+
 	public var backgroundColor:Int;
 	public var jpegTablesTag:TagJPEGTables;
-	
+
 	#if test_abc
 	public var abcTag:TagDoABC;
 	public var abcData:ABCData;
 	public var abcClasses(default, null):Map<Int, ClassDef>;
 	#end
-	
-	
+
+
 	public function new()
 	{
 		super();
-		
+
 		if (scalingGrids == null) scalingGrids = new Map<Int, Int>();
-		
+
 		backgroundColor = 0xffffff;
 		tags = new Array<ITag>();
 		tagsRaw = new Array<SWFRawTag>();
@@ -117,53 +113,53 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		scenes = new Array<Scene>();
 		frames = new Array<Frame>();
 		layers = new Array<Layer>();
-	
+
 		tagFactory = new SWFTagFactory();
-		
+
 		rootTimelineContainer = this;
-		
+
 		enterFrameProvider = new Sprite();
 	}
-	
+
 	public function getCharacter(characterId:Int):IDefinitionTag {
-		
+
 		var tagIndex:Int = rootTimelineContainer.dictionary.get (characterId);
-		
+
 		if (tagIndex >= 0 && tagIndex < rootTimelineContainer.tags.length) {
 			return cast rootTimelineContainer.tags[tagIndex];
 		}
 		return null;
 	}
-	
+
 	public function getScalingGrid(characterId:Int):TagDefineScalingGrid {
 		//trace(characterId  + " getScalingGrid" );
 		//trace(scalingGrids);
-		
+
 		if (scalingGrids.exists (characterId)) {
 			return cast rootTimelineContainer.tags[scalingGrids.get (characterId)];
 		}
 		return null;
 	}
-	
+
 	public function parseTags(data:SWFData, version:Int):Void {
 		var tag:ITag;
 		parseTagsInit(data, version);
 		while ((tag = parseTag(data)) != null && tag.type != TagEnd.TYPE) {};
 		parseTagsFinalize();
 	}
-	
+
 	public function parseTagsAsync(data:SWFData, version:Int):Void {
 		parseTagsInit(data, version);
 		enterFrameProvider.addEventListener(Event.ENTER_FRAME, parseTagsAsyncHandler);
 	}
-	
+
 	private function parseTagsAsyncHandler(event:Event):Void {
 		enterFrameProvider.removeEventListener(Event.ENTER_FRAME, parseTagsAsyncHandler);
 		if(dispatchEvent(new SWFProgressEvent(SWFProgressEvent.PROGRESS, _tmpData.position, _tmpData.length, false, true))) {
 			parseTagsAsyncInternal();
 		}
 	}
-	
+
 	private function parseTagsAsyncInternal():Void {
 		var tag:ITag;
 		var time:Int = flash.Lib.getTimer();
@@ -181,7 +177,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			dispatchEvent(new SWFProgressEvent(SWFProgressEvent.COMPLETE, _tmpData.position, _tmpData.length));
 		}
 	}
-	
+
 	private function parseTagsInit(data:SWFData, version:Int):Void {
 		tags = new Array<ITag>();
 		frames = new Array<Frame>();
@@ -193,10 +189,10 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		hasSoundStream = false;
 		_tmpData = data;
 		_tmpVersion = version;
-		
+
 		//trace(":: Container parseTagsInit");
 	}
-	
+
 	private function parseTag(data:SWFData, async:Bool = false):ITag {
 		var pos = data.position;
 		// Bail out if eof
@@ -217,7 +213,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 				timelineContainer.tagFactory = tagFactory;
 				timelineContainer.rootTimelineContainer = this;
 			}
-			
+
 			// Parse tag
 			tag.parse(data, tagHeader.contentLength, _tmpVersion, async);
 		} catch(e:Error) {
@@ -230,7 +226,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		// Register tag
 		tags.push(tag);
 		tagsRaw.push(tagRaw);
-		
+
 		// Build dictionary and display list etc
 		processTag(tag);
 		// Adjust position (just in case the parser under- or overflows)
@@ -265,7 +261,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		}
 		return tag;
 	}
-	
+
 	private function parseTagsFinalize():Void {
 		if(soundStream != null && soundStream.data.length == 0) {
 			soundStream = null;
@@ -335,9 +331,9 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 
 	private function processTag(tag:ITag):Void {
-		
+
 		//trace("  ..Process: " + tag.type + " - name: " + tag.name);
-		
+
 		var currentTagIndex:Int = tags.length - 1;
 		if(Std.is (tag, IDefinitionTag)) {
 			processDefinitionTag(cast tag, currentTagIndex);
@@ -346,7 +342,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			processDisplayListTag(cast tag, currentTagIndex);
 			return;
 		}
-		
+
 		switch(cast (tag.type, Int)) {
 			// Frame labels and scenes
 			case TagFrameLabel.TYPE, TagDefineSceneAndFrameLabelData.TYPE:
@@ -372,7 +368,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			#end
 		}
 	}
-	
+
 	private function processDefinitionTag(tag:IDefinitionTag, currentTagIndex:Int):Void {
 		if(tag.characterId > 0) {
 			// Register definition tag in dictionary
@@ -424,7 +420,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 				frameIndexes.set (tagFrameLabel.frameName, currentFrame.frameNumber + 1);
 		}
 	}
-	
+
 	private function processSoundStreamTag(tag:ITag, currentTagIndex:Int):Void {
 		switch(cast (tag.type, Int)) {
 			case TagSoundStreamHead.TYPE, TagSoundStreamHead2.TYPE:
@@ -469,38 +465,38 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	private function processJPEGTablesTag(tag:TagJPEGTables, currentTagIndex:Int):Void {
 		jpegTablesTag = tag;
 	}
-	
+
 	private function processScalingGridTag(tag:TagDefineScalingGrid, currentTagIndex:Int):Void {
 		scalingGrids.set (tag.characterId, currentTagIndex);
 	}
-	
+
 	#if test_abc
-	
+
 	private function processAS3Tag(tag:TagDoABC, currentTagIndex:Int):Void {
 		// Just store it for now
 		abcTag = tag;
-		
+
 		//trace("ABC: " + tag);
-		
-		var bytes = #if flash haxe.io.Bytes.ofData(tag.bytes) #else tag.bytes #end; 
-		var input = new haxe.io.BytesInput(bytes); 
+
+		var bytes = #if flash haxe.io.Bytes.ofData(tag.bytes) #else tag.bytes #end;
+		var input = new haxe.io.BytesInput(bytes);
 		var reader = new format.abc.Reader(input);
-		
+
 		//trace("Reading...");
 		abcData = reader.read();
 
-		
+
 	}
-	
+
 	#end
-	
+
 	public function buildLayers():Void {
 		var i:Int;
 		var depth:String;
 		var depthInt:Int;
 		var depths = new Map <Int, Array <Int>>();
 		var depthsAvailable:Array<Int> = [];
-		
+
 		for(i in 0...frames.length) {
 			var frame:Frame = frames[i];
 			for(depth in frame.objects.keys()) {
@@ -556,28 +552,28 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		for(i in 0...frames.length) {
 			var frameObjs = frames[i].objects;
 			for (depth in frameObjs.keys()) {
-				
+
 				for (j in 0...depthsAvailable.length) {
-					
+
 					if (depth == depthsAvailable[j]) {
-						
+
 						frameObjs.get (depth).layer = j;
-						
+
 					}
-					
+
 				}
-				
-				
+
+
 			}
-		}	
+		}
 	}
-	
+
 	private function sortNumeric (a:Int, b:Int):Int {
-		
+
 		return a - b;
-		
+
 	}
-	
+
 	public function toString(indent:Int = 0):String {
 		var i:Int;
 		var str:String = "";
@@ -602,7 +598,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		if (layers.length > 0) {
 			str += "\n" + StringUtils.repeat(indent + 2) + "Layers:";
 			for (i in 0...layers.length) {
-				str += "\n" + StringUtils.repeat(indent + 4) + 
+				str += "\n" + StringUtils.repeat(indent + 4) +
 					"[" + i + "] " + layers[i].toString(indent + 4);
 			}
 		}

@@ -9,7 +9,7 @@ import format.swf.timeline.Scene;
 
 import flash.errors.Error;
 
-class TagDefineSprite extends SWFTimelineContainer #if !haxe3 , #end implements IDefinitionTag
+class TagDefineSprite extends SWFTimelineContainer implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 39;
 	

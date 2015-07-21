@@ -7,7 +7,7 @@ import format.swf.utils.ColorUtils;
 import flash.filters.BitmapFilter;
 import flash.filters.GlowFilter;
 
-class FilterGlow extends Filter #if !haxe3 , #end implements IFilter
+class FilterGlow extends Filter implements IFilter
 {
 	public var glowColor:Int;
 	public var blurX:Float;

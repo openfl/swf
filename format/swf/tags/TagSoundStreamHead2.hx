@@ -5,7 +5,7 @@ import format.swf.data.consts.SoundSize;
 import format.swf.data.consts.SoundType;
 import format.swf.data.consts.SoundCompression;
 
-class TagSoundStreamHead2 extends TagSoundStreamHead #if !haxe3 , #end implements ITag
+class TagSoundStreamHead2 extends TagSoundStreamHead implements ITag
 {
 	public static inline var TYPE:Int = 45;
 	

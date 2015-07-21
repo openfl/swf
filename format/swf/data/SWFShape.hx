@@ -28,12 +28,12 @@ class SWFShape
 	public var lineStyles(default, null):Array<SWFLineStyle>;
 	public var referencePoint(default, null):Point;
 	
-	private var fillEdgeMaps:Array<IntHash<Array<IEdge>>>;
-	private var lineEdgeMaps:Array<IntHash<Array<IEdge>>>;
-	private var currentFillEdgeMap:IntHash<Array<IEdge>>;
-	private var currentLineEdgeMap:IntHash<Array<IEdge>>;
+	private var fillEdgeMaps:Array<Map<Int, Array<IEdge>>>;
+	private var lineEdgeMaps:Array<Map<Int, Array<IEdge>>>;
+	private var currentFillEdgeMap:Map<Int, Array<IEdge>>;
+	private var currentLineEdgeMap:Map<Int, Array<IEdge>>;
 	private var numGroups:Int;
-	private var coordMap:Hash<Array<IEdge>>;
+	private var coordMap:Map<String, Array<IEdge>>;
 	
 	private var unitDivisor:Float;
 	
@@ -223,10 +223,10 @@ class SWFShape
 			var currentLineStyleIdx:Int = 0;
 			var subPath:Array<IEdge> = new Array<IEdge>();
 			numGroups = 0;
-			fillEdgeMaps = new Array<IntHash<Array<IEdge>>>();
-			lineEdgeMaps = new Array<IntHash<Array<IEdge>>>();
-			currentFillEdgeMap = new IntHash<Array<IEdge>>();
-			currentLineEdgeMap = new IntHash<Array<IEdge>>();
+			fillEdgeMaps = new Array<Map<Int, Array<IEdge>>>();
+			lineEdgeMaps = new Array<Map<Int, Array<IEdge>>>();
+			currentFillEdgeMap = new Map<Int, Array<IEdge>>();
+			currentLineEdgeMap = new Map<Int, Array<IEdge>>();
 			for (i in 0...records.length) {
 				var shapeRecord:SWFShapeRecord = records[i];
 				switch(shapeRecord.type) {
@@ -251,8 +251,8 @@ class SWFShape
 								cleanEdgeMap(currentLineEdgeMap);
 								fillEdgeMaps.push(currentFillEdgeMap);
 								lineEdgeMaps.push(currentLineEdgeMap);
-								currentFillEdgeMap = new IntHash<Array<IEdge>>();
-								currentLineEdgeMap = new IntHash<Array<IEdge>>();
+								currentFillEdgeMap = new Map<Int, Array<IEdge>>();
+								currentLineEdgeMap = new Map<Int, Array<IEdge>>();
 								currentLineStyleIdx = 0;
 								currentFillStyleIdx0 = 0;
 								currentFillStyleIdx1 = 0;
@@ -524,7 +524,7 @@ class SWFShape
 		}
 	}
 	
-	private function createPathFromEdgeMap(edgeMap:IntHash<Array<IEdge>>):Array<IEdge> {
+	private function createPathFromEdgeMap(edgeMap:Map<Int, Array<IEdge>>):Array<IEdge> {
 		var newPath:Array<IEdge> = new Array<IEdge>();
 		var styleIdxArray = [];
 		for(styleIdx in edgeMap.keys()) {
@@ -537,7 +537,7 @@ class SWFShape
 		return newPath;
 	}
 	
-	private function cleanEdgeMap(edgeMap:IntHash<Array<IEdge>>):Void {
+	private function cleanEdgeMap(edgeMap:Map<Int, Array<IEdge>>):Void {
 		for(styleIdx in edgeMap.keys()) {
 			var subPath:Array<IEdge> = edgeMap.get (styleIdx);
 			if(subPath != null && subPath.length > 0) {
@@ -572,7 +572,7 @@ class SWFShape
 	}
 	
 	private function createCoordMap(path:Array<IEdge>):Void {
-		coordMap = new Hash<Array<IEdge>>();
+		coordMap = new Map<String, Array<IEdge>>();
 		for(i in 0...path.length) {
 			var from:Point = path[i].from;
 			var key:String = from.x + "_" + from.y;

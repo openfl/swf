@@ -7,7 +7,7 @@ import format.swf.utils.StringUtils;
 
 import flash.utils.ByteArray;
 
-class TagDefineFont2 extends TagDefineFont #if !haxe3 , #end implements IDefinitionTag
+class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 48;
 	

@@ -4,7 +4,7 @@ import format.swf.SWFData;
 
 import flash.utils.ByteArray;
 
-class TagEnableDebugger2 extends TagEnableDebugger #if !haxe3 , #end implements ITag
+class TagEnableDebugger2 extends TagEnableDebugger implements ITag
 {
 	public static inline var TYPE:Int = 64;
 	

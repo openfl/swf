@@ -4,7 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.SWFRectangle;
 import format.swf.utils.StringUtils;
 
-class TagDefineShape4 extends TagDefineShape3 #if !haxe3 , #end implements IDefinitionTag
+class TagDefineShape4 extends TagDefineShape3 implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 83;
 	

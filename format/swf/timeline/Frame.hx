@@ -4,10 +4,6 @@ import format.swf.tags.TagPlaceObject;
 import format.swf.tags.TagRemoveObject;
 import format.swf.utils.StringUtils;
 
-#if !haxe3
-typedef Map<Int, T> = IntHash<T>;
-#end
-
 class Frame
 {
 	public var frameNumber:Int = 0;

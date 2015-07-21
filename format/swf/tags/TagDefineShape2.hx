@@ -2,7 +2,7 @@
 
 import format.swf.SWFData;
 
-class TagDefineShape2 extends TagDefineShape #if !haxe3 , #end implements IDefinitionTag
+class TagDefineShape2 extends TagDefineShape implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 22;
 	

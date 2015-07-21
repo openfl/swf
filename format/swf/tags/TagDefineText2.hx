@@ -4,7 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.SWFTextRecord;
 import format.swf.utils.StringUtils;
 
-class TagDefineText2 extends TagDefineText #if !haxe3 , #end implements IDefinitionTag
+class TagDefineText2 extends TagDefineText implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 33;
 	

@@ -8,7 +8,7 @@ import flash.display.Loader;
 import flash.events.Event;
 import flash.utils.ByteArray;
 
-class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 #if !haxe3 , #end implements IDefinitionTag
+class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 35;
 	

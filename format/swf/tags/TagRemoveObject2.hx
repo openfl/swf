@@ -2,7 +2,7 @@
 
 import format.swf.SWFData;
 
-class TagRemoveObject2 extends TagRemoveObject #if !haxe3 , #end implements IDisplayListTag
+class TagRemoveObject2 extends TagRemoveObject implements IDisplayListTag
 {
 	public static inline var TYPE:Int = 28;
 	

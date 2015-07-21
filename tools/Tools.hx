@@ -41,7 +41,7 @@ class Tools {
 	private static var targetDirectory:String;
 	
 	
-	#if (neko && (haxe_210 || haxe3))
+	#if neko
 	public static function __init__ () {
 		
 		var haxePath = Sys.getEnv ("HAXEPATH");

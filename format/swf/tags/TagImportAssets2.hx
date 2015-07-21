@@ -2,7 +2,7 @@
 
 import format.swf.SWFData;
 
-class TagImportAssets2 extends TagImportAssets #if !haxe3 , #end implements ITag
+class TagImportAssets2 extends TagImportAssets implements ITag
 {
 	public static inline var TYPE:Int = 71;
 

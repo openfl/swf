@@ -3,7 +3,7 @@
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
 
-class TagDefineBitsJPEG2 extends TagDefineBits #if !haxe3 , #end implements IDefinitionTag
+class TagDefineBitsJPEG2 extends TagDefineBits implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 21;
 	

@@ -1,12 +1,7 @@
 ﻿package format.swf.utils;
 
 import flash.utils.ByteArray;
-
-#if haxe3
 import haxe.crypto.BaseCode;
-#else
-import haxe.BaseCode;
-#end
 
 class BitArray extends ByteArray
 {

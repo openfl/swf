@@ -5,7 +5,7 @@ import format.swf.data.consts.BlendMode;
 import format.swf.utils.ColorUtils;
 import format.swf.utils.StringUtils;
 
-class TagPlaceObject3 extends TagPlaceObject2 #if !haxe3 , #end implements IDisplayListTag
+class TagPlaceObject3 extends TagPlaceObject2 implements IDisplayListTag
 {
 	public static inline var TYPE:Int = 70;
 	

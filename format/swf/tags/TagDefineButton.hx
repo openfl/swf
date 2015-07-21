@@ -24,7 +24,7 @@ class TagDefineButton implements IDefinitionTag
 	public var characters (default, null):Array<SWFButtonRecord>;
 	public var actions (default, null):Array<IAction>;
 	
-	private var frames:Hash<Array<SWFButtonRecord>>;
+	private var frames:Map<String, Array<SWFButtonRecord>>;
 	
 	public function new() {
 		type = TYPE;
@@ -33,7 +33,7 @@ class TagDefineButton implements IDefinitionTag
 		level = 1;
 		characters = new Array<SWFButtonRecord>();
 		actions = new Array<IAction>();
-		frames = new Hash<Array<SWFButtonRecord>>();
+		frames = new Map<String, Array<SWFButtonRecord>>();
 	}
 	
 	public function parse(data:SWFData, length:Int, version:Int, async:Bool = false):Void {

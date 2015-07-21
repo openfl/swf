@@ -4,7 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.actions.IAction;
 import format.swf.utils.StringUtils;
 
-class TagDoInitAction extends TagDoAction #if !haxe3 , #end implements ITag
+class TagDoInitAction extends TagDoAction implements ITag
 {
 	public static inline var TYPE:Int = 59;
 	

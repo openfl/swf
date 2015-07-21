@@ -9,7 +9,7 @@ import flash.filters.BevelFilter;
 import flash.filters.BitmapFilter;
 import flash.filters.BitmapFilterType;
 
-class FilterBevel extends Filter #if !haxe3 , #end implements IFilter
+class FilterBevel extends Filter implements IFilter
 {
 	public var shadowColor:Int;
 	public var highlightColor:Int;

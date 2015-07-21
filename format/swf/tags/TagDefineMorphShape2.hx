@@ -5,7 +5,7 @@ import format.swf.data.SWFMorphLineStyle2;
 import format.swf.data.SWFRectangle;
 import format.swf.utils.StringUtils;
 
-class TagDefineMorphShape2 extends TagDefineMorphShape #if !haxe3 , #end implements ITag
+class TagDefineMorphShape2 extends TagDefineMorphShape implements ITag
 {
 	public static inline var TYPE:Int = 84;
 	

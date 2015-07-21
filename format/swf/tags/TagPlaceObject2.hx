@@ -3,7 +3,7 @@
 import format.swf.SWFData;
 import format.swf.utils.StringUtils;
 
-class TagPlaceObject2 extends TagPlaceObject #if !haxe3 , #end implements IDisplayListTag
+class TagPlaceObject2 extends TagPlaceObject implements IDisplayListTag
 {
 	public static inline var TYPE:Int = 26;
 	

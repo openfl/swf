@@ -2,7 +2,7 @@
 
 import format.swf.SWFData;
 
-class TagDefineFontInfo2 extends TagDefineFontInfo #if !haxe3 , #end implements ITag
+class TagDefineFontInfo2 extends TagDefineFontInfo implements ITag
 {
 	public static inline var TYPE:Int = 62;
 	

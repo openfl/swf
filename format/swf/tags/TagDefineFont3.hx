@@ -1,6 +1,6 @@
 ﻿package format.swf.tags;
 
-class TagDefineFont3 extends TagDefineFont2 #if !haxe3 , #end implements IDefinitionTag
+class TagDefineFont3 extends TagDefineFont2 implements IDefinitionTag
 {
 	public static inline var TYPE:Int = 75;
 	private static var unitDivisor:Int = 20;

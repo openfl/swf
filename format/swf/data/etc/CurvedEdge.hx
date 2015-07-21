@@ -2,7 +2,7 @@
 
 import flash.geom.Point;
 
-class CurvedEdge extends StraightEdge #if !haxe3 , #end implements IEdge
+class CurvedEdge extends StraightEdge implements IEdge
 {
 	public var control(default, null):Point;
 	

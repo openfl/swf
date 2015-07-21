@@ -17,10 +17,6 @@ import format.swf.tags.TagDefineButton2;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagSymbolClass;
 
-#if !haxe3
-typedef Map<String, T> = Hash<T>;
-#end
-
 
 class SWF extends EventDispatcher {
 	

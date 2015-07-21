@@ -1,10 +1,6 @@
 ﻿package format.swf.utils;
 
-#if haxe3
 import haxe.crypto.BaseCode;
-#else
-import haxe.BaseCode;
-#end
 
 //import flash.events.*;
 

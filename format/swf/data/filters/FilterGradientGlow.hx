@@ -10,7 +10,7 @@ import flash.filters.BitmapFilterType;
 import flash.filters.GradientGlowFilter; // Not supported on native yet
 #end
 
-class FilterGradientGlow extends Filter #if !haxe3 , #end implements IFilter
+class FilterGradientGlow extends Filter implements IFilter
 {
 	public var numColors:Int;
 	public var blurX:Float;

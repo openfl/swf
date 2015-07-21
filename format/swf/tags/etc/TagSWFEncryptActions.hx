@@ -3,7 +3,7 @@ package format.swf.tags.etc;
 import format.swf.tags.ITag;
 import format.swf.tags.TagUnknown;
 
-class TagSWFEncryptActions extends TagUnknown #if !haxe3 , #end implements ITag
+class TagSWFEncryptActions extends TagUnknown implements ITag
 {
 	public static inline var TYPE:Int = 253;
 	

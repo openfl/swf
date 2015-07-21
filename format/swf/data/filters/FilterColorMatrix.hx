@@ -7,7 +7,7 @@ import format.swf.utils.StringUtils;
 import flash.filters.BitmapFilter;
 import flash.filters.ColorMatrixFilter;
 
-class FilterColorMatrix extends Filter #if !haxe3 , #end implements IFilter
+class FilterColorMatrix extends Filter implements IFilter
 {
 	public var colorMatrix (default, null):Array<Float>;
 	

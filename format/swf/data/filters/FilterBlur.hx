@@ -6,7 +6,7 @@ import format.swf.SWFData;
 import flash.filters.BitmapFilter;
 import flash.filters.BlurFilter;
 
-class FilterBlur extends Filter #if !haxe3 , #end implements IFilter
+class FilterBlur extends Filter implements IFilter
 {
 	public var blurX:Float;
 	public var blurY:Float;
