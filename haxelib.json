@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "1.9.0",
-  "releasenote": "Updated for Lime 2.5, improved SWFLite library",
+  "version": "1.9.1",
+  "releasenote": "Added library prefix support, removed Haxe 2 support",
   "contributors": [ "singmajesty" ]
 }
