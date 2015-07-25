@@ -10,6 +10,7 @@ import flash.events.Event;
 import flash.filters.*;
 import flash.Lib;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.ButtonSymbol;
 import format.swf.lite.symbols.DynamicTextSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
@@ -517,6 +518,10 @@ class MovieClip extends flash.display.MovieClip {
 				} else if (Std.is (symbol, StaticTextSymbol)) {
 					
 					displayObject = new StaticTextField (swf, cast symbol);
+					
+				} else if (Std.is (symbol, ButtonSymbol)) {
+					
+					displayObject = new SimpleButton (swf, cast symbol);
 					
 				}
 				

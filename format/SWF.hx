@@ -125,9 +125,10 @@ class SWF extends EventDispatcher {
 	
 	
 	public function createButton (className:String):SimpleButton {
+		
 		var symbol:Dynamic = null;
 		var charId:Int;
-			
+		
 		if (symbols.exists (className)) {
 			charId = symbols.get (className);
 			symbol = data.getCharacter (charId);
