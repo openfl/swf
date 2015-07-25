@@ -3,7 +3,6 @@ package ::PACKAGE_NAME::;
 
 import format.swf.lite.MovieClip;
 import format.swf.lite.SWFLite;
-import haxe.Unserializer;
 import openfl.Assets;
 
 
@@ -26,54 +25,6 @@ class ::CLASS_NAME:: extends MovieClip {
 		var symbol = swfLite.symbols.get (::SYMBOL_ID::);
 		
 		super (swfLite, cast symbol);
-		
-	}
-	
-	
-	private function resolveClass (name:String):Class <Dynamic> {
-		
-		var value = Type.resolveClass (name);
-		
-		if (value == null) {
-			
-			#if flash
-			value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "flash"));
-			#else
-			value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "openfl"));
-			#end
-			
-		}
-		
-		return value;
-		
-	}
-	
-	
-	private function resolveEnum (name:String):Enum <Dynamic> {
-		
-		var value = Type.resolveEnum (name);
-		
-		if (value == null) {
-			
-			#if flash
-			value = Type.resolveEnum (StringTools.replace (name, "openfl._legacy", "flash"));
-			#else
-			value = Type.resolveEnum (StringTools.replace (name, "openfl._legacy", "openfl"));
-			#end
-			
-		}
-		
-		#if flash
-		
-		if (value == null) {
-			
-			return cast Type.resolveClass (name);
-			
-		}
-		
-		#end
-		
-		return value;
 		
 	}
 	

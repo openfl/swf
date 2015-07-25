@@ -13,14 +13,14 @@ class ::CLASS_NAME:: extends SimpleButton {
 		
 		if (!SWFLite.instances.exists ("::SWF_ID::")) {
 			
-			SWFLite.instances.set ("::SWF_ID::", new SWFLite (Assets.getBytes ("::SWF_ID::")));
+			SWFLite.instances.set ("::SWF_ID::", SWFLite.unserialize (Assets.getText ("::SWF_ID::")));
 			
 		}
 		
-		var swf = SWFLite.instances.get ("::SWF_ID::");
-		var symbol = swf.data.getCharacter (::SYMBOL_ID::);
+		var swfLite = SWFLite.instances.get ("::SWF_ID::");
+		var symbol = swfLite.symbols.get (::SYMBOL_ID::);
 		
-		super (cast symbol);
+		super (swfLite, cast symbol);
 		
 	}
 	

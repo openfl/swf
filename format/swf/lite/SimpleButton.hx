@@ -16,10 +16,29 @@ class SimpleButton extends flash.display.SimpleButton {
 		
 		this.symbol = symbol;
 		
-		downState = new MovieClip (swf, symbol.downState);
-		hitTestState = new MovieClip (swf, symbol.hitState);
-		overState = new MovieClip (swf, symbol.overState);
-		upState = new MovieClip (swf, symbol.upState);
+		if (symbol.downState != null) {
+			
+			downState = new MovieClip (swf, symbol.downState);
+			
+		}
+		
+		if (symbol.hitState != null) {
+			
+			hitTestState = new MovieClip (swf, symbol.hitState);
+			
+		}
+		
+		if (symbol.overState != null) {
+			
+			overState = new MovieClip (swf, symbol.overState);
+			
+		}
+		
+		if (symbol.upState != null) {
+			
+			upState = new MovieClip (swf, symbol.upState);
+			
+		}
 		
 	}
 	

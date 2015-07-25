@@ -4,6 +4,7 @@ package;
 import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.lite.symbols.BitmapSymbol;
+import format.swf.lite.symbols.ButtonSymbol;
 import format.swf.lite.symbols.DynamicTextSymbol;
 import format.swf.lite.symbols.ShapeSymbol;
 import format.swf.lite.symbols.SpriteSymbol;
@@ -210,6 +211,10 @@ class Tools {
 				
 				templateData = movieClipTemplate;
 				
+			} else if (Std.is (symbol, ButtonSymbol)) {
+				
+				templateData = simpleButtonTemplate;
+				
 			}
 			
 			if (templateData != null && symbol.className != null) {
@@ -268,6 +273,10 @@ class Tools {
 										} else if (Std.is (childSymbol, DynamicTextSymbol) || Std.is (childSymbol, StaticTextSymbol)) {
 											
 											className = "openfl.text.TextField";
+											
+										} else if (Std.is (childSymbol, ButtonSymbol)) {
+											
+											className = "openfl.display.SimpleButton";
 											
 										}
 										

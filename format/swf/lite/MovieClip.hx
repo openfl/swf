@@ -4,6 +4,7 @@ package format.swf.lite;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
+import flash.display.Graphics;
 import flash.display.PixelSnapping;
 import flash.display.Shape;
 import flash.events.Event;
@@ -26,7 +27,6 @@ import openfl.Assets;
 class MovieClip extends flash.display.MovieClip {
 	
 	
-	@:noCompletion private static var clips:Array <MovieClip>;
 	@:noCompletion private static var initialized:Bool;
 	
 	@:noCompletion private var lastUpdate:Int;
@@ -49,7 +49,6 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (!initialized) {
 			
-			clips = new Array <MovieClip> ();
 			initialized = true;
 			
 		}
@@ -61,8 +60,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__totalFrames > 1) {
 			
-			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
+			#if flash
+			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame, false, 0, true);
 			play ();
+			#elseif (openfl && !openfl_legacy)
+			play ();
+			#end
 			
 		}
 		
@@ -74,45 +77,6 @@ class MovieClip extends flash.display.MovieClip {
 		return start + ((end - start) * ratio);
 		
 	}
-	
-	
-	/*private function createBitmap (xfl:XFL, instance:DOMBitmapInstance):Bitmap {
-		
-		var bitmap = null;
-		var bitmapData = null;
-		
-		if (xfl.document.media.exists (instance.libraryItemName)) {
-			
-			var bitmapItem = xfl.document.media.get (instance.libraryItemName);
-			bitmapData = Assets.getBitmapData (Path.directory (xfl.path) + "/bin/" + bitmapItem.bitmapDataHRef);
-			
-		}
-		
-		if (bitmapData != null) {
-			
-			bitmap = new Bitmap (bitmapData);
-			
-			if (instance.matrix != null) {
-				
-				bitmap.transform.matrix = instance.matrix;
-				
-			}
-			
-		}
-		
-		return bitmap;
-		
-	}*/
-	
-	
-	//private function createDynamicText (symbol:TagDefineEditText):TextField {
-		//
-		//var textField = new TextField ();
-		//textField.selectable = !symbol.noSelect;
-		//
-		//return textField;
-		//
-	//}
 	
 	
 	@:noCompletion private function createShape (symbol:ShapeSymbol):Shape {
@@ -185,118 +149,30 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		/*if (shape.cacheAsBitmap) {
-			
-			var bitmapData = new BitmapData (Math.ceil (shape.width), Math.ceil (shape.height), true, 0x00000000);
-			bitmapData.draw (shape);
-			return new Bitmap (bitmapData);
-			
-		}*/
-		
 		return shape;
 		
 	}
 	
 	
-	//private function createStaticText (symbol:TagDefineText):TextField {
-		//
-		//var textField = new TextField ();
-		//textField.selectable = false;
-		//textField.x += instance.left;
-		//
-		// xfl does not embed the font
-		//textField.embedFonts = true;
-		//
-		//var format = new TextFormat ();
-		//
-		///*
-		//for (record in symbol.records) {
-			//
-			//var pos = textField.text.length;
-			//
-			//for (entry in record.glyphEntries) {
-				//
-				//entry.
-				//
-			//}
-			//
-			//textField.appendText (record.);
-			//
-			//if (textRun.textAttrs.face != null) format.font = textRun.textAttrs.face;
-			//if (textRun.textAttrs.alignment != null) format.align = Reflect.field (TextFormatAlign, textRun.textAttrs.alignment.toUpperCase ());
-			//if (textRun.textAttrs.size != 0) format.size = textRun.textAttrs.size;
-			//if (textRun.textAttrs.fillColor != 0) {
-				//
-				//if (textRun.textAttrs.alpha != 0) {
-					//
-					// need to add alpha to color
-					//format.color = textRun.textAttrs.fillColor;
-					//
-				//} else {
-					//
-					//format.color = textRun.textAttrs.fillColor;
-					//
-				//}
-				//
-			//}
-			//
-			//textField.setTextFormat (format, pos, textField.text.length);
-			//
-		//}*/
-		//
-		//return textField;
-		//
-	//}
-	
-	
-	/*private function createSprite (symbol:SWFTimelineContainer, object:FrameObject):MovieClip {
-		
-		var movieClip = new MovieClip (symbol, swf);
-		
-		if (movieClip != null) {
-			
-			if (object.matrix != null) {
-				
-				movieClip.transform.matrix = object.matrix;
-				
-			}
-			
-			/*if (instance.color != null) {
-				
-				movieClip.transform.colorTransform = instance.color;
-				
-			}*/
-			
-			//movieClip.cacheAsBitmap = instance.cacheAsBitmap;
-			
-			/*if (instance.exportAsBitmap) {
-				
-				movieClip.flatten ();
-				
-			}
-			
-		}
-		
-		return movieClip;
-		
-	}*/
-	
-	
 	@:noCompletion private function enterFrame ():Void {
 		
-		if (lastUpdate == __currentFrame) {
+		if (playing) {
 			
-			__currentFrame ++;
-			
-			if (__currentFrame > __totalFrames) {
+			if (lastUpdate == __currentFrame) {
 				
-				__currentFrame = 1;
+				__currentFrame ++;
+				
+				if (__currentFrame > __totalFrames) {
+					
+					__currentFrame = 1;
+					
+				}
 				
 			}
 			
+			update ();
+			
 		}
-		
-		update ();
 		
 	}
 	
@@ -346,11 +222,26 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (Std.is (frame, Int)) {
 			
-			return cast frame;
+			var index:Int = cast frame;
+			
+			if (index < 1) return 1;
+			if (index > __totalFrames) return __totalFrames;
+			
+			return index;
 			
 		} else if (Std.is (frame, String)) {
 			
-			// need to handle frame labels
+			var label:String = cast frame;
+			
+			for (i in 0...symbol.frames.length) {
+				
+				if (symbol.frames[i].label == label) {
+					
+					return i;
+					
+				}
+				
+			}
 			
 		}
 		
@@ -461,7 +352,6 @@ class MovieClip extends flash.display.MovieClip {
 		if (!playing && __totalFrames > 1) {
 			
 			playing = true;
-			clips.push (this);
 			
 		}
 		
@@ -486,8 +376,6 @@ class MovieClip extends flash.display.MovieClip {
 	@:noCompletion private function renderFrame (index:Int):Void {
 		
 		var frame = symbol.frames[index];
-		
-		//if (frame.frameNumber == __currentFrame - 1 || frame.tweenType == null || frame.tweenType == "") {
 		
 		var mask = null;
 		var maskObject = null;
@@ -563,163 +451,6 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-			/*for (element in frame.elements) {
-				
-				if (Std.is (element, DOMSymbolInstance)) {
-					
-					var movieClip = createSymbol (xfl, cast element);
-					
-					if (movieClip != null) {
-						
-						addChild (movieClip);
-						
-					}
-					
-				} else if (Std.is (element, DOMBitmapInstance)) {
-					
-					var bitmap = createBitmap (xfl, cast element);
-					
-					if (bitmap != null) {
-						
-						addChild (bitmap);
-						
-					}
-					
-				} else if (Std.is (element, DOMShape)) {
-					
-					var shape = new Shape (cast element);
-					addChild (shape);
-					
-				} else if (Std.is (element, DOMDynamicText)) {
-					
-					var text = createDynamicText (cast element);
-					
-					if (text != null) {
-						
-						addChild (text);
-						
-					}
-					
-				} else if (Std.is (element, DOMStaticText)) {
-					
-					var text = createStaticText (cast element);
-					
-					if (text != null) {
-						
-						addChild (text);
-						
-					}
-					
-				}
-				
-			}*/
-			
-		/*} else if (frame.tweenType == "motion") {
-			
-			if (index < layer.frames.length - 1) {
-				
-				var firstInstance = null;
-				
-				for (element in frame.elements) {
-					
-					if (Std.is (element, DOMSymbolInstance)) {
-						
-						firstInstance = element;
-						break;
-						
-					}
-					
-				}
-				
-				var secondFrame = layer.frames[index + 1];
-				var secondInstance = null;
-				
-				for (element in secondFrame.elements) {
-					
-					if (Std.is (element, DOMSymbolInstance)) {
-						
-						secondInstance = element;
-						break;
-						
-					}
-					
-				}
-				
-				if (firstInstance.libraryItemName == secondInstance.libraryItemName) {
-					
-					var instance:DOMSymbolInstance = firstInstance.clone ();
-					var ratio = (__currentFrame - frame.index) / frame.duration;
-					
-					if (secondInstance.matrix != null) {
-						
-						if (instance.matrix == null) instance.matrix = new Matrix ();
-						
-						instance.matrix.a = applyTween (instance.matrix.a, secondInstance.matrix.a, ratio);
-						instance.matrix.b = applyTween (instance.matrix.b, secondInstance.matrix.b, ratio);
-						instance.matrix.c = applyTween (instance.matrix.c, secondInstance.matrix.c, ratio);
-						instance.matrix.d = applyTween (instance.matrix.d, secondInstance.matrix.d, ratio);
-						instance.matrix.tx = applyTween (instance.matrix.tx, secondInstance.matrix.tx, ratio);
-						instance.matrix.ty = applyTween (instance.matrix.ty, secondInstance.matrix.ty, ratio);
-						
-					}
-					
-					if (secondInstance.color != null) {
-						
-						if (instance.color == null) instance.color = new Color ();
-						
-						instance.color.alphaMultiplier = applyTween (instance.color.alphaMultiplier, secondInstance.color.alphaMultiplier, ratio);
-						instance.color.alphaOffset = applyTween (instance.color.alphaOffset, secondInstance.color.alphaOffset, ratio);
-						instance.color.blueMultiplier = applyTween (instance.color.blueMultiplier, secondInstance.color.blueMultiplier, ratio);
-						instance.color.blueOffset = applyTween (instance.color.blueOffset, secondInstance.color.blueOffset, ratio);
-						instance.color.greenMultiplier = applyTween (instance.color.greenMultiplier, secondInstance.color.greenMultiplier, ratio);
-						instance.color.greenOffset = applyTween (instance.color.greenOffset, secondInstance.color.greenOffset, ratio);
-						instance.color.redMultiplier = applyTween (instance.color.redMultiplier, secondInstance.color.redMultiplier, ratio);
-						instance.color.redOffset = applyTween (instance.color.redOffset, secondInstance.color.redOffset, ratio);
-						
-					}
-					
-					var movieClip = createSymbol (xfl, instance);
-					
-					if (movieClip != null) {
-						
-						addChild (movieClip);
-						
-					}
-					
-				}
-				
-			}
-			
-		} else if (frame.tweenType == "motion object") {
-			
-			var instances = [];
-			
-			for (element in frame.elements) {
-				
-				if (Std.is (element, DOMSymbolInstance)) {
-					
-					instances.push (element.clone ());
-					
-				}
-				
-			}
-			
-			// temporarily render without tweening
-			
-			for (instance in instances) {
-				
-				var movieClip = createSymbol (xfl, instance);
-				
-				if (movieClip != null) {
-					
-					addChild (movieClip);
-					
-				}
-				
-			}
-			
-		}*/
-		
 	}
 	
 	
@@ -728,7 +459,6 @@ class MovieClip extends flash.display.MovieClip {
 		if (playing) {
 			
 			playing = false;
-			clips.remove (this);
 			
 		}
 		
@@ -747,6 +477,8 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__currentFrame != lastUpdate) {
 			
+			// TODO: Optimize the frame updates to reuse objects
+			
 			for (i in 0...numChildren) {
 				
 				var child = getChildAt (0);
@@ -761,18 +493,6 @@ class MovieClip extends flash.display.MovieClip {
 				
 			}
 			
-			//var frameIndex = -1;
-			//
-			//for (i in 0...data.frames.length) {
-				//
-				//if (data.frames[i]. <= __currentFrame) {
-					//
-					//frameIndex = i;
-					//
-				//}
-				//
-			//}
-			
 			var frameIndex = __currentFrame - 1;
 			
 			if (frameIndex > -1) {
@@ -781,11 +501,27 @@ class MovieClip extends flash.display.MovieClip {
 				
 			}
 			
+			#if (!flash && openfl && !openfl_legacy)
+			__renderDirty = true;
+			DisplayObject.__worldRenderDirty++;
+			#end
+			
 		}
 		
 		lastUpdate = __currentFrame;
 		
 	}
+	
+	
+	#if (!flash && openfl && !openfl_legacy)
+	public override function __enterFrame ():Void {
+		
+		enterFrame ();
+		
+		super.__enterFrame ();
+		
+	}
+	#end
 	
 	
 	
@@ -818,15 +554,13 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	
-	@:noCompletion private static function stage_onEnterFrame (event:Event):Void {
+	#if flash
+	@:noCompletion private function stage_onEnterFrame (event:Event):Void {
 		
-		for (clip in clips) {
-			
-			clip.enterFrame ();
-			
-		}
+		enterFrame ();
 		
 	}
+	#end
 	
 	
 }

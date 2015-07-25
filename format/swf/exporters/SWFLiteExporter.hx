@@ -93,8 +93,6 @@ class SWFLiteExporter {
 				var sprite = new SpriteSymbol ();
 				var frame = new Frame ();
 				
-				sprite.frames.push (frame);
-				
 				for (i in 0...records.length) {
 					
 					var object = records[i];
@@ -147,6 +145,8 @@ class SWFLiteExporter {
 					frame.objects.push (frameObject);
 					
 				}
+				
+				sprite.frames.push (frame);
 				
 				return sprite;
 				
@@ -283,66 +283,69 @@ class SWFLiteExporter {
 			
 		}
 		
-		// TODO: Handle more frames, skipping frames without relevant data
-		
-		var frame = new Frame ();
-		frame.label = tag.frames[0].label;
-		
-		for (object in tag.frames[0].getObjectsSortedByDepth ()) {
+		for (i in 0...tag.frames.length) {
+		//for (i in 0...1) {
 			
-			var frameObject = new FrameObject ();
-			frameObject.id = object.characterId;
+			var frame = new Frame ();
+			frame.label = tag.frames[i].label;
 			
-			processTag (cast data.getCharacter (object.characterId));
-			
-			var placeTag:TagPlaceObject = cast tag.tags[object.placedAtIndex];
-			frameObject.name = placeTag.instanceName;
-			
-			if (placeTag.matrix != null) {
+			for (object in tag.frames[i].getObjectsSortedByDepth ()) {
 				
-				var matrix = placeTag.matrix.matrix;
-				matrix.tx *= (1 / 20);
-				matrix.ty *= (1 / 20);
+				var frameObject = new FrameObject ();
+				frameObject.id = object.characterId;
 				
-				frameObject.matrix = matrix;
+				processTag (cast data.getCharacter (object.characterId));
 				
-			}
-			
-			if (placeTag.colorTransform != null) {
+				var placeTag:TagPlaceObject = cast tag.tags[object.placedAtIndex];
+				frameObject.name = placeTag.instanceName;
 				
-				frameObject.colorTransform = placeTag.colorTransform.colorTransform;
-				
-			}
-			
-			if (placeTag.hasFilterList) {
-				
-				var filters:Array<FilterType> = [];
-				
-				for (surfaceFilter in placeTag.surfaceFilterList) {
+				if (placeTag.matrix != null) {
 					
-					var type = surfaceFilter.type;
+					var matrix = placeTag.matrix.matrix;
+					matrix.tx *= (1 / 20);
+					matrix.ty *= (1 / 20);
 					
-					if (type != null) {
-						
-						filters.push (surfaceFilter.type);
-						//filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
-						
-					}
+					frameObject.matrix = matrix;
 					
 				}
 				
-				frameObject.filters = filters;
+				if (placeTag.colorTransform != null) {
+					
+					frameObject.colorTransform = placeTag.colorTransform.colorTransform;
+					
+				}
+				
+				if (placeTag.hasFilterList) {
+					
+					var filters:Array<FilterType> = [];
+					
+					for (surfaceFilter in placeTag.surfaceFilterList) {
+						
+						var type = surfaceFilter.type;
+						
+						if (type != null) {
+							
+							filters.push (surfaceFilter.type);
+							//filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
+							
+						}
+						
+					}
+					
+					frameObject.filters = filters;
+					
+				}
+				
+				frameObject.depth = placeTag.depth;
+				frameObject.clipDepth = (placeTag.hasClipDepth ? placeTag.clipDepth : 0);
+				
+				frame.objects.push (frameObject);
 				
 			}
 			
-			frameObject.depth = placeTag.depth;
-			frameObject.clipDepth = (placeTag.hasClipDepth ? placeTag.clipDepth : 0);
-			
-			frame.objects.push (frameObject);
+			symbol.frames.push (frame);
 			
 		}
-		
-		symbol.frames.push (frame);
 		
 		if (root) {
 			
