@@ -41,7 +41,7 @@ class DynamicTextField extends TextField {
 		
 		var format = new TextFormat ();
 		if (symbol.color != null) format.color = (symbol.color & 0x00FFFFFF);
-		format.size = Std.int (symbol.fontHeight / 20);
+		format.size = Math.round (symbol.fontHeight / 20);
 		
 		var font:FontSymbol = cast swf.symbols.get (symbol.fontID);
 		
@@ -103,9 +103,7 @@ class DynamicTextField extends TextField {
 			format.indent = Std.int (symbol.indent / 20);
 			format.leading = Std.int (symbol.leading / 20);
 			
-			#if (flash || lime_legacy)
-			if (embedFonts) format.leading += 4; // TODO: Is this an issue of Flash fonts are embedded?
-			#end
+			if (embedFonts) format.leading += 4; // TODO: Why is this necessary?
 			
 		}
 		

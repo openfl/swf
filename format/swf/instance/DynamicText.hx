@@ -51,7 +51,7 @@ class DynamicText extends TextField {
 		
 		var format = new TextFormat ();
 		if (tag.hasTextColor) format.color = (tag.textColor & 0x00FFFFFF);
-		format.size = Std.int (tag.fontHeight / 20);
+		format.size = Math.round (tag.fontHeight / 20);
 		
 		if (tag.hasFont) {
 			
@@ -118,9 +118,7 @@ class DynamicText extends TextField {
 			format.indent = Std.int (tag.indent / 20);
 			format.leading = Std.int (tag.leading / 20);
 			
-			#if flash
-			if (embedFonts) format.leading += 4; // TODO: Is this an issue of Flash fonts are embedded?
-			#end
+			if (embedFonts) format.leading += 4; // TODO: Why is this necessary?
 			
 		}
 		
