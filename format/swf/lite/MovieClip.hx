@@ -58,16 +58,16 @@ class MovieClip extends flash.display.MovieClip {
 		
 		update ();
 		
-		if (__totalFrames > 1) {
-			
-			#if flash
-			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame, false, 0, true);
-			play ();
-			#elseif (openfl && !openfl_legacy)
-			play ();
-			#end
-			
-		}
+		//if (__totalFrames > 1) {
+			//
+			//#if flash
+			//Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame, false, 0, true);
+			//play ();
+			//#elseif (openfl && !openfl_legacy)
+			//play ();
+			//#end
+			//
+		//}
 		
 	}
 	
