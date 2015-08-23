@@ -116,13 +116,15 @@ class Bitmap extends flash.display.Bitmap {
 				}
 				
 				bitmapData = new BitmapData (data.bitmapWidth, data.bitmapHeight, transparent);
-				bitmapData.setPixels (bitmapData.rect, buffer);
 				
 				#if ((cpp || neko) && openfl_legacy)
+				bitmapData.setPixels (bitmapData.rect, buffer);
 				bitmapData.unmultiplyAlpha ();
-				//bitmapData.setAlphaMode (1);
 				#else
+				bitmapData.image.buffer.premultiplied = false;
+				bitmapData.setPixels (bitmapData.rect, buffer);
 				bitmapData.image.buffer.premultiplied = true;
+				bitmapData.image.premultiplied = false;
 				#end
 				
 				data.instance = bitmapData;
@@ -152,6 +154,7 @@ class Bitmap extends flash.display.Bitmap {
 					#else
 					bitmapData = BitmapData.fromBytes (data.bitmapData, alpha);
 					bitmapData.image.buffer.premultiplied = true;
+					bitmapData.image.premultiplied = false;
 					#end
 					//bitmapData.setAlphaMode (1);
 					
