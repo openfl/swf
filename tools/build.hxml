@@ -4,7 +4,6 @@
 -lib openfl
 -lib swf
 -lib format
--D lime-legacy
--D openfl-legacy
+-D lime_cairo
 -D optional_cffi
 --remap flash:openfl

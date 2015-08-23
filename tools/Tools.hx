@@ -1,7 +1,6 @@
 package;
 
 
-import flash.utils.ByteArray;
 import format.swf.exporters.SWFLiteExporter;
 import format.swf.lite.symbols.BitmapSymbol;
 import format.swf.lite.symbols.ButtonSymbol;
@@ -31,6 +30,8 @@ import lime.project.AssetType;
 import lime.project.Haxelib;
 import lime.project.HXProject;
 import lime.project.Platform;
+import openfl.display.PNGEncoderOptions;
+import openfl.utils.ByteArray;
 import sys.io.File;
 import sys.io.Process;
 import sys.FileSystem;
@@ -67,16 +68,16 @@ class Tools {
 				}
 				
 				lines.push (line);
-         		
-   			}
-   			
+				
+			}
+			
 		} catch (e:Dynamic) {
 			
 			process.close ();
 			
 		}
 		
-		path += "/legacy/ndll/";
+		path += "/ndll/";
 		
 		switch (PlatformHelper.hostPlatform) {
 			
@@ -569,7 +570,7 @@ class Tools {
 						swfLite.symbols.set (id, symbol);
 						
 						var asset = new Asset ("", symbol.path, AssetType.IMAGE);
-						var assetData = bitmapData.encode ("png");
+						var assetData = bitmapData.encode (bitmapData.rect, new PNGEncoderOptions ());
 						
 						if (cacheDirectory != null) {
 							

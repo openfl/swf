@@ -390,10 +390,10 @@ class SWFLiteExporter {
 			
 			switch (tag.align) {
 				
-				case 0: symbol.align = TextFormatAlign.LEFT;
-				case 1: symbol.align = TextFormatAlign.RIGHT;
-				case 2: symbol.align = TextFormatAlign.CENTER;
-				case 3: symbol.align = TextFormatAlign.JUSTIFY;
+				case 0: symbol.align = "left";
+				case 1: symbol.align = "right";
+				case 2: symbol.align = "center";
+				case 3: symbol.align = "justify";
 				
 			}
 			
