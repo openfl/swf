@@ -90,6 +90,7 @@ import lime.graphics.Image;
 	
 	public override function load (handler:AssetLibrary -> Void):Void {
 		
+		#if swflite_preload
 		var paths = [];
 		var bitmap:BitmapSymbol;
 		
@@ -131,6 +132,9 @@ import lime.graphics.Image;
 			}
 			
 		}
+		#else
+		handler (this);
+		#end
 		
 	}
 	
