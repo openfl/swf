@@ -119,6 +119,10 @@ import openfl.Assets;
 		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "flash"));
 		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
 		
+		#elseif openfl_legacy
+		
+		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl", "openfl._legacy"));
+		
 		#else
 		
 		if (value == null) value = Type.resolveClass (StringTools.replace (name, "openfl._legacy", "openfl"));
@@ -144,6 +148,10 @@ import openfl.Assets;
 		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl", "flash"));
 		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl._legacy", "flash"));
 		if (value == null) value = cast Type.resolveClass (StringTools.replace (name, "openfl._v2", "flash"));
+		
+		#elseif openfl_legacy
+		
+		if (value == null) value = Type.resolveEnum (StringTools.replace (name, "openfl", "openfl._legacy"));
 		
 		#else
 		
