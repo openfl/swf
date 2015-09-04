@@ -27,6 +27,8 @@ import format.SWF;
 #if !openfl_legacy
 typedef LimeAssetLibrary = lime.Assets.AssetLibrary;
 #else
+import openfl._legacy.Assets.Future;
+import openfl._legacy.Assets.Promise;
 typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 #end
 
@@ -141,6 +143,7 @@ typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 	}
 	
 	
+	#if !openfl_legacy
 	public override function load ():Future<LimeAssetLibrary> {
 		
 		var promise = new Promise<LimeAssetLibrary> ();
@@ -186,6 +189,49 @@ typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 		return promise.future;
 		
 	}
+	#else
+	public override function load (handler:AssetLibrary->Void):Void {
+		
+		#if flash
+		
+		context = new LoaderContext (false, ApplicationDomain.currentDomain, null);
+		context.allowCodeImport = true;
+		
+		if (Assets.isLocal (id, AssetType.BINARY)) {
+			
+			loader = new Loader ();
+			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
+				
+				handler (this);
+				
+			});
+			loader.loadBytes (Assets.getBytes (id), context);
+			
+		} else {
+			
+			loader = new Loader ();
+			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (_) {
+				
+				handler (this);
+				
+			});
+			loader.load (new URLRequest (Assets.getPath (id)), context);
+			
+		}
+		
+		#else
+		
+		if (swf == null) {
+			
+			swf = new SWF (Assets.getBytes (id));
+			handler (this);
+			
+		}
+		
+		#end
+		
+	}
+	#end
 	
 	
 }

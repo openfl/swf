@@ -19,12 +19,6 @@ import lime.app.Future;
 import lime.app.Promise;
 #end
 
-#if !openfl_legacy
-typedef LimeAssetLibrary = lime.Assets.AssetLibrary;
-#else
-typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
-#end
-
 
 @:keep class SWFLiteLibrary extends AssetLibrary {
 	
@@ -96,6 +90,7 @@ typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 	}
 	
 	
+	#if !openfl_legacy
 	public override function load ():Future<LimeAssetLibrary> {
 		
 		var promise = new Promise<LimeAssetLibrary> ();
@@ -151,6 +146,57 @@ typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 		return promise.future;
 		
 	}
+	#else
+	public override function load (handler:AssetLibrary->Void):Void {
+		
+		#if swflite_preload
+		var paths = [];
+		var bitmap:BitmapSymbol;
+		
+		for (symbol in swf.symbols) {
+			
+			if (Std.is (symbol, BitmapSymbol)) {
+				
+				bitmap = cast symbol;
+				paths.push (bitmap.path);
+				
+			}
+			
+		}
+		
+		if (paths.length == 0) {
+			
+			handler (this);
+			
+		} else {
+			
+			var loaded = 0;
+			
+			var onLoad = function (_) {
+				
+				loaded++;
+				
+				if (loaded == paths.length) {
+					
+					handler (this);
+					
+				}
+				
+			};
+			
+			for (path in paths) {
+				
+				Assets.loadBitmapData (path, onLoad);
+				
+			}
+			
+		}
+		#else
+		handler (this);
+		#end
+		
+	}
+	#end
 	
 	
 	public override function unload ():Void {
