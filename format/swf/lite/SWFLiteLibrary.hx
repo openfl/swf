@@ -15,6 +15,14 @@ import openfl.Assets;
 
 #if (lime && !lime_legacy)
 import lime.graphics.Image;
+import lime.app.Future;
+import lime.app.Promise;
+#end
+
+#if !openfl_legacy
+typedef LimeAssetLibrary = lime.Assets.AssetLibrary;
+#else
+typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 #end
 
 
@@ -88,7 +96,9 @@ import lime.graphics.Image;
 	}
 	
 	
-	public override function load (handler:AssetLibrary -> Void):Void {
+	public override function load ():Future<LimeAssetLibrary> {
+		
+		var promise = new Promise<LimeAssetLibrary> ();
 		
 		#if swflite_preload
 		var paths = [];
@@ -107,7 +117,7 @@ import lime.graphics.Image;
 		
 		if (paths.length == 0) {
 			
-			handler (this);
+			promise.complete (this);
 			
 		} else {
 			
@@ -117,9 +127,11 @@ import lime.graphics.Image;
 				
 				loaded++;
 				
+				promise.progress (loaded / paths.length);
+				
 				if (loaded == paths.length) {
 					
-					handler (this);
+					promise.complete (this);
 					
 				}
 				
@@ -127,14 +139,16 @@ import lime.graphics.Image;
 			
 			for (path in paths) {
 				
-				Assets.loadBitmapData (path, onLoad);
+				Assets.loadBitmapData (path).onComplete (onLoad).onError (promise.error);
 				
 			}
 			
 		}
 		#else
-		handler (this);
+		promise.complete (this);
 		#end
+		
+		return promise.future;
 		
 	}
 	
