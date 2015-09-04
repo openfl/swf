@@ -91,9 +91,9 @@ import lime.app.Promise;
 	
 	
 	#if !openfl_legacy
-	public override function load ():Future<LimeAssetLibrary> {
+	public override function load ():Future<lime.Assets.AssetLibrary> {
 		
-		var promise = new Promise<LimeAssetLibrary> ();
+		var promise = new Promise<lime.Assets.AssetLibrary> ();
 		
 		#if swflite_preload
 		var paths = [];

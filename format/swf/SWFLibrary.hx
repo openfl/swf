@@ -24,14 +24,6 @@ import lime.app.Promise;
 import format.SWF;
 #end
 
-#if !openfl_legacy
-typedef LimeAssetLibrary = lime.Assets.AssetLibrary;
-#else
-import openfl._legacy.Assets.Future;
-import openfl._legacy.Assets.Promise;
-typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
-#end
-
 
 @:keep class SWFLibrary extends AssetLibrary {
 	
@@ -144,9 +136,9 @@ typedef LimeAssetLibrary = openfl._legacy.Assets.AssetLibrary;
 	
 	
 	#if !openfl_legacy
-	public override function load ():Future<LimeAssetLibrary> {
+	public override function load ():Future<lime.Assets.AssetLibrary> {
 		
-		var promise = new Promise<LimeAssetLibrary> ();
+		var promise = new Promise<lime.Assets.AssetLibrary> ();
 		
 		#if flash
 		
