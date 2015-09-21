@@ -200,23 +200,23 @@ class Tools {
 								
 								if (childSymbol != null) {
 									
-									if (Std.is (symbol, TagDefineSprite)) {
+									if (Std.is (childSymbol, TagDefineSprite)) {
 										
 										className = "openfl.display.MovieClip";
 										
-									} else if (Std.is (symbol, TagDefineBitsLossless) || Std.is (symbol, TagDefineBits)) {
+									} else if (Std.is (childSymbol, TagDefineBitsLossless) || Std.is (childSymbol, TagDefineBits)) {
 										
 										className = "openfl.display.Bitmap";
 										
-									} else if (Std.is (symbol, TagDefineShape) || Std.is (symbol, TagDefineMorphShape)) {
+									} else if (Std.is (childSymbol, TagDefineShape) || Std.is (childSymbol, TagDefineMorphShape)) {
 										
 										className = "openfl.display.Shape";
 										
-									} else if (Std.is (symbol, TagDefineText) || Std.is (symbol, TagDefineEditText)) {
+									} else if (Std.is (childSymbol, TagDefineText) || Std.is (childSymbol, TagDefineEditText)) {
 										
 										className = "openfl.text.TextField";
 										
-									} else if (Std.is (symbol, TagDefineButton2)) {
+									} else if (Std.is (childSymbol, TagDefineButton2)) {
 										
 										className = "openfl.display.SimpleButton";
 										

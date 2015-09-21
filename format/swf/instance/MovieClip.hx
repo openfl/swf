@@ -434,6 +434,13 @@ class MovieClip extends flash.display.MovieClip {
 					// Remove the object from the display list
 					// todo - disconnect event handlers ?
 					removeChild(activeObject.object);
+					
+					if (activeObject.object.name != null && Reflect.hasField (this, activeObject.object.name)) {
+						
+						Reflect.deleteField (this, activeObject.object.name);
+						
+					}
+					
 				} else {
 					newActiveObjects.push(activeObject);
 				}

@@ -36,6 +36,10 @@ class ::PREFIX::::CLASS_NAME:: extends MovieClip {
 @:bind @:native("::CLASS_NAME::") class ::PREFIX::::CLASS_NAME:: extends flash.display.MovieClip {
 	
 	
+	::foreach CLASS_PROPERTIES::public var ::name:: (default, null):::type::;
+	::end::
+	
+	
 	public function new () {
 		
 		super ();
