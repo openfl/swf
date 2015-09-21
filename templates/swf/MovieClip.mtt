@@ -9,6 +9,10 @@ import openfl.Assets;
 class ::PREFIX::::CLASS_NAME:: extends MovieClip {
 	
 	
+	::foreach CLASS_PROPERTIES::public var ::name:: (default, null):::type::;
+	::end::
+	
+	
 	public function new () {
 		
 		if (!SWF.instances.exists ("::SWF_ID::")) {

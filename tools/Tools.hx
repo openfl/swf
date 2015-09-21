@@ -10,7 +10,15 @@ import format.swf.lite.symbols.SpriteSymbol;
 import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.SWFLiteLibrary;
 import format.swf.lite.SWFLite;
+import format.swf.tags.TagDefineBits;
+import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton2;
+import format.swf.tags.TagDefineEditText;
+import format.swf.tags.TagDefineMorphShape;
+import format.swf.tags.TagDefineShape;
+import format.swf.tags.TagDefineSprite;
+import format.swf.tags.TagDefineText;
+import format.swf.tags.TagPlaceObject;
 import format.swf.SWFLibrary;
 import format.swf.SWFTimelineContainer;
 import format.SWF;
@@ -173,7 +181,64 @@ class Tools {
 			
 			if (templateData != null) {
 				
-				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID, PREFIX: prefix };
+				var classProperties = [];
+				
+				if (Std.is (symbol, SWFTimelineContainer)) {
+					
+					var timelineContainer:SWFTimelineContainer = cast symbol;
+					
+					if (timelineContainer.frames.length > 0) {
+						
+						for (frameObject in timelineContainer.frames[0].objects) {
+							
+							var placeObject:TagPlaceObject = cast timelineContainer.tags[frameObject.placedAtIndex];
+							
+							if (placeObject != null && placeObject.instanceName != null) {
+								
+								var childSymbol = timelineContainer.getCharacter (frameObject.characterId);
+								var className = null;
+								
+								if (childSymbol != null) {
+									
+									if (Std.is (symbol, TagDefineSprite)) {
+										
+										className = "openfl.display.MovieClip";
+										
+									} else if (Std.is (symbol, TagDefineBitsLossless) || Std.is (symbol, TagDefineBits)) {
+										
+										className = "openfl.display.Bitmap";
+										
+									} else if (Std.is (symbol, TagDefineShape) || Std.is (symbol, TagDefineMorphShape)) {
+										
+										className = "openfl.display.Shape";
+										
+									} else if (Std.is (symbol, TagDefineText) || Std.is (symbol, TagDefineEditText)) {
+										
+										className = "openfl.text.TextField";
+										
+									} else if (Std.is (symbol, TagDefineButton2)) {
+										
+										className = "openfl.display.SimpleButton";
+										
+									}
+									
+									if (className != null) {
+										
+										classProperties.push ( { name: placeObject.instanceName, type: className } );
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID, PREFIX: prefix, CLASS_PROPERTIES: classProperties };
 				var template = new Template (templateData);
 				var targetPath;
 				
