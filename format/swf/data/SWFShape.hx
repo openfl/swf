@@ -380,7 +380,7 @@ class SWFShape
 									// Gradient fill
 									var colors:Array<UInt> = [];
 									var alphas:Array<Float> = [];
-									var ratios:Array<Float> = [];
+									var ratios:Array<Int> = [];
 									var gradientRecord:SWFGradientRecord;
 									matrix = fillStyle.gradientMatrix.matrix.clone();
 									matrix.tx /= 20;
@@ -484,7 +484,7 @@ class SWFShape
 									// Gradient fill
 									var colors:Array<Int> = [];
 									var alphas:Array<Float> = [];
-									var ratios:Array<Float> = [];
+									var ratios:Array<Int> = [];
 									var gradientRecord:SWFGradientRecord;
 									var matrix:Matrix = fillStyle.gradientMatrix.matrix.clone();
 									matrix.tx /= 20;
