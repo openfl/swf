@@ -165,6 +165,9 @@ class Tools {
 				
 			}
 			
+			var packageNameDot = packageName;
+			if (packageNameDot.length > 0) packageNameDot += ".";
+			
 			var symbolID = swf.symbols.get (className);
 			var templateData = null;
 			var symbol = swf.data.getCharacter (symbolID);
@@ -238,7 +241,7 @@ class Tools {
 					
 				}
 				
-				var context = { PACKAGE_NAME: packageName, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID, PREFIX: prefix, CLASS_PROPERTIES: classProperties };
+				var context = { PACKAGE_NAME: packageName, PACKAGE_NAME_DOT: packageNameDot, CLASS_NAME: name, SWF_ID: swfAsset.id, SYMBOL_ID: symbolID, PREFIX: prefix, CLASS_PROPERTIES: classProperties };
 				var template = new Template (templateData);
 				var targetPath;
 				
