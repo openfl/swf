@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.0.3",
-  "releasenote": "Improved use of child instance names in generated classes",
+  "version": "2.0.4",
+  "releasenote": "Update for OpenFL 3.3.6, improve generate on Flash target",
   "contributors": [ "singmajesty" ]
 }
