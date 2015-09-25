@@ -120,11 +120,13 @@ class Bitmap extends flash.display.Bitmap {
 				#if ((cpp || neko) && openfl_legacy)
 				bitmapData.setPixels (bitmapData.rect, buffer);
 				bitmapData.unmultiplyAlpha ();
-				#else
+				#elseif !flash
 				bitmapData.image.buffer.premultiplied = false;
 				bitmapData.setPixels (bitmapData.rect, buffer);
 				bitmapData.image.buffer.premultiplied = true;
 				bitmapData.image.premultiplied = false;
+				#else
+				bitmapData.setPixels (bitmapData.rect, buffer);
 				#end
 				
 				data.instance = bitmapData;
