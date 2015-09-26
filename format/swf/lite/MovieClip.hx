@@ -18,9 +18,19 @@ import format.swf.lite.symbols.SpriteSymbol;
 import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.lite.SWFLite;
+import openfl.display.BitmapDataChannel;
+import openfl.geom.Point;
 
 #if openfl
 import openfl.Assets;
+#end
+
+#if (lime && !openfl_legacy)
+import lime.graphics.Image;
+import lime.graphics.ImageBuffer;
+import lime.graphics.ImageChannel;
+import lime.math.Vector2;
+import lime.Assets in LimeAssets;
 #end
 
 
@@ -100,8 +110,7 @@ class MovieClip extends flash.display.MovieClip {
 					
 					if (bitmap != null && bitmap.path != "") {
 						
-						var bitmapData = Assets.getBitmapData (bitmap.path);
-						graphics.beginBitmapFill (bitmapData, matrix, repeat, smooth);
+						graphics.beginBitmapFill (getBitmap (bitmap), matrix, repeat, smooth);
 						
 					}
 					
@@ -218,6 +227,85 @@ class MovieClip extends flash.display.MovieClip {
 	}*/
 	
 	
+	@:noCompletion private function getBitmap (symbol:BitmapSymbol):BitmapData {
+		
+		#if openfl
+		
+		if (Assets.cache.hasBitmapData (symbol.path)) {
+			
+			return Assets.getBitmapData (symbol.path);
+			
+		} else {
+			
+			#if !openfl_legacy
+			
+			var source = LimeAssets.getImage (symbol.path);
+			
+			if (source != null && symbol.alpha != null && symbol.alpha != "") {
+				
+				#if flash
+				var cache = source;
+				var buffer = new ImageBuffer (null, source.width, source.height);
+				buffer.src = new BitmapData (source.width, source.height, true, 0);
+				source = new Image (buffer);
+				source.copyPixels (cache, cache.rect, new Vector2 (), null, null, false);
+				#end
+				
+				var alpha = LimeAssets.getImage (symbol.alpha);
+				source.copyChannel (alpha, alpha.rect, new Vector2 (), ImageChannel.RED, ImageChannel.ALPHA);
+				
+				symbol.alpha = null;
+				source.buffer.premultiplied = true;
+				
+				#if !sys
+				source.premultiplied = false;
+				#end
+				
+			}
+			
+			#if !flash
+			var bitmapData = BitmapData.fromImage (source);
+			#else
+			var bitmapData = source.src;
+			#end
+			
+			Assets.cache.setBitmapData (symbol.path, bitmapData);
+			return bitmapData;
+			
+			#else
+			
+			var bitmapData = Assets.getBitmapData (symbol.path);
+			
+			if (bitmapData != null && symbol.alpha != null && symbol.alpha != "") {
+				
+				var cache = bitmapData;
+				bitmapData = new BitmapData (cache.width, cache.height, true, 0);
+				bitmapData.copyPixels (cache, cache.rect, new Point (), null, null, false);
+				
+				var alpha = Assets.getBitmapData (symbol.alpha);
+				bitmapData.copyChannel (alpha, alpha.rect, new Point (), BitmapDataChannel.RED, BitmapDataChannel.ALPHA);
+				symbol.alpha = null;
+				
+				bitmapData.unmultiplyAlpha ();
+				
+			}
+			
+			Assets.cache.setBitmapData (symbol.path, bitmapData);
+			return bitmapData;
+			
+			#end
+			
+		}
+		
+		#else
+		
+		return null;
+		
+		#end
+		
+	}
+	
+	
 	@:noCompletion private function getFrame (frame:Dynamic):Int {
 		
 		if (Std.is (frame, Int)) {
@@ -295,10 +383,14 @@ class MovieClip extends flash.display.MovieClip {
 			
 			displayObject.transform.matrix = frameObject.matrix;
 			
+			var dynamicTextField:DynamicTextField;
+			
 			if (Std.is (displayObject, DynamicTextField)) {
 				
-				displayObject.x += untyped displayObject.symbol.x;
-				displayObject.y += untyped displayObject.symbol.y #if flash + 4 #end;
+				dynamicTextField = cast displayObject;
+				
+				displayObject.x += dynamicTextField.symbol.x;
+				displayObject.y += dynamicTextField.symbol.y #if flash + 4 #end;
 				
 			}
 			
@@ -397,7 +489,7 @@ class MovieClip extends flash.display.MovieClip {
 					
 				} else if (Std.is (symbol, BitmapSymbol)) {
 					
-					displayObject = new Bitmap (Assets.getBitmapData (cast (symbol, BitmapSymbol).path), PixelSnapping.AUTO, true);
+					displayObject = new Bitmap (getBitmap (cast symbol), PixelSnapping.AUTO, true);
 					
 				} else if (Std.is (symbol, DynamicTextSymbol)) {
 					

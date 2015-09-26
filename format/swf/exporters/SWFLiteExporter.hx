@@ -3,6 +3,10 @@ package format.swf.exporters;
 
 import flash.display.BitmapData;
 import flash.text.TextFormatAlign;
+import flash.utils.ByteArray;
+import format.png.Data;
+import format.png.Writer;
+import format.swf.data.consts.BitmapFormat;
 import format.swf.data.SWFButtonRecord;
 import format.swf.exporters.core.FilterType;
 import format.swf.exporters.core.ShapeCommand;
@@ -21,6 +25,7 @@ import format.swf.lite.SWFLite;
 import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsJPEG2;
+import format.swf.tags.TagDefineBitsJPEG3;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton;
 import format.swf.tags.TagDefineButton2;
@@ -35,15 +40,23 @@ import format.swf.tags.TagPlaceObject;
 import format.swf.tags.TagSymbolClass;
 import format.swf.SWFRoot;
 import format.swf.SWFTimelineContainer;
+import format.tools.Deflate;
+import haxe.io.Bytes;
+import haxe.io.BytesOutput;
+import lime.graphics.format.JPEG;
+import openfl.display.PNGEncoderOptions;
 
 
 class SWFLiteExporter {
 	
 	
-	public var bitmaps:Map <Int, BitmapData>;
+	public var bitmapAlpha:Map <Int, ByteArray>;
+	public var bitmaps:Map <Int, ByteArray>;
+	public var bitmapTypes:Map <Int, BitmapType>;
 	public var filterClasses:Map <String, Bool>;
 	public var swfLite:SWFLite;
 	
+	private var alphaPalette:Bytes;
 	private var data:SWFRoot;
 	
 
@@ -51,7 +64,9 @@ class SWFLiteExporter {
 		
 		this.data = data;
 		
-		bitmaps = new Map <Int, BitmapData> ();
+		bitmapAlpha = new Map <Int, ByteArray> ();
+		bitmaps = new Map <Int, ByteArray> ();
+		bitmapTypes = new Map <Int, BitmapType> ();
 		filterClasses = new Map <String, Bool> ();
 		
 		swfLite = new SWFLite ();
@@ -185,14 +200,152 @@ class SWFLiteExporter {
 	
 	private function addBitmap (tag:IDefinitionTag):BitmapSymbol {
 		
-		var bitmap = new Bitmap (tag);
+		var alphaByteArray = null;
+		var byteArray = null;
+		var type = null;
 		
-		if (bitmap.bitmapData != null) {
+		if (Std.is (tag, TagDefineBitsLossless)) {
+			
+			var data:TagDefineBitsLossless = cast tag;
+			
+			var transparent = (data.level > 1);
+			var buffer = data.zlibBitmapData;
+			buffer.uncompress ();
+			buffer.position = 0;
+			
+			if (data.bitmapFormat == BitmapFormat.BIT_8) {
+				
+				var palette = Bytes.alloc (data.bitmapColorTableSize * 3);
+				var alpha = null;
+				
+				if (transparent) alpha = Bytes.alloc (data.bitmapColorTableSize);
+				var index = 0;
+				
+				for (i in 0...data.bitmapColorTableSize) {
+					
+					palette.set (index++, buffer.readUnsignedByte ());
+					palette.set (index++, buffer.readUnsignedByte ());
+					palette.set (index++, buffer.readUnsignedByte ());
+					if (transparent) alpha.set (i, buffer.readUnsignedByte ());
+					
+				}
+				
+				var values = Bytes.alloc ((data.bitmapWidth + 1) * data.bitmapHeight);
+				index = 0;
+				
+				for (y in 0...data.bitmapHeight) {
+					
+					values.set (index++, 0);
+					values.blit (index, buffer, buffer.position, data.bitmapWidth);
+					index += data.bitmapWidth;
+					buffer.position += data.bitmapWidth;
+					
+				}
+				
+				var png = new List ();
+				png.add (CHeader ( { width: data.bitmapWidth, height: data.bitmapHeight, colbits: 8, color: ColIndexed, interlaced: false } ));
+				png.add (CPalette (palette));
+				png.add (CData (Deflate.run (values)));
+				png.add (CEnd);
+				
+				var output = new BytesOutput ();
+				var writer = new Writer (output);
+				writer.write (png);
+				
+				byteArray = ByteArray.fromBytes (output.getBytes ());
+				type = BitmapType.PNG;
+				
+			} else {
+				
+				var bitmapData = new BitmapData (data.bitmapWidth, data.bitmapHeight, transparent);
+				
+				bitmapData.image.buffer.premultiplied = false;
+				bitmapData.setPixels (bitmapData.rect, buffer);
+				bitmapData.image.buffer.premultiplied = true;
+				bitmapData.image.premultiplied = false;
+				
+				byteArray = bitmapData.encode (bitmapData.rect, new PNGEncoderOptions ());
+				type = BitmapType.PNG;
+				
+			}
+			
+		} else if (Std.is (tag, TagDefineBitsJPEG2)) {
+			
+			var data:TagDefineBitsJPEG2 = cast tag;
+			
+			if (Std.is (tag, TagDefineBitsJPEG3)) {
+				
+				var alpha = cast (tag, TagDefineBitsJPEG3).bitmapAlphaData;
+				alpha.uncompress ();
+				alpha.position = 0;
+				
+				if (alphaPalette == null) {
+					
+					alphaPalette = Bytes.alloc (256 * 3);
+					var index = 0;
+					
+					for (i in 0...256) {
+						
+						alphaPalette.set (index++, i);
+						alphaPalette.set (index++, i);
+						alphaPalette.set (index++, i);
+						
+					}
+					
+				}
+				
+				var image = lime.graphics.format.JPEG.decodeBytes (data.bitmapData, false);
+				
+				var values = Bytes.alloc ((image.width + 1) * image.height);
+				var index = 0;
+				
+				for (y in 0...image.height) {
+					
+					values.set (index++, 0);
+					values.blit (index, alpha, alpha.position, image.width);
+					index += image.width;
+					alpha.position += image.width;
+					
+				}
+				
+				var png = new List ();
+				png.add (CHeader ( { width: image.width, height: image.height, colbits: 8, color: ColIndexed, interlaced: false } ));
+				png.add (CPalette (alphaPalette));
+				png.add (CData (Deflate.run (values)));
+				png.add (CEnd);
+				
+				var output = new BytesOutput ();
+				var writer = new Writer (output);
+				writer.write (png);
+				
+				alphaByteArray = ByteArray.fromBytes (output.getBytes ());
+				byteArray = data.bitmapData;
+				type = BitmapType.JPEG_ALPHA;
+				
+			} else {
+				
+				byteArray = data.bitmapData;
+				type = BitmapType.JPEG;
+				
+			}
+			
+		} else if (Std.is (tag, TagDefineBits)) {
+			
+			var data:TagDefineBits = cast tag;
+			
+			byteArray = data.bitmapData;
+			type = BitmapType.JPEG;
+			
+		}
+		
+		if (byteArray != null) {
 			
 			var symbol = new BitmapSymbol ();
 			symbol.id = tag.characterId;
 			
-			bitmaps.set (symbol.id, bitmap.bitmapData);
+			bitmapAlpha.set (symbol.id, alphaByteArray);
+			bitmaps.set (symbol.id, byteArray);
+			bitmapTypes.set (symbol.id, type);
 			
 			symbol.path = "";
 			swfLite.symbols.set (symbol.id, symbol);
@@ -567,5 +720,14 @@ class SWFLiteExporter {
 		
 	}
 	
+	
+}
+
+
+enum BitmapType {
+	
+	PNG;
+	JPEG_ALPHA;
+	JPEG;
 	
 }

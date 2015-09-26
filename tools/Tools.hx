@@ -600,7 +600,7 @@ class Tools {
 					
 					for (file in FileSystem.readDirectory (cacheDirectory)) {
 						
-						if (Path.extension (file) == "png") {
+						if (Path.extension (file) == "png" || Path.extension (file) == "jpg") {
 							
 							var asset = new Asset (cacheDirectory + "/" + file, "libraries/" + library.name + "/" + file, AssetType.IMAGE);
 							output.assets.push (asset);
@@ -632,18 +632,18 @@ class Tools {
 					
 					for (id in exporter.bitmaps.keys ()) {
 						
-						var bitmapData = exporter.bitmaps.get (id);
+						var type = exporter.bitmapTypes.get (id) == BitmapType.PNG ? "png" : "jpg";
 						var symbol:BitmapSymbol = cast swfLite.symbols.get (id);
-						symbol.path = "libraries/" + library.name + "/" + id + ".png";
+						symbol.path = "libraries/" + library.name + "/" + id + "." + type;
 						swfLite.symbols.set (id, symbol);
 						
 						var asset = new Asset ("", symbol.path, AssetType.IMAGE);
-						var assetData = bitmapData.encode (bitmapData.rect, new PNGEncoderOptions ());
+						var assetData = exporter.bitmaps.get (id);
 						
 						if (cacheDirectory != null) {
 							
-							asset.sourcePath = cacheDirectory + "/" + id + ".png";
-							asset.format = "png";
+							asset.sourcePath = cacheDirectory + "/" + id + "." + type;
+							asset.format = type;
 							File.saveBytes (asset.sourcePath, assetData);
 							
 						} else {
@@ -655,6 +655,31 @@ class Tools {
 						}
 						
 						output.assets.push (asset);
+						
+						if (exporter.bitmapTypes.get (id) == BitmapType.JPEG_ALPHA) {
+							
+							symbol.alpha = "libraries/" + library.name + "/" + id + "a.png";
+							
+							var asset = new Asset ("", symbol.alpha, AssetType.IMAGE);
+							var assetData = exporter.bitmapAlpha.get (id);
+							
+							if (cacheDirectory != null) {
+								
+								asset.sourcePath = cacheDirectory + "/" + id + "a.png";
+								asset.format = "png";
+								File.saveBytes (asset.sourcePath, assetData);
+								
+							} else {
+								
+								asset.data = StringHelper.base64Encode (cast assetData);
+								//asset.data = bitmapData.encode ("png");
+								asset.encoding = AssetEncoding.BASE64;
+								
+							}
+							
+							output.assets.push (asset);
+							
+						}
 						
 					}
 					
