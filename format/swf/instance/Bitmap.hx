@@ -124,7 +124,6 @@ class Bitmap extends flash.display.Bitmap {
 				bitmapData.image.buffer.premultiplied = false;
 				bitmapData.setPixels (bitmapData.rect, buffer);
 				bitmapData.image.buffer.premultiplied = true;
-				bitmapData.image.premultiplied = false;
 				#else
 				bitmapData.setPixels (bitmapData.rect, buffer);
 				#end
@@ -156,7 +155,7 @@ class Bitmap extends flash.display.Bitmap {
 					#else
 					bitmapData = BitmapData.fromBytes (data.bitmapData, alpha);
 					bitmapData.image.buffer.premultiplied = true;
-					bitmapData.image.premultiplied = false;
+					//bitmapData.image.premultiplied = false;
 					#end
 					//bitmapData.setAlphaMode (1);
 					
