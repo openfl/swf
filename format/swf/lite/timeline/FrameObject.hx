@@ -16,6 +16,8 @@ class FrameObject {
 	public var id:Int;
 	public var matrix:Matrix;
 	public var name:String;
+	public var symbol:Int;
+	public var type:FrameObjectType;
 	
 	
 	public function new () {

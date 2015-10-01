@@ -145,6 +145,12 @@ import format.SWF;
 		context = new LoaderContext (false, ApplicationDomain.currentDomain, null);
 		context.allowCodeImport = true;
 		
+		trace (id);
+		trace (Assets.exists (id));
+		trace (Assets.exists (id, AssetType.BINARY));
+		trace (Assets.isLocal (id, AssetType.BINARY));
+		trace (Assets.getPath (id));
+		
 		if (Assets.isLocal (id, AssetType.BINARY)) {
 			
 			loader = new Loader ();

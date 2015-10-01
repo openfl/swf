@@ -21,6 +21,7 @@ import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.symbols.SWFSymbol;
 import format.swf.lite.timeline.Frame;
 import format.swf.lite.timeline.FrameObject;
+import format.swf.lite.timeline.FrameObjectType;
 import format.swf.lite.SWFLite;
 import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBits;
@@ -113,7 +114,8 @@ class SWFLiteExporter {
 					var object = records[i];
 					
 					var frameObject = new FrameObject ();
-					frameObject.id = object.characterId;
+					frameObject.symbol = object.characterId;
+					frameObject.id = i;
 					
 					processTag (cast data.getCharacter (object.characterId));
 					
@@ -436,21 +438,56 @@ class SWFLiteExporter {
 			
 		}
 		
-		for (i in 0...tag.frames.length) {
-		//for (i in 0...1) {
+		var instances = new Array<Int> ();
+		var lastModified = new Map<Int, Int> ();
+		
+		var frame, frameObject, frameData, placeTag:TagPlaceObject;
+		
+		for (frameData in tag.frames) {
 			
-			var frame = new Frame ();
-			frame.label = tag.frames[i].label;
+			frame = new Frame ();
 			
-			for (object in tag.frames[i].getObjectsSortedByDepth ()) {
+			if (frameData.label != null) {
 				
-				var frameObject = new FrameObject ();
-				frameObject.id = object.characterId;
+				frame.label = frameData.label;
 				
-				processTag (cast data.getCharacter (object.characterId));
+			}
+			
+			instances.splice (0, instances.length);
+			
+			for (object in frameData.getObjectsSortedByDepth ()) {
 				
-				var placeTag:TagPlaceObject = cast tag.tags[object.placedAtIndex];
-				frameObject.name = placeTag.instanceName;
+				instances.push (object.placedAtIndex);
+				
+				if (!lastModified.exists (object.placedAtIndex)) {
+					
+					processTag (cast data.getCharacter (object.characterId));
+					
+					placeTag = cast tag.tags[object.placedAtIndex];
+					
+				} else if (object.lastModifiedAtIndex > lastModified.get (object.placedAtIndex)) {
+					
+					placeTag = cast tag.tags[object.lastModifiedAtIndex];
+					
+				} else {
+					
+					continue;
+					
+				}
+				
+				frameObject = new FrameObject ();
+				frameObject.symbol = object.characterId;
+				frameObject.id = object.placedAtIndex;
+				
+				if (!lastModified.exists (object.placedAtIndex)) {
+					
+					frameObject.type = FrameObjectType.CREATE;
+					
+				} else {
+					
+					frameObject.type = FrameObjectType.UPDATE;
+					
+				}
 				
 				if (placeTag.matrix != null) {
 					
@@ -492,7 +529,23 @@ class SWFLiteExporter {
 				frameObject.depth = placeTag.depth;
 				frameObject.clipDepth = (placeTag.hasClipDepth ? placeTag.clipDepth : 0);
 				
+				lastModified.set (object.placedAtIndex, object.lastModifiedAtIndex);
+				
 				frame.objects.push (frameObject);
+				
+			}
+			
+			for (id in lastModified.keys ()) {
+				
+				if (instances.indexOf (id) == -1) {
+					
+					lastModified.remove (id);
+					
+					frameObject = new FrameObject ();
+					frameObject.id = id;
+					frameObject.type = FrameObjectType.DESTROY;
+					
+				}
 				
 			}
 			
@@ -699,7 +752,7 @@ class SWFLiteExporter {
 			} else if (Std.is (tag, TagDefineText)) {
 				
 				return addStaticText (cast tag);
-					
+				
 			} else if (Std.is (tag, TagDefineShape)) {
 				
 				return addShape (cast tag);
