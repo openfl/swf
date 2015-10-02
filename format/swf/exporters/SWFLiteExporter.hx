@@ -733,6 +733,8 @@ class SWFLiteExporter {
 	
 	private function processTag (tag:IDefinitionTag):SWFSymbol {
 		
+		if (tag == null) return null;
+		
 		if (!swfLite.symbols.exists (tag.characterId)) {
 			
 			if (Std.is (tag, TagDefineSprite)) {
