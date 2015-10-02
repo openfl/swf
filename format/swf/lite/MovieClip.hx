@@ -586,19 +586,21 @@ class MovieClip extends flash.display.MovieClip {
 						
 						displayObject = __createObject (frameObject);
 						
-						depth = frameObject.depth - 1;
-						
-						if (depth >= numChildren) {
+						if (displayObject != null) {
 							
-							addChild (displayObject);
+							if (frameObject.depth >= numChildren) {
+								
+								addChild (displayObject);
+								
+							} else {
+								
+								addChildAt (displayObject, frameObject.depth);
+								
+							}
 							
-						} else {
-							
-							addChildAt (displayObject, depth);
+							__objects.set (frameObject.id, displayObject);
 							
 						}
-						
-						__objects.set (frameObject.id, displayObject);
 						
 					} else {
 						

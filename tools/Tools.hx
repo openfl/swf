@@ -318,10 +318,10 @@ class Tools {
 						for (object in spriteSymbol.frames[0].objects) {
 							
 							if (object.name != null) {
-							
-								if (swfLite.symbols.exists (object.id)) {
+								
+								if (swfLite.symbols.exists (object.symbol)) {
 									
-									var childSymbol = swfLite.symbols.get (object.id);
+									var childSymbol = swfLite.symbols.get (object.symbol);
 									//var className = childSymbol.className;
 									var className = null;
 									

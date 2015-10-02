@@ -479,6 +479,8 @@ class SWFLiteExporter {
 				frameObject.symbol = object.characterId;
 				frameObject.id = object.placedAtIndex;
 				
+				frameObject.name = placeTag.instanceName;
+				
 				if (!lastModified.exists (object.placedAtIndex)) {
 					
 					frameObject.type = FrameObjectType.CREATE;
