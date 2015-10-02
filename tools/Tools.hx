@@ -511,7 +511,7 @@ class Tools {
 				
 				type = Path.extension (library.sourcePath).toLowerCase ();
 				
-				if (type == "swf" && (project.target == Platform.HTML5 || project.target == Platform.FIREFOX)) {
+				if (type == "swf" && (project.target != Platform.FLASH && !project.defines.exists ("openfl-legacy"))) {
 					
 					type = "swflite";
 					
