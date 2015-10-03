@@ -44,6 +44,11 @@ class MovieClip extends flash.display.MovieClip {
 	@:noCompletion private var __swf:SWFLite;
 	@:noCompletion private var __symbol:SpriteSymbol;
 	
+	#if swflite_fps
+	@:noCompletion private var __frameTime:Int;
+	@:noCompletion private var __startTime:Int;
+	#end
+	
 	#if flash
 	@:noCompletion private var __currentFrame:Int;
 	@:noCompletion private var __totalFrames:Int;
@@ -158,6 +163,11 @@ class MovieClip extends flash.display.MovieClip {
 		if (!__playing && __totalFrames > 1) {
 			
 			__playing = true;
+			
+			#if swflite_fps
+			__frameTime = Std.int (1000 / __swf.frameRate);
+			__startTime = Lib.getTimer ();
+			#end
 			
 		}
 		
@@ -324,6 +334,22 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (__playing) {
 			
+			#if swflite_fps
+			
+			var currentTime = Lib.getTimer ();
+			var elapsedTime = currentTime - __startTime;
+			
+			__currentFrame += Math.floor (elapsedTime / __frameTime);
+			__startTime = currentTime - (elapsedTime % __frameTime);
+			
+			while (__currentFrame > __totalFrames) {
+				
+				__currentFrame -= __totalFrames;
+				
+			}
+			
+			#else
+			
 			if (__lastUpdate == __currentFrame) {
 				
 				__currentFrame++;
@@ -335,6 +361,8 @@ class MovieClip extends flash.display.MovieClip {
 				}
 				
 			}
+			
+			#end
 			
 			__updateFrame ();
 			
