@@ -40,7 +40,7 @@ class TagDefineBitsLossless implements IDefinitionTag
 		bitmapWidth = data.readUI16();
 		bitmapHeight = data.readUI16();
 		if (bitmapFormat == BitmapFormat.BIT_8) {
-			bitmapColorTableSize = data.readUI8();
+			bitmapColorTableSize = data.readUI8() + 1;
 		}
 		data.readBytes(zlibBitmapData, 0, length - ((bitmapFormat == BitmapFormat.BIT_8) ? 8 : 7));
 	}
@@ -52,7 +52,7 @@ class TagDefineBitsLossless implements IDefinitionTag
 		body.writeUI16(bitmapWidth);
 		body.writeUI16(bitmapHeight);
 		if (bitmapFormat == BitmapFormat.BIT_8) {
-			body.writeUI8(bitmapColorTableSize);
+			body.writeUI8(bitmapColorTableSize - 1);
 		}
 		if (zlibBitmapData.length > 0) {
 			body.writeBytes(zlibBitmapData);
