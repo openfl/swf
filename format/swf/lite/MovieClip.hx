@@ -38,19 +38,17 @@ import lime.Assets in LimeAssets;
 class MovieClip extends flash.display.MovieClip {
 	
 	
+	@:noCompletion private var __frameTime:Int;
 	@:noCompletion private var __lastUpdate:Int;
 	@:noCompletion private var __objects:Map<Int, DisplayObject>;
 	@:noCompletion private var __playing:Bool;
 	@:noCompletion private var __swf:SWFLite;
 	@:noCompletion private var __symbol:SpriteSymbol;
-	
-	#if swflite_fps
-	@:noCompletion private var __frameTime:Int;
-	@:noCompletion private var __startTime:Int;
-	#end
+	@:noCompletion private var __timeElapsed:Int;
 	
 	#if flash
 	@:noCompletion private var __currentFrame:Int;
+	@:noCompletion private var __previousTime:Int;
 	@:noCompletion private var __totalFrames:Int;
 	#end
 	
@@ -73,6 +71,7 @@ class MovieClip extends flash.display.MovieClip {
 		if (__totalFrames > 1) {
 			
 			#if flash
+			__previousTime = Lib.getTimer ();
 			Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame, false, 0, true);
 			play ();
 			#elseif (openfl && !openfl_legacy)
@@ -164,9 +163,9 @@ class MovieClip extends flash.display.MovieClip {
 			
 			__playing = true;
 			
-			#if swflite_fps
+			#if !swflite_parent_fps
 			__frameTime = Std.int (1000 / __swf.frameRate);
-			__startTime = Lib.getTimer ();
+			__timeElapsed = 0;
 			#end
 			
 		}
@@ -330,46 +329,56 @@ class MovieClip extends flash.display.MovieClip {
 	}
 	
 	
-	@:noCompletion @:dox(hide) public #if (!flash && openfl && !openfl_legacy) override #end function __enterFrame ():Void {
+	@:noCompletion @:dox(hide) public #if (!flash && openfl && !openfl_legacy) override #end function __enterFrame (deltaTime:Int):Void {
 		
 		if (__playing) {
 			
-			#if swflite_fps
-			
-			var currentTime = Lib.getTimer ();
-			var elapsedTime = currentTime - __startTime;
-			
-			__currentFrame += Math.floor (elapsedTime / __frameTime);
-			__startTime = currentTime - (elapsedTime % __frameTime);
-			
-			while (__currentFrame > __totalFrames) {
-				
-				__currentFrame -= __totalFrames;
-				
-			}
-			
+			#if !swflite_parent_fps
+			__timeElapsed += deltaTime;
+			var advanceFrames = Math.floor (__timeElapsed / __frameTime);
+			__timeElapsed = (__timeElapsed % __frameTime);
 			#else
+			var advanceFrames = (__lastUpdate == __currentFrame) ? 1 : 0;
+			#end
 			
-			if (__lastUpdate == __currentFrame) {
+			if (__frameScripts != null) {
 				
-				__currentFrame++;
-				
-				if (__currentFrame > __totalFrames) {
+				for (i in 0...advanceFrames) {
 					
-					__currentFrame = 1;
+					__currentFrame++;
+					
+					if (__currentFrame > __totalFrames) {
+						
+						__currentFrame = 1;
+						
+					}
+					
+					if (__frameScripts.exists (__currentFrame - 1)) {
+						
+						__frameScripts.get (__currentFrame - 1) ();
+						
+					}
+					
+				}
+				
+			} else {
+				
+				__currentFrame += advanceFrames;
+				
+				while (__currentFrame > __totalFrames) {
+					
+					__currentFrame -= __totalFrames;
 					
 				}
 				
 			}
-			
-			#end
 			
 			__updateFrame ();
 			
 		}
 		
 		#if (!flash && openfl && !openfl_legacy)
-		super.__enterFrame ();
+		super.__enterFrame (deltaTime);
 		#end
 		
 	}
@@ -750,7 +759,12 @@ class MovieClip extends flash.display.MovieClip {
 	#if flash
 	@:noCompletion private function stage_onEnterFrame (event:Event):Void {
 		
-		__enterFrame ();
+		var currentTime = Lib.getTimer ();
+		var deltaTime = currentTime - __previousTime;
+		
+		__enterFrame (deltaTime);
+		
+		__previousTime = currentTime;
 		
 	}
 	#end
