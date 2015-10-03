@@ -530,7 +530,7 @@ class Tools {
 				
 				LogHelper.info ("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
 				
-				var swf = new Asset (library.sourcePath, "libraries/" + library.name + "/" + library.name + ".swf", AssetType.BINARY);
+				var swf = new Asset (library.sourcePath, "lib/" + library.name + "/" + library.name + ".swf", AssetType.BINARY);
 				
 				if (library.embed != null) {
 					
@@ -543,9 +543,9 @@ class Tools {
 				var data:Dynamic = {};
 				data.version = 0.1;
 				data.type = "format.swf.SWFLibrary";
-				data.args = [ "libraries/" + library.name + "/" + library.name + ".swf" ];
+				data.args = [ "lib/" + library.name + "/" + library.name + ".swf" ];
 				
-				var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
+				var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
 				asset.data = Json.stringify (data);
 				output.assets.push (asset);
 				
@@ -602,17 +602,18 @@ class Tools {
 						
 						if (Path.extension (file) == "png" || Path.extension (file) == "jpg") {
 							
-							var asset = new Asset (cacheDirectory + "/" + file, "libraries/" + library.name + "/" + file, AssetType.IMAGE);
+							var asset = new Asset (cacheDirectory + "/" + file, "lib/" + library.name + "/" + file, AssetType.IMAGE);
 							output.assets.push (asset);
 							
 						}
 						
 					}
 					
-					var swfLiteAsset = new Asset (cacheDirectory + "/" + library.name + ".dat", "libraries/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
+					var swfLiteAsset = new Asset (cacheDirectory + "/" + library.name + ".dat", "lib/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
 					output.assets.push (swfLiteAsset);
 					
-					var asset = new Asset (cacheDirectory + ".json", "libraries/" + library.name + ".json", AssetType.TEXT);
+					var asset = new Asset (cacheDirectory + ".json", "lib/" + library.name + ".json", AssetType.TEXT);
+					asset.id = "libraries/" + library.name + ".json";
 					output.assets.push (asset);
 					
 					embeddedSWFLite = true;
@@ -634,7 +635,7 @@ class Tools {
 						
 						var type = exporter.bitmapTypes.get (id) == BitmapType.PNG ? "png" : "jpg";
 						var symbol:BitmapSymbol = cast swfLite.symbols.get (id);
-						symbol.path = "libraries/" + library.name + "/" + id + "." + type;
+						symbol.path = "lib/" + library.name + "/" + id + "." + type;
 						swfLite.symbols.set (id, symbol);
 						
 						var asset = new Asset ("", symbol.path, AssetType.IMAGE);
@@ -658,7 +659,7 @@ class Tools {
 						
 						if (exporter.bitmapTypes.get (id) == BitmapType.JPEG_ALPHA) {
 							
-							symbol.alpha = "libraries/" + library.name + "/" + id + "a.png";
+							symbol.alpha = "lib/" + library.name + "/" + id + "a.png";
 							
 							var asset = new Asset ("", symbol.alpha, AssetType.IMAGE);
 							var assetData = exporter.bitmapAlpha.get (id);
@@ -693,12 +694,13 @@ class Tools {
 					var data:Dynamic = {};
 					data.version = 0.1;
 					data.type = "format.swf.lite.SWFLiteLibrary";
-					data.args = [ "libraries/" + library.name + "/" + library.name + ".dat" ];
+					data.args = [ "lib/" + library.name + "/" + library.name + ".dat" ];
 					
-					var swfLiteAsset = new Asset ("", "libraries/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
+					var swfLiteAsset = new Asset ("", "lib/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
 					var swfLiteAssetData = swfLite.serialize ();
 					
-					var asset = new Asset ("", "libraries/" + library.name + ".json", AssetType.TEXT);
+					var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
+					asset.id = "libraries/" + library.name + ".json";
 					var assetData = Json.stringify (data);
 					
 					if (cacheDirectory != null) {
