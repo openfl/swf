@@ -546,6 +546,7 @@ class Tools {
 				data.args = [ "lib/" + library.name + "/" + library.name + ".swf" ];
 				
 				var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
+				asset.id = "libraries/" + library.name + ".json";
 				asset.data = Json.stringify (data);
 				output.assets.push (asset);
 				
