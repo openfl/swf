@@ -341,6 +341,7 @@ class MovieClip extends flash.display.MovieClip {
 			var advanceFrames = (__lastUpdate == __currentFrame) ? 1 : 0;
 			#end
 			
+			#if (!flash && openfl && !openfl_legacy)
 			if (__frameScripts != null) {
 				
 				for (i in 0...advanceFrames) {
@@ -356,12 +357,15 @@ class MovieClip extends flash.display.MovieClip {
 					if (__frameScripts.exists (__currentFrame - 1)) {
 						
 						__frameScripts.get (__currentFrame - 1) ();
+						if (!__playing) break;
 						
 					}
 					
 				}
 				
-			} else {
+			} else 
+			#end
+			{
 				
 				__currentFrame += advanceFrames;
 				
