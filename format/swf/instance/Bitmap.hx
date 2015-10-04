@@ -58,7 +58,7 @@ class Bitmap extends flash.display.Bitmap {
 					}
 					
 					var imageData = new ByteArray ();
-					var padding = Math.ceil (data.bitmapWidth / 4) - Math.floor (data.bitmapWidth / 4);
+					var padding = (4 - data.bitmapWidth % 4) % 4;
 					var index = 0;
 					
 					for (y in 0...data.bitmapHeight) {
