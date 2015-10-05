@@ -45,6 +45,7 @@ class MovieClip extends flash.display.MovieClip {
 	@:noCompletion private var __swf:SWFLite;
 	@:noCompletion private var __symbol:SpriteSymbol;
 	@:noCompletion private var __timeElapsed:Int;
+	@:noCompletion private var __zeroSymbol:Int;
 	
 	#if flash
 	@:noCompletion private var __currentFrame:Int;
@@ -62,6 +63,7 @@ class MovieClip extends flash.display.MovieClip {
 		
 		__lastUpdate = -1;
 		__objects = new Map ();
+		__zeroSymbol = -1;
 		
 		__currentFrame = 1;
 		__totalFrames = __symbol.frames.length;
@@ -608,6 +610,8 @@ class MovieClip extends flash.display.MovieClip {
 				
 			}
 			
+			previousIndex = 0;
+			
 		}
 		
 		var frame, displayObject, depth;
@@ -622,6 +626,22 @@ class MovieClip extends flash.display.MovieClip {
 			for (frameObject in frame.objects) {
 				
 				if (frameObject.type != FrameObjectType.DESTROY) {
+					
+					if (frameObject.id == 0 && frameObject.symbol != __zeroSymbol) {
+						
+						displayObject = __objects.get (0);
+						
+						if (displayObject != null && displayObject.parent == this) {
+							
+							removeChild (displayObject);
+							
+						}
+						
+						__objects.remove (0);
+						displayObject = null;
+						__zeroSymbol = frameObject.symbol;
+						
+					}
 					
 					if (!__objects.exists (frameObject.id)) {
 						

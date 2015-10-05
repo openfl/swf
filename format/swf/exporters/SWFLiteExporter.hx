@@ -440,6 +440,7 @@ class SWFLiteExporter {
 		
 		var instances = new Array<Int> ();
 		var lastModified = new Map<Int, Int> ();
+		var zeroCharacter = -1;
 		
 		var frame, frameObject, frameData, placeTag:TagPlaceObject;
 		
@@ -458,6 +459,13 @@ class SWFLiteExporter {
 			for (object in frameData.getObjectsSortedByDepth ()) {
 				
 				instances.push (object.placedAtIndex);
+				
+				if (object.placedAtIndex == 0 && object.characterId != zeroCharacter) {
+					
+					lastModified.remove (0);
+					zeroCharacter = object.characterId;
+					
+				}
 				
 				if (!lastModified.exists (object.placedAtIndex)) {
 					
