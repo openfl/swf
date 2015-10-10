@@ -92,7 +92,13 @@ class MovieClip extends flash.display.MovieClip {
 			
 		}
 		
-		objectPool = new Map<Int, List<ChildObject>>();
+		if (__currentLabels.length > 0) {
+			
+			__currentLabels.sort (function (a, b) return a.frame - b.frame);
+			
+		}
+		
+		objectPool = new Map<Int, List<ChildObject>> ();
 		activeObjects = [];
 		
 		// TODO: Set ABCData here if needed

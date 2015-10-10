@@ -20,6 +20,7 @@ import format.swf.lite.timeline.FrameObject;
 import format.swf.lite.timeline.FrameObjectType;
 import format.swf.lite.SWFLite;
 import openfl.display.BitmapDataChannel;
+import openfl.display.FrameLabel;
 import openfl.geom.Point;
 
 #if openfl
@@ -67,6 +68,20 @@ class MovieClip extends flash.display.MovieClip {
 		
 		__currentFrame = 1;
 		__totalFrames = __symbol.frames.length;
+		
+		#if !flash
+		__currentLabels = [];
+		
+		for (i in 0...__symbol.frames.length) {
+			
+			if (__symbol.frames[i].label != null) {
+				
+				__currentLabels.push (new FrameLabel (__symbol.frames[i].label, i + 1));
+				
+			}
+			
+		}
+		#end
 		
 		__updateFrame ();
 		
