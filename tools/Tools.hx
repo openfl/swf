@@ -613,10 +613,6 @@ class Tools {
 					var swfLiteAsset = new Asset (cacheDirectory + "/" + library.name + ".dat", "lib/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
 					output.assets.push (swfLiteAsset);
 					
-					var asset = new Asset (cacheDirectory + ".json", "lib/" + library.name + ".json", AssetType.TEXT);
-					asset.id = "libraries/" + library.name + ".json";
-					output.assets.push (asset);
-					
 					embeddedSWFLite = true;
 					
 				} else {
@@ -692,35 +688,21 @@ class Tools {
 						
 					//}
 					
-					var data:Dynamic = {};
-					data.version = 0.1;
-					data.type = "format.swf.lite.SWFLiteLibrary";
-					data.args = [ "lib/" + library.name + "/" + library.name + ".dat" ];
-					
 					var swfLiteAsset = new Asset ("", "lib/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
 					var swfLiteAssetData = swfLite.serialize ();
-					
-					var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
-					asset.id = "libraries/" + library.name + ".json";
-					var assetData = Json.stringify (data);
 					
 					if (cacheDirectory != null) {
 						
 						swfLiteAsset.sourcePath = cacheDirectory + "/" + library.name + ".dat";
 						File.saveContent (swfLiteAsset.sourcePath, swfLiteAssetData);
 						
-						asset.sourcePath = cacheDirectory + ".json";
-						File.saveContent (asset.sourcePath, assetData);
-						
 					} else {
 						
 						swfLiteAsset.data = swfLiteAssetData;
-						asset.data = assetData;
 						
 					}
 					
 					output.assets.push (swfLiteAsset);
-					output.assets.push (asset);
 					
 					if (library.generate) {
 						
@@ -731,6 +713,16 @@ class Tools {
 					embeddedSWFLite = true;
 					
 				}
+				
+				var data:Dynamic = {};
+				data.version = 0.1;
+				data.type = "format.swf.lite.SWFLiteLibrary";
+				data.args = [ "lib/" + library.name + "/" + library.name + ".dat" ];
+				
+				var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
+				asset.id = "libraries/" + library.name + ".json";
+				asset.data = Json.stringify (data);
+				output.assets.push (asset);
 				
 			}
 			
