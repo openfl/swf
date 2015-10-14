@@ -411,13 +411,13 @@ class MovieClip extends flash.display.MovieClip {
 		
 		if (Assets.cache.hasBitmapData (symbol.path)) {
 			
-			return Assets.getBitmapData (symbol.path);
+			return Assets.cache.getBitmapData (symbol.path);
 			
 		} else {
 			
 			#if !openfl_legacy
 			
-			var source = LimeAssets.getImage (symbol.path);
+			var source = LimeAssets.getImage (symbol.path, false);
 			
 			if (source != null && symbol.alpha != null && symbol.alpha != "") {
 				
@@ -429,10 +429,10 @@ class MovieClip extends flash.display.MovieClip {
 				source.copyPixels (cache, cache.rect, new Vector2 (), null, null, false);
 				#end
 				
-				var alpha = LimeAssets.getImage (symbol.alpha);
+				var alpha = LimeAssets.getImage (symbol.alpha, false);
 				source.copyChannel (alpha, alpha.rect, new Vector2 (), ImageChannel.RED, ImageChannel.ALPHA);
 				
-				symbol.alpha = null;
+				//symbol.alpha = null;
 				source.buffer.premultiplied = true;
 				
 				#if !sys
@@ -452,7 +452,7 @@ class MovieClip extends flash.display.MovieClip {
 			
 			#else
 			
-			var bitmapData = Assets.getBitmapData (symbol.path);
+			var bitmapData = Assets.getBitmapData (symbol.path, false);
 			
 			if (bitmapData != null && symbol.alpha != null && symbol.alpha != "") {
 				
@@ -460,9 +460,9 @@ class MovieClip extends flash.display.MovieClip {
 				bitmapData = new BitmapData (cache.width, cache.height, true, 0);
 				bitmapData.copyPixels (cache, cache.rect, new Point (), null, null, false);
 				
-				var alpha = Assets.getBitmapData (symbol.alpha);
+				var alpha = Assets.getBitmapData (symbol.alpha, false);
 				bitmapData.copyChannel (alpha, alpha.rect, new Point (), BitmapDataChannel.RED, BitmapDataChannel.ALPHA);
-				symbol.alpha = null;
+				//symbol.alpha = null;
 				
 				bitmapData.unmultiplyAlpha ();
 				
