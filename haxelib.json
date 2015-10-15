@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.1.1",
-  "releasenote": "Added SWFLite Frame-rate independence, animation improvements",
+  "version": "2.1.2",
+  "releasenote": "Improved JPEG alpha support, improved currentFrameLabels, minor fixes",
   "contributors": [ "singmajesty" ]
 }
