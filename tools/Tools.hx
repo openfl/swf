@@ -548,6 +548,13 @@ class Tools {
 				var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
 				asset.id = "libraries/" + library.name + ".json";
 				asset.data = Json.stringify (data);
+				
+				if (library.embed != null) {
+					
+					asset.embed = library.embed;
+					
+				}
+				
 				output.assets.push (asset);
 				
 				if (library.generate) {
@@ -604,6 +611,13 @@ class Tools {
 						if (Path.extension (file) == "png" || Path.extension (file) == "jpg") {
 							
 							var asset = new Asset (cacheDirectory + "/" + file, "lib/" + library.name + "/" + file, AssetType.IMAGE);
+							
+							if (library.embed != null) {
+								
+								asset.embed = library.embed;
+								
+							}
+							
 							output.assets.push (asset);
 							
 						}
@@ -611,6 +625,13 @@ class Tools {
 					}
 					
 					var swfLiteAsset = new Asset (cacheDirectory + "/" + library.name + ".dat", "lib/" + library.name + "/" + library.name + ".dat", AssetType.TEXT);
+					
+					if (library.embed != null) {
+						
+						swfLiteAsset.embed = library.embed;
+						
+					}
+					
 					output.assets.push (swfLiteAsset);
 					
 					embeddedSWFLite = true;
@@ -652,6 +673,12 @@ class Tools {
 							
 						}
 						
+						if (library.embed != null) {
+							
+							asset.embed = library.embed;
+							
+						}
+						
 						output.assets.push (asset);
 						
 						if (exporter.bitmapTypes.get (id) == BitmapType.JPEG_ALPHA) {
@@ -672,6 +699,12 @@ class Tools {
 								asset.data = StringHelper.base64Encode (cast assetData);
 								//asset.data = bitmapData.encode ("png");
 								asset.encoding = AssetEncoding.BASE64;
+								
+							}
+							
+							if (library.embed != null) {
+								
+								asset.embed = library.embed;
 								
 							}
 							
@@ -702,6 +735,12 @@ class Tools {
 						
 					}
 					
+					if (library.embed != null) {
+						
+						swfLiteAsset.embed = library.embed;
+						
+					}
+					
 					output.assets.push (swfLiteAsset);
 					
 					if (library.generate) {
@@ -722,6 +761,13 @@ class Tools {
 				var asset = new Asset ("", "lib/" + library.name + ".json", AssetType.TEXT);
 				asset.id = "libraries/" + library.name + ".json";
 				asset.data = Json.stringify (data);
+				
+				if (library.embed != null) {
+					
+					asset.embed = library.embed;
+					
+				}
+				
 				output.assets.push (asset);
 				
 			}
