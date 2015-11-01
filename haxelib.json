@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.1.2",
-  "releasenote": "Improved JPEG alpha support, improved currentFrameLabels, minor fixes",
+  "version": "2.1.3",
+  "releasenote": "Fixed library embed support",
   "contributors": [ "singmajesty" ]
 }
