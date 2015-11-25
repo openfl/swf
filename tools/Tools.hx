@@ -644,7 +644,7 @@ class Tools {
 						
 					}
 					
-					var bytes = ByteArray.readFile (library.sourcePath);
+					var bytes:ByteArray = File.getBytes (library.sourcePath);
 					var swf = new SWF (bytes);
 					var exporter = new SWFLiteExporter (swf.data);
 					var swfLite = exporter.swfLite;

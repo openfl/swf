@@ -302,7 +302,7 @@ class SWFData extends BitArray
 
 	public function readSTRING():String {
 		var index:Int = position;
-		while (this[index++] > 0) {}
+		while (this.get (index++) > 0) {}
 		resetBitsPending();
 		#if (neko || cpp) //TODO: Check for other targets that might require this
 		var result = readUTFBytes(index - position - 1);
@@ -864,7 +864,7 @@ class SWFData extends BitArray
 
 			// Write LZMA properties
 			for(i in 0...5) {
-				ba.writeByte(this[i + 12]);
+				ba.writeByte(this.get (i + 12));
 			}
 
 			// Write uncompressed length (64 bit)

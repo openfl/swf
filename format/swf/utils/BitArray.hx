@@ -1,9 +1,9 @@
 ﻿package format.swf.utils;
 
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 import haxe.crypto.BaseCode;
 
-class BitArray extends ByteArray
+class BitArray extends ByteArrayData
 {
 	private var bitsPending:Int = 0;
 	
@@ -12,7 +12,7 @@ class BitArray extends ByteArray
 		var partial:Int;
 		var bitsConsumed:Int;
 		if (bitsPending > 0) {
-			var byte:Int = this[position - 1] & (0xff >> (8 - bitsPending));
+			var byte:Int = this.get (position - 1) & (0xff >> (8 - bitsPending));
 			bitsConsumed = Std.int (Math.min(bitsPending, bits));
 			bitsPending -= bitsConsumed;
 			partial = byte >> bitsPending;
@@ -59,15 +59,15 @@ class BitArray extends ByteArray
 			}
 			#else
 			if (bitsPending > bits) {
-				this[position - 1] |= value << (bitsPending - bits);
+				this.set (position - 1, this.get (position - 1) | value << (bitsPending - bits));
 				bitsConsumed = bits;
 				bitsPending -= bits;
 			} else if (bitsPending == bits) {
-				this[position - 1] |= value;
+				this.set (position - 1, this.get (position - 1) | value);
 				bitsConsumed = bits;
 				bitsPending = 0;
 			} else {
-				this[position - 1] |= value >> (bits - bitsPending);
+				this.set (position - 1, this.get (position - 1) | value >> (bits - bitsPending));
 				bitsConsumed = bitsPending;
 				bitsPending = 0;
 			}
