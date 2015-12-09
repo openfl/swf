@@ -51,7 +51,7 @@ import format.swf.data.SWFZoneRecord;
 import format.swf.utils.BitArray;
 
 
-class SWFData extends BitArray
+@:forward abstract SWFData(BitArray) from BitArray to BitArray
 {
 	public static inline var FLOAT16_EXPONENT_BASE:Float = 15;
 	#if flash
@@ -64,11 +64,14 @@ class SWFData extends BitArray
     public static inline var MIN_FLOAT_VALUE:Float = 2.2250738585072014e-308;
     public static inline var MAX_FLOAT_VALUE:Float = 1.7976931348623158e+308;
 	#end
-
+	
+	public var length (get, set):Int;
+	
+	
 	public function new() {
 
-		super ();
-		endian = Endian.LITTLE_ENDIAN;
+		this = new BitArray ();
+		this.endian = Endian.LITTLE_ENDIAN;
 
 	}
 
@@ -77,76 +80,76 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readSI8():Int {
-		resetBitsPending();
-		return readByte();
+		this.resetBitsPending();
+		return this.readByte();
 	}
 
 	public function writeSI8(value:Int):Void {
-		resetBitsPending();
-		writeByte(value);
+		this.resetBitsPending();
+		this.writeByte(value);
 	}
 
 	public function readSI16():Int {
-		resetBitsPending();
-		return readShort();
+		this.resetBitsPending();
+		return this.readShort();
 	}
 
 	public function writeSI16(value:Int):Void {
-		resetBitsPending();
-		writeShort(value);
+		this.resetBitsPending();
+		this.writeShort(value);
 	}
 
 	public function readSI32():Int {
-		resetBitsPending();
-		return readInt();
+		this.resetBitsPending();
+		return this.readInt();
 	}
 
 	public function writeSI32(value:Int):Void {
-		resetBitsPending();
-		writeInt(value);
+		this.resetBitsPending();
+		this.writeInt(value);
 	}
 
 	public function readUI8():Int {
-		resetBitsPending();
-		return readUnsignedByte();
+		this.resetBitsPending();
+		return this.readUnsignedByte();
 	}
 
 	public function writeUI8(value:Int):Void {
-		resetBitsPending();
-		writeByte(value);
+		this.resetBitsPending();
+		this.writeByte(value);
 	}
 
 	public function readUI16():Int {
-		resetBitsPending();
-		return readUnsignedShort();
+		this.resetBitsPending();
+		return this.readUnsignedShort();
 	}
 
 	public function writeUI16(value:Int):Void {
-		resetBitsPending();
-		writeShort(value);
+		this.resetBitsPending();
+		this.writeShort(value);
 	}
 
 	public function readUI24():Int {
-		resetBitsPending();
-		var loWord:Int = readUnsignedShort();
-		var hiByte:Int = readUnsignedByte();
+		this.resetBitsPending();
+		var loWord:Int = this.readUnsignedShort();
+		var hiByte:Int = this.readUnsignedByte();
 		return (hiByte << 16) | loWord;
 	}
 
 	public function writeUI24(value:Int):Void {
-		resetBitsPending();
-		writeShort(value & 0xffff);
-		writeByte(value >> 16);
+		this.resetBitsPending();
+		this.writeShort(value & 0xffff);
+		this.writeByte(value >> 16);
 	}
 
 	public function readUI32():Int {
-		resetBitsPending();
-		return readUnsignedInt();
+		this.resetBitsPending();
+		return this.readUnsignedInt();
 	}
 
 	public function writeUI32(value:Int):Void {
-		resetBitsPending();
-		writeUnsignedInt(value);
+		this.resetBitsPending();
+		this.writeUnsignedInt(value);
 	}
 
 	/////////////////////////////////////////////////////////
@@ -154,23 +157,23 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readFIXED():Float {
-		resetBitsPending();
-		return readInt() / 65536;
+		this.resetBitsPending();
+		return this.readInt() / 65536;
 	}
 
 	public function writeFIXED(value:Float):Void {
-		resetBitsPending();
-		writeInt(Std.int(value * 65536));
+		this.resetBitsPending();
+		this.writeInt(Std.int(value * 65536));
 	}
 
 	public function readFIXED8():Float {
-		resetBitsPending();
-		return readShort() / 256;
+		this.resetBitsPending();
+		return this.readShort() / 256;
 	}
 
 	public function writeFIXED8(value:Float):Void {
-		resetBitsPending();
-		writeShort(Std.int(value * 256));
+		this.resetBitsPending();
+		this.writeShort(Std.int(value * 256));
 	}
 
 	/////////////////////////////////////////////////////////
@@ -178,28 +181,28 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readFLOAT():Float {
-		resetBitsPending();
-		return readFloat();
+		this.resetBitsPending();
+		return this.readFloat();
 	}
 
 	public function writeFLOAT(value:Float):Void {
-		resetBitsPending();
-		writeFloat(value);
+		this.resetBitsPending();
+		this.writeFloat(value);
 	}
 
 	public function readDOUBLE():Float {
-		resetBitsPending();
-		return readDouble();
+		this.resetBitsPending();
+		return this.readDouble();
 	}
 
 	public function writeDOUBLE(value:Float):Void {
-		resetBitsPending();
-		writeDouble(value);
+		this.resetBitsPending();
+		this.writeDouble(value);
 	}
 
 	public function readFLOAT16():Float {
-		resetBitsPending();
-		var word:Int = readUnsignedShort();
+		this.resetBitsPending();
+		var word:Int = this.readUnsignedShort();
 		var sign:Int = ((word & 0x8000) != 0) ? -1 : 1;
 		var exponent:Int = (word >> 10) & 0x1f;
 		var significand:Int = word & 0x3ff;
@@ -231,16 +234,16 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readEncodedU32():Int {
-		resetBitsPending();
-		var result:Int = readUnsignedByte();
+		this.resetBitsPending();
+		var result:Int = this.readUnsignedByte();
 		if (result & 0x80 > 0) {
-			result = (result & 0x7f) | (readUnsignedByte() << 7);
+			result = (result & 0x7f) | (this.readUnsignedByte() << 7);
 			if (result & 0x4000 > 0) {
-				result = (result & 0x3fff) | (readUnsignedByte() << 14);
+				result = (result & 0x3fff) | (this.readUnsignedByte() << 14);
 				if (result & 0x200000 > 0) {
-					result = (result & 0x1fffff) | (readUnsignedByte() << 21);
+					result = (result & 0x1fffff) | (this.readUnsignedByte() << 21);
 					if (result & 0x10000000 > 0) {
-						result = (result & 0xfffffff) | (readUnsignedByte() << 28);
+						result = (result & 0xfffffff) | (this.readUnsignedByte() << 28);
 					}
 				}
 			}
@@ -272,20 +275,20 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readUB(bits:Int):Int {
-		return readBits(bits);
+		return this.readBits(bits);
 	}
 
 	public function writeUB(bits:Int, value:Int):Void {
-		writeBits(bits, value);
+		this.writeBits(bits, value);
 	}
 
 	public function readSB(bits:Int):Int {
 		var shift:Int = 32 - bits;
-		return Std.int(readBits(bits) << shift) >> shift;
+		return Std.int(this.readBits(bits) << shift) >> shift;
 	}
 
 	public function writeSB(bits:Int, value:Int):Void {
-		writeBits(bits, value);
+		this.writeBits(bits, value);
 	}
 
 	public function readFB(bits:Int):Float {
@@ -301,23 +304,23 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readSTRING():String {
-		var index:Int = position;
+		var index:Int = this.position;
 		while (this.get (index++) > 0) {}
-		resetBitsPending();
+		this.resetBitsPending();
 		#if (neko || cpp) //TODO: Check for other targets that might require this
-		var result = readUTFBytes(index - position - 1);
-		position++;
+		var result = this.readUTFBytes(index - this.position - 1);
+		this.position++;
 		return result;
 		#else
-		return readUTFBytes(index - position);
+		return this.readUTFBytes(index - this.position);
 		#end
 	}
 
 	public function writeSTRING(value:String):Void {
 		if (value != null && value.length > 0) {
-			writeUTFBytes(value);
+			this.writeUTFBytes(value);
 		}
-		writeByte(0);
+		this.writeByte(0);
 	}
 
 	/////////////////////////////////////////////////////////
@@ -325,13 +328,13 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readLANGCODE():Int {
-		resetBitsPending();
-		return readUnsignedByte();
+		this.resetBitsPending();
+		return this.readUnsignedByte();
 	}
 
 	public function writeLANGCODE(value:Int):Void {
-		resetBitsPending();
-		writeByte(value);
+		this.resetBitsPending();
+		this.writeByte(value);
 	}
 
 	/////////////////////////////////////////////////////////
@@ -339,43 +342,43 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readRGB():Int {
-		resetBitsPending();
-		var r:Int = readUnsignedByte();
-		var g:Int = readUnsignedByte();
-		var b:Int = readUnsignedByte();
+		this.resetBitsPending();
+		var r:Int = this.readUnsignedByte();
+		var g:Int = this.readUnsignedByte();
+		var b:Int = this.readUnsignedByte();
 		return 0xff000000 | (r << 16) | (g << 8) | b;
 	}
 
 	public function writeRGB(value:Int):Void {
-		resetBitsPending();
-		writeByte((value >> 16) & 0xff);
-		writeByte((value >> 8) & 0xff);
-		writeByte(value  & 0xff);
+		this.resetBitsPending();
+		this.writeByte((value >> 16) & 0xff);
+		this.writeByte((value >> 8) & 0xff);
+		this.writeByte(value  & 0xff);
 	}
 
 	public function readRGBA():Int {
-		resetBitsPending();
+		this.resetBitsPending();
 		var rgb:Int = readRGB() & 0x00ffffff;
-		var a:Int = readUnsignedByte();
+		var a:Int = this.readUnsignedByte();
 		return a << 24 | rgb;
 	}
 
 	public function writeRGBA(value:Int):Void {
-		resetBitsPending();
+		this.resetBitsPending();
 		writeRGB(value);
-		writeByte((value >> 24) & 0xff);
+		this.writeByte((value >> 24) & 0xff);
 	}
 
 	public function readARGB():Int {
-		resetBitsPending();
-		var a:Int = readUnsignedByte();
+		this.resetBitsPending();
+		var a:Int = this.readUnsignedByte();
 		var rgb:Int = readRGB() & 0x00ffffff;
 		return (a << 24) | rgb;
 	}
 
 	public function writeARGB(value:Int):Void {
-		resetBitsPending();
-		writeByte((value >> 24) & 0xff);
+		this.resetBitsPending();
+		this.writeByte((value >> 24) & 0xff);
 		writeRGB(value);
 	}
 
@@ -405,28 +408,28 @@ class SWFData extends BitArray
 		var hasScale:Bool = (value.scaleX != 1) || (value.scaleY != 1);
 		var hasRotate:Bool = (value.rotateSkew0 != 0) || (value.rotateSkew1 != 0);
 
-		writeBits(1, hasScale ? 1 : 0);
+		this.writeBits(1, hasScale ? 1 : 0);
 		if (hasScale) {
 			var scaleBits:Int;
 			if(value.scaleX == 0 && value.scaleY == 0) {
 				scaleBits = 1;
 			} else {
-				scaleBits = calculateMaxBits(true, [ Std.int (value.scaleX * 65536), Std.int (value.scaleY * 65536) ]);
+				scaleBits = this.calculateMaxBits(true, [ Std.int (value.scaleX * 65536), Std.int (value.scaleY * 65536) ]);
 			}
 			writeUB(5, scaleBits);
 			writeFB(scaleBits, value.scaleX);
 			writeFB(scaleBits, value.scaleY);
 		}
 
-		writeBits(1, hasRotate ? 1 : 0);
+		this.writeBits(1, hasRotate ? 1 : 0);
 		if (hasRotate) {
-			var rotateBits:Int = calculateMaxBits(true, [ Std.int (value.rotateSkew0 * 65536), Std.int (value.rotateSkew1 * 65536) ]);
+			var rotateBits:Int = this.calculateMaxBits(true, [ Std.int (value.rotateSkew0 * 65536), Std.int (value.rotateSkew1 * 65536) ]);
 			writeUB(5, rotateBits);
 			writeFB(rotateBits, value.rotateSkew0);
 			writeFB(rotateBits, value.rotateSkew1);
 		}
 
-		var translateBits:Int = calculateMaxBits(true, [value.translateX, value.translateY]);
+		var translateBits:Int = this.calculateMaxBits(true, [value.translateX, value.translateY]);
 		writeUB(5, translateBits);
 		writeSB(translateBits, value.translateX);
 		writeSB(translateBits, value.translateY);
@@ -535,7 +538,7 @@ class SWFData extends BitArray
 		if (readUI8() == 0) {
 			return null;
 		} else {
-			position--;
+			this.position--;
 			return new SWFButtonRecord(this, level);
 		}
 	}
@@ -576,7 +579,7 @@ class SWFData extends BitArray
 		if (readUI8() == 0) {
 			return null;
 		} else {
-			position--;
+			this.position--;
 			return new SWFTextRecord(this, glyphBits, advanceBits, previousRecord, level);
 		}
 	}
@@ -710,7 +713,7 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readACTIONRECORD():IAction {
-		var pos:Int = position;
+		var pos:Int = this.position;
 		var action:IAction = null;
 		var actionCode:Int = readUI8();
 		if (actionCode != 0) {
@@ -786,12 +789,12 @@ class SWFData extends BitArray
 	}
 
 	public function readCLIPACTIONRECORD(version:Int):SWFClipActionRecord {
-		var pos:Int = position;
+		var pos:Int = this.position;
 		var flags:Int = (version >= 6) ? readUI32() : readUI16();
 		if (flags == 0) {
 			return null;
 		} else {
-			position = pos;
+			this.position = pos;
 			return new SWFClipActionRecord(this, version);
 		}
 	}
@@ -814,7 +817,7 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function readTagHeader():SWFRecordHeader {
-		var pos:Int = position;
+		var pos:Int = this.position;
 		var tagTypeAndLength:Int = readUI16();
 		var tagLength:Int = tagTypeAndLength & 0x003f;
 		if (tagLength == 0x3f) {
@@ -822,7 +825,7 @@ class SWFData extends BitArray
 			// Shouldn't it be an unsigned int?
 			tagLength = readSI32();
 		}
-		return new SWFRecordHeader(tagTypeAndLength >> 6, tagLength, position - pos);
+		return new SWFRecordHeader(tagTypeAndLength >> 6, tagLength, this.position - pos);
 	}
 
 	public function writeTagHeader(type:Int, length:Int, forceLongHeader:Bool = false):Void {
@@ -841,11 +844,11 @@ class SWFData extends BitArray
 	/////////////////////////////////////////////////////////
 
 	public function swfUncompress(compressionMethod:CompressionAlgorithm, uncompressedLength:Int = 0):Void {
-		var pos:Int = position;
+		var pos:Int = this.position;
 		var ba:ByteArray = new ByteArray();
 
 		if(compressionMethod == CompressionAlgorithm.ZLIB) {
-			readBytes(ba);
+			this.readBytes(ba);
 			ba.position = 0;
 			ba.uncompress();
 		} else if(compressionMethod == CompressionAlgorithm.LZMA) {
@@ -873,8 +876,8 @@ class SWFData extends BitArray
 			ba.writeUnsignedInt(0);
 
 			// Write compressed data
-			position = 17;
-			readBytes(ba, 13);
+			this.position = 17;
+			this.readBytes(ba, 13);
 
 			// Uncompress
 			ba.position = 0;
@@ -884,17 +887,17 @@ class SWFData extends BitArray
 			throw(new Error("Unknown compression method: " + compressionMethod));
 		}
 
-		length = position = pos;
-		writeBytes(ba);
-		position = pos;
+		length = this.position = pos;
+		this.writeBytes(ba);
+		this.position = pos;
 	}
 
 	public function swfCompress(compressionMethod:CompressionAlgorithm):Void {
-		var pos:Int = position;
+		var pos:Int = this.position;
 		var ba:ByteArray = new ByteArray();
 
 		if(compressionMethod == CompressionAlgorithm.ZLIB) {
-			readBytes(ba);
+			this.readBytes(ba);
 			ba.position = 0;
 			ba.compress();
 		} else if(compressionMethod == CompressionAlgorithm.LZMA) {
@@ -903,7 +906,7 @@ class SWFData extends BitArray
 			throw(new Error("Can't publish LZMA compressed SWFs"));
 			// This should be correct, but doesn't seem to work:
 			var lzma:ByteArray = new ByteArray();
-			readBytes(lzma);
+			this.readBytes(lzma);
 			lzma.position = 0;
 			lzma.compress(compressionMethod);
 			// Write compressed length
@@ -919,8 +922,8 @@ class SWFData extends BitArray
 			throw(new Error("Unknown compression method: " + compressionMethod));
 		}
 
-		length = position = pos;
-		writeBytes(ba);
+		length = this.position = pos;
+		this.writeBytes(ba);
 	}
 
 	/////////////////////////////////////////////////////////
@@ -932,7 +935,7 @@ class SWFData extends BitArray
 	}
 
 	public function skipBytes(length:Int):Void {
-		position += length;
+		this.position += length;
 	}
 
 	public static function dump(ba:ByteArray, length:Int, offset:Int = 0):Void {
@@ -953,4 +956,46 @@ class SWFData extends BitArray
 		ba.position = posOrig;
 		trace(str);
 	}
+	
+	
+	
+	
+	// Get & Set Methods
+	
+	
+	
+	
+	@:noCompletion private function get_length ():Int {
+		
+		#if display
+		return 0;
+		#elseif flash
+		return this.length;
+		#else
+		@:privateAccess return this.__length;
+		#end
+		
+	}
+	
+	
+	@:noCompletion private function set_length (value:Int):Int {
+		
+		#if display
+		#elseif flash
+		this.length = value;
+		#else
+		if (value > 0) {
+			
+			@:privateAccess this.__resize (value);
+			
+		}
+		
+		@:privateAccess this.__length = value;
+		#end
+		
+		return value;
+		
+	}
+	
+	
 }
