@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.1.4",
-  "releasenote": "Update for OpenFL 3.5",
+  "version": "2.1.5",
+  "releasenote": "ByteArray fix",
   "contributors": [ "singmajesty" ]
 }
