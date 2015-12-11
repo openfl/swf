@@ -50,6 +50,8 @@ import format.swf.data.SWFZoneData;
 import format.swf.data.SWFZoneRecord;
 import format.swf.utils.BitArray;
 
+@:access(format.swf.utils.BitArray)
+
 
 @:forward abstract SWFData(BitArray) from BitArray to BitArray
 {
@@ -990,7 +992,7 @@ import format.swf.utils.BitArray;
 			
 		}
 		
-		@:privateAccess this.__length = value;
+		this.__length = value;
 		#end
 		
 		return value;

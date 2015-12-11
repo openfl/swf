@@ -49,25 +49,26 @@ class SimpleButton extends flash.display.SimpleButton {
 			//trace(i + ": " + rec);
 			
 			if (rec.stateUp) {
-				if (this.upState == null) this.upState = new Sprite();
+				/*if (this.upState == null)*/ this.upState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
+				trace (displayObject);
 				if (displayObject != null) placeButtonRecord(displayObject, rec, this.upState);
 				#if (mobile) if (this.overState == null) this.overState = this.upState; #end
 			}
 			#if !(mobile)
 			if (rec.stateOver) {
-				if (this.overState == null) this.overState = new Sprite();
+				/*if (this.overState == null)*/ this.overState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
 				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.overState);
 			}
 			#end
 			if (rec.stateDown) {
-				if (this.downState == null) this.downState = new Sprite();
+				/*if (this.downState == null)*/ this.downState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
 				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.downState);
 			}
 			if (rec.stateHitTest) {
-				if (this.hitTestState == null) this.hitTestState = new Sprite();
+				/*if (this.hitTestState == null)*/ this.hitTestState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
 				if (displayObject != null)  placeButtonRecord(displayObject, rec, this.hitTestState);
 			}
