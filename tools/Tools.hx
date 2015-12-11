@@ -519,6 +519,12 @@ class Tools {
 				
 			}
 			
+			if (type == "swf" && project.target == Platform.HTML5) {
+				
+				type = "swflite";
+				
+			}
+			
 			if (type == "swf" && project.target != Platform.HTML5) {
 				
 				if (!FileSystem.exists (library.sourcePath)) {
