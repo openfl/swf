@@ -122,7 +122,7 @@ class DynamicTextField extends TextField {
 			
 			htmlText = symbol.text;
 			
-		} else {
+		} else #if (flash) if (symbol.text != null) #end {
 			
 			text = symbol.text;
 			
