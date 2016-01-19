@@ -108,28 +108,32 @@ class DynamicTextField extends TextField {
 		}
 		
 		defaultTextFormat = format;
-		
-		#if !flash
-		
-		var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
-		plain = new EReg ("<br>", "g").replace (plain, "\n");
-		plain = new EReg ("<.*?>", "g").replace (plain, "");
-		text = StringTools.htmlUnescape (plain);
-		
-		#else
-		
-		if (symbol.html) {
-			
-			htmlText = symbol.text;
-			
-		} else #if (flash) if (symbol.text != null) #end {
-			
-			text = symbol.text;
-			
+
+		if (symbol.text != null) {
+
+			#if !flash
+
+			var plain = new EReg ("</p>", "g").replace (symbol.text, "\n");
+			plain = new EReg ("<br>", "g").replace (plain, "\n");
+			plain = new EReg ("<.*?>", "g").replace (plain, "");
+			text = StringTools.htmlUnescape (plain);
+
+			#else
+
+			if (symbol.html) {
+
+				htmlText = symbol.text;
+
+			} else {
+
+				text = symbol.text;
+
+			}
+
+			#end
+
 		}
-		
-		#end
-		
+
 		//autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
 		
 	}
