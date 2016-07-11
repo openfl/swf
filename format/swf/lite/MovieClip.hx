@@ -50,9 +50,11 @@ class MovieClip extends flash.display.MovieClip {
 	
 	#if flash
 	@:noCompletion private var __currentFrame:Int;
+	@:noCompletion private var __currentFrameLabel:String;
+	@:noCompletion private var __currentLabel:String;
+	@:noCompletion private var __currentLabels:Array<FrameLabel>;
 	@:noCompletion private var __previousTime:Int;
 	@:noCompletion private var __totalFrames:Int;
-	@:noCompletion private var __currentLabels:Array<FrameLabel>;
 	#end
 	
 	
@@ -81,7 +83,7 @@ class MovieClip extends flash.display.MovieClip {
 			}
 			
 		}
-
+		
 		__updateFrame ();
 		
 		if (__totalFrames > 1) {
@@ -213,17 +215,7 @@ class MovieClip extends flash.display.MovieClip {
 		}
 		
 	}
-
-
-	#if flash
-	@:getter(currentLabels)
-	private function get_currentLabels():Array<FrameLabel> {
-
-		return __currentLabels;
-
-	}
-	#end
-
+	
 	
 	public function unflatten ():Void {
 		
@@ -770,6 +762,44 @@ class MovieClip extends flash.display.MovieClip {
 				
 			}
 			
+			if (__symbol.frames.length > frameIndex) {
+				
+				__currentFrameLabel = __symbol.frames[frameIndex].label;
+				
+			} else {
+				
+				__currentFrameLabel = null;
+				
+			}
+			
+			if (__currentFrameLabel != null) {
+				
+				__currentLabel = __currentFrameLabel;
+				
+			} else {
+				
+				if (__currentFrame != __lastUpdate + 1) {
+					
+					__currentLabel = null;
+					
+					for (label in __currentLabels) {
+						
+						if (label.frame <= __currentFrame) {
+							
+							__currentLabel = label.name;
+							
+						} else {
+							
+							break;
+							
+						}
+						
+					}
+					
+				}
+				
+			}
+			
 			#if (!flash && openfl && !openfl_legacy)
 			__renderDirty = true;
 			DisplayObject.__worldRenderDirty++;
@@ -790,18 +820,48 @@ class MovieClip extends flash.display.MovieClip {
 	
 	
 	#if flash
-	@:noCompletion @:getter public function get_currentFrame():Int {
+	
+	@:noCompletion @:getter(currentFrame) public function get_currentFrame ():Int {
 		
 		return __currentFrame;
 		
 	}
 	
 	
-	@:noCompletion @:getter public function get___totalFrames():Int {
+	@:noCompletion @:getter(currentFrameLabel) public function get_currentFrameLabel ():String {
+		
+		return __currentFrameLabel;
+		
+	}
+	
+	
+	@:noCompletion @:getter(currentLabel) public function get_currentLabel ():String {
+		
+		return __currentLabel;
+		
+	}
+	
+	
+	@:noCompletion @:getter(currentLabels) private function get_currentLabels ():Array<FrameLabel> {
+		
+		return __currentLabels;
+		
+	}
+	
+	
+	@:noCompletion @:getter(framesLoaded) public function get_framesLoaded ():Int {
 		
 		return __totalFrames;
 		
 	}
+	
+	
+	@:noCompletion @:getter(totalFrames) public function get_totalFrames ():Int {
+		
+		return __totalFrames;
+		
+	}
+	
 	#end
 	
 	
