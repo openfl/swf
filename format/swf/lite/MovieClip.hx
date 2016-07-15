@@ -504,7 +504,7 @@ class MovieClip extends flash.display.MovieClip {
 				
 				if (__symbol.frames[i].label == label) {
 					
-					return i;
+					return i + 1;
 					
 				}
 				
@@ -750,53 +750,45 @@ class MovieClip extends flash.display.MovieClip {
 			
 			if (frameIndex > -1) {
 				
-				__currentFrameLabel = __symbol.frames[frameIndex].label;
+				if (__symbol.frames.length > frameIndex && __symbol.frames[frameIndex] != null) {
+					
+					__currentFrameLabel = __symbol.frames[frameIndex].label;
+					
+				} else {
+					
+					__currentFrameLabel = null;
+					
+				}
 				
 				if (__currentFrameLabel != null) {
 					
 					__currentLabel = __currentFrameLabel;
 					
-				}
-				
-				__renderFrame (frameIndex);
-				
-			}
-			
-			if (__symbol.frames.length > frameIndex) {
-				
-				__currentFrameLabel = __symbol.frames[frameIndex].label;
-				
-			} else {
-				
-				__currentFrameLabel = null;
-				
-			}
-			
-			if (__currentFrameLabel != null) {
-				
-				__currentLabel = __currentFrameLabel;
-				
-			} else {
-				
-				if (__currentFrame != __lastUpdate + 1) {
+				} else {
 					
-					__currentLabel = null;
-					
-					for (label in __currentLabels) {
+					if (__currentFrame != __lastUpdate + 1) {
 						
-						if (label.frame <= __currentFrame) {
+						__currentLabel = null;
+						
+						for (label in __currentLabels) {
 							
-							__currentLabel = label.name;
-							
-						} else {
-							
-							break;
+							if (label.frame <= __currentFrame) {
+								
+								__currentLabel = label.name;
+								
+							} else {
+								
+								break;
+								
+							}
 							
 						}
 						
 					}
 					
 				}
+				
+				__renderFrame (frameIndex);
 				
 			}
 			
