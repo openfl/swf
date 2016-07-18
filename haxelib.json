@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.2.1",
-  "releasenote": "Updates for currentLabel",
+  "version": "2.2.2",
+  "releasenote": "Improvements to currentLabel, currentFrameLabel, other fixes",
   "contributors": [ "singmajesty" ]
 }
