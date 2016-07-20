@@ -3,11 +3,20 @@ package format.swf.lite;
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
+import flash.display.BitmapDataChannel;
+import flash.display.CapsStyle;
 import flash.display.DisplayObject;
+import flash.display.FrameLabel;
+import flash.display.GradientType;
 import flash.display.Graphics;
+import flash.display.InterpolationMethod;
+import flash.display.JointStyle;
+import flash.display.LineScaleMode;
 import flash.display.PixelSnapping;
 import flash.display.Shape;
+import flash.display.SpreadMethod;
 import flash.events.Event;
+import flash.geom.Point;
 import flash.filters.*;
 import flash.Lib;
 import format.swf.lite.symbols.BitmapSymbol;
@@ -19,9 +28,6 @@ import format.swf.lite.symbols.StaticTextSymbol;
 import format.swf.lite.timeline.FrameObject;
 import format.swf.lite.timeline.FrameObjectType;
 import format.swf.lite.SWFLite;
-import openfl.display.BitmapDataChannel;
-import openfl.display.FrameLabel;
-import openfl.geom.Point;
 
 #if openfl
 import openfl.Assets;
@@ -305,6 +311,26 @@ class MovieClip extends flash.display.MovieClip {
 					#if (cpp || neko)
 					shape.cacheAsBitmap = true;
 					#end
+					
+					#if flash
+					var fillType = switch (fillType) {
+						case "0": GradientType.LINEAR;
+						case "1": GradientType.RADIAL;
+						default: fillType;
+					}
+					var spreadMethod = switch (fillType) {
+						case "0": SpreadMethod.PAD;
+						case "1": SpreadMethod.REFLECT;
+						case "2": SpreadMethod.REPEAT;
+						default: spreadMethod;
+					}
+					var interpolationMethod = switch (interpolationMethod) {
+						case "0": InterpolationMethod.LINEAR_RGB;
+						case "1": InterpolationMethod.RGB;
+						default: interpolationMethod;
+					}
+					#end
+					
 					graphics.beginGradientFill (fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
 				
 				case CurveTo (controlX, controlY, anchorX, anchorY):
@@ -319,6 +345,28 @@ class MovieClip extends flash.display.MovieClip {
 					graphics.endFill ();
 				
 				case LineStyle (thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+					
+					#if flash
+					var scaleMode = switch (scaleMode) {
+						case "0": LineScaleMode.HORIZONTAL;
+						case "1": LineScaleMode.NONE;
+						case "2": LineScaleMode.NORMAL;
+						case "3": LineScaleMode.VERTICAL;
+						default: scaleMode;
+					}
+					var caps = switch (caps) {
+						case "0": CapsStyle.NONE;
+						case "1": CapsStyle.ROUND;
+						case "2": CapsStyle.SQUARE;
+						default: caps;
+					}
+					var joints = switch (joints) {
+						case "0": JointStyle.BEVEL;
+						case "1": JointStyle.MITER;
+						case "2": JointStyle.ROUND;
+						default: joints;
+					}
+					#end
 					
 					if (thickness != null) {
 						
