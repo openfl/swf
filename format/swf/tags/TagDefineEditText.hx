@@ -82,7 +82,7 @@ class TagDefineEditText implements IDefinitionTag
 		if (hasFontClass) {
 			fontClass = data.readSTRING();
 		}
-		if (hasFont) {
+		if (hasFont || hasFontClass) {
 			fontHeight = data.readUI16();
 		}
 		if (hasTextColor) {
@@ -134,7 +134,7 @@ class TagDefineEditText implements IDefinitionTag
 		if (hasFontClass) {
 			body.writeSTRING(fontClass);
 		}
-		if (hasFont) {
+		if (hasFont || hasFontClass) {
 			body.writeUI16(fontHeight);
 		}
 		if (hasTextColor) {
