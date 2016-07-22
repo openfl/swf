@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.2.2",
-  "releasenote": "Improvements to currentLabel, currentFrameLabel, other fixes",
+  "version": "2.2.3",
+  "releasenote": "Minor fix to TextField font name",
   "contributors": [ "singmajesty" ]
 }
