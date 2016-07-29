@@ -232,6 +232,7 @@ class SWFLiteExporter {
 					
 				}
 				
+				var paddedWidth:Int = Math.ceil(data.bitmapWidth / 4) * 4;
 				var values = Bytes.alloc ((data.bitmapWidth + 1) * data.bitmapHeight);
 				index = 0;
 				
@@ -240,13 +241,14 @@ class SWFLiteExporter {
 					values.set (index++, 0);
 					values.blit (index, buffer, buffer.position, data.bitmapWidth);
 					index += data.bitmapWidth;
-					buffer.position += data.bitmapWidth;
+					buffer.position += paddedWidth;
 					
 				}
 				
 				var png = new List ();
 				png.add (CHeader ( { width: data.bitmapWidth, height: data.bitmapHeight, colbits: 8, color: ColIndexed, interlaced: false } ));
 				png.add (CPalette (palette));
+				if (transparent) png.add(CUnknown("tRNS", alpha));
 				png.add (CData (Deflate.run (values)));
 				png.add (CEnd);
 				
