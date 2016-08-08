@@ -116,4 +116,14 @@ class BitArray extends ByteArrayData
 		}
 		return bits;
 	}
+	
+	#if flash
+	private function get (pos:UInt):UInt {
+		return this[pos];
+	}
+	
+	private function set (pos:UInt, value:UInt):UInt {
+		return this[pos] = value;
+	}
+	#end
 }

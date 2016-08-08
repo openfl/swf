@@ -194,7 +194,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	}
 
 	private function parseTag(data:SWFData, async:Bool = false):ITag {
-		var pos = data.position;
+		var pos:Int = data.position;
 		// Bail out if eof
 		eof = (pos >= data.length);
 		if(eof) {
@@ -230,7 +230,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		// Build dictionary and display list etc
 		processTag(tag);
 		// Adjust position (just in case the parser under- or overflows)
-		var position = pos + tagHeader.tagLength;
+		var position:UInt = pos + tagHeader.tagLength;
 		if(data.position != position) {
 			var index:Int = tags.length - 1;
 			var excessBytes:Int = data.position - (pos + tagHeader.tagLength);
