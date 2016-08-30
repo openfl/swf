@@ -4,6 +4,7 @@
 -lib lime
 -lib openfl
 -lib format
--D lime_cairo
--D optional_cffi
+-D lime-cairo
+-D lime-cffi
+-D optional-cffi
 --remap flash:openfl
