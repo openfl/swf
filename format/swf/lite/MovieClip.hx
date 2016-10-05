@@ -283,6 +283,12 @@ class MovieClip extends flash.display.MovieClip {
 		
 		var shape = new Shape ();
 		var graphics = shape.graphics;
+
+		if (symbol.rendered != null) {
+			graphics.copyFrom(symbol.rendered.graphics);
+			return shape;
+		}
+
 		
 		for (command in symbol.commands) {
 			
@@ -389,6 +395,12 @@ class MovieClip extends flash.display.MovieClip {
 			}
 			
 		}
+
+		// Graphics is drawn.
+		// We no longer need the commands, allow GC to collect...
+		symbol.commands = null;
+		symbol.rendered = new Shape();
+		symbol.rendered.graphics.copyFrom(shape.graphics);
 		
 		return shape;
 		
