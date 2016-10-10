@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.2.4",
-  "releasenote": "Minor PNG fix, correct issue affecting keyframe animation of simple objects",
+  "version": "2.3.0",
+  "releasenote": "Update for Lime 3.3.0, performance optimization",
   "contributors": [ "singmajesty" ]
 }
