@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": [ ],
   "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.3.0",
-  "releasenote": "Update for Lime 3.3.0, performance optimization",
+  "version": "2.3.1",
+  "releasenote": "Update for Lime 3.4.0",
   "contributors": [ "singmajesty" ]
 }

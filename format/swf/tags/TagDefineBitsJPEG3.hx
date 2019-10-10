@@ -1,4 +1,4 @@
-﻿package format.swf.tags;
+package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
@@ -69,7 +69,7 @@ class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 implements IDefinitionTag
 	}
 	
 	override private function exportCompleteHandler(event:Event):Void {
-		var loader:Loader = event.target.loader;
+		var loader:Loader = (cast event.target).loader;
 		var bitmapData:BitmapData = new BitmapData(Math.ceil (loader.content.width), Math.ceil (loader.content.height), true);
 		bitmapData.draw(loader);
 		try {

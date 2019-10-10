@@ -1,4 +1,4 @@
-﻿package format.swf.tags;
+package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
@@ -68,7 +68,7 @@ class TagDefineBits implements IDefinitionTag
 	}
 	
 	private function exportCompleteHandler(event:Event):Void {
-		var loader:Loader = event.target.loader;
+		var loader:Loader = (cast event.target).loader;
 		var bitmapData:BitmapData = new BitmapData(Math.ceil (loader.content.width), Math.ceil (loader.content.height));
 		bitmapData.draw(loader);
 		instance = bitmapData;
