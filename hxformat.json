@@ -1,0 +1,22 @@
+{
+	"excludes": [
+		"\\templates",
+		"/templates",
+		"\\node_modules",
+		"/node_modules"
+	],
+	"lineEnds": {
+		"leftCurly": "both",
+		"rightCurly": "both",
+		"objectLiteralCurly": {
+			"leftCurly": "after"
+		}
+	},
+	"sameLine": {
+		"ifBody": "same",
+		"ifElse": "next",
+		"doWhile": "next",
+		"tryBody": "next",
+		"tryCatch": "next"
+	}
+}
