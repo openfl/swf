@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension>
 	
-	<library handler="swf" type="swf" />
+	<!-- <library handler="swf" type="swf" />
 	<library handler="swf" type="swflite" />
-	<library handler="swf" type="swf_lite" />
+	<library handler="swf" type="swf_lite" /> -->
 	
 </extension>

@@ -1,10 +1,11 @@
 {
-  "name": "swf",
-  "url": "http://github.com/openfl/swf",
-  "license": "MIT",
-  "tags": [ ],
-  "description": "Provides support for parsing and displaying SWF content",
-  "version": "2.3.1",
-  "releasenote": "Update for Lime 3.4.0",
-  "contributors": [ "singmajesty" ]
+	"name": "swf",
+	"url": "http://github.com/openfl/swf",
+	"license": "MIT",
+	"tags": [ ],
+	"description": "Provides support for parsing and displaying SWF content",
+	"version": "3.0.0",
+	"releasenote": "0",
+	"contributors": [ "singmajesty" ],
+	"classPath": "src"
 }
