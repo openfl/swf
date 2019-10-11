@@ -2,6 +2,7 @@ package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
+import openfl.utils.ByteArray;
 
 class TagDefineBitsJPEG2 extends TagDefineBits implements IDefinitionTag
 {
@@ -29,6 +30,25 @@ class TagDefineBitsJPEG2 extends TagDefineBits implements IDefinitionTag
 				&& bitmapData[5] == 0xd8)
 			{
 				bitmapData.writeBytes(bitmapData, 4);
+			}
+			if (version < 8)
+			{
+				// TODO: Encoding tables and image data are separate! Not a verbatim JPEG
+				var image = new ByteArray();
+				var byte, lastByte = 0;
+				for (i in 2...(bitmapData.length - 2))
+				{
+					byte = bitmapData[i];
+					if (lastByte == 0xFF && byte == 0xD9)
+					{
+						bitmapData.readBytes(image, 0, i); // trim the end marker of the JPEG table
+						bitmapData.position += 4; // trim the start marker of the JPEG data
+						bitmapData.readBytes(image, i);
+						bitmapData = image;
+						break;
+					}
+					lastByte = byte;
+				}
 			}
 		}
 		else if (bitmapData[0] == 0x89 && bitmapData[1] == 0x50 && bitmapData[2] == 0x4e && bitmapData[3] == 0x47 && bitmapData[4] == 0x0d
