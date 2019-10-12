@@ -39,13 +39,10 @@ class TagDefineFontInfo implements ITag
 
 		var fontNameLen:Int = data.readUI8();
 		var fontNameRaw:ByteArray = new ByteArray();
-		fontNameRaw.endian = BIG_ENDIAN;
-		data.readBytes(fontNameRaw, 0, fontNameLen);
-		#if ((cpp || neko || nodejs) && openfl_legacy)
-		fontName = fontNameRaw.readUTFBytes(fontNameLen - 1);
-		#else
-		fontName = fontNameRaw.readUTFBytes(fontNameLen);
-		#end
+		fontNameRaw.writeShort(fontNameLen);
+		data.readBytes(fontNameRaw, 2, fontNameLen);
+		fontNameRaw.position = 0;
+		fontName = fontNameRaw.readUTF();
 
 		var flags:Int = data.readUI8();
 		smallText = ((flags & 0x20) != 0);

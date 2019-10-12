@@ -56,21 +56,18 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 		languageCode = data.readLANGCODE();
 		var fontNameLen:Int = data.readUI8();
 		var fontNameRaw:ByteArray = new ByteArray();
-		fontNameRaw.endian = BIG_ENDIAN;
-		data.readBytes(fontNameRaw, 0, fontNameLen);
-		#if ((cpp || neko) && openfl_legacy)
-		fontName = fontNameRaw.readUTFBytes(fontNameLen - 1);
-		#else
-		fontName = fontNameRaw.readUTFBytes(fontNameLen);
-		#end
+		fontNameRaw.writeShort(fontNameLen);
+		data.readBytes(fontNameRaw, 2, fontNameLen);
+		fontNameRaw.position = 0;
+		fontName = fontNameRaw.readUTF();
 		var i:Int;
 		var numGlyphs:Int = data.readUI16();
 		if (numGlyphs > 0)
 		{
-			// Skip offsets. We don't need them.
+			// OffsetTable
 			data.skipBytes(numGlyphs << (wideOffsets ? 2 : 1));
-			// Not used
-			var codeTableOffset:Int = (wideOffsets ? data.readUI32() : data.readUI16());
+			// CodeTableOffset
+			data.skipBytes(wideOffsets ? 4 : 2);
 			for (i in 0...numGlyphs)
 			{
 				glyphShapeTable.push(data.readSHAPE());
@@ -101,6 +98,7 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 		}
 		else
 		{
+			data.skipBytes(2);
 			ascent = 0;
 			descent = 0;
 			leading = 0;
