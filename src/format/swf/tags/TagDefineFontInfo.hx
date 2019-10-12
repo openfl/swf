@@ -39,8 +39,12 @@ class TagDefineFontInfo implements ITag
 
 		var fontNameLen:Int = data.readUI8();
 		var fontNameRaw:ByteArray = new ByteArray();
-		fontNameRaw.writeShort(fontNameLen);
 		data.readBytes(fontNameRaw, 2, fontNameLen);
+		if (fontNameRaw[fontNameRaw.length - 1] == 0)
+		{
+			fontNameLen--;
+		}
+		fontNameRaw.writeShort(fontNameLen);
 		fontNameRaw.position = 0;
 		fontName = fontNameRaw.readUTF();
 

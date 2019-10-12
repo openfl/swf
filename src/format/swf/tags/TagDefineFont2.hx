@@ -56,10 +56,15 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 		languageCode = data.readLANGCODE();
 		var fontNameLen:Int = data.readUI8();
 		var fontNameRaw:ByteArray = new ByteArray();
-		fontNameRaw.writeShort(fontNameLen);
 		data.readBytes(fontNameRaw, 2, fontNameLen);
+		if (fontNameRaw[fontNameRaw.length - 1] == 0)
+		{
+			fontNameLen--;
+		}
+		fontNameRaw.writeShort(fontNameLen);
 		fontNameRaw.position = 0;
 		fontName = fontNameRaw.readUTF();
+
 		var i:Int;
 		var numGlyphs:Int = data.readUI16();
 		if (numGlyphs > 0)
