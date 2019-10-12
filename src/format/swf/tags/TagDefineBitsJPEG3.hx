@@ -32,28 +32,29 @@ class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 implements IDefinitionTag
 		if (bitmapData[0] == 0xff && (bitmapData[1] == 0xd8 || bitmapData[1] == 0xd9))
 		{
 			bitmapType = BitmapType.JPEG;
-			// Before version 8 of the SWF file format, SWF files could contain an
-			// erroneous header of 0xFF, 0xD9, 0xFF, 0xD8 before the JPEG SOI marker.
-			if (bitmapData[0] == 0xff && bitmapData[1] == 0xd9 && bitmapData[2] == 0xff && bitmapData[3] == 0xd8 && bitmapData[4] == 0xff
-				&& bitmapData[5] == 0xd8)
-			{
-				bitmapData.writeBytes(bitmapData, 4);
-			}
+
 			if (version < 8)
 			{
-				// TODO: Encoding tables and image data are separate! Not a verbatim JPEG
-				var image = new ByteArray();
-				var byte, lastByte = 0;
-				for (i in 2...(bitmapData.length - 2))
+				// Before version 8 the data might be wrapped with multiple SOI/end markers
+				var byte, lastByte = 0, i = 0;
+				while (i < bitmapData.length - 2)
 				{
 					byte = bitmapData[i];
-					if (lastByte == 0xFF && byte == 0xD9)
+					if (byte == 0xD9 && lastByte == 0xFF)
 					{
-						bitmapData.readBytes(image, 0, i); // trim the end marker of the JPEG table
-						bitmapData.position += 4; // trim the start marker of the JPEG data
-						bitmapData.readBytes(image, i);
-						bitmapData = image;
-						break;
+						var copy = new ByteArray();
+						bitmapData.position = 0;
+						if (i > 0)
+						{
+							bitmapData.readBytes(copy, 0, i);
+						}
+						bitmapData.position += 4;
+						bitmapData.readBytes(copy, i);
+						bitmapData = copy;
+					}
+					else
+					{
+						i++;
 					}
 					lastByte = byte;
 				}
