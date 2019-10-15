@@ -1,14 +1,13 @@
 package format.swf.instance;
 
-import flash.display.BitmapData;
-import flash.utils.ByteArray;
-import flash.utils.CompressionAlgorithm;
 import format.swf.data.consts.BitmapFormat;
 import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsJPEG3;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineBitsJPEG2;
+import openfl.display.BitmapData;
+import openfl.utils.ByteArray;
 
 class Bitmap extends flash.display.Bitmap
 {

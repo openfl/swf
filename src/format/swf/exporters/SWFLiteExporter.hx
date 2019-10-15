@@ -552,7 +552,7 @@ class SWFLiteExporter
 
 				if (placeTag.matrix != null)
 				{
-					var matrix = placeTag.matrix.matrix;
+					var matrix = placeTag.matrix.matrix.clone();
 					matrix.tx *= (1 / 20);
 					matrix.ty *= (1 / 20);
 

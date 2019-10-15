@@ -1,7 +1,6 @@
 package format.swf.instance;
 
 import format.swf.exporters.ShapeCommandExporter;
-import format.swf.instance.Bitmap;
 import format.swf.tags.TagDefineShape;
 import format.swf.SWFTimelineContainer;
 
@@ -35,7 +34,7 @@ class Shape extends flash.display.Shape
 						#if (cpp || neko)
 						cacheAsBitmap = true;
 						#end
-						graphics.beginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
+						graphics.beginGradientFill(@:privateAccess GradientType.fromInt(fillType), colors, alphas, ratios, matrix, @:privateAccess SpreadMethod.fromInt(spreadMethod), @:privateAccess InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
 
 					case CurveTo(controlX, controlY, anchorX, anchorY):
 						#if (cpp || neko)
@@ -49,7 +48,7 @@ class Shape extends flash.display.Shape
 					case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 						if (thickness != null)
 						{
-							graphics.lineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
+							graphics.lineStyle(thickness, color, alpha, pixelHinting, @:privateAccess LineScaleMode.fromInt(scaleMode), @:privateAccess CapsStyle.fromInt(caps), @:privateAccess JointStyle.fromInt(joints), miterLimit);
 						}
 						else
 						{

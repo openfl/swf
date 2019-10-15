@@ -16,6 +16,8 @@ class SWFMatrix
 	public var xscale:Float;
 	public var yscale:Float;
 	public var rotation:Float;
+	
+	private var __matrix:Matrix;
 
 	public function new(data:SWFData = null)
 	{
@@ -27,7 +29,11 @@ class SWFMatrix
 
 	private function get_matrix():Matrix
 	{
-		return new Matrix(scaleX, rotateSkew0, rotateSkew1, scaleY, translateX, translateY);
+		if (__matrix == null)
+		{
+			__matrix = new Matrix(scaleX, rotateSkew0, rotateSkew1, scaleY, translateX, translateY);
+		}
+		return __matrix;
 	}
 
 	public function parse(data:SWFData):Void

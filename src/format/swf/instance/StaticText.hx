@@ -1,11 +1,11 @@
 package format.swf.instance;
 
-import flash.display.Shape;
 import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineText;
 import format.swf.tags.TagDefineText2;
 import format.swf.SWFTimelineContainer;
+import openfl.display.Shape;
 
 class StaticText extends Shape
 {
@@ -79,7 +79,7 @@ class StaticText extends Shape
 				case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 					if (thickness != null)
 					{
-						graphics.lineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
+						graphics.lineStyle(thickness, color, alpha, pixelHinting, @:privateAccess LineScaleMode.fromInt(scaleMode), @:privateAccess CapsStyle.fromInt(caps), @:privateAccess JointStyle.fromInt(joints), miterLimit);
 					}
 					else
 					{

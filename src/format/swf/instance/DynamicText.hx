@@ -1,22 +1,19 @@
 package format.swf.instance;
 
-import flash.display.BitmapData;
-import flash.geom.Matrix;
-import flash.geom.Rectangle;
-import flash.text.Font;
-import flash.text.TextField;
-import flash.text.TextFieldAutoSize;
-import flash.text.TextFormat;
-import flash.text.TextFormatAlign;
 import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineEditText;
-import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineFont2;
 import format.swf.SWFTimelineContainer;
-import openfl.Assets;
 #if ((cpp || neko) && openfl_legacy)
 import openfl.text.AbstractFont;
 #end
+import openfl.display.BitmapData;
+import openfl.geom.Matrix;
+import openfl.text.Font;
+import openfl.text.TextField;
+import openfl.text.TextFieldAutoSize;
+import openfl.text.TextFormat;
+import openfl.text.TextFormatAlign;
 
 class DynamicText extends TextField
 {

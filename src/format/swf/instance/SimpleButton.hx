@@ -1,27 +1,19 @@
 package format.swf.instance;
 
-import flash.display.BitmapData;
-import flash.display.BlendMode;
-import flash.display.DisplayObject;
-import flash.display.Sprite;
-import flash.filters.BitmapFilter;
-import flash.geom.ColorTransform;
-import flash.geom.Matrix;
-import flash.events.Event;
-import flash.Lib;
 import format.swf.data.SWFButtonRecord;
 import format.swf.SWFTimelineContainer;
-import format.swf.tags.IDefinitionTag;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton2;
 import format.swf.tags.TagDefineEditText;
-import format.swf.tags.TagDefineFont;
 import format.swf.tags.TagDefineShape;
 import format.swf.tags.TagDefineSprite;
 import format.swf.tags.TagDefineText;
-import format.swf.tags.TagPlaceObject;
-import format.swf.timeline.FrameObject;
+import openfl.display.BlendMode;
+import openfl.display.DisplayObject;
+import openfl.display.Sprite;
+import openfl.filters.BitmapFilter;
+import openfl.geom.Matrix;
 
 class SimpleButton extends flash.display.SimpleButton
 {
@@ -55,7 +47,6 @@ class SimpleButton extends flash.display.SimpleButton
 				/*if (this.upState == null)*/
 				this.upState = new Sprite();
 				displayObject = getDisplayObject(rec.characterId);
-				trace(displayObject);
 				if (displayObject != null) placeButtonRecord(displayObject, rec, this.upState);
 				#if (mobile)
 				if (this.overState == null) this.overState = this.upState;

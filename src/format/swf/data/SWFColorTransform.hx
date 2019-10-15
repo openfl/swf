@@ -16,6 +16,8 @@ class SWFColorTransform
 	public var aAdd:Int = 0;
 	public var hasMultTerms:Bool;
 	public var hasAddTerms:Bool;
+	
+	private var __colorTransform:ColorTransform;
 
 	public function new(data:SWFData = null)
 	{
@@ -27,7 +29,11 @@ class SWFColorTransform
 
 	private function get_colorTransform():ColorTransform
 	{
-		return new ColorTransform(rMult / 0xFF, gMult / 0xFF, bMult / 0xFF, aMult / 0xFF, rAdd, gAdd, bAdd, aAdd);
+		if (__colorTransform == null)
+		{
+			__colorTransform = new ColorTransform(rMult / 0xFF, gMult / 0xFF, bMult / 0xFF, aMult / 0xFF, rAdd, gAdd, bAdd, aAdd);
+		}
+		return __colorTransform;
 	}
 
 	public function parse(data:SWFData):Void
