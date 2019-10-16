@@ -1,6 +1,5 @@
 package format.swf.instance;
 
-import format.swf.instance.MovieClip.ChildObject;
 import format.swf.tags.TagDefineBits;
 import format.swf.tags.TagDefineBitsLossless;
 import format.swf.tags.TagDefineButton2;
@@ -14,33 +13,30 @@ import format.swf.timeline.Frame;
 import format.swf.timeline.FrameObject;
 import openfl.display.Bitmap;
 import openfl.display.DisplayObject;
-import openfl.display.ITimeline;
+import openfl.display.Timeline;
 
 class MovieClip extends flash.display.MovieClip
 {
 	public function new(data:SWFTimelineContainer)
 	{
 		super();
-		__timeline = new openfl._internal.utils.Timeline(this, new TimelineData(data));
-		play();
+
+		__fromTimeline(new MovieClipTimeline(data));
 	}
 }
 
-class TimelineData implements ITimeline
+class MovieClipTimeline extends Timeline
 {
-	public var frameLabels:Map<Int, Array<String>>;
-	public var frameRate:Float;
-	public var frameScripts:Map<Int, openfl.display.MovieClip->Void>;
-	public var framesLoaded:Int;
-	public var totalFrames:Int;
-
 	@:noCompletion private var activeObjects:Array<ChildObject>;
 	@:noCompletion private var data:SWFTimelineContainer;
 	@:noCompletion private var movieClip:openfl.display.MovieClip;
 	@:noCompletion private var objectPool:Map<Int, List<ChildObject>>;
+	@:noCompletion private var previousFrame:Int;
 
 	public function new(data:SWFTimelineContainer)
 	{
+		super();
+
 		this.data = data;
 
 		frameLabels = new Map();
@@ -52,7 +48,31 @@ class TimelineData implements ITimeline
 
 		for (frame in data.frameLabels.keys())
 		{
-			frameLabels.set(frame + 1, data.frameLabels.get(frame));
+			var	labels = [];
+			var _labels = data.frameLabels.get(frame);
+			for (label in _labels)
+			{
+				labels.push(new openfl.display.FrameLabel(label, frame + 1));
+			}
+			frameLabels.set(frame + 1, labels);
+		}
+	}
+
+	public override function attachMovieClip(movieClip:openfl.display.MovieClip):Void
+	{
+		this.movieClip = movieClip;
+
+		objectPool = new Map<Int, List<ChildObject>>();
+		activeObjects = [];
+	}
+
+	public override function enterFrame(frame:Int):Void
+	{
+		var frameIndex = frame - 1;
+
+		if (frameIndex > -1)
+		{
+			renderFrame(frameIndex);
 		}
 	}
 	
@@ -339,23 +359,6 @@ class TimelineData implements ITimeline
 					movieClip.addChild(displayObject);
 				}
 			}
-		}
-	}
-	
-		public function updateMovieClip(movieClip:openfl.display.MovieClip, previousFrame:Int, currentFrame:Int):Void
-	{
-		if (this.movieClip != movieClip)
-		{
-			objectPool = new Map<Int, List<ChildObject>>();
-			activeObjects = [];
-			this.movieClip = movieClip;
-		}
-
-		var frameIndex = currentFrame - 1;
-
-		if (frameIndex > -1)
-		{
-			renderFrame(frameIndex);
 		}
 	}
 }
