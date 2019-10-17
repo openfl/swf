@@ -1,0 +1,20 @@
+{
+    "[haxe]": {
+        "editor.formatOnSave": true,
+        "files.eol": "\n",
+        "files.insertFinalNewline": true
+    },
+    "codedox": {
+        "commentprefix": "    ",
+        "commentdescription": "",
+        "commentend": "**/",
+        "alwaysMultiline": false,
+        "paramFormat": "",
+        "returnFormat": "",
+        "neverAskTemplate": true
+    },
+    "editor.codeLens": false,
+    "editor.insertSpaces": false,
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+}
