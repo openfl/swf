@@ -39,22 +39,20 @@ class MovieClipTimeline extends Timeline
 
 		this.data = data;
 
-		frameLabels = new Map();
 		frameRate = @:privateAccess cast(data.rootTimelineContainer, SWFRoot).frameRate;
 		frameScripts = new Map();
 
 		totalFrames = data.frames.length;
 		framesLoaded = totalFrames;
 
+		currentLabels = [];
 		for (frame in data.frameLabels.keys())
 		{
-			var	labels = [];
-			var _labels = data.frameLabels.get(frame);
-			for (label in _labels)
+			var labels = data.frameLabels.get(frame);
+			for (label in labels)
 			{
-				labels.push(new openfl.display.FrameLabel(label, frame + 1));
+				currentLabels.push(new openfl.display.FrameLabel(label, frame + 1));
 			}
-			frameLabels.set(frame + 1, labels);
 		}
 	}
 
@@ -75,7 +73,7 @@ class MovieClipTimeline extends Timeline
 			renderFrame(frameIndex);
 		}
 	}
-	
+
 	@:noCompletion private inline function getDisplayObject(charId:Int):DisplayObject
 	{
 		var displayObject:DisplayObject = null;
