@@ -13,15 +13,14 @@ import format.swf.timeline.Frame;
 import format.swf.timeline.FrameObject;
 import openfl.display.Bitmap;
 import openfl.display.DisplayObject;
+import openfl.display.Scene;
 import openfl.display.Timeline;
 
-class MovieClip extends flash.display.MovieClip
+class MovieClip extends #if flash flash.display.MovieClip.MovieClip2 #else openfl.display.MovieClip #end
 {
 	public function new(data:SWFTimelineContainer)
 	{
-		super();
-
-		__fromTimeline(new MovieClipTimeline(data));
+		super(new MovieClipTimeline(data));
 	}
 }
 
@@ -40,12 +39,9 @@ class MovieClipTimeline extends Timeline
 		this.data = data;
 
 		frameRate = @:privateAccess cast(data.rootTimelineContainer, SWFRoot).frameRate;
-		frameScripts = new Map();
+		scripts = [];
 
-		totalFrames = data.frames.length;
-		framesLoaded = totalFrames;
-
-		currentLabels = [];
+		var currentLabels = [];
 		for (frame in data.frameLabels.keys())
 		{
 			var labels = data.frameLabels.get(frame);
@@ -54,6 +50,8 @@ class MovieClipTimeline extends Timeline
 				currentLabels.push(new openfl.display.FrameLabel(label, frame + 1));
 			}
 		}
+
+		scenes = [new Scene("", currentLabels, data.frames.length)];
 	}
 
 	public override function attachMovieClip(movieClip:openfl.display.MovieClip):Void
