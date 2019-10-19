@@ -9,9 +9,9 @@ import format.abc.Data.Name;
 #end
 import format.swf.data.SWFRectangle;
 import format.swf.events.SWFProgressEvent;
-import flash.utils.ByteArray;
-import flash.utils.CompressionAlgorithm;
-import flash.errors.Error;
+import openfl.utils.ByteArray;
+import openfl.utils.CompressionAlgorithm;
+import openfl.errors.Error;
 import format.swf.tags.TagSymbolClass;
 
 class SWFRoot extends SWFTimelineContainer

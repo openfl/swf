@@ -3,9 +3,9 @@ package format.swf.data.filters;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 import format.swf.utils.StringUtils;
-import flash.filters.BitmapFilter;
+import openfl.filters.BitmapFilter;
 #if flash
-import flash.filters.ConvolutionFilter; // Not supported on native yet
+import openfl.filters.ConvolutionFilter; // Not supported on native yet
 
 #end
 class FilterConvolution extends Filter implements IFilter

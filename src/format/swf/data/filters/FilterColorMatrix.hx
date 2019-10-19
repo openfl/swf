@@ -1,10 +1,10 @@
 package format.swf.data.filters;
 
-import openfl._internal.formats.swf.FilterType;
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 import format.swf.utils.StringUtils;
-import flash.filters.BitmapFilter;
-import flash.filters.ColorMatrixFilter;
+import openfl.filters.BitmapFilter;
+import openfl.filters.ColorMatrixFilter;
 
 class FilterColorMatrix extends Filter implements IFilter
 {

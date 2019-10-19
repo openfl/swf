@@ -2,7 +2,7 @@ package format.swf.utils;
 
 import haxe.crypto.BaseCode;
 
-// import flash.events.*;
+// import openfl.events.*;
 class StringUtils
 {
 	public static function trim(input:String):String

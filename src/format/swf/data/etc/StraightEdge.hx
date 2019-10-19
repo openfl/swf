@@ -1,6 +1,6 @@
 package format.swf.data.etc;
 
-import flash.geom.Point;
+import openfl.geom.Point;
 
 class StraightEdge implements IEdge
 {

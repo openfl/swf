@@ -2,7 +2,7 @@ package format.swf.data;
 
 import format.swf.SWFData;
 import format.swf.utils.NumberUtils;
-import flash.geom.Rectangle;
+import openfl.geom.Rectangle;
 
 class SWFRectangle
 {

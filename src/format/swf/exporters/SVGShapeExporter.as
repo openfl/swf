@@ -4,42 +4,42 @@ package com.codeazur.hxswf.exporters
 	import com.codeazur.hxswf.exporters.core.DefaultSVGShapeExporter;
 	import com.codeazur.hxswf.utils.ColorUtils;
 	import com.codeazur.utils.StringUtils;
-	
-	import flash.display.CapsStyle;
-	import flash.display.GradientType;
-	import flash.display.InterpolationMethod;
-	import flash.display.JointStyle;
-	import flash.display.LineScaleMode;
-	import flash.display.SpreadMethod;
-	import flash.geom.Matrix;
-	
+
+	import openfl.display.CapsStyle;
+	import openfl.display.GradientType;
+	import openfl.display.InterpolationMethod;
+	import openfl.display.JointStyle;
+	import openfl.display.LineScaleMode;
+	import openfl.display.SpreadMethod;
+	import openfl.geom.Matrix;
+
 	class SVGShapeExporter extends DefaultSVGShapeExporter
 	{
 		private static inline var s:Namespace = new Namespace("s", "http://www.w3.org/2000/svg");
 		private static inline var xlink:Namespace = new Namespace("xlink", "http://www.w3.org/1999/xlink");
-				
+
 		private var _svg:XML;
 		private var path:XML;
 		private var gradients:Array<String>;
-		
+
 		public function SVGShapeExporter(swf:SWF) {
 			super(swf);
 		}
-		
+
 		public function get svg():XML { return _svg; }
-		
+
 		override public function beginShape():Void {
 			_svg = <svg xmlns={s.uri} xmlns:xlink={xlink.uri}><defs /><g /></svg>;
 			gradients = new Array<String>();
 		}
-		
+
 		override public function beginFill(color:Int, alpha:Float = 1.0):Void {
 			finalizePath();
 			path.@stroke = "none";
 			path.@fill = ColorUtils.rgbToString(color);
 			if(alpha != 1) { path.@["fill-opacity"] = alpha; }
 		}
-		
+
 		override public function beginGradientFill(type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix = null, spreadMethod:String = SpreadMethod.PAD, interpolationMethod:String = InterpolationMethod.RGB, focalPointRatio:Float = 0):Void {
 			finalizePath();
 			var gradient:XML = (type == GradientType.LINEAR) ? <linearGradient /> : <radialGradient />;
@@ -58,7 +58,7 @@ package com.codeazur.hxswf.exporters
 		override public function beginBitmapFill(bitmapId:Int, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
 			throw(new Error("Bitmap fills are not yet supported for shape export."));
 		}
-		
+
 		override public function lineStyle(thickness:Float = NaN, color:Int = 0, alpha:Float = 1.0, pixelHinting:Bool = false, scaleMode:String = LineScaleMode.NORMAL, startCaps:String = null, endCaps:String = null, joints:String = null, miterLimit:Float = 3):Void {
 			finalizePath();
 			path.@fill = "none";
@@ -97,7 +97,7 @@ package com.codeazur.hxswf.exporters
 			svg.s::defs.appendChild(gradient);
 		}
 
-		
+
 		override private function finalizePath():Void {
 			if(path && pathData != "") {
 				path.@d = StringUtils.trim(pathData);
@@ -106,8 +106,8 @@ package com.codeazur.hxswf.exporters
 			path = <path />;
 			super.finalizePath();
 		}
-		
-		
+
+
 		private function populateGradientElement(gradient:XML, type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix, spreadMethod:String, interpolationMethod:String, focalPointRatio:Float):Void {
 			gradient.@gradientUnits = "userSpaceOnUse";
 			if(type == GradientType.LINEAR) {

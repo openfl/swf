@@ -1,8 +1,8 @@
 package format.swf.data;
 
 import format.swf.SWFData;
-import flash.geom.Matrix;
-import flash.geom.Point;
+import openfl.geom.Matrix;
+import openfl.geom.Point;
 
 class SWFMatrix
 {
@@ -16,7 +16,7 @@ class SWFMatrix
 	public var xscale:Float;
 	public var yscale:Float;
 	public var rotation:Float;
-	
+
 	private var __matrix:Matrix;
 
 	public function new(data:SWFData = null)

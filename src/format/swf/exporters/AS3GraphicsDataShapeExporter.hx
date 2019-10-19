@@ -3,23 +3,23 @@ package format.swf.exporters;
 import format.swf.instance.Bitmap;
 import format.swf.SWFRoot;
 import format.swf.exporters.core.DefaultShapeExporter;
-import flash.display.GradientType;
+import openfl.display.GradientType;
 import format.swf.SWFTimelineContainer;
 import format.swf.tags.TagDefineBitsLossless;
-import flash.display.CapsStyle;
-import flash.display.GraphicsBitmapFill;
-import flash.display.GraphicsEndFill;
-import flash.display.GraphicsGradientFill;
-import flash.display.GraphicsPath;
-import flash.display.GraphicsSolidFill;
-import flash.display.GraphicsStroke;
-import flash.display.IGraphicsData;
-import flash.display.InterpolationMethod;
-import flash.display.JointStyle;
-import flash.display.LineScaleMode;
-import flash.display.SpreadMethod;
-import flash.geom.Matrix;
-import flash.Vector;
+import openfl.display.CapsStyle;
+import openfl.display.GraphicsBitmapFill;
+import openfl.display.GraphicsEndFill;
+import openfl.display.GraphicsGradientFill;
+import openfl.display.GraphicsPath;
+import openfl.display.GraphicsSolidFill;
+import openfl.display.GraphicsStroke;
+import openfl.display.IGraphicsData;
+import openfl.display.InterpolationMethod;
+import openfl.display.JointStyle;
+import openfl.display.LineScaleMode;
+import openfl.display.SpreadMethod;
+import openfl.geom.Matrix;
+import openfl.Vector;
 
 class AS3GraphicsDataShapeExporter extends DefaultShapeExporter
 {

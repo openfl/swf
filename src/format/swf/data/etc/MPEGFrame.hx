@@ -1,7 +1,7 @@
 package format.swf.data.etc;
 
-import flash.utils.ByteArray;
-import flash.errors.Error;
+import openfl.utils.ByteArray;
+import openfl.errors.Error;
 
 class MPEGFrame
 {

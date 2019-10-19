@@ -1,9 +1,9 @@
 package format.swf.data.filters;
 
-import openfl._internal.formats.swf.FilterType;
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
-import flash.filters.BitmapFilter;
-import flash.filters.BlurFilter;
+import openfl.filters.BitmapFilter;
+import openfl.filters.BlurFilter;
 
 class FilterBlur extends Filter implements IFilter
 {

@@ -3,14 +3,14 @@ package com.codeazur.as3swf.exporters
 	import com.codeazur.as3swf.SWF;
 	import com.codeazur.as3swf.utils.ColorUtils;
 	import com.codeazur.as3swf.utils.NumberUtils;
-	
-	import flash.display.CapsStyle;
-	import flash.display.InterpolationMethod;
-	import flash.display.JointStyle;
-	import flash.display.LineScaleMode;
-	import flash.display.SpreadMethod;
-	import flash.geom.Matrix;
-	import flash.geom.Point;
+
+	import openfl.display.CapsStyle;
+	import openfl.display.InterpolationMethod;
+	import openfl.display.JointStyle;
+	import openfl.display.LineScaleMode;
+	import openfl.display.SpreadMethod;
+	import openfl.geom.Matrix;
+	import openfl.geom.Point;
 	import com.codeazur.as3swf.exporters.core.DefaultShapeExporter;
 
 	public class JSCanvasShapeExporter extends DefaultShapeExporter
@@ -19,21 +19,21 @@ package com.codeazur.as3swf.exporters
 		protected static const FILL_ACTIVE:String = "fillActive";
 		protected static const BITMAP_FILL_ACTIVE:String = "bitmapFillActive";
 		protected static const STROKE_ACTIVE:String = "strokeActive";
-		
+
 		protected var _js:String = "";
-		
+
 		protected var fills:Vector.<String>;
 		protected var strokes:Vector.<String>;
-		
+
 		protected var geometry:Array;
 		protected var prefix:Array;
 		protected var suffix:Array;
-		
+
 		protected var active:String = NOT_ACTIVE;
-		
+
 		protected var condensed:Boolean;
 		protected var lineSep:String = "";
-		
+
 		public function JSCanvasShapeExporter(swf:SWF, condensed:Boolean = true)
 		{
 			super(swf);
@@ -42,15 +42,15 @@ package com.codeazur.as3swf.exporters
 				lineSep = "\r";
 			}
 		}
-		
+
 		public function get js():String { return _js; }
-		
+
 
 		override public function beginShape():void {
 			_js = "";
 		}
-		
-		
+
+
 		override public function beginFills():void {
 			fills = new Vector.<String>();
 		}
@@ -58,16 +58,16 @@ package com.codeazur.as3swf.exporters
 		override public function endFills():void {
 		}
 
-		
+
 		override public function beginLines():void {
 			strokes = new Vector.<String>();
 		}
-		
+
 		override public function endLines():void {
 			processPreviousStroke();
 		}
-		
-		
+
+
 		override public function endShape():void {
 			var i:uint;
 			if (fills != null) {
@@ -79,23 +79,23 @@ package com.codeazur.as3swf.exporters
 			fills = null;
 			strokes = null;
 		}
-		
-		
+
+
 		override public function beginFill(color:uint, alpha:Number = 1.0):void {
 			processPreviousFill();
 			active = FILL_ACTIVE;
 			prefix = ["c.save();"];
 			geometry = ["c.beginPath();"];
-			suffix = ["c.fillStyle=\"rgba(" + 
+			suffix = ["c.fillStyle=\"rgba(" +
 				ColorUtils.r(color) * 255 + ", " +
 				ColorUtils.g(color) * 255 + ", " +
 				ColorUtils.b(color) * 255 + ", " +
 				alpha +
 				")\";",
-				"c.fill();", 
+				"c.fill();",
 				"c.restore();"];
 		}
-		
+
 		override public function beginGradientFill(type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix = null, spreadMethod:String = SpreadMethod.PAD, interpolationMethod:String = InterpolationMethod.RGB, focalPointRatio:Number = 0):void {
 			processPreviousFill();
 			active = NOT_ACTIVE;
@@ -154,7 +154,7 @@ package com.codeazur.as3swf.exporters
 			prefix = ["c.save();"];
 			geometry = [];
 			suffix = ["var i=swf.ia[swf.ca[" + bitmapId + "].i].i;",
-				"c.drawImage(i," + 
+				"c.drawImage(i," +
 				"0," +
 				"0," +
 				"i.width," +
@@ -166,12 +166,12 @@ package com.codeazur.as3swf.exporters
 				");",
 				"c.restore();"]
 		}
-		
+
 		override public function endFill():void {
 			processPreviousFill();
 			active = NOT_ACTIVE;
 		}
-		
+
 		override public function lineStyle(thickness:Number = NaN, color:uint = 0, alpha:Number = 1.0, pixelHinting:Boolean = false, scaleMode:String = LineScaleMode.NORMAL, startCaps:String = null, endCaps:String = null, joints:String = null, miterLimit:Number = 3):void {
 			processPreviousStroke();
 			active = STROKE_ACTIVE;
@@ -190,7 +190,7 @@ package com.codeazur.as3swf.exporters
 				prefix.push("c.miterLimit = " + miterLimit + ";");
 			}
 			geometry = ["c.beginPath();"];
-			suffix = ["c.strokeStyle=\"rgba(" + 
+			suffix = ["c.strokeStyle=\"rgba(" +
 				ColorUtils.r(color) * 255 + ", " +
 				ColorUtils.g(color) * 255 + ", " +
 				ColorUtils.b(color) * 255 + ", " +
@@ -200,34 +200,34 @@ package com.codeazur.as3swf.exporters
 				"c.stroke();",
 				"c.restore();"];
 		}
-		
+
 		override public function moveTo(x:Number, y:Number):void {
 			if (active != NOT_ACTIVE && active != BITMAP_FILL_ACTIVE) {
-				geometry.push("c.moveTo(" + 
-					NumberUtils.roundPixels20(x) + ", " + 
+				geometry.push("c.moveTo(" +
+					NumberUtils.roundPixels20(x) + ", " +
 					NumberUtils.roundPixels20(y) + ");");
 			}
 		}
-		
+
 		override public function lineTo(x:Number, y:Number):void {
 			if (active != NOT_ACTIVE && active != BITMAP_FILL_ACTIVE) {
-				geometry.push("c.lineTo(" + 
-					NumberUtils.roundPixels20(x) + ", " + 
+				geometry.push("c.lineTo(" +
+					NumberUtils.roundPixels20(x) + ", " +
 					NumberUtils.roundPixels20(y) + ");");
 			}
 		}
-		
+
 		override public function curveTo(controlX:Number, controlY:Number, anchorX:Number, anchorY:Number):void {
 			if (active != NOT_ACTIVE && active != BITMAP_FILL_ACTIVE) {
-				geometry.push("c.quadraticCurveTo(" + 
-					NumberUtils.roundPixels20(controlX) + ", " + 
-					NumberUtils.roundPixels20(controlY) + ", " + 
-					NumberUtils.roundPixels20(anchorX) + ", " + 
+				geometry.push("c.quadraticCurveTo(" +
+					NumberUtils.roundPixels20(controlX) + ", " +
+					NumberUtils.roundPixels20(controlY) + ", " +
+					NumberUtils.roundPixels20(anchorX) + ", " +
 					NumberUtils.roundPixels20(anchorY) + ");");
 			}
 		}
 
-		
+
 		protected function processPreviousFill():void {
 			if (active == FILL_ACTIVE) {
 				active = NOT_ACTIVE;
@@ -240,12 +240,12 @@ package com.codeazur.as3swf.exporters
 			} else if(active == BITMAP_FILL_ACTIVE) {
 				active = NOT_ACTIVE;
 				fills.push(
-					prefix.join(lineSep), 
+					prefix.join(lineSep),
 					suffix.join(lineSep)
 				);
 			}
 		}
-		
+
 		protected function processPreviousStroke():void {
 			if (active == STROKE_ACTIVE) {
 				active = NOT_ACTIVE;

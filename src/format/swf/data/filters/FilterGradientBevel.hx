@@ -1,8 +1,8 @@
 package format.swf.data.filters;
 
 import format.swf.utils.ColorUtils;
-import flash.filters.BitmapFilter;
-import flash.filters.BitmapFilterType;
+import openfl.filters.BitmapFilter;
+import openfl.filters.BitmapFilterType;
 #if flash
 import flash.filters.GradientBevelFilter; // Not supported on native yet
 

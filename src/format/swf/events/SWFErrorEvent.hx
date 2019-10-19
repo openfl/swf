@@ -1,6 +1,6 @@
 package format.swf.events;
 
-import flash.events.Event;
+import openfl.events.Event;
 
 class SWFErrorEvent extends Event
 {

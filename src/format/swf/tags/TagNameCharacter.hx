@@ -2,7 +2,7 @@ package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.utils.StringUtils;
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 
 class TagNameCharacter implements ITag
 {

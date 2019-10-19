@@ -13,7 +13,7 @@ import format.swf.data.SWFShapeRecordStraightEdge;
 import format.swf.data.SWFShapeRecordStyleChange;
 import format.swf.exporters.core.IShapeExporter;
 import format.swf.utils.StringUtils;
-import flash.errors.Error;
+import openfl.errors.Error;
 
 class TagDefineMorphShape implements IDefinitionTag
 {

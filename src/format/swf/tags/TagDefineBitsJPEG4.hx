@@ -2,7 +2,7 @@ package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 
 class TagDefineBitsJPEG4 extends TagDefineBitsJPEG3 implements IDefinitionTag
 {

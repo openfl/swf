@@ -13,11 +13,11 @@ import format.swf.exporters.core.IShapeExporter;
 import format.swf.utils.ColorUtils;
 import format.swf.utils.NumberUtils;
 import format.swf.utils.StringUtils;
-import flash.display.GradientType;
-import flash.display.LineScaleMode;
-import flash.geom.Matrix;
-import flash.geom.Point;
-import flash.errors.Error;
+import openfl.display.GradientType;
+import openfl.display.LineScaleMode;
+import openfl.geom.Matrix;
+import openfl.geom.Point;
+import openfl.errors.Error;
 
 class SWFShape
 {

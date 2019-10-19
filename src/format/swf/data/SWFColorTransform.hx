@@ -1,6 +1,6 @@
 package format.swf.data;
 
-import flash.geom.ColorTransform;
+import openfl.geom.ColorTransform;
 import format.swf.SWFData;
 
 class SWFColorTransform
@@ -16,7 +16,7 @@ class SWFColorTransform
 	public var aAdd:Int = 0;
 	public var hasMultTerms:Bool;
 	public var hasAddTerms:Bool;
-	
+
 	private var __colorTransform:ColorTransform;
 
 	public function new(data:SWFData = null)

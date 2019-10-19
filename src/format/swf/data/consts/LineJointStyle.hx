@@ -1,6 +1,6 @@
 package format.swf.data.consts;
 
-import flash.display.JointStyle;
+import openfl.display.JointStyle;
 
 class LineJointStyle
 {

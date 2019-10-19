@@ -1,6 +1,6 @@
 package format.swf.data.consts;
 
-import flash.display.InterpolationMethod;
+import openfl.display.InterpolationMethod;
 
 class GradientInterpolationMode
 {

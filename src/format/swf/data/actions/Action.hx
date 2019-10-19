@@ -1,8 +1,8 @@
 package format.swf.data.actions;
 
 import format.swf.SWFData;
-import flash.errors.Error;
-import flash.Vector;
+import openfl.errors.Error;
+import openfl.Vector;
 
 class Action implements IAction
 {

@@ -10,7 +10,7 @@ import format.swf.data.filters.FilterGradientBevel;
 import format.swf.data.filters.FilterGradientGlow;
 import format.swf.data.filters.FilterConvolution;
 import format.swf.data.filters.FilterColorMatrix;
-import flash.errors.Error;
+import openfl.errors.Error;
 
 class SWFFilterFactory
 {

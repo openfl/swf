@@ -1,15 +1,15 @@
 package format.swf;
 
-import flash.display.BitmapData;
-import flash.display.Loader;
-import flash.display.MovieClip;
-import flash.events.Event;
-import flash.media.Sound;
-import flash.net.URLRequest;
-import flash.system.ApplicationDomain;
-import flash.system.LoaderContext;
-import flash.text.Font;
-import flash.utils.ByteArray;
+import openfl.display.BitmapData;
+import openfl.display.Loader;
+import openfl.display.MovieClip;
+import openfl.events.Event;
+import openfl.media.Sound;
+import openfl.net.URLRequest;
+import openfl.system.ApplicationDomain;
+import openfl.system.LoaderContext;
+import openfl.text.Font;
+import openfl.utils.ByteArray;
 import haxe.Unserializer;
 import openfl.Assets;
 #if (lime && !lime_legacy)

@@ -1,15 +1,15 @@
 package format.swf.exporters;
 
-import flash.display.BitmapData;
-import flash.text.TextFormatAlign;
-import flash.utils.ByteArray;
+import openfl.display.BitmapData;
+import openfl.text.TextFormatAlign;
+import openfl.utils.ByteArray;
 import format.png.Data;
 import format.png.Writer;
 import format.swf.data.consts.BitmapFormat;
 import format.swf.data.consts.BlendMode;
 import format.swf.data.SWFButtonRecord;
-import openfl._internal.formats.swf.FilterType;
-import openfl._internal.formats.swf.ShapeCommand;
+import format.swf.exporters.core.FilterType;
+import format.swf.exporters.core.ShapeCommand;
 import format.swf.instance.Bitmap;
 #if hxp
 import hxp.Log;
@@ -17,6 +17,8 @@ import hxp.Log;
 import lime.tools.helpers.LogHelper in Log;
 #end
 import lime.graphics.Image;
+import openfl._internal.formats.swf.FilterType as OpenFLFilterType;
+import openfl._internal.formats.swf.ShapeCommand as OpenFLShapeCommand;
 import openfl._internal.symbols.BitmapSymbol;
 import openfl._internal.symbols.ButtonSymbol;
 import openfl._internal.symbols.DynamicTextSymbol;
@@ -151,7 +153,7 @@ class SWFLiteExporter
 
 					if (object.hasFilterList)
 					{
-						var filters:Array<FilterType> = [];
+						var filters:Array<OpenFLFilterType> = [];
 
 						for (filter in object.filterList)
 						{
@@ -159,7 +161,7 @@ class SWFLiteExporter
 
 							if (type != null)
 							{
-								filters.push(filter.type);
+								filters.push(convertFilterType(filter.type));
 								// filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
 							}
 						}
@@ -373,7 +375,7 @@ class SWFLiteExporter
 			var defineFont:TagDefineFont2 = cast tag;
 			var symbol = new FontSymbol();
 			symbol.id = defineFont.characterId;
-			symbol.glyphs = new Array<Array<ShapeCommand>>();
+			symbol.glyphs = new Array<Array<OpenFLShapeCommand>>();
 
 			// for (i in 0...defineFont.glyphShapeTable.length) {
 			//
@@ -466,7 +468,7 @@ class SWFLiteExporter
 			var symbol = new ShapeSymbol();
 			symbol.id = tag.characterId;
 
-			symbol.commands = handler.commands;
+			symbol.commands = convertShapeCommands(handler.commands);
 
 			for (command in handler.commands)
 			{
@@ -566,7 +568,7 @@ class SWFLiteExporter
 
 				if (placeTag.hasFilterList)
 				{
-					var filters:Array<FilterType> = [];
+					var filters:Array<OpenFLFilterType> = [];
 
 					for (surfaceFilter in placeTag.surfaceFilterList)
 					{
@@ -574,7 +576,7 @@ class SWFLiteExporter
 
 						if (type != null)
 						{
-							filters.push(surfaceFilter.type);
+							filters.push(convertFilterType(surfaceFilter.type));
 							// filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
 						}
 					}
@@ -774,7 +776,7 @@ class SWFLiteExporter
 					{
 						handler.beginShape();
 						defineFont.export(handler, index);
-						font.glyphs[index] = handler.commands.copy();
+						font.glyphs[index] = convertShapeCommands(handler.commands);
 						font.advances[index] = defineFont.fontAdvanceTable[index];
 					}
 				}
@@ -822,6 +824,65 @@ class SWFLiteExporter
 		}
 
 		return;
+	}
+
+	private function convertFilterType(filterType:FilterType):OpenFLFilterType
+	{
+		switch (filterType)
+		{
+			case BlurFilter(blurX, blurY, quality):
+				return OpenFLFilterType.BlurFilter(blurX, blurY, quality);
+			case ColorMatrixFilter(matrix):
+				return OpenFLFilterType.ColorMatrixFilter(matrix);
+			case DropShadowFilter(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject):
+				return OpenFLFilterType.DropShadowFilter(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject);
+			case GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout):
+				return OpenFLFilterType.GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout);
+			default:
+				return null;
+		}
+	}
+
+	private function convertShapeCommand(shapeCommand:ShapeCommand):OpenFLShapeCommand
+	{
+		switch (shapeCommand)
+		{
+			case BeginBitmapFill(bitmap, matrix, repeat, smooth):
+				return OpenFLShapeCommand.BeginBitmapFill(bitmap, matrix, repeat, smooth);
+			case BeginFill(color, alpha):
+				return OpenFLShapeCommand.BeginFill(color, alpha);
+			case BeginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+				var _fillType = #if !flash @:privateAccess fillType.toInt() #else 0 #end;
+				var _spreadMethod = #if !flash @:privateAccess spreadMethod.toInt() #else 0 #end;
+				var _interpolationMethod = #if !flash @:privateAccess interpolationMethod.toInt() #else 0 #end;
+				return OpenFLShapeCommand.BeginGradientFill(_fillType, cast colors, alphas, ratios, matrix, _spreadMethod, _interpolationMethod,
+					focalPointRatio);
+			case CurveTo(controlX, controlY, anchorX, anchorY):
+				return OpenFLShapeCommand.CurveTo(controlX, controlY, anchorX, anchorY);
+			case EndFill:
+				return OpenFLShapeCommand.EndFill;
+			case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+				var _scaleMode = #if !flash @:privateAccess scaleMode.toInt() #else 0 #end;
+				var _caps = #if !flash @:privateAccess caps.toInt() #else 0 #end;
+				var _joints = #if !flash @:privateAccess joints.toInt() #else 0 #end;
+				return OpenFLShapeCommand.LineStyle(thickness, color, alpha, pixelHinting, _scaleMode, _caps, _joints, miterLimit);
+			case LineTo(x, y):
+				return OpenFLShapeCommand.LineTo(x, y);
+			case MoveTo(x, y):
+				return OpenFLShapeCommand.MoveTo(x, y);
+			default:
+				return null;
+		}
+	}
+
+	private function convertShapeCommands(commands:Array<ShapeCommand>):Array<OpenFLShapeCommand>
+	{
+		var _commands = [];
+		for (command in commands)
+		{
+			_commands.push(convertShapeCommand(command));
+		}
+		return _commands;
 	}
 
 	private function processSymbol(symbol:format.swf.data.SWFSymbol):Void

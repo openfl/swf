@@ -28,7 +28,7 @@ class TagDefineBitsJPEG2 extends TagDefineBits implements IDefinitionTag
 			if (version < 8)
 			{
 				// Before version 8 the data might be wrapped with multiple SOI/end markers
-				var byte, lastByte = 0, i = 0;
+				var byte, lastByte = 0, i:UInt = 0;
 				while (i < bitmapData.length - 2)
 				{
 					byte = bitmapData[i];

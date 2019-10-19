@@ -1,15 +1,15 @@
 package format;
 
-import flash.display.BitmapData;
-import flash.events.Event;
-import flash.events.EventDispatcher;
-import flash.utils.ByteArray;
+import openfl.display.BitmapData;
+import openfl.events.Event;
+import openfl.events.EventDispatcher;
+import openfl.utils.ByteArray;
 // import format.swf.instance.Bitmap;
 // import format.swf.instance.MovieClip;
 // import format.swf.instance.SimpleButton;
-import flash.display.Bitmap;
-import flash.display.MovieClip;
-import flash.display.SimpleButton;
+import openfl.display.Bitmap;
+import openfl.display.MovieClip;
+import openfl.display.SimpleButton;
 import format.swf.SWFRoot;
 import format.swf.SWFTimelineContainer;
 import format.swf.tags.TagDefineBits;

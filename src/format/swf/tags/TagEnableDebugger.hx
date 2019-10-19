@@ -1,7 +1,7 @@
 package format.swf.tags;
 
 import format.swf.SWFData;
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 
 class TagEnableDebugger implements ITag
 {

@@ -4,7 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.SWFRectangle;
 import format.swf.data.SWFShapeWithStyle;
 import format.swf.exporters.core.IShapeExporter;
-import flash.errors.Error;
+import openfl.errors.Error;
 
 class TagDefineShape implements IDefinitionTag
 {

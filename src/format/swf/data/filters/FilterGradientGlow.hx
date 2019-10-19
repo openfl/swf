@@ -3,8 +3,8 @@ package format.swf.data.filters;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 import format.swf.utils.StringUtils;
-import flash.filters.BitmapFilter;
-import flash.filters.BitmapFilterType;
+import openfl.filters.BitmapFilter;
+import openfl.filters.BitmapFilterType;
 #if flash
 import flash.filters.GradientGlowFilter; // Not supported on native yet
 

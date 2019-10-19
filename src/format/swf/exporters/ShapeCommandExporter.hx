@@ -1,11 +1,11 @@
 package format.swf.exporters;
 
-import flash.geom.Matrix;
+import openfl.geom.Matrix;
 import format.swf.SWFTimelineContainer;
 import format.swf.exporters.core.DefaultShapeExporter;
 import format.swf.utils.NumberUtils;
 import format.swf.utils.StringUtils;
-import openfl._internal.formats.swf.ShapeCommand;
+import format.swf.exporters.core.ShapeCommand;
 import openfl.display.CapsStyle;
 import openfl.display.GradientType;
 import openfl.display.InterpolationMethod;
@@ -50,7 +50,7 @@ class ShapeCommandExporter extends DefaultShapeExporter
 	override public function beginGradientFill(type:GradientType, colors:Array<UInt>, alphas:Array<Float>, ratios:Array<Int>, matrix:Matrix = null,
 			spreadMethod:SpreadMethod = null, interpolationMethod:InterpolationMethod = null, focalPointRatio:Float = 0):Void
 	{
-		commands.push(BeginGradientFill(type.toInt(), colors, alphas, ratios, matrix, spreadMethod.toInt(), interpolationMethod.toInt(), focalPointRatio));
+		commands.push(BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio));
 	}
 
 	override public function beginBitmapFill(bitmapId:Int, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void
@@ -66,7 +66,7 @@ class ShapeCommandExporter extends DefaultShapeExporter
 	override public function lineStyle(thickness:Null<Float> = null, color:Int = 0, alpha:Float = 1.0, pixelHinting:Bool = false,
 			scaleMode:LineScaleMode = null, startCaps:CapsStyle = null, endCaps:CapsStyle = null, joints:JointStyle = null, miterLimit:Float = 3):Void
 	{
-		commands.push(LineStyle(thickness, color, alpha, pixelHinting, scaleMode.toInt(), startCaps.toInt(), /*endCaps,*/ joints.toInt(), miterLimit));
+		commands.push(LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, /*endCaps,*/ joints, miterLimit));
 	}
 
 	override public function moveTo(x:Float, y:Float):Void

@@ -257,7 +257,6 @@ class SWFFont extends AbstractFont
 						case LineTo(x, y):
 							graphics.lineTo(x * scale + offsetX, y * scale + offsetY);
 						case CurveTo(controlX, controlY, anchorX, anchorY):
-							// cacheAsBitmap = true;
 							graphics.curveTo(controlX * scale + offsetX, controlY * scale + offsetY, anchorX * scale + offsetX, anchorY * scale + offsetY);
 
 						default:

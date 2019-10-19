@@ -1,6 +1,6 @@
 package format.swf.timeline;
 
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 
 class SoundStream
 {

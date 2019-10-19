@@ -1,7 +1,7 @@
 package format.swf.tags;
 
 import format.swf.SWFData;
-import flash.errors.Error;
+import openfl.errors.Error;
 
 class TagUnknown implements ITag
 {

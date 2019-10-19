@@ -1,11 +1,11 @@
 package format.swf.data;
 
-import flash.errors.Error;
+import openfl.errors.Error;
 import format.swf.SWFData;
 import format.swf.data.consts.ActionValueType;
 import format.swf.utils.StringUtils;
-import flash.utils.ByteArray;
-import flash.utils.Endian;
+import openfl.utils.ByteArray;
+import openfl.utils.Endian;
 
 class SWFActionValue
 {

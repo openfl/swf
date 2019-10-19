@@ -1,6 +1,6 @@
 package format.swf.data.consts;
 
-import flash.display.SpreadMethod;
+import openfl.display.SpreadMethod;
 
 class GradientSpreadMode
 {

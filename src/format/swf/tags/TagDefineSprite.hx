@@ -6,7 +6,7 @@ import format.swf.tags.IDefinitionTag;
 import format.swf.timeline.Frame;
 import format.swf.timeline.Layer;
 import format.swf.timeline.Scene;
-import flash.errors.Error;
+import openfl.errors.Error;
 
 class TagDefineSprite extends SWFTimelineContainer implements IDefinitionTag
 {

@@ -1,9 +1,9 @@
 package format.swf;
 
-import flash.errors.Error;
-import flash.utils.ByteArray;
-import flash.utils.CompressionAlgorithm;
-import flash.utils.Endian;
+import openfl.errors.Error;
+import openfl.utils.ByteArray;
+import openfl.utils.CompressionAlgorithm;
+import openfl.utils.Endian;
 import format.swf.data.actions.IAction;
 import format.swf.factories.SWFActionFactory;
 import format.swf.factories.SWFFilterFactory;

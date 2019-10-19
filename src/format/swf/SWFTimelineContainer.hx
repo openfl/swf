@@ -49,13 +49,13 @@ import format.swf.timeline.LayerStrip;
 import format.swf.timeline.Scene;
 import format.swf.timeline.SoundStream;
 import format.swf.utils.StringUtils;
-import flash.errors.Error;
-import flash.display.Sprite;
-import flash.events.Event;
-import flash.utils.ByteArray;
-import flash.utils.Endian;
+import openfl.errors.Error;
+import openfl.display.Sprite;
+import openfl.events.Event;
+import openfl.utils.ByteArray;
+import openfl.utils.Endian;
 
-// import flash.utils.getTimer;
+// import openfl.utils.getTimer;
 class SWFTimelineContainer extends SWFEventDispatcher
 {
 	// We're just being lazy here.

@@ -2,8 +2,8 @@ package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapFormat;
-import flash.display.BitmapData;
-import flash.utils.ByteArray;
+import openfl.display.BitmapData;
+import openfl.utils.ByteArray;
 
 class TagDefineBitsLossless implements IDefinitionTag
 {

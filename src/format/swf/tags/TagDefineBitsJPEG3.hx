@@ -2,10 +2,10 @@ package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
-import flash.display.BitmapData;
-import flash.display.Loader;
-import flash.events.Event;
-import flash.utils.ByteArray;
+import openfl.display.BitmapData;
+import openfl.display.Loader;
+import openfl.events.Event;
+import openfl.utils.ByteArray;
 
 class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 implements IDefinitionTag
 {
@@ -36,7 +36,7 @@ class TagDefineBitsJPEG3 extends TagDefineBitsJPEG2 implements IDefinitionTag
 			if (version < 8)
 			{
 				// Before version 8 the data might be wrapped with multiple SOI/end markers
-				var byte, lastByte = 0, i = 0;
+				var byte, lastByte = 0, i:UInt = 0;
 				while (i < bitmapData.length - 2)
 				{
 					byte = bitmapData[i];

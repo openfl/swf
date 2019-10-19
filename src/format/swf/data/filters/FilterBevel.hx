@@ -5,8 +5,8 @@ import format.swf.utils.ColorUtils;
 #if flash
 import flash.filters.BevelFilter;
 #end
-import flash.filters.BitmapFilter;
-import flash.filters.BitmapFilterType;
+import openfl.filters.BitmapFilter;
+import openfl.filters.BitmapFilterType;
 
 class FilterBevel extends Filter implements IFilter
 {

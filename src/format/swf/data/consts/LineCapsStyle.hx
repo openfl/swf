@@ -1,6 +1,6 @@
 package format.swf.data.consts;
 
-import flash.display.CapsStyle;
+import openfl.display.CapsStyle;
 
 class LineCapsStyle
 {

@@ -1,10 +1,10 @@
 package format.swf.data.filters;
 
-import openfl._internal.formats.swf.FilterType;
+import format.swf.exporters.core.FilterType;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
-import flash.filters.BitmapFilter;
-import flash.filters.GlowFilter;
+import openfl.filters.BitmapFilter;
+import openfl.filters.GlowFilter;
 
 class FilterGlow extends Filter implements IFilter
 {

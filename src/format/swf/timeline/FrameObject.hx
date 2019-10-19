@@ -1,6 +1,6 @@
 package format.swf.timeline;
 
-import flash.geom.Matrix;
+import openfl.geom.Matrix;
 import format.swf.utils.StringUtils;
 
 class FrameObject

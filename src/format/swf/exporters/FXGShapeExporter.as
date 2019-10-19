@@ -5,31 +5,31 @@ package com.codeazur.hxswf.exporters
 	import com.codeazur.hxswf.utils.ColorUtils;
 	import com.codeazur.utils.StringUtils;
 
-	import flash.display.CapsStyle;
-	import flash.display.GradientType;
-	import flash.display.InterpolationMethod;
-	import flash.display.JointStyle;
-	import flash.display.LineScaleMode;
-	import flash.display.SpreadMethod;
-	import flash.geom.Matrix;
-	
+	import openfl.display.CapsStyle;
+	import openfl.display.GradientType;
+	import openfl.display.InterpolationMethod;
+	import openfl.display.JointStyle;
+	import openfl.display.LineScaleMode;
+	import openfl.display.SpreadMethod;
+	import openfl.geom.Matrix;
+
 	class FXGShapeExporter extends DefaultSVGShapeExporter
 	{
 		private static inline var s:Namespace = new Namespace("s", "library://ns.adobe.com/flex/spark");
-		
+
 		private var _fxg:XML;
 		private var path:XML;
-		
+
 		public function FXGShapeExporter(swf:SWF) {
 			super(swf);
 		}
-		
+
 		public function get fxg():XML { return _fxg; }
-		
+
 		override public function beginShape():Void {
 			_fxg = <s:Graphic xmlns:s={s.uri}><s:Group /></s:Graphic>;
 		}
-		
+
 		override public function beginFill(color:Int, alpha:Float = 1.0):Void {
 			finalizePath();
 			var fill:XML = <s:fill xmlns:s={s.uri} />;
@@ -39,7 +39,7 @@ package com.codeazur.hxswf.exporters
 			fill.appendChild(solidColor);
 			path.appendChild(fill);
 		}
-		
+
 		override public function beginGradientFill(type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix = null, spreadMethod:String = SpreadMethod.PAD, interpolationMethod:String = InterpolationMethod.RGB, focalPointRatio:Float = 0):Void {
 			finalizePath();
 			var fill:XML = <s:fill xmlns:s={s.uri} />;
@@ -57,7 +57,7 @@ package com.codeazur.hxswf.exporters
 		override public function beginBitmapFill(bitmapId:Int, matrix:Matrix = null, repeat:Bool = true, smooth:Bool = false):Void {
 			throw(new Error("Bitmap fills are not yet supported for shape export."));
 		}
-		
+
 		override public function lineStyle(thickness:Float = NaN, color:Int = 0, alpha:Float = 1.0, pixelHinting:Bool = false, scaleMode:String = LineScaleMode.NORMAL, startCaps:String = null, endCaps:String = null, joints:String = null, miterLimit:Float = 3):Void {
 			finalizePath();
 			var stroke:XML = <s:stroke xmlns:s={s.uri} />;
@@ -88,7 +88,7 @@ package com.codeazur.hxswf.exporters
 			}
 		}
 
-		
+
 		override private function finalizePath():Void {
 			if(path && pathData != "") {
 				path.@data = StringUtils.trim(pathData);
@@ -97,8 +97,8 @@ package com.codeazur.hxswf.exporters
 			path = <s:Path xmlns:s={s.uri} />;
 			super.finalizePath();
 		}
-		
-		
+
+
 		private function populateGradientElement(gradient:XML, type:String, colors:Array, alphas:Array, ratios:Array, matrix:Matrix, spreadMethod:String, interpolationMethod:String, focalPointRatio:Float):Void {
 			var isLinear:Bool = (type == GradientType.LINEAR);
 			if(!isLinear && focalPointRatio != 0) {
@@ -126,7 +126,7 @@ package com.codeazur.hxswf.exporters
 				// For radial gradients we just stick with the original tx/ty.
 				m.tx = isLinear ? -16384 * matrix.a / 20 + matrix.tx : matrix.tx;
 				m.ty = isLinear ? -16384 * matrix.b / 20 + matrix.ty : matrix.ty;
-				var matrixContainer:XML = <s:matrix xmlns:s={s.uri} /> 
+				var matrixContainer:XML = <s:matrix xmlns:s={s.uri} />
 				var matrixChild:XML = <s:Matrix xmlns:s={s.uri} />
 				if(m.tx != 0) { matrixChild.@tx = m.tx; }
 				if(m.ty != 0) { matrixChild.@ty = m.ty; }

@@ -2,10 +2,10 @@ package format.swf.tags;
 
 import format.swf.SWFData;
 import format.swf.data.consts.BitmapType;
-import flash.display.BitmapData;
-import flash.display.Loader;
-import flash.events.Event;
-import flash.utils.ByteArray;
+import openfl.display.BitmapData;
+import openfl.display.Loader;
+import openfl.events.Event;
+import openfl.utils.ByteArray;
 
 class TagDefineBits implements IDefinitionTag
 {

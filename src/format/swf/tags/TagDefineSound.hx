@@ -6,8 +6,8 @@ import format.swf.data.consts.SoundRate;
 import format.swf.data.consts.SoundSize;
 import format.swf.data.consts.SoundType;
 import format.swf.data.etc.MPEGFrame;
-import flash.utils.ByteArray;
-import flash.errors.Error;
+import openfl.utils.ByteArray;
+import openfl.errors.Error;
 
 class TagDefineSound implements IDefinitionTag
 {

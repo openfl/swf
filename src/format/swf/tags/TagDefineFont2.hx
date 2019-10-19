@@ -4,7 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.SWFKerningRecord;
 import format.swf.data.SWFRectangle;
 import format.swf.utils.StringUtils;
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 
 class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 {

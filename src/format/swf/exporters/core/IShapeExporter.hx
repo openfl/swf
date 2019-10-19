@@ -1,13 +1,13 @@
 package format.swf.exporters.core;
 
-import flash.display.BitmapData;
-import flash.display.CapsStyle;
-import flash.display.GradientType;
-import flash.display.InterpolationMethod;
-import flash.display.JointStyle;
-import flash.display.LineScaleMode;
-import flash.display.SpreadMethod;
-import flash.geom.Matrix;
+import openfl.display.BitmapData;
+import openfl.display.CapsStyle;
+import openfl.display.GradientType;
+import openfl.display.InterpolationMethod;
+import openfl.display.JointStyle;
+import openfl.display.LineScaleMode;
+import openfl.display.SpreadMethod;
+import openfl.geom.Matrix;
 
 interface IShapeExporter
 {

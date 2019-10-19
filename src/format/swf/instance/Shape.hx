@@ -31,15 +31,9 @@ class Shape extends flash.display.Shape
 						}
 
 					case BeginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						#if (cpp || neko)
-						cacheAsBitmap = true;
-						#end
-						graphics.beginGradientFill(@:privateAccess GradientType.fromInt(fillType), colors, alphas, ratios, matrix, @:privateAccess SpreadMethod.fromInt(spreadMethod), @:privateAccess InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
+						graphics.beginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
 
 					case CurveTo(controlX, controlY, anchorX, anchorY):
-						#if (cpp || neko)
-						cacheAsBitmap = true;
-						#end
 						graphics.curveTo(controlX, controlY, anchorX, anchorY);
 
 					case EndFill:
@@ -48,7 +42,7 @@ class Shape extends flash.display.Shape
 					case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 						if (thickness != null)
 						{
-							graphics.lineStyle(thickness, color, alpha, pixelHinting, @:privateAccess LineScaleMode.fromInt(scaleMode), @:privateAccess CapsStyle.fromInt(caps), @:privateAccess JointStyle.fromInt(joints), miterLimit);
+							graphics.lineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 						}
 						else
 						{

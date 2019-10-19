@@ -3,7 +3,7 @@ package format.swf.data;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 import format.swf.utils.MatrixUtils;
-import flash.errors.Error;
+import openfl.errors.Error;
 
 class SWFMorphFillStyle
 {

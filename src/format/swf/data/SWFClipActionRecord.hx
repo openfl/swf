@@ -4,7 +4,7 @@ import format.swf.SWFData;
 import format.swf.data.actions.Action;
 import format.swf.data.actions.IAction;
 import format.swf.utils.StringUtils;
-import flash.Vector;
+import openfl.Vector;
 
 class SWFClipActionRecord
 {
