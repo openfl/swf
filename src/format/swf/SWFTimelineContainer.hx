@@ -163,10 +163,10 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	private function parseTagsAsyncInternal():Void
 	{
 		var tag:ITag;
-		var time:Int = flash.Lib.getTimer();
+		var time:Int = openfl.Lib.getTimer();
 		while ((tag = parseTag(_tmpData, true)) != null && tag.type != TagEnd.TYPE)
 		{
-			if ((flash.Lib.getTimer() - time) > TIMEOUT)
+			if ((openfl.Lib.getTimer() - time) > TIMEOUT)
 			{
 				enterFrameProvider.addEventListener(Event.ENTER_FRAME, parseTagsAsyncHandler);
 				return;
@@ -321,14 +321,14 @@ class SWFTimelineContainer extends SWFEventDispatcher
 	{
 		var tag:ITag;
 		var tagRaw:SWFRawTag;
-		var time:Int = flash.Lib.getTimer();
+		var time:Int = openfl.Lib.getTimer();
 		do
 		{
 			tag = (_tmpTagIterator < tags.length) ? tags[_tmpTagIterator] : null;
 			tagRaw = (_tmpTagIterator < tagsRaw.length) ? tagsRaw[_tmpTagIterator] : null;
 			publishTag(_tmpData, tag, tagRaw, _tmpVersion);
 			_tmpTagIterator++;
-			if ((flash.Lib.getTimer() - time) > TIMEOUT)
+			if ((openfl.Lib.getTimer() - time) > TIMEOUT)
 			{
 				enterFrameProvider.addEventListener(Event.ENTER_FRAME, publishTagsAsyncHandler);
 				return;

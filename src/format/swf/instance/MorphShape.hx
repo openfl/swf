@@ -4,7 +4,7 @@ import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineMorphShape;
 import format.swf.SWFTimelineContainer;
 
-class MorphShape extends flash.display.Shape
+class MorphShape extends openfl.display.Shape
 {
 	private var tag:TagDefineMorphShape;
 	private var handler:ShapeCommandExporter;

@@ -224,7 +224,7 @@ class SWFFont extends AbstractFont
 
 			if (index > -1)
 			{
-				var shape = new flash.display.Shape();
+				var shape = new openfl.display.Shape();
 				var handler = new ShapeCommandExporter(null);
 				font.export(handler, index);
 

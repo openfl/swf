@@ -90,12 +90,12 @@ class SWF extends EventDispatcher
 
 	inline private function dispatchCompleteTimer():Void
 	{
-		var tmr = new flash.utils.Timer(1, 1);
-		tmr.addEventListener(flash.events.TimerEvent.TIMER_COMPLETE, dispatchComplete);
+		var tmr = new openfl.utils.Timer(1, 1);
+		tmr.addEventListener(openfl.events.TimerEvent.TIMER_COMPLETE, dispatchComplete);
 		tmr.start();
 	}
 
-	private function dispatchComplete(e:flash.events.TimerEvent):Void
+	private function dispatchComplete(e:openfl.events.TimerEvent):Void
 	{
 		complete = true;
 		dispatchEvent(new Event(Event.COMPLETE));

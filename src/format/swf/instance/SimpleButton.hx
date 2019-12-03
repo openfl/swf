@@ -15,7 +15,7 @@ import openfl.display.Sprite;
 import openfl.filters.BitmapFilter;
 import openfl.geom.Matrix;
 
-class SimpleButton extends flash.display.SimpleButton
+class SimpleButton extends openfl.display.SimpleButton
 {
 	@:noCompletion private var data:SWFTimelineContainer;
 	@:noCompletion private var tag:TagDefineButton2;

@@ -9,7 +9,7 @@ import format.swf.tags.TagDefineBitsJPEG2;
 import openfl.display.BitmapData;
 import openfl.utils.ByteArray;
 
-class Bitmap extends flash.display.Bitmap
+class Bitmap extends openfl.display.Bitmap
 {
 	public function new(tag:IDefinitionTag)
 	{

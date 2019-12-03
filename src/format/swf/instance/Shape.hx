@@ -4,7 +4,7 @@ import format.swf.exporters.ShapeCommandExporter;
 import format.swf.tags.TagDefineShape;
 import format.swf.SWFTimelineContainer;
 
-class Shape extends flash.display.Shape
+class Shape extends openfl.display.Shape
 {
 	public function new(data:SWFTimelineContainer, tag:TagDefineShape)
 	{

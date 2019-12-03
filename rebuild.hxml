@@ -1,0 +1,12 @@
+-main Tools
+-neko run.n
+-cp scripts
+-cp src
+-lib openfl
+-lib hxp
+-lib lime
+-lib format
+-D lime-cairo
+-D lime-cffi
+-D optional-cffi
+--no-inline

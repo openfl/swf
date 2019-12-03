@@ -16,7 +16,7 @@ import openfl.display.DisplayObject;
 import openfl.display.Scene;
 import openfl.display.Timeline;
 
-class MovieClip extends #if flash flash.display.MovieClip.MovieClip2 #else openfl.display.MovieClip #end
+class MovieClip extends #if flash openfl.display.MovieClip.MovieClip2 #else openfl.display.MovieClip #end
 {
 	public function new(data:SWFTimelineContainer)
 	{

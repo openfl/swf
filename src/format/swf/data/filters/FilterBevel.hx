@@ -3,7 +3,7 @@ package format.swf.data.filters;
 import format.swf.SWFData;
 import format.swf.utils.ColorUtils;
 #if flash
-import flash.filters.BevelFilter;
+import openfl.filters.BevelFilter;
 #end
 import openfl.filters.BitmapFilter;
 import openfl.filters.BitmapFilterType;
