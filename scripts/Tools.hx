@@ -1,20 +1,20 @@
 package;
 
-import format.swf.exporters.AnimateLibraryExporter;
-// import format.swf.exporters.SWFLiteExporter;
-import format.swf.tags.TagDefineBits;
-import format.swf.tags.TagDefineBitsJPEG2;
-import format.swf.tags.TagDefineBitsJPEG3;
-import format.swf.tags.TagDefineBitsLossless;
-import format.swf.tags.TagDefineButton2;
-import format.swf.tags.TagDefineEditText;
-import format.swf.tags.TagDefineMorphShape;
-import format.swf.tags.TagDefineShape;
-import format.swf.tags.TagDefineSprite;
-import format.swf.tags.TagDefineText;
-import format.swf.tags.TagPlaceObject;
-import format.swf.SWFTimelineContainer;
-import format.SWF;
+import swf.exporters.AnimateLibraryExporter;
+// import swf.exporters.SWFLiteExporter;
+import swf.tags.TagDefineBits;
+import swf.tags.TagDefineBitsJPEG2;
+import swf.tags.TagDefineBitsJPEG3;
+import swf.tags.TagDefineBitsLossless;
+import swf.tags.TagDefineButton2;
+import swf.tags.TagDefineEditText;
+import swf.tags.TagDefineMorphShape;
+import swf.tags.TagDefineShape;
+import swf.tags.TagDefineSprite;
+import swf.tags.TagDefineText;
+import swf.tags.TagPlaceObject;
+import swf.SWFTimelineContainer;
+import swf.SWF;
 import haxe.Json;
 import haxe.Serializer;
 import haxe.Template;
@@ -28,22 +28,22 @@ import lime.tools.AssetType;
 import lime.tools.HXProject;
 import lime.tools.Platform;
 import lime.utils.AssetManifest;
-// import format.swf.exporters.swflite.BitmapSymbol;
-// import format.swf.exporters.swflite.ButtonSymbol;
-// import format.swf.exporters.swflite.DynamicTextSymbol;
-// import format.swf.exporters.swflite.ShapeSymbol;
-// import format.swf.exporters.swflite.SpriteSymbol;
-// import format.swf.exporters.swflite.StaticTextSymbol;
-import format.swf.exporters.swf.SWFLibrary;
-// import format.swf.exporters.swflite.SWFLiteLibrary;
-// import format.swf.exporters.swflite.SWFLite;
+// import swf.exporters.swflite.BitmapSymbol;
+// import swf.exporters.swflite.ButtonSymbol;
+// import swf.exporters.swflite.DynamicTextSymbol;
+// import swf.exporters.swflite.ShapeSymbol;
+// import swf.exporters.swflite.SpriteSymbol;
+// import swf.exporters.swflite.StaticTextSymbol;
+import swf.SWFLibrary;
+// import swf.exporters.swflite.SWFLiteLibrary;
+// import swf.exporters.swflite.SWFLite;
 import openfl.display.PNGEncoderOptions;
 import openfl.utils.ByteArray;
 import sys.io.File;
 import sys.io.Process;
 import sys.FileSystem;
 
-using format.swf.exporters.FrameScriptParser.AVM2;
+using swf.exporters.FrameScriptParser.AVM2;
 
 class Tools
 {
@@ -763,7 +763,7 @@ class Tools
 		// 		#end
 
 		// 		var data = AssetHelper.createManifest(project);
-		// 		data.libraryType = "format.swf.exporters.swflite.SWFLiteLibrary";
+		// 		data.libraryType = "swf.exporters.swflite.SWFLiteLibrary";
 		// 		data.libraryArgs = ["swflite" + SWFLITE_DATA_SUFFIX, uuid];
 		// 		data.name = Path.withoutDirectory(Path.withoutExtension(sourcePath));
 
@@ -935,7 +935,7 @@ class Tools
 			// 			}
 
 			// 			var data = AssetHelper.createManifest(output, library.name);
-			// 			data.libraryType = "format.swf.exporters.swf.SWFLibrary";
+			// 			data.libraryType = "swf.SWFLibrary";
 			// 			data.libraryArgs = [library.name + ".swf"];
 			// 			data.name = library.name;
 			// 			data.rootPath = "lib/" + library.name;
@@ -1197,7 +1197,7 @@ class Tools
 			// 			}
 
 			// 			var data = AssetHelper.createManifest(merge);
-			// 			data.libraryType = "format.swf.exporters.swflite.SWFLiteLibrary";
+			// 			data.libraryType = "swf.exporters.swflite.SWFLiteLibrary";
 			// 			data.libraryArgs = [library.name + SWFLITE_DATA_SUFFIX, uuid];
 			// 			data.name = library.name;
 
@@ -1236,17 +1236,17 @@ class Tools
 
 		if (embeddedAnimate)
 		{
-			output.haxeflags.push("format.swf.exporters.animate.AnimateLibrary");
+			output.haxeflags.push("swf.exporters.animate.AnimateLibrary");
 		}
 
 		if (embeddedSWF)
 		{
-			output.haxeflags.push("format.swf.exporters.swf.SWFLibrary");
+			output.haxeflags.push("swf.SWFLibrary");
 		}
 
 		if (embeddedSWFLite)
 		{
-			output.haxeflags.push("format.swf.exporters.swflite.SWFLiteLibrary");
+			output.haxeflags.push("swf.exporters.swflite.SWFLiteLibrary");
 		}
 
 		if (embeddedSWF || embeddedSWFLite || embeddedAnimate)

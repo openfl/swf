@@ -1,6 +1,6 @@
 package ::PACKAGE_NAME::;
 
-@:access(format.swf.exporters.animate.AnimateLibrary)
+@:access(swf.exporters.animate.AnimateLibrary)
 
 class ::CLASS_NAME:: extends openfl.display.BitmapData
 {
@@ -8,8 +8,8 @@ class ::CLASS_NAME:: extends openfl.display.BitmapData
 	{
 		super(0, 0, true, 0);
 
-		var library = format.swf.exporters.animate.AnimateLibrary.get("::UUID::");
-		var symbol:format.swf.exporters.animate.AnimateBitmapSymbol = cast library.symbols.get(::SYMBOL_ID::);
+		var library = swf.exporters.animate.AnimateLibrary.get("::UUID::");
+		var symbol:swf.exporters.animate.AnimateBitmapSymbol = cast library.symbols.get(::SYMBOL_ID::);
 		var image = library.getImage(symbol.path);
 		__fromImage(image);
 	}
