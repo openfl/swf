@@ -809,8 +809,67 @@ class Tools
 				type = Path.extension(library.sourcePath).toLowerCase();
 			}
 
+			if (type == "swf" && (project.target == Platform.FLASH || project.target == Platform.AIR))
+			{
+				if (!FileSystem.exists(library.sourcePath))
+				{
+					Log.warn("Could not find library file: " + library.sourcePath);
+					continue;
+				}
+
+				Log.info("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
+
+				var swf = new Asset(library.sourcePath, library.name + ".swf", AssetType.BINARY);
+				// swf.library = library.name;
+
+				var embed = (library.embed != false);
+				// var embed = (library.embed == true); // default to non-embedded
+
+				if (embed)
+				{
+					// swf.embed = true;
+					// output.assets.push (swf);
+					// output.haxeflags.push ("-swf-lib " + swf.sourcePath);
+					output.haxeflags.push("-resource " + swf.sourcePath + "@swf:" + swf.id);
+				}
+				else
+				{
+					swf.embed = false;
+					output.assets.push(swf);
+				}
+
+				var data = AssetHelper.createManifest(output, library.name);
+				data.libraryType = "swf.SWFLibrary";
+				data.libraryArgs = [library.name + ".swf"];
+				data.name = library.name;
+				data.rootPath = "lib/" + library.name;
+
+				swf.library = library.name;
+
+				var asset = new Asset("", "lib/" + library.name + ".json", AssetType.MANIFEST);
+				asset.id = "libraries/" + library.name + ".json";
+				asset.library = library.name;
+				asset.data = data.serialize();
+				asset.embed = true;
+
+				output.assets.push(asset);
+
+				if (true || library.generate)
+				{
+					var generatedClasses = generateSWFClasses(project, output, swf, library.prefix);
+
+					for (className in generatedClasses)
+					{
+						output.haxeflags.push(className);
+					}
+				}
+
+				embeddedSWF = true;
+				// project.haxelibs.push (new Haxelib ("swf"));
+				// output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));))
+			}
 			// #if !nodejs
-			if (type == "animate" || type == "swf" || type == "swflite" || type == "swf_lite")
+			else if (type == "animate" || type == "swf" || type == "swflite" || type == "swf_lite")
 			{
 				if (!FileSystem.exists(library.sourcePath))
 				{
