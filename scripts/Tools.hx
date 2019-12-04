@@ -891,7 +891,7 @@ class Tools
 					if (FileSystem.exists(cacheFile))
 					{
 						var cacheDate = FileSystem.stat(cacheFile).mtime;
-						var toolDate = FileSystem.stat(Haxelib.getPath(new Haxelib("openfl"), true) + "/scripts/tools.n").mtime;
+						var toolDate = FileSystem.stat(Haxelib.getPath(new Haxelib("swf"), true) + "/run.n").mtime;
 						var sourceDate = FileSystem.stat(library.sourcePath).mtime;
 
 						if (sourceDate.getTime() < cacheDate.getTime() && toolDate.getTime() < cacheDate.getTime())
