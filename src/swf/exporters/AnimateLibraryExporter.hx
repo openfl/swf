@@ -1520,14 +1520,14 @@ private class SWFDocument
 	}
 }
 
-private enum abstract SWFFrameObjectType(Int) from Int to Int
+@:enum private abstract SWFFrameObjectType(Int) from Int to Int
 {
 	public var CREATE = 0;
 	public var UPDATE = 1;
 	public var DESTROY = 2;
 }
 
-private enum abstract SWFShapeCommandType(Int) from Int to Int
+@:enum private abstract SWFShapeCommandType(Int) from Int to Int
 {
 	public var BEGIN_BITMAP_FILL = 0;
 	public var BEGIN_FILL = 1;
@@ -1540,7 +1540,7 @@ private enum abstract SWFShapeCommandType(Int) from Int to Int
 	public var MOVE_TO = 8;
 }
 
-private enum abstract SWFSymbolType(Int) from Int to Int
+@:enum private abstract SWFSymbolType(Int) from Int to Int
 {
 	public var BITMAP = 0;
 	public var BUTTON = 1;
@@ -1551,7 +1551,7 @@ private enum abstract SWFSymbolType(Int) from Int to Int
 	public var STATIC_TEXT = 6;
 }
 
-private enum abstract SWFFilterType(Int) from Int to Int
+@:enum private abstract SWFFilterType(Int) from Int to Int
 {
 	public var BLUR = 0;
 	public var COLOR_MATRIX = 1;

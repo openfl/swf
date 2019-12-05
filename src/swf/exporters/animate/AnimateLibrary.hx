@@ -696,7 +696,7 @@ import openfl.filters.GlowFilter;
 	}
 }
 
-enum abstract SWFShapeCommandType(Int) from Int to Int
+@:enum abstract SWFShapeCommandType(Int) from Int to Int
 {
 	public var BEGIN_BITMAP_FILL = 0;
 	public var BEGIN_FILL = 1;
@@ -709,7 +709,7 @@ enum abstract SWFShapeCommandType(Int) from Int to Int
 	public var MOVE_TO = 8;
 }
 
-enum abstract SWFSymbolType(Int) from Int to Int
+@:enum abstract SWFSymbolType(Int) from Int to Int
 {
 	public var BITMAP = 0;
 	public var BUTTON = 1;

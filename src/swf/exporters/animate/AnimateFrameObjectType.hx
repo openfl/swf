@@ -1,6 +1,6 @@
 package swf.exporters.animate;
 
-enum abstract AnimateFrameObjectType(Int) from Int to Int
+@:enum abstract AnimateFrameObjectType(Int) from Int to Int
 {
 	public var CREATE = 0;
 	public var UPDATE = 1;
