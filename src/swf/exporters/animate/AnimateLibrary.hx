@@ -574,9 +574,9 @@ import openfl.filters.GlowFilter;
 		return symbol;
 	}
 
-	private function __parseMatrix(values:Array<Int>):Matrix
+	private function __parseMatrix(values:Array<Float>):Matrix
 	{
-		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(values[4]), __pixel(values[5])) : null;
+		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(cast values[4]), __pixel(cast values[5])) : null;
 	}
 
 	private function __parseShape(data:Dynamic):AnimateShapeSymbol
