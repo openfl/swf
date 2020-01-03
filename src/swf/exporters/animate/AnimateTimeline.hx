@@ -1,6 +1,6 @@
 package swf.exporters.animate;
 
-import openfl._internal.utils.Log;
+import lime.utils.Log;
 import openfl.display.DisplayObject;
 import openfl.display.FrameLabel;
 import openfl.display.FrameScript;

@@ -1,11 +1,11 @@
 package swf.exporters.swflite;
 
-import swf.exporters.swflite.SWFLite;
-import openfl._internal.utils.Log;
+import lime.utils.Log;
 import openfl.text.Font;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
+import swf.exporters.swflite.SWFLite;
 
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')

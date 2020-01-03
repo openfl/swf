@@ -1,7 +1,7 @@
 package swf;
 
 import haxe.Resource;
-import openfl._internal.backend.lime.Image;
+import lime.graphics.Image;
 import openfl.display.Loader;
 import openfl.display.MovieClip;
 import openfl.events.Event;

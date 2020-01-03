@@ -1,6 +1,6 @@
 package swf.exporters.animate;
 
-import openfl._internal.utils.Log;
+import lime.utils.Log;
 import openfl.text.Font;
 import openfl.text.TextField;
 import openfl.text.TextFormat;

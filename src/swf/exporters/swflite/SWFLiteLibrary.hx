@@ -1,9 +1,9 @@
 package swf.exporters.swflite;
 
-import openfl._internal.backend.lime.AssetManifest;
-import openfl._internal.backend.lime.Image;
-import openfl._internal.backend.lime.ImageChannel;
-import openfl._internal.backend.math.Vector2;
+import lime.graphics.Image;
+import lime.graphics.ImageChannel;
+import lime.math.Vector2;
+import lime.utils.AssetManifest;
 import swf.exporters.swflite.BitmapSymbol;
 import openfl.display.MovieClip;
 import openfl.events.Event;

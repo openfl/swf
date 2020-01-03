@@ -1,9 +1,9 @@
 package swf.exporters.animate;
 
 import haxe.Json;
-import openfl._internal.backend.lime.Image;
-import openfl._internal.backend.lime.ImageChannel;
-import openfl._internal.backend.math.Vector2;
+import lime.graphics.Image;
+import lime.graphics.ImageChannel;
+import lime.math.Vector2;
 import swf.exporters.core.FilterType;
 import openfl.display.MovieClip;
 import openfl.events.Event;
@@ -19,7 +19,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Future;
 import openfl.utils.Promise;
 #if lime
-import openfl._internal.backend.lime.AssetManifest;
+import lime.utils.AssetManifest;
 #else
 import openfl.utils.AssetManifest;
 #end

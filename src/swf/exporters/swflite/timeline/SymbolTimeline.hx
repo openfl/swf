@@ -1,6 +1,7 @@
 package swf.exporters.swflite.timeline;
 
 // TODO: Force keeping of SWF symbols a different way?
+import lime.utils.Log;
 import swf.exporters.swflite.SWFLite;
 import swf.exporters.swflite.BitmapSymbol;
 import swf.exporters.swflite.ButtonSymbol;
@@ -13,7 +14,6 @@ import swf.exporters.swflite.SWFSymbol;
 import swf.exporters.swflite.timeline.Frame;
 import swf.exporters.swflite.timeline.FrameObject;
 import swf.exporters.swflite.timeline.FrameObjectType;
-import openfl._internal.utils.Log;
 import openfl.display.DisplayObject;
 import openfl.display.FrameLabel;
 import openfl.display.FrameScript;
