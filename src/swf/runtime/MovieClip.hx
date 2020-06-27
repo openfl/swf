@@ -20,7 +20,8 @@ class MovieClip extends #if flash openfl.display.MovieClip.MovieClip2 #else open
 {
 	public function new(data:SWFTimelineContainer)
 	{
-		super(new MovieClipTimeline(data));
+		super();
+		attachTimeline(new MovieClipTimeline(data));
 	}
 }
 
