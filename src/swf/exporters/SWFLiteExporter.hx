@@ -11,11 +11,11 @@ import swf.data.SWFButtonRecord;
 import swf.exporters.core.FilterType;
 import swf.exporters.core.ShapeCommand;
 import swf.runtime.Bitmap;
-#if hxp
-import hxp.Log;
-#else
-import lime.tools.helpers.LogHelper in Log;
-#end
+// #if hxp
+// import hxp.Log;
+// #else
+// import lime.tools.helpers.LogHelper in Log;
+// #end
 import lime.graphics.Image;
 import swf.exporters.swflite.BitmapSymbol;
 import swf.exporters.swflite.ButtonSymbol;
