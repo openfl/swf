@@ -2,6 +2,8 @@ package swf.exporters.swflite;
 
 import swf.exporters.swflite.SWFLite;
 import swf.exporters.swflite.timeline.Frame;
+import swf.exporters.swflite.timeline.SymbolTimeline;
+import openfl.display.DisplayObject;
 import openfl.display.MovieClip;
 import openfl.geom.Rectangle;
 
@@ -16,6 +18,8 @@ class SpriteSymbol extends SWFSymbol
 	public var frames:Array<Frame>;
 	public var scale9Grid:Rectangle;
 
+	private var swf:SWFLite;
+
 	public function new()
 	{
 		super();
@@ -23,12 +27,23 @@ class SpriteSymbol extends SWFSymbol
 		frames = new Array<Frame>();
 	}
 
+	private function __constructor(movieClip:MovieClip):Void
+	{
+		var timeline = new SymbolTimeline(swf, this);
+		#if flash
+		@:privateAccess cast(movieClip, flash.display.MovieClip.MovieClip2).attachTimeline(timeline);
+		#else
+		movieClip.attachTimeline(timeline);
+		#end
+		movieClip.scale9Grid = scale9Grid;
+	}
+
 	private override function __createObject(swf:SWFLite):MovieClip
 	{
 		#if (!macro && !flash)
-		MovieClip.__initSWF = swf;
-		MovieClip.__initSymbol = this;
+		MovieClip.__constructor = __constructor;
 		#end
+		this.swf = swf;
 
 		#if flash
 		if (className == "flash.display.MovieClip")
@@ -81,8 +96,19 @@ class SpriteSymbol extends SWFSymbol
 			#end
 		}
 
-		movieClip.scale9Grid = scale9Grid;
+		#if flash
+		if (!Std.is(movieClip, flash.display.MovieClip.MovieClip2))
+		{
+			movieClip.scale9Grid = scale9Grid;
+		}
+		#end
 
 		return movieClip;
+	}
+
+	private override function __initObject(swf:SWFLite, instance:DisplayObject):Void
+	{
+		this.swf = swf;
+		__constructor(cast instance);
 	}
 }

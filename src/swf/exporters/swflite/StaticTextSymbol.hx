@@ -83,8 +83,7 @@ class StaticTextSymbol extends SWFSymbol
 								case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 									if (thickness != null)
 									{
-										graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.fromInt(scaleMode), CapsStyle.fromInt(caps),
-											JointStyle.fromInt(joints), miterLimit);
+										graphics.lineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 									}
 									else
 									{

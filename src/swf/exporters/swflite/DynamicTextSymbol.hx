@@ -46,9 +46,9 @@ class DynamicTextSymbol extends SWFSymbol
 	{
 		var textField = new TextField();
 
-		#if !flash
-		textField.__symbol = this;
-		#end
+		// #if !flash
+		// textField.__symbol = this;
+		// #end
 
 		textField.width = width;
 		textField.height = height;

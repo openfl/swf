@@ -71,6 +71,7 @@ class SWFLiteExporter
 	public var swfLite:SWFLite;
 
 	private var data:SWFRoot;
+	private var symbolsByTagID:Map<Int, swf.data.SWFSymbol>;
 
 	public function new(data:SWFRoot)
 	{
@@ -83,6 +84,7 @@ class SWFLiteExporter
 		soundTypes = new Map<Int, SoundType>();
 		soundSymbolClassNames = new Map<Int, String>();
 		filterClasses = new Map<String, Bool>();
+		symbolsByTagID = new Map();
 
 		swfLite = new SWFLite();
 		swfLite.frameRate = data.frameRate;
@@ -96,6 +98,7 @@ class SWFLiteExporter
 				for (symbol in cast(tag, TagSymbolClass).symbols)
 				{
 					processSymbol(symbol);
+					symbolsByTagID.set(symbol.tagId, symbol);
 				}
 			}
 		}
@@ -643,7 +646,7 @@ class SWFLiteExporter
 		var swfSymbol = symbolsByTagID.get(symbol.id);
 		if (swfSymbol != null)
 		{
-			var scripts = FrameScriptParser.convertToJS(swfData, swfSymbol.name);
+			var scripts = FrameScriptParser.convertToJS(data, swfSymbol.name);
 			if (scripts != null)
 			{
 				for (i in 0...scripts.length)
@@ -849,17 +852,17 @@ class SWFLiteExporter
 
 		if (data2 == null && ~/_fla\.MainTimeline$/.match(symbol.name))
 		{
-			data2 = libraryData.root;
+			data2 = swfLite.root;
 		}
 
 		if (data2 != null && symbol.name != null)
 		{
 			data2.className = symbol.name;
-			data2.baseClassName = FrameScriptParser.getBaseClassName(swfData, symbol.name);
+			data2.baseClassName = FrameScriptParser.getBaseClassName(data, symbol.name);
 		}
 	}
 
-	private function processTag(tag:IDefinitionTag):SWFSymbol
+	private function processTag(tag:IDefinitionTag):Dynamic
 	{
 		if (tag == null) return null;
 

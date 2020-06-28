@@ -65,8 +65,7 @@ class ShapeSymbol extends SWFSymbol
 					#if flash
 					var colors:Array<UInt> = cast colors;
 					#end
-					graphics.beginGradientFill(GradientType.fromInt(fillType), colors, alphas, ratios, matrix, SpreadMethod.fromInt(spreadMethod),
-						InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
+					graphics.beginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
 
 				case CurveTo(controlX, controlY, anchorX, anchorY):
 					graphics.curveTo(controlX, controlY, anchorX, anchorY);
@@ -77,8 +76,7 @@ class ShapeSymbol extends SWFSymbol
 				case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
 					if (thickness != null)
 					{
-						graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.fromInt(scaleMode), CapsStyle.fromInt(caps),
-							JointStyle.fromInt(joints), miterLimit);
+						graphics.lineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit);
 					}
 					else
 					{

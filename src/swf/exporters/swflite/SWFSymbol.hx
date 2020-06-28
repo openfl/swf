@@ -18,4 +18,6 @@ import openfl.display.DisplayObject;
 	{
 		return null;
 	}
+
+	private function __initObject(swf:SWFLite, instance:DisplayObject):Void {}
 }

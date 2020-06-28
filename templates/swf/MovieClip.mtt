@@ -26,8 +26,7 @@ class ::CLASS_NAME:: extends ::BASE_CLASS_NAME:: {
 
 		var swfLite = SWFLite.instances.get ("::SWF_ID::");
 		var symbol = swfLite.symbols.get (::SYMBOL_ID::);
-
-		__fromSymbol (swfLite, cast symbol);
+		symbol.__initObject(swfLite, this);
 
 	}
 
