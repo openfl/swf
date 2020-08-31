@@ -108,22 +108,19 @@ class AnimateLibraryExporter
 			processSymbol(symbol);
 		}
 
-		// TODO: Compressed
-
 		var libraryJSON = libraryData.serialize();
 		var bytes = new ByteArray();
 		bytes.writeUTFBytes(libraryJSON);
 		var crc32 = Crc32.make(bytes);
-		// var size = bytes.length;
-		// bytes.deflate();
-		var size = 0;
+		var fileSize = bytes.length;
+		bytes.deflate();
 
 		var entry:Entry = {
 			fileName: "data.json",
-			fileSize: bytes.length,
+			fileSize: fileSize,
 			fileTime: Date.now(),
-			compressed: false,
-			dataSize: size,
+			compressed: true,
+			dataSize: bytes.length,
 			data: bytes,
 			crc32: crc32
 		};
@@ -138,16 +135,15 @@ class AnimateLibraryExporter
 		var bytes = new ByteArray();
 		bytes.writeUTFBytes(manifestJSON);
 		var crc32 = Crc32.make(bytes);
-		// var size = bytes.length;
-		// bytes.deflate();
-		var size = 0;
+		var fileSize = bytes.length;
+		bytes.deflate();
 
 		var entry:Entry = {
 			fileName: "library.json",
-			fileSize: bytes.length,
+			fileSize: fileSize,
 			fileTime: Date.now(),
-			compressed: false,
-			dataSize: size,
+			compressed: true,
+			dataSize: bytes.length,
 			data: bytes,
 			crc32: crc32
 		};
