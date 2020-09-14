@@ -57,8 +57,8 @@ import swf.utils.BitArray;
 	public static var MIN_FLOAT_VALUE:Float = untyped __global__["Number"].MIN_VALUE;
 	public static var MAX_FLOAT_VALUE:Float = untyped __global__["Number"].MAX_VALUE;
 	#elseif js
-	public static var MIN_FLOAT_VALUE:Float = untyped __js__("Number.MIN_VALUE");
-	public static var MAX_FLOAT_VALUE:Float = untyped __js__("Number.MAX_VALUE");
+	public static var MIN_FLOAT_VALUE:Float = untyped untyped #if haxe4 js.Syntax.code #else __js__ #end ("Number.MIN_VALUE");
+	public static var MAX_FLOAT_VALUE:Float = untyped untyped #if haxe4 js.Syntax.code #else __js__ #end ("Number.MAX_VALUE");
 	#else
 	public static inline var MIN_FLOAT_VALUE:Float = 2.2250738585072014e-308;
 	public static inline var MAX_FLOAT_VALUE:Float = 1.7976931348623158e+308;

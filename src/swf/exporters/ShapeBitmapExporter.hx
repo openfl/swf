@@ -4,11 +4,11 @@ import haxe.ds.Option;
 import swf.exporters.core.ShapeCommand;
 import openfl.geom.Matrix;
 
-/*
- * SWF tends to output bitmaps as a ShapeSymbol, but exporting as Bitmap instances can be more efficient at runtime.
- * This exporter attempts to detect simple bitmaps, and export as a MovieClip with Bitmap children instead
- * The exporter will return null if it seems like an incompatible list of commands
- */
+/**
+	SWF tends to output bitmaps as a ShapeSymbol, but exporting as Bitmap instances can be more efficient at runtime.
+	This exporter attempts to detect simple bitmaps, and export as a MovieClip with Bitmap children instead
+	The exporter will return null if it seems like an incompatible list of commands
+**/
 class ShapeBitmapExporter
 {
 	public static function process(exporter:ShapeCommandExporter):Array<BitmapFill>

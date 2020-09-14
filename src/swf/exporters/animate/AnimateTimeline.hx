@@ -6,8 +6,9 @@ import openfl.display.FrameLabel;
 import openfl.display.FrameScript;
 import openfl.display.MovieClip;
 import openfl.display.Scene;
+import openfl.display.Shape;
 import openfl.display.Timeline;
-import openfl.events.Event;
+// import openfl.events.Event;
 import openfl.filters.BitmapFilter;
 import openfl.filters.BlurFilter;
 import openfl.filters.ColorMatrixFilter;
@@ -103,7 +104,7 @@ class AnimateTimeline extends Timeline
 
 					scripts.push(new FrameScript(script, frame));
 					#elseif js
-					var script = untyped __js__("eval({0})", "(function(){" + frameData.scriptSource + "})");
+					var script = untyped untyped #if haxe4 js.Syntax.code #else __js__ #end ("eval({0})", "(function(){" + frameData.scriptSource + "})");
 					var wrapper = function(scope:MovieClip)
 					{
 						try
@@ -355,34 +356,47 @@ class AnimateTimeline extends Timeline
 				}
 			}
 
-			var child;
-			var i = currentInstances.length;
-			var length = __movieClip.numChildren;
-
-			while (i < length)
+			// TODO: How to tell if shapes are for a scale9Grid clip?
+			if (__movieClip.scale9Grid != null)
 			{
-				child = __movieClip.getChildAt(i);
-
-				// TODO: Faster method of determining if this was automatically added?
-
-				for (instance in __activeInstances)
+				__movieClip.graphics.clear();
+				if (currentInstances.length > 0)
 				{
-					if (instance.displayObject == child)
-					{
-						// set MovieClips back to initial state (autoplay)
-						if (Std.is(child, MovieClip))
-						{
-							var movie:MovieClip = cast child;
-							movie.gotoAndPlay(1);
-						}
-
-						__movieClip.removeChild(child);
-						i--;
-						length--;
-					}
+					var shape:Shape = cast currentInstances[0].displayObject;
+					__movieClip.graphics.copyFrom(shape.graphics);
 				}
+			}
+			else
+			{
+				var child;
+				var i = currentInstances.length;
+				var length = __movieClip.numChildren;
 
-				i++;
+				while (i < length)
+				{
+					child = __movieClip.getChildAt(i);
+
+					// TODO: Faster method of determining if this was automatically added?
+
+					for (instance in __activeInstances)
+					{
+						if (instance.displayObject == child)
+						{
+							// set MovieClips back to initial state (autoplay)
+							if (Std.is(child, MovieClip))
+							{
+								var movie:MovieClip = cast child;
+								movie.gotoAndPlay(1);
+							}
+
+							__movieClip.removeChild(child);
+							i--;
+							length--;
+						}
+					}
+
+					i++;
+				}
 			}
 
 			#if !openfljs

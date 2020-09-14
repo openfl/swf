@@ -30,9 +30,9 @@ class AnimateSpriteSymbol extends AnimateSymbol
 		#if flash
 		@:privateAccess cast(movieClip, flash.display.MovieClip.MovieClip2).attachTimeline(timeline);
 		#else
+		movieClip.scale9Grid = scale9Grid;
 		movieClip.attachTimeline(timeline);
 		#end
-		movieClip.scale9Grid = scale9Grid;
 	}
 
 	private override function __createObject(library:AnimateLibrary):MovieClip
