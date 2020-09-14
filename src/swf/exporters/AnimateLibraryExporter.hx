@@ -1204,6 +1204,7 @@ class AnimateLibraryExporter
 			if (templateData != null && Reflect.hasField(symbol, "className") && symbol.className != null)
 			{
 				var className:String = symbol.className;
+				var hidden = false;
 
 				var name = className;
 				var packageName = "";
@@ -1222,6 +1223,9 @@ class AnimateLibraryExporter
 				}
 
 				name = formatClassName(name, prefix);
+
+				// TODO: Is this right? Is this hard-coded in Flash Player for internal classes?
+				if (packageName == "privatePkg") continue;
 
 				var classProperties = [];
 				var objectReferences = new Map<String, Bool>();
@@ -1281,13 +1285,21 @@ class AnimateLibraryExporter
 											}
 											else
 											{
-												className = formatClassName(className, prefix);
+												if (StringTools.startsWith(className, "privatePkg."))
+												{
+													className = "Dynamic";
+													hidden = true;
+												}
+												else
+												{
+													className = formatClassName(className, prefix);
+												}
 											}
 
 											if (className != null)
 											{
 												objectReferences[object.name] = true;
-												classProperties.push({name: object.name, type: className});
+												classProperties.push({name: object.name, type: className, hidden: true});
 											}
 										}
 									}

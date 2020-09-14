@@ -2,9 +2,9 @@ package ::PACKAGE_NAME::;
 
 @:access(swf.exporters.animate)
 
-class ::CLASS_NAME:: extends ::if BASE_CLASS_NAME::::BASE_CLASS_NAME::::else::#if flash flash.display.MovieClip.MovieClip2 #else openfl.display.MovieClip #end::end::
+class ::CLASS_NAME:: extends ::if BASE_CLASS_NAME::::BASE_CLASS_NAME::::else::#if flash flash.display.MovieClip.MovieClip2 #else openfl.display.MovieClip #end::end:: implements Dynamic
 {
-	::foreach CLASS_PROPERTIES::@:keep public var ::name::(default, null):::type::;
+	::foreach CLASS_PROPERTIES::@:keep ::if hidden::@:noCompletion @:dox(hide) ::end::public var ::name::(default, null):::type::;
 	::end::
 
 	public function new()

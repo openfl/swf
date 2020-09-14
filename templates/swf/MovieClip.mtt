@@ -9,7 +9,7 @@ import openfl.utils.Assets;
 class ::CLASS_NAME:: extends ::BASE_CLASS_NAME:: {
 
 
-	::foreach CLASS_PROPERTIES::@:keep public var ::name:: (default, null):::type::;
+	::foreach CLASS_PROPERTIES::@:keep ::if hidden::@:noCompletion @:dox(hide) ::end::public var ::name:: (default, null):::type::;
 	::end::
 
 	public function new () {
@@ -38,7 +38,7 @@ class ::CLASS_NAME:: extends ::BASE_CLASS_NAME:: {
 @:bind @:native("::NATIVE_CLASS_NAME::") class ::CLASS_NAME:: extends ::BASE_CLASS_NAME:: {
 
 
-	::foreach CLASS_PROPERTIES::@:keep public var ::name:: (default, null):::type::;
+	::foreach CLASS_PROPERTIES::@:keep ::if hidden::@:noCompletion @:dox(hide) ::end::public var ::name:: (default, null):::type::;
 	::end::
 
 	public function new () {

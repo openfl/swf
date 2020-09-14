@@ -201,6 +201,9 @@ class Tools
 			packageName = packageName.charAt(0).toLowerCase() + packageName.substr(1);
 			name = formatClassName(name, prefix);
 
+			// TODO: Is this right? Is this hard-coded in Flash Player for internal classes?
+			if (packageName == "privatePkg") continue;
+
 			var symbolID = swf.symbols.get(className);
 			var templateData = null;
 			var symbol = swf.data.getCharacter(symbolID);
@@ -241,6 +244,7 @@ class Tools
 			{
 				var classProperties = [];
 				var objectReferences = new Map<String, Bool>();
+				var privatePkg = false;
 
 				if (Std.is(symbol, SWFTimelineContainer))
 				{
@@ -261,11 +265,13 @@ class Tools
 									var id = frameObject.characterId;
 									var childSymbol = timelineContainer.getCharacter(id);
 									var className = null;
+									var hidden = false;
 
 									if (classLookupMap.exists(id))
 									{
 										className = classLookupMap.get(id);
 									}
+
 									if (childSymbol != null)
 									{
 										if (className == null)
@@ -295,19 +301,35 @@ class Tools
 										}
 										else
 										{
-											className = formatClassName(className, prefix);
+											if (StringTools.startsWith(className, "privatePkg."))
+											{
+												className = "Dynamic";
+												hidden = true;
+												privatePkg = true;
+											}
+											else
+											{
+												className = formatClassName(className, prefix);
+											}
 										}
 
 										if (className != null && !objectReferences.exists(placeObject.instanceName))
 										{
 											objectReferences[placeObject.instanceName] = true;
-											classProperties.push({name: placeObject.instanceName, type: className});
+											classProperties.push({name: placeObject.instanceName, type: className, hidden: hidden});
 										}
 									}
 								}
 							}
 						}
 					}
+				}
+
+				if (privatePkg)
+				{
+					// This is not ideal... having trouble making classes dynamic for the Flash target on Haxe 4
+					classProperties.push({name: "loopMode", type: "Bool", hidden: true});
+					classProperties.push({name: "firstFrame", type: "Bool", hidden: true});
 				}
 
 				var context = {
