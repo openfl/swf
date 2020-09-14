@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": [ ],
 	"description": "Provides support for parsing and displaying SWF content",
-	"version": "3.0.0",
-	"releasenote": "Initial release using Timeline API (OpenFL >= 9)",
+	"version": "3.0.1",
+	"releasenote": "Scale9 fixes, compilation fix on Flash",
 	"contributors": [ "singmajesty" ],
 	"classPath": "src"
 }
