@@ -49,7 +49,7 @@ import openfl.filters.GlowFilter;
 	];
 	#end
 
-	private static var instances:Map<String, AnimateLibrary>;
+	private static var instances:Map<String, AnimateLibrary> = new Map();
 
 	private var alphaCheck:Map<String, Bool>;
 	private var bitmapClassNames:Map<String, String>;
@@ -81,7 +81,6 @@ import openfl.filters.GlowFilter;
 		rootPath = "";
 		#end
 
-		if (instances == null) instances = new Map();
 		instances.set(uuid, this);
 
 		// Hack to include filter classes, macro.include is not working properly
@@ -113,7 +112,6 @@ import openfl.filters.GlowFilter;
 
 	private static function get(uuid:String):AnimateLibrary
 	{
-		if (instances == null) return null;
 		return instances.get(uuid);
 	}
 
