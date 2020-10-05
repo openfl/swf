@@ -212,7 +212,7 @@ class AnimateLibraryExporter
 
 					if (object.placeMatrix != null)
 					{
-						var matrix = object.placeMatrix.matrix;
+						var matrix = object.placeMatrix.matrix.clone();
 						matrix.tx *= (1 / 20);
 						matrix.ty *= (1 / 20);
 
@@ -726,7 +726,7 @@ class AnimateLibraryExporter
 
 				if (placeTag.matrix != null)
 				{
-					var matrix = placeTag.matrix.matrix;
+					var matrix = placeTag.matrix.matrix.clone();
 					matrix.tx *= (1 / 20);
 					matrix.ty *= (1 / 20);
 
@@ -1040,7 +1040,7 @@ class AnimateLibraryExporter
 
 		symbol.records = records;
 
-		var matrix = tag.textMatrix.matrix;
+		var matrix = tag.textMatrix.matrix.clone();
 		matrix.tx *= (1 / 20);
 		matrix.ty *= (1 / 20);
 
