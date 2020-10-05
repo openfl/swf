@@ -1,3 +1,9 @@
+3.0.2 (09/16/2020)
+------------------
+
+* Remove `implements Dynamic` on MovieClip template for Haxe 4 support
+
+
 3.0.1 (09/14/2020)
 ------------------
 
