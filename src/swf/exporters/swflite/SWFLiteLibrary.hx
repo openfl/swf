@@ -87,7 +87,7 @@ import openfl.filters.GlowFilter;
 			return true;
 		}
 
-		if (type == (cast AssetType.IMAGE) || type == (cast AssetType.MOVIE_CLIP))
+		if (type == null || type == (cast AssetType.IMAGE) || type == (cast AssetType.MOVIE_CLIP))
 		{
 			return (swf != null && swf.hasSymbol(id));
 		}
