@@ -90,6 +90,14 @@ class ButtonSymbol extends SWFSymbol
 		return simpleButton;
 	}
 
+	private override function __init(swf:SWFLite):Void
+	{
+		#if (!macro && !flash)
+		SimpleButton.__constructor = __constructor;
+		#end
+		this.swf = swf;
+	}
+
 	private override function __initObject(swf:SWFLite, instance:DisplayObject):Void
 	{
 		this.swf = swf;

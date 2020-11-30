@@ -87,6 +87,12 @@ class AnimateButtonSymbol extends AnimateSymbol
 		return simpleButton;
 	}
 
+	private override function __init(library:AnimateLibrary):Void
+	{
+		SimpleButton.__constructor = __constructor;
+		this.library = library;
+	}
+
 	private override function __initObject(library:AnimateLibrary, instance:DisplayObject):Void
 	{
 		this.library = library;

@@ -103,6 +103,14 @@ class AnimateSpriteSymbol extends AnimateSymbol
 		return movieClip;
 	}
 
+	private override function __init(library:AnimateLibrary):Void
+	{
+		#if !macro
+		MovieClip.__constructor = __constructor;
+		#end
+		this.library = library;
+	}
+
 	private override function __initObject(library:AnimateLibrary, instance:DisplayObject):Void
 	{
 		this.library = library;

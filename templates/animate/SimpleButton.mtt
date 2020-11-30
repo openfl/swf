@@ -6,10 +6,10 @@ class ::CLASS_NAME:: extends ::if BASE_CLASS_NAME::::BASE_CLASS_NAME::::else::#i
 {
 	public function new()
 	{
-		super();
-
 		var library = swf.exporters.animate.AnimateLibrary.get("::UUID::");
 		var symbol = library.symbols.get(::SYMBOL_ID::);
-		symbol.__initObject(library, this);
+		symbol.__init(library);
+
+		super();
 	}
 }

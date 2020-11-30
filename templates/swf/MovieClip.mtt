@@ -14,19 +14,11 @@ class ::CLASS_NAME:: extends ::BASE_CLASS_NAME:: {
 
 	public function new () {
 
-		super ();
-
-		/*
-		if (!SWFLite.instances.exists ("::SWF_ID::")) {
-
-			SWFLite.instances.set ("::SWF_ID::", SWFLite.unserialize (Assets.getText ("::SWF_ID::")));
-
-		}
-		*/
-
 		var swfLite = SWFLite.instances.get ("::SWF_ID::");
 		var symbol = swfLite.symbols.get (::SYMBOL_ID::);
-		symbol.__initObject(swfLite, this);
+		symbol.__init(swfLite);
+
+		super();
 
 	}
 
