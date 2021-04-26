@@ -1,5 +1,6 @@
 package swf.exporters.animate;
 
+import openfl.display.Sprite;
 import lime.utils.Log;
 import openfl.display.DisplayObject;
 import openfl.display.FrameLabel;
@@ -362,8 +363,14 @@ class AnimateTimeline extends Timeline
 				__movieClip.graphics.clear();
 				if (currentInstances.length > 0)
 				{
-					var shape:Shape = cast currentInstances[0].displayObject;
-					__movieClip.graphics.copyFrom(shape.graphics);
+					if(Std.isOfType(currentInstances[0].displayObject, Shape))
+					{
+						var shape:Shape = cast currentInstances[0].displayObject;
+						__movieClip.graphics.copyFrom(shape.graphics);
+					}else{
+						var sprite:Sprite = cast currentInstances[0].displayObject;
+						__movieClip.graphics.copyFrom(sprite.graphics);
+					}
 				}
 			}
 			else
