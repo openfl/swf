@@ -51,7 +51,6 @@ import openfl.filters.GlowFilter;
 	#end
 
 	private static var instances:Map<String, AnimateLibrary> = new Map();
-	private static var linkedClasses:Map<String, AnimateLibrary> = new Map();
 
 	private var alphaCheck:Map<String, Bool>;
 	private var bitmapClassNames:Map<String, String>;
@@ -92,28 +91,20 @@ import openfl.filters.GlowFilter;
 		// var filter = flash.filters.GlowFilter;
 	}
 
-	// TODO: Move to better public API location
-	public static function bind(className:String):Void
+	#if (openfl > "9.1.0")
+	public override function bind(className:String, instance:Dynamic = null):Bool
 	{
 		#if !flash
-		if (linkedClasses.exists(className))
+		var symbol = symbolsByClassName.get(className);
+		if (symbol != null)
 		{
-			var library = linkedClasses.get(className);
-			var symbol = library.symbolsByClassName.get(className);
-			symbol.__init(library);
-		}
-		else
-		{
-			#if lime
-			for (key in linkedClasses.keys())
-			{
-				trace(key);
-			}
-			lime.utils.Log.warn("Cannot bind SWF class name \"" + className + "\": Linked symbol not found");
-			#end
+			symbol.__init(this);
+			return true;
 		}
 		#end
+		return false;
 	}
+	#end
 
 	#if lime
 	public override function exists(id:String, type:String):Bool
@@ -270,8 +261,10 @@ import openfl.filters.GlowFilter;
 				symbols.set(symbol.id, symbol);
 				if (symbol.className != null)
 				{
-					linkedClasses.set(symbol.className, this);
 					symbolsByClassName.set(symbol.className, symbol);
+					#if (openfl > "9.1.0")
+					Assets.registerBinding(symbol.className, this);
+					#end
 				}
 			}
 
@@ -386,13 +379,12 @@ import openfl.filters.GlowFilter;
 		// 	SWFLite.instances.remove(instanceID);
 		// }
 
-		for (key in linkedClasses.keys())
+		#if (openfl > "9.1.0")
+		for (className in symbolsByClassName.keys())
 		{
-			if (linkedClasses.get(key) == this)
-			{
-				linkedClasses.remove(key);
-			}
+			Assets.unregisterBinding(className, this);
 		}
+		#end
 
 		for (bitmapSymbol in bitmapSymbols)
 		{
