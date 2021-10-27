@@ -1,15 +1,14 @@
 package swf;
 
-import openfl.display.BitmapData;
-import openfl.events.Event;
-import openfl.events.EventDispatcher;
-import openfl.utils.ByteArray;
-// import swf.runtime.Bitmap;
-// import swf.runtime.MovieClip;
-// import swf.runtime.SimpleButton;
 import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 import openfl.display.MovieClip;
 import openfl.display.SimpleButton;
+import openfl.events.Event;
+import openfl.events.EventDispatcher;
+import openfl.events.TimerEvent;
+import openfl.utils.ByteArray;
+import openfl.utils.Timer;
 import swf.SWFRoot;
 import swf.SWFTimelineContainer;
 import swf.tags.TagDefineBits;
@@ -69,7 +68,8 @@ class SWF extends EventDispatcher
 
 				var bits:TagDefineBits = cast tag;
 				bits.exportBitmapData(handler);
-			} /*else if (Std.is (tag, TagDefineBitsLossless)) {
+			}
+			/*else if (Std.is (tag, TagDefineBitsLossless)) {
 
 				allTags++;
 
@@ -86,19 +86,6 @@ class SWF extends EventDispatcher
 		#else
 		dispatchCompleteTimer();
 		#end
-	}
-
-	inline private function dispatchCompleteTimer():Void
-	{
-		var tmr = new openfl.utils.Timer(1, 1);
-		tmr.addEventListener(openfl.events.TimerEvent.TIMER_COMPLETE, dispatchComplete);
-		tmr.start();
-	}
-
-	private function dispatchComplete(e:openfl.events.TimerEvent):Void
-	{
-		complete = true;
-		dispatchEvent(new Event(Event.COMPLETE));
 	}
 
 	public override function addEventListener(type:String, listener:Dynamic, useCapture:Bool = false, priority:Int = 0, useWeakReference:Bool = false):Void
@@ -163,6 +150,19 @@ class SWF extends EventDispatcher
 		// }
 
 		return null;
+	}
+
+	private inline function dispatchCompleteTimer():Void
+	{
+		var timer = new Timer(1, 1);
+		timer.addEventListener(TimerEvent.TIMER_COMPLETE, dispatchComplete);
+		timer.start();
+	}
+
+	private function dispatchComplete(e:TimerEvent):Void
+	{
+		complete = true;
+		dispatchEvent(new Event(Event.COMPLETE));
 	}
 
 	public function getBitmapData(className:String):BitmapData
