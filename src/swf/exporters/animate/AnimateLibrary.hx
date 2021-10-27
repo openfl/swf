@@ -35,6 +35,7 @@ import openfl.filters.GlowFilter;
 @:noDebug
 #end
 @:access(swf.exporters.animate.AnimateSpriteSymbol)
+@:access(swf.exporters.animate)
 @SuppressWarnings("checkstyle:FieldDocComment")
 @:keep class AnimateLibrary extends AssetLibrary
 {
@@ -50,6 +51,7 @@ import openfl.filters.GlowFilter;
 	#end
 
 	private static var instances:Map<String, AnimateLibrary> = new Map();
+	private static var linkedClasses:Map<String, AnimateLibrary> = new Map();
 
 	private var alphaCheck:Map<String, Bool>;
 	private var bitmapClassNames:Map<String, String>;
@@ -88,6 +90,29 @@ import openfl.filters.GlowFilter;
 		// var filter = flash.filters.BlurFilter;
 		// var filter = flash.filters.DropShadowFilter;
 		// var filter = flash.filters.GlowFilter;
+	}
+
+	// TODO: Move to better public API location
+	public static function bind(className:String):Void
+	{
+		#if !flash
+		if (linkedClasses.exists(className))
+		{
+			var library = linkedClasses.get(className);
+			var symbol = library.symbolsByClassName.get(className);
+			symbol.__init(library);
+		}
+		else
+		{
+			#if lime
+			for (key in linkedClasses.keys())
+			{
+				trace(key);
+			}
+			lime.utils.Log.warn("Cannot bind SWF class name \"" + className + "\": Linked symbol not found");
+			#end
+		}
+		#end
 	}
 
 	#if lime
@@ -243,7 +268,11 @@ import openfl.filters.GlowFilter;
 
 				if (symbol == null) continue;
 				symbols.set(symbol.id, symbol);
-				if (symbol.className != null) symbolsByClassName.set(symbol.className, symbol);
+				if (symbol.className != null)
+				{
+					linkedClasses.set(symbol.className, this);
+					symbolsByClassName.set(symbol.className, symbol);
+				}
 			}
 
 			// SWFLite.instances.set(instanceID, swf);
@@ -356,6 +385,14 @@ import openfl.filters.GlowFilter;
 		// {
 		// 	SWFLite.instances.remove(instanceID);
 		// }
+
+		for (key in linkedClasses.keys())
+		{
+			if (linkedClasses.get(key) == this)
+			{
+				linkedClasses.remove(key);
+			}
+		}
 
 		for (bitmapSymbol in bitmapSymbols)
 		{
