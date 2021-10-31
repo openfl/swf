@@ -63,7 +63,7 @@ import flash.display.AVM1Movie;
 		if (id == "")
 		{
 			#if flash
-			if (Std.is(loader.content, AVM1Movie))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (loader.content, AVM1Movie))
 			{
 				var clip = new MovieClip();
 				clip.addChild(loader);

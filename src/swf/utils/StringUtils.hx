@@ -461,12 +461,14 @@ class StringUtils
 								break;
 							case "d":
 							case "i":
-								valueInt = ((Std.is(value, Float)) ? cast value : Std.parseInt(Std.string(value)));
+								valueInt = ((#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
+									Float)) ? cast value : Std.parseInt(Std.string(value)));
 								valueStr = Std.string(Math.abs(valueInt));
 								sign = (valueInt < 0) ? SIGN_NEG : SIGN_POS;
 								break;
 							case "u":
-								valueStr = Std.string((Std.is(value, Float)) ? cast value : Std.parseInt(Std.string(value)));
+								valueStr = Std.string((#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
+									Float)) ? cast value : Std.parseInt(Std.string(value)));
 								break;
 							case "f":
 							case "F":
@@ -479,7 +481,8 @@ class StringUtils
 									precision = 6;
 								}
 								var exp10:Float = Math.pow(10, precision);
-								valueFloat = (Std.is(value, Float)) ? cast value : Std.parseFloat(Std.string(value));
+								valueFloat = (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
+									Float)) ? cast value : Std.parseFloat(Std.string(value));
 								valueStr = Std.string(Math.round(Math.abs(valueFloat) * exp10) / exp10);
 								if (precision > 0)
 								{
@@ -504,14 +507,17 @@ class StringUtils
 							case "x":
 							case "X":
 							case "p":
-								valueStr = (Std.is(value, Float)) ? Std.string(Std.int(value)) : StringTools.hex(Std.parseInt(value));
+								valueStr = (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
+									Float)) ? Std.string(Std.int(value)) : StringTools.hex(Std.parseInt(value));
 								if (type == "X")
 								{
 									valueStr = valueStr.toUpperCase();
 								}
 								break;
 							case "o":
-								valueStr = BaseCode.encode(Std.string(((Std.is(value, Float)) ? Std.int(value) : Std.int(value))), "01234567");
+								valueStr = BaseCode.encode(Std.string(((#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
+									Float)) ? Std.int(value) : Std.int(value))),
+									"01234567");
 								break;
 						}
 

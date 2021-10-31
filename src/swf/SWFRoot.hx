@@ -55,7 +55,7 @@ class SWFRoot extends SWFTimelineContainer
 		symbols = new Map<String, Int>();
 		for (tag in this.tags)
 		{
-			if (Std.is(tag, TagSymbolClass))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
 			{
 				for (symbol in cast(tag, TagSymbolClass).symbols)
 				{

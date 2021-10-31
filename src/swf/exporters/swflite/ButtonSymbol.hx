@@ -81,7 +81,7 @@ class ButtonSymbol extends SWFSymbol
 		}
 
 		#if flash
-		if (!Std.is(simpleButton, flash.display.SimpleButton.SimpleButton2))
+		if (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (simpleButton, flash.display.SimpleButton.SimpleButton2))
 		{
 			__constructor(simpleButton);
 		}

@@ -209,17 +209,19 @@ class Tools
 			var symbol = swf.data.getCharacter(symbolID);
 			var baseClassName = null;
 
-			if (Std.is(symbol, TagDefineBits) || Std.is(symbol, TagDefineBitsJPEG2) || Std.is(symbol, TagDefineBitsLossless))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBits)
+				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBitsJPEG2)
+				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBitsLossless))
 			{
 				templateData = bitmapDataTemplate;
 				baseClassName = "openfl.display.BitmapData";
 			}
-			else if (Std.is(symbol, TagDefineButton2))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineButton2))
 			{
 				templateData = simpleButtonTemplate;
 				baseClassName = "openfl.display.SimpleButton";
 			}
-			else if (Std.is(symbol, SWFTimelineContainer))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SWFTimelineContainer))
 			{
 				templateData = movieClipTemplate;
 				baseClassName = "openfl.display.MovieClip";
@@ -246,7 +248,7 @@ class Tools
 				var objectReferences = new Map<String, Bool>();
 				var privatePkg = false;
 
-				if (Std.is(symbol, SWFTimelineContainer))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SWFTimelineContainer))
 				{
 					var timelineContainer:SWFTimelineContainer = cast symbol;
 
@@ -276,25 +278,27 @@ class Tools
 									{
 										if (className == null)
 										{
-											if (Std.is(childSymbol, TagDefineSprite))
+											if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineSprite))
 											{
 												className = "openfl.display.MovieClip";
 											}
-											else if (Std.is(childSymbol, TagDefineBits)
-												|| Std.is(childSymbol, TagDefineBitsJPEG2)
-												|| Std.is(childSymbol, TagDefineBitsLossless))
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineBits)
+												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineBitsJPEG2)
+												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineBitsLossless))
 											{
 												className = "openfl.display.BitmapData";
 											}
-											else if (Std.is(childSymbol, TagDefineShape) || Std.is(childSymbol, TagDefineMorphShape))
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineShape)
+												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineMorphShape))
 											{
 												className = "openfl.display.Shape";
 											}
-											else if (Std.is(childSymbol, TagDefineText) || Std.is(childSymbol, TagDefineEditText))
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineText)
+												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineEditText))
 											{
 												className = "openfl.text.TextField";
 											}
-											else if (Std.is(childSymbol, TagDefineButton2))
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineButton2))
 											{
 												className = "openfl.display.SimpleButton";
 											}
@@ -384,12 +388,12 @@ class Tools
 	// 		var symbol = swfLite.symbols.get(symbolID);
 	// 		var templateData = null;
 	// 		var baseClassName = null;
-	// 		if (Std.is(symbol, BitmapSymbol))
+	// 		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(symbol, BitmapSymbol))
 	// 		{
 	// 			templateData = bitmapDataTemplate;
 	// 			baseClassName = "openfl.display.BitmapData";
 	// 		}
-	// 		else if (Std.is(symbol, SpriteSymbol))
+	// 		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(symbol, SpriteSymbol))
 	// 		{
 	// 			templateData = movieClipTemplate;
 	// 			if (cast(symbol, SpriteSymbol).baseClassName != null)
@@ -401,7 +405,7 @@ class Tools
 	// 				baseClassName = "openfl.display.MovieClip";
 	// 			}
 	// 		}
-	// 		else if (Std.is(symbol, ButtonSymbol))
+	// 		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(symbol, ButtonSymbol))
 	// 		{
 	// 			templateData = simpleButtonTemplate;
 	// 			baseClassName = "openfl.display.SimpleButton";
@@ -424,7 +428,7 @@ class Tools
 	// 			// name = formatClassName(name, prefix);
 	// 			var classProperties = [];
 	// 			var objectReferences = new Map<String, Bool>();
-	// 			if (Std.is(symbol, SpriteSymbol))
+	// 			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(symbol, SpriteSymbol))
 	// 			{
 	// 				var spriteSymbol:SpriteSymbol = cast symbol;
 	// 				if (spriteSymbol.frames.length > 0 && Reflect.hasField(spriteSymbol.frames[0], "objects"))
@@ -443,29 +447,29 @@ class Tools
 	// 										var className = childSymbol.className;
 	// 										if (className == null)
 	// 										{
-	// 											if (Std.is(childSymbol, SpriteSymbol))
+	// 											if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, SpriteSymbol))
 	// 											{
 	// 												className = "openfl.display.MovieClip";
 	// 											}
-	// 											else if (Std.is(childSymbol, TagDefineBits)
-	// 												|| Std.is(childSymbol, TagDefineBitsJPEG2)
-	// 												|| Std.is(childSymbol, TagDefineBitsLossless))
+	// 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, TagDefineBits)
+	// 												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, TagDefineBitsJPEG2)
+	// 												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, TagDefineBitsLossless))
 	// 											{
 	// 												className = "openfl.display.BitmapData";
 	// 											}
-	// 											else if (Std.is(childSymbol, ShapeSymbol))
+	// 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, ShapeSymbol))
 	// 											{
 	// 												className = "openfl.display.Shape";
 	// 											}
-	// 											else if (Std.is(childSymbol, BitmapSymbol))
+	// 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, BitmapSymbol))
 	// 											{
 	// 												className = "openfl.display.Bitmap";
 	// 											}
-	// 											else if (Std.is(childSymbol, DynamicTextSymbol) || Std.is(childSymbol, StaticTextSymbol))
+	// 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, DynamicTextSymbol) || #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, StaticTextSymbol))
 	// 											{
 	// 												className = "openfl.text.TextField";
 	// 											}
-	// 											else if (Std.is(childSymbol, ButtonSymbol))
+	// 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end(childSymbol, ButtonSymbol))
 	// 											{
 	// 												className = "openfl.display.SimpleButton";
 	// 											}

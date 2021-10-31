@@ -48,7 +48,7 @@ class DynamicText extends TextField
 		{
 			var font = data.getCharacter(tag.fontId);
 
-			if (Std.is(font, TagDefineFont2))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (font, TagDefineFont2))
 			{
 				#if ((cpp || neko) && openfl_legacy)
 				var fontName = cast(font, TagDefineFont2).fontName;

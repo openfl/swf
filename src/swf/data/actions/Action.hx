@@ -74,7 +74,7 @@ class Action implements IAction
 		for (i in 0...n)
 		{
 			action = actions[i];
-			if (Std.is(action, IActionBranch))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (action, IActionBranch))
 			{
 				var j:Int = 0;
 				var found:Bool = false;

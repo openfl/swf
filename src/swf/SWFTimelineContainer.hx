@@ -215,7 +215,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		var tag:ITag = tagFactory.create(tagHeader.type);
 		try
 		{
-			if (Std.is(tag, SWFTimelineContainer))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, SWFTimelineContainer))
 			{
 				var timelineContainer:SWFTimelineContainer = cast tag;
 				// Currently, the only SWFTimelineContainer (other than the SWF root
@@ -364,12 +364,12 @@ class SWFTimelineContainer extends SWFEventDispatcher
 		// trace("  ..Process: " + tag.type + " - name: " + tag.name);
 
 		var currentTagIndex:Int = tags.length - 1;
-		if (Std.is(tag, IDefinitionTag))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, IDefinitionTag))
 		{
 			processDefinitionTag(cast tag, currentTagIndex);
 			return;
 		}
-		else if (Std.is(tag, IDisplayListTag))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, IDisplayListTag))
 		{
 			processDisplayListTag(cast tag, currentTagIndex);
 			return;
@@ -651,7 +651,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 						// set start of new strip
 						startFrameIndex = curFrameIndex;
 						// evaluate type of new strip (motion tween detection see below)
-						curStripType = (Std.is(getCharacter(curFrameObject.characterId),
+						curStripType = (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (getCharacter(curFrameObject.characterId),
 							TagDefineMorphShape)) ? LayerStrip.TYPE_SHAPETWEEN : LayerStrip.TYPE_STATIC;
 					}
 					else if (curStripType == LayerStrip.TYPE_STATIC && curFrameObject.lastModifiedAtIndex > 0)

@@ -62,14 +62,14 @@ class SWF extends EventDispatcher
 
 		for (tag in data.tags)
 		{
-			if (Std.is(tag, TagDefineBits))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBits))
 			{
 				allTags++;
 
 				var bits:TagDefineBits = cast tag;
 				bits.exportBitmapData(handler);
 			}
-			/*else if (Std.is (tag, TagDefineBitsLossless)) {
+			/*else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsLossless)) {
 
 				allTags++;
 
@@ -109,7 +109,7 @@ class SWF extends EventDispatcher
 			symbol = data.getCharacter(charId);
 		}
 
-		// if (Std.is (symbol, TagDefineButton2)) {
+		// if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineButton2)) {
 
 		// 	return new SimpleButton (data, cast symbol);
 
@@ -143,7 +143,7 @@ class SWF extends EventDispatcher
 			}
 		}
 
-		// if (Std.is (symbol, SWFTimelineContainer)) {
+		// if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SWFTimelineContainer)) {
 
 		// 	return new MovieClip (cast symbol);
 
@@ -181,7 +181,8 @@ class SWF extends EventDispatcher
 			}
 		}
 
-		if (Std.is(symbol, TagDefineBits) || Std.is(symbol, TagDefineBitsLossless))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBits)
+			|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBitsLossless))
 		{
 			return new Bitmap(cast symbol).bitmapData;
 		}

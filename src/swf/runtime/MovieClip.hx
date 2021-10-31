@@ -79,7 +79,7 @@ class MovieClipTimeline extends Timeline
 
 		var symbol = data.getCharacter(charId);
 
-		if (Std.is(symbol, TagDefineSprite))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineSprite))
 		{
 			displayObject = new MovieClip(cast symbol);
 			var grid = data.getScalingGrid(charId);
@@ -88,27 +88,28 @@ class MovieClipTimeline extends Timeline
 				cast(displayObject, MovieClip).scale9Grid = grid.splitter.rect;
 			}
 		}
-		else if (Std.is(symbol, TagDefineBitsLossless) || Std.is(symbol, TagDefineBits))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBitsLossless)
+			|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineBits))
 		{
 			displayObject = new Bitmap(cast symbol);
 		}
-		else if (Std.is(symbol, TagDefineShape))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineShape))
 		{
 			displayObject = new Shape(data, cast symbol);
 		}
-		else if (Std.is(symbol, TagDefineText))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineText))
 		{
 			displayObject = new StaticText(data, cast symbol);
 		}
-		else if (Std.is(symbol, TagDefineEditText))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineEditText))
 		{
 			displayObject = new DynamicText(data, cast symbol);
 		}
-		else if (Std.is(symbol, TagDefineButton2))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineButton2))
 		{
 			displayObject = new SimpleButton(data, cast symbol);
 		}
-		else if (Std.is(symbol, TagDefineMorphShape))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineMorphShape))
 		{
 			displayObject = new MorphShape(data, cast symbol);
 		}
@@ -147,7 +148,7 @@ class MovieClipTimeline extends Timeline
 				matrix.tx *= 1 / 20;
 				matrix.ty *= 1 / 20;
 
-				if (Std.is(displayObject, DynamicText))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, DynamicText))
 				{
 					var offset = cast(displayObject, DynamicText).offset.clone();
 					offset.concat(matrix);
@@ -163,7 +164,7 @@ class MovieClipTimeline extends Timeline
 			matrix.tx *= 1 / 20;
 			matrix.ty *= 1 / 20;
 
-			if (Std.is(displayObject, DynamicText))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, DynamicText))
 			{
 				var offset = cast(displayObject, DynamicText).offset.clone();
 				offset.concat(matrix);
@@ -211,7 +212,7 @@ class MovieClipTimeline extends Timeline
 			displayObject.filters = filters;
 		}
 
-		if (Std.is(displayObject, MorphShape))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, MorphShape))
 		{
 			if (lastTag != null) cast(displayObject, MorphShape).render(lastTag.ratio);
 		}

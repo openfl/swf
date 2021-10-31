@@ -180,7 +180,7 @@ import openfl.filters.GlowFilter;
 			var symbol = symbolsByClassName.get(id);
 			if (symbol != null)
 			{
-				if (Std.is(symbol, AnimateSpriteSymbol))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateSpriteSymbol))
 				{
 					return cast(symbol, AnimateSpriteSymbol).__createObject(this);
 				}

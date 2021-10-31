@@ -97,7 +97,7 @@ class SpriteSymbol extends SWFSymbol
 		}
 
 		#if flash
-		if (!Std.is(movieClip, flash.display.MovieClip.MovieClip2))
+		if (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (movieClip, flash.display.MovieClip.MovieClip2))
 		{
 			movieClip.scale9Grid = scale9Grid;
 		}

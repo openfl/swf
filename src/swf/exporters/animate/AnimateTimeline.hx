@@ -383,7 +383,7 @@ class AnimateTimeline extends Timeline
 						if (instance.displayObject == child)
 						{
 							// set MovieClips back to initial state (autoplay)
-							if (Std.is(child, MovieClip))
+							if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (child, MovieClip))
 							{
 								var movie:MovieClip = cast child;
 								movie.gotoAndPlay(1);

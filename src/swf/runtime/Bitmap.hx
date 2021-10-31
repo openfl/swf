@@ -15,7 +15,7 @@ class Bitmap extends openfl.display.Bitmap
 	{
 		super();
 
-		if (Std.is(tag, TagDefineBitsLossless))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsLossless))
 		{
 			var data:TagDefineBitsLossless = cast tag;
 
@@ -117,7 +117,7 @@ class Bitmap extends openfl.display.Bitmap
 				data.instance = bitmapData;
 			}
 		}
-		else if (Std.is(tag, TagDefineBitsJPEG2))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsJPEG2))
 		{
 			var data:TagDefineBitsJPEG2 = cast tag;
 
@@ -128,7 +128,7 @@ class Bitmap extends openfl.display.Bitmap
 			else
 			{
 				#if !flash
-				if (Std.is(tag, TagDefineBitsJPEG3))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsJPEG3))
 				{
 					var alpha = cast(tag, TagDefineBitsJPEG3).bitmapAlphaData;
 					alpha.uncompress();
@@ -156,7 +156,7 @@ class Bitmap extends openfl.display.Bitmap
 				#end
 			}
 		}
-		else if (Std.is(tag, TagDefineBits))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBits))
 		{
 			var data:TagDefineBits = cast tag;
 

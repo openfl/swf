@@ -110,7 +110,7 @@ import openfl.filters.GlowFilter;
 		{
 			for (symbol in swf.symbols)
 			{
-				if (Std.is(symbol, BitmapSymbol) && cast(symbol, BitmapSymbol).path == id)
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, BitmapSymbol) && cast(symbol, BitmapSymbol).path == id)
 				{
 					var bitmapSymbol:BitmapSymbol = cast symbol;
 
@@ -173,7 +173,7 @@ import openfl.filters.GlowFilter;
 
 			for (symbol in swf.symbols)
 			{
-				if (Std.is(symbol, BitmapSymbol))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, BitmapSymbol))
 				{
 					bitmapSymbol = cast symbol;
 
@@ -246,7 +246,7 @@ import openfl.filters.GlowFilter;
 		{
 			for (symbol in swf.symbols)
 			{
-				if (Std.is(symbol, BitmapSymbol) && cast(symbol, BitmapSymbol).path == id)
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, BitmapSymbol) && cast(symbol, BitmapSymbol).path == id)
 				{
 					var bitmapSymbol:BitmapSymbol = cast symbol;
 
@@ -296,7 +296,7 @@ import openfl.filters.GlowFilter;
 
 		for (symbol in swf.symbols)
 		{
-			if (Std.is(symbol, BitmapSymbol))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, BitmapSymbol))
 			{
 				bitmap = cast symbol;
 				Assets.cache.removeBitmapData(bitmap.path);

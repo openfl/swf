@@ -51,7 +51,7 @@ import openfl.Assets;
 			var symbol = symbolsByClassName.get(className);
 			if (symbol != null)
 			{
-				if (Std.is(symbol, SpriteSymbol))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SpriteSymbol))
 				{
 					return cast(symbol, SpriteSymbol).__createObject(this);
 				}
@@ -67,7 +67,7 @@ import openfl.Assets;
 
 		if (symbol != null)
 		{
-			if (Std.is(symbol, BitmapSymbol))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, BitmapSymbol))
 			{
 				var bitmap:BitmapSymbol = cast symbol;
 				return Assets.getBitmapData(bitmap.path);

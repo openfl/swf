@@ -35,7 +35,7 @@ class StaticText extends Shape
 			{
 				color = record.textColor & 0x00FFFFFF;
 
-				if (Std.is(tag, TagDefineText2))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineText2))
 				{
 					alpha = (record.textColor & 0xFF) / 0xFF;
 				}

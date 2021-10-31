@@ -724,10 +724,11 @@ class FrameScriptParser
 			a += "	";
 		return a;
 	}
-} /**
+}
+
+/**
  * AVM2 ActionScript3 Byte Code (ABC) Instruction Traversal
  */
-
 private typedef MultiName =
 {
 	var name:String;
@@ -966,7 +967,7 @@ class AVM2
 		{
 			//			if (i > 0) js += ", ";
 			var arg = stack.pop();
-			if (Std.is(arg, String))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (arg, String))
 			{
 				//				js += arg;
 				temp.push(arg);

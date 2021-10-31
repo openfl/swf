@@ -118,7 +118,7 @@ class SWFShape
 	private function readShapeRecords(data:SWFData, fillBits:Int, lineBits:Int, level:Int = 1):Void
 	{
 		var shapeRecord:SWFShapeRecord = null;
-		while (!Std.is(shapeRecord, SWFShapeRecordEnd))
+		while (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (shapeRecord, SWFShapeRecordEnd))
 		{
 			// The SWF10 spec says that shape records are byte aligned.
 			// In reality they seem not to be?
@@ -161,7 +161,7 @@ class SWFShape
 
 	private function writeShapeRecords(data:SWFData, fillBits:Int, lineBits:Int, level:Int = 1):Void
 	{
-		if (records.length == 0 || !Std.is(records[records.length - 1], SWFShapeRecordEnd))
+		if (records.length == 0 || !#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (records[records.length - 1], SWFShapeRecordEnd))
 		{
 			records.push(new SWFShapeRecordEnd());
 		}
@@ -231,7 +231,7 @@ class SWFShape
 
 	private function determineReferencePoint():Void
 	{
-		if (Std.is(records[0], SWFShapeRecordStyleChange))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (records[0], SWFShapeRecordStyleChange))
 		{
 			var styleChangeRecord:SWFShapeRecordStyleChange = cast records[0];
 			if (styleChangeRecord != null && styleChangeRecord.stateMoveTo)
@@ -517,7 +517,7 @@ class SWFShape
 				{
 					handler.moveTo(e.from.x, e.from.y);
 				}
-				if (Std.is(e, CurvedEdge))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (e, CurvedEdge))
 				{
 					var c:CurvedEdge = cast e;
 					handler.curveTo(c.control.x, c.control.y, c.to.x, c.to.y);
@@ -618,7 +618,7 @@ class SWFShape
 				{
 					handler.moveTo(e.from.x, e.from.y);
 				}
-				if (Std.is(e, CurvedEdge))
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (e, CurvedEdge))
 				{
 					var c:CurvedEdge = cast e;
 					handler.curveTo(c.control.x, c.control.y, c.to.x, c.to.y);

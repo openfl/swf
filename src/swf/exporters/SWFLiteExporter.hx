@@ -93,7 +93,7 @@ class SWFLiteExporter
 
 		for (tag in data.tags)
 		{
-			if (Std.is(tag, TagSymbolClass))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
 			{
 				for (symbol in cast(tag, TagSymbolClass).symbols)
 				{
@@ -108,7 +108,7 @@ class SWFLiteExporter
 	{
 		var symbol = new ButtonSymbol();
 
-		if (Std.is(tag, IDefinitionTag))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, IDefinitionTag))
 		{
 			symbol.id = untyped tag.characterId;
 		}
@@ -185,7 +185,7 @@ class SWFLiteExporter
 			return null;
 		}
 
-		if (Std.is(tag, TagDefineButton))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineButton))
 		{
 			var defineButton:TagDefineButton = cast tag;
 
@@ -215,7 +215,7 @@ class SWFLiteExporter
 		var byteArray = null;
 		var type = null;
 
-		if (Std.is(tag, TagDefineBitsLossless))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsLossless))
 		{
 			var data:TagDefineBitsLossless = cast tag;
 
@@ -287,11 +287,11 @@ class SWFLiteExporter
 				type = BitmapType.PNG;
 			}
 		}
-		else if (Std.is(tag, TagDefineBitsJPEG2))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsJPEG2))
 		{
 			var data:TagDefineBitsJPEG2 = cast tag;
 
-			if (Std.is(tag, TagDefineBitsJPEG3))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsJPEG3))
 			{
 				var alpha = cast(tag, TagDefineBitsJPEG3).bitmapAlphaData;
 				alpha.uncompress();
@@ -343,7 +343,7 @@ class SWFLiteExporter
 				type = BitmapType.JPEG;
 			}
 		}
-		else if (Std.is(tag, TagDefineBits))
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBits))
 		{
 			var data:TagDefineBits = cast tag;
 
@@ -371,7 +371,7 @@ class SWFLiteExporter
 
 	private function addFont(tag:IDefinitionTag):FontSymbol
 	{
-		if (Std.is(tag, TagDefineFont2))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont2))
 		{
 			var defineFont:TagDefineFont2 = cast tag;
 			var symbol = new FontSymbol();
@@ -491,7 +491,7 @@ class SWFLiteExporter
 	{
 		var symbol = new SpriteSymbol();
 
-		if (Std.is(tag, IDefinitionTag))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, IDefinitionTag))
 		{
 			symbol.id = untyped tag.characterId;
 		}
@@ -820,7 +820,7 @@ class SWFLiteExporter
 
 	private function addSound(tag:IDefinitionTag):Void
 	{
-		if (Std.is(tag, TagDefineSound))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 		{
 			var defineSound:TagDefineSound = cast tag;
 
@@ -868,35 +868,39 @@ class SWFLiteExporter
 
 		if (!swfLite.symbols.exists(tag.characterId))
 		{
-			if (Std.is(tag, TagDefineSprite))
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSprite))
 			{
 				return addSprite(cast tag);
 			}
-			else if (Std.is(tag, TagDefineBits) || Std.is(tag, TagDefineBitsJPEG2) || Std.is(tag, TagDefineBitsLossless))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBits)
+				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsJPEG2)
+				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineBitsLossless))
 			{
 				return addBitmap(tag);
 			}
-			else if (Std.is(tag, TagDefineButton) || Std.is(tag, TagDefineButton2))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineButton)
+				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineButton2))
 			{
 				return addButton(cast tag);
 			}
-			else if (Std.is(tag, TagDefineEditText))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineEditText))
 			{
 				return addDynamicText(cast tag);
 			}
-			else if (Std.is(tag, TagDefineText))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineText))
 			{
 				return addStaticText(cast tag);
 			}
-			else if (Std.is(tag, TagDefineShape))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineShape))
 			{
 				return addShape(cast tag);
 			}
-			else if (Std.is(tag, TagDefineFont) || Std.is(tag, TagDefineFont4))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont)
+				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont4))
 			{
 				return addFont(tag);
 			}
-			else if (Std.is(tag, TagDefineSound))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 			{
 				addSound(tag);
 			}
