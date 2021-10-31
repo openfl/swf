@@ -868,7 +868,7 @@ class Tools
 
 				output.assets.push(asset);
 
-				if (true || library.generate)
+				if (library.generate != false)
 				{
 					var generatedClasses = generateSWFClasses(project, output, swf, library.prefix);
 
@@ -925,7 +925,7 @@ class Tools
 						var swf = new SWF(bytes);
 						var exporter = new AnimateLibraryExporter(swf.data, cacheFile);
 
-						if (true || library.generate)
+						if (library.generate != false)
 						{
 							var targetPath;
 
