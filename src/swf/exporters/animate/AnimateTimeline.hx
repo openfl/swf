@@ -7,6 +7,7 @@ import openfl.display.FrameScript;
 import openfl.display.MovieClip;
 import openfl.display.Scene;
 import openfl.display.Shape;
+import openfl.display.Sprite;
 import openfl.display.Timeline;
 // import openfl.events.Event;
 import openfl.filters.BitmapFilter;
@@ -46,8 +47,8 @@ class AnimateTimeline extends Timeline
 	@:noCompletion private var __currentInstancesByFrameObjectID:Map<Int, FrameSymbolInstance>;
 	@:noCompletion private var __instanceFields:Array<String>;
 	@:noCompletion private var __library:AnimateLibrary;
-	@:noCompletion private var __movieClip:MovieClip;
 	@:noCompletion private var __previousFrame:Int;
+	@:noCompletion private var __sprite:Sprite;
 	@:noCompletion private var __symbol:AnimateSpriteSymbol;
 
 	public function new(library:AnimateLibrary, symbol:AnimateSpriteSymbol)
@@ -150,102 +151,7 @@ class AnimateTimeline extends Timeline
 
 	public override function attachMovieClip(movieClip:MovieClip):Void
 	{
-		__movieClip = movieClip;
-
-		if (__activeInstances != null) return;
-
-		__instanceFields = [];
-		__previousFrame = -1;
-
-		__activeInstances = [];
-		__activeInstancesByFrameObjectID = new Map();
-		__currentInstancesByFrameObjectID = new Map();
-
-		var frame:Int;
-		var frameData:AnimateFrame;
-		var instance:FrameSymbolInstance;
-		var duplicate:Bool;
-		var symbol:AnimateSymbol;
-		var displayObject:DisplayObject;
-
-		// TODO: Create later?
-
-		for (i in 0...scenes[0].numFrames)
-		{
-			frame = i + 1;
-			frameData = __symbol.frames[i];
-
-			if (frameData.objects == null) continue;
-
-			for (frameObject in frameData.objects)
-			{
-				if (frameObject.type == AnimateFrameObjectType.CREATE)
-				{
-					if (__activeInstancesByFrameObjectID.exists(frameObject.id))
-					{
-						continue;
-					}
-					else
-					{
-						instance = null;
-						duplicate = false;
-
-						for (activeInstance in __activeInstances)
-						{
-							if (activeInstance.displayObject != null
-								&& activeInstance.characterID == frameObject.symbol
-								&& activeInstance.depth == frameObject.depth)
-							{
-								// TODO: Fix duplicates in exporter
-								instance = activeInstance;
-								duplicate = true;
-								break;
-							}
-						}
-					}
-
-					if (instance == null)
-					{
-						symbol = __library.symbols.get(frameObject.symbol);
-
-						if (symbol != null)
-						{
-							displayObject = symbol.__createObject(__library);
-
-							if (displayObject != null)
-							{
-								#if !flash
-								// displayObject.parent = __movieClip;
-								// displayObject.stage = __movieClip.stage;
-
-								// if (__movieClip.stage != null) displayObject.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
-								#end
-
-								instance = new FrameSymbolInstance(frame, frameObject.id, frameObject.symbol, frameObject.depth, displayObject,
-									frameObject.clipDepth);
-							}
-						}
-					}
-
-					if (instance != null)
-					{
-						__activeInstancesByFrameObjectID.set(frameObject.id, instance);
-
-						if (!duplicate)
-						{
-							__activeInstances.push(instance);
-							__updateDisplayObject(instance.displayObject, frameObject);
-						}
-					}
-				}
-			}
-		}
-
-		#if !openfljs
-		__instanceFields = Type.getInstanceFields(Type.getClass(__movieClip));
-		#end
-
-		enterFrame(1);
+		init(movieClip);
 	}
 
 	public override function enterFrame(currentFrame:Int):Void
@@ -326,7 +232,7 @@ class AnimateTimeline extends Timeline
 
 			for (i in 0...currentInstances.length)
 			{
-				existingChild = (i < __movieClip.numChildren) ? __movieClip.getChildAt(i) : null;
+				existingChild = (i < __sprite.numChildren) ? __sprite.getChildAt(i) : null;
 				instance = currentInstances[i];
 
 				targetDepth = instance.depth;
@@ -334,7 +240,7 @@ class AnimateTimeline extends Timeline
 
 				if (existingChild != targetChild)
 				{
-					__movieClip.addChildAt(targetChild, i);
+					__sprite.addChildAt(targetChild, i);
 				}
 
 				child = targetChild;
@@ -357,24 +263,24 @@ class AnimateTimeline extends Timeline
 			}
 
 			// TODO: How to tell if shapes are for a scale9Grid clip?
-			if (__movieClip.scale9Grid != null)
+			if (__sprite.scale9Grid != null)
 			{
-				__movieClip.graphics.clear();
+				__sprite.graphics.clear();
 				if (currentInstances.length > 0)
 				{
 					var shape:Shape = cast currentInstances[0].displayObject;
-					__movieClip.graphics.copyFrom(shape.graphics);
+					__sprite.graphics.copyFrom(shape.graphics);
 				}
 			}
 			else
 			{
 				var child;
 				var i = currentInstances.length;
-				var length = __movieClip.numChildren;
+				var length = __sprite.numChildren;
 
 				while (i < length)
 				{
-					child = __movieClip.getChildAt(i);
+					child = __sprite.getChildAt(i);
 
 					// TODO: Faster method of determining if this was automatically added?
 
@@ -389,7 +295,7 @@ class AnimateTimeline extends Timeline
 								movie.gotoAndPlay(1);
 							}
 
-							__movieClip.removeChild(child);
+							__sprite.removeChild(child);
 							i--;
 							length--;
 						}
@@ -405,6 +311,120 @@ class AnimateTimeline extends Timeline
 
 			__previousFrame = currentFrame;
 		}
+	}
+
+	private function init(sprite:Sprite):Void
+	{
+		if (__activeInstances != null) return;
+
+		__sprite = sprite;
+
+		__instanceFields = [];
+		__previousFrame = -1;
+
+		__activeInstances = [];
+		__activeInstancesByFrameObjectID = new Map();
+		__currentInstancesByFrameObjectID = new Map();
+
+		var frame:Int;
+		var frameData:AnimateFrame;
+		var instance:FrameSymbolInstance;
+		var duplicate:Bool;
+		var symbol:AnimateSymbol;
+		var displayObject:DisplayObject;
+
+		// TODO: Create later?
+
+		for (i in 0...scenes[0].numFrames)
+		{
+			frame = i + 1;
+			frameData = __symbol.frames[i];
+
+			if (frameData.objects == null) continue;
+
+			for (frameObject in frameData.objects)
+			{
+				if (frameObject.type == AnimateFrameObjectType.CREATE)
+				{
+					if (__activeInstancesByFrameObjectID.exists(frameObject.id))
+					{
+						continue;
+					}
+					else
+					{
+						instance = null;
+						duplicate = false;
+
+						for (activeInstance in __activeInstances)
+						{
+							if (activeInstance.displayObject != null
+								&& activeInstance.characterID == frameObject.symbol
+								&& activeInstance.depth == frameObject.depth)
+							{
+								// TODO: Fix duplicates in exporter
+								instance = activeInstance;
+								duplicate = true;
+								break;
+							}
+						}
+					}
+
+					if (instance == null)
+					{
+						symbol = __library.symbols.get(frameObject.symbol);
+
+						if (symbol != null)
+						{
+							displayObject = symbol.__createObject(__library);
+
+							if (displayObject != null)
+							{
+								#if !flash
+								// displayObject.parent = __sprite;
+								// displayObject.stage = __sprite.stage;
+
+								// if (__sprite.stage != null) displayObject.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
+								#end
+
+								instance = new FrameSymbolInstance(frame, frameObject.id, frameObject.symbol, frameObject.depth, displayObject,
+									frameObject.clipDepth);
+							}
+						}
+					}
+
+					if (instance != null)
+					{
+						__activeInstancesByFrameObjectID.set(frameObject.id, instance);
+
+						if (!duplicate)
+						{
+							__activeInstances.push(instance);
+							__updateDisplayObject(instance.displayObject, frameObject);
+						}
+					}
+				}
+			}
+		}
+
+		#if !openfljs
+		__instanceFields = Type.getInstanceFields(Type.getClass(__sprite));
+		#end
+
+		enterFrame(1);
+	}
+
+	public override function initializeSprite(sprite:Sprite):Void
+	{
+		if (__activeInstances != null) return;
+
+		init(sprite);
+
+		__activeInstances = null;
+		__activeInstancesByFrameObjectID = null;
+		__currentInstancesByFrameObjectID = null;
+		__instanceFields = null;
+		__sprite = null;
+		__previousFrame = -1;
 	}
 
 	@:noCompletion private function __sortDepths(a:FrameSymbolInstance, b:FrameSymbolInstance):Int
@@ -482,7 +502,7 @@ class AnimateTimeline extends Timeline
 		}
 
 		#if openfljs
-		Reflect.setField(__movieClip, displayObject.name, displayObject);
+		Reflect.setField(__sprite, displayObject.name, displayObject);
 		#end
 	}
 
@@ -490,13 +510,13 @@ class AnimateTimeline extends Timeline
 	{
 		for (field in __instanceFields)
 		{
-			var length = __movieClip.numChildren;
+			var length = __sprite.numChildren;
 			for (i in 0...length)
 			{
-				var child = __movieClip.getChildAt(i);
+				var child = __sprite.getChildAt(i);
 				if (child.name == field)
 				{
-					Reflect.setField(__movieClip, field, child);
+					Reflect.setField(__sprite, field, child);
 					break;
 				}
 			}

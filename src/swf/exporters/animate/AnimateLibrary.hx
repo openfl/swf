@@ -182,7 +182,13 @@ import openfl.filters.GlowFilter;
 			{
 				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateSpriteSymbol))
 				{
-					return cast(symbol, AnimateSpriteSymbol).__createObject(this);
+					var sprite = cast(symbol, AnimateSpriteSymbol).__createObject(this);
+					if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (sprite, MovieClip))
+					{
+						// May return a Sprite if there is a custom base class defined that uses
+						// Sprite instead of MovieClip. In that case, access through new()
+						return cast sprite;
+					}
 				}
 			}
 		}
