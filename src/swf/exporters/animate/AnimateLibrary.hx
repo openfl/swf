@@ -678,7 +678,14 @@ import openfl.filters.GlowFilter;
 		for (frameData in frames)
 		{
 			frame = new AnimateFrame();
-			frame.label = frameData.label;
+			if (Reflect.hasField(frameData, "label"))
+			{
+				frame.labels = [frameData.label];
+			}
+			else if (Reflect.hasField(frameData, "labels"))
+			{
+				frame.labels = frameData.labels;
+			}
 			// frame.script = frameData.script;
 			if (Reflect.hasField(frameData, "scriptSource"))
 			{

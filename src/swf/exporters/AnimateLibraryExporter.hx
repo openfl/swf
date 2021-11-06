@@ -679,8 +679,7 @@ class AnimateLibraryExporter
 
 			if (frameData.labels != null)
 			{
-				frame.label = frameData.labels[0];
-				// TODO: frame.labels
+				frame.labels = frameData.labels;
 			}
 
 			instances.splice(0, instances.length);

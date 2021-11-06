@@ -8,7 +8,7 @@ import openfl.display.MovieClip;
 #end
 @:keep class AnimateFrame
 {
-	public var label:String;
+	public var labels:Array<String>;
 	public var objects:Array<AnimateFrameObject>;
 	public var script:MovieClip->Void;
 	public var scriptSource:String;

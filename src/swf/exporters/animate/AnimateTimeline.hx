@@ -74,9 +74,12 @@ class AnimateTimeline extends Timeline
 			frame = i + 1;
 			frameData = __symbol.frames[i];
 
-			if (frameData.label != null)
+			if (frameData.labels != null)
 			{
-				labels.push(new FrameLabel(frameData.label, frame));
+				for (label in frameData.labels)
+				{
+					labels.push(new FrameLabel(label, frame));
+				}
 			}
 
 			if (frameData.script != null)
