@@ -15,6 +15,8 @@ import swf.tags.TagDefineText;
 import swf.tags.TagPlaceObject;
 import swf.SWFTimelineContainer;
 import swf.SWF;
+import haxe.io.BytesInput;
+import haxe.zip.Reader;
 import haxe.Json;
 import haxe.Serializer;
 import haxe.Template;
@@ -165,7 +167,9 @@ class Tools
 		var movieClipTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/swf/MovieClip.mtt");
 		var simpleButtonTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/swf/SimpleButton.mtt");
 
-		var swf = new SWF(ByteArray.fromBytes(File.getBytes(swfAsset.sourcePath)));
+		var bytes = ByteArray.fromBytes(File.getBytes(swfAsset.sourcePath));
+		bytes = readSWC(bytes);
+		var swf = new SWF(bytes);
 
 		if (prefix != "" && prefix != null)
 		{
@@ -605,7 +609,7 @@ class Tools
 			var inputPath = words[1];
 			var outputPath = words.length > 2 ? words[2] : null;
 
-			if (words.length == 1 || Path.extension(inputPath) == "swf")
+			if (words.length == 1 || Path.extension(inputPath) == "swf" || Path.extension(inputPath) == "swc")
 			{
 				if (words.length > 3)
 				{
@@ -651,6 +655,7 @@ class Tools
 		System.mkdir(Path.directory(targetPath));
 
 		var bytes:ByteArray = File.getBytes(sourcePath);
+		bytes = readSWC(bytes);
 		var swf = new SWF(bytes);
 		var exporter = new AnimateLibraryExporter(swf.data, targetPath);
 
@@ -823,7 +828,7 @@ class Tools
 				type = Path.extension(library.sourcePath).toLowerCase();
 			}
 
-			if (type == "swf" && (project.target == Platform.FLASH || project.target == Platform.AIR))
+			if ((type == "swf" || type == "swc") && (project.target == Platform.FLASH || project.target == Platform.AIR))
 			{
 				if (!FileSystem.exists(library.sourcePath))
 				{
@@ -883,7 +888,7 @@ class Tools
 				// output.assets.push (new Asset (library.sourcePath, "libraries/" + library.name + ".swf", AssetType.BINARY));))
 			}
 			// #if !nodejs
-			else if (type == "animate" || type == "swf" || type == "swflite" || type == "swf_lite")
+			else if (type == "animate" || type == "swf" || type == "swflite" || type == "swf_lite" || type == "swc")
 			{
 				if (!FileSystem.exists(library.sourcePath))
 				{
@@ -922,6 +927,7 @@ class Tools
 						}
 
 						var bytes:ByteArray = File.getBytes(library.sourcePath);
+						bytes = readSWC(bytes);
 						var swf = new SWF(bytes);
 						var exporter = new AnimateLibraryExporter(swf.data, cacheFile);
 
@@ -1350,6 +1356,34 @@ class Tools
 		}
 
 		return null;
+	}
+
+	private static function readSWC(bytes:ByteArray):ByteArray
+	{
+		var input = new BytesInput(bytes);
+		if (input.length < 4)
+		{
+			return bytes;
+		}
+
+		var header = input.readInt32();
+		if (header != 0x04034B50)
+		{
+			return bytes;
+		}
+
+		input.position = 0;
+		var entries = Reader.readZip(input);
+
+		for (entry in entries)
+		{
+			if (entry.fileName == "library.swf")
+			{
+				return entry.data;
+			}
+		}
+
+		return bytes;
 	}
 
 	private static function resolveClass(name:String):Class<Dynamic>
