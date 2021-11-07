@@ -166,151 +166,170 @@ class AnimateTimeline extends Timeline
 			var instance:FrameSymbolInstance;
 
 			var updateFrameStart = __previousFrame < currentFrame ? (__previousFrame == -1 ? 0 : __previousFrame) : 0;
+			var skipFrame = false;
 
-			// Reset frame objects if starting over.
-			if (updateFrameStart <= 0)
+			// TODO: A lot more optimizing!
+			if (currentFrame == 1 && __previousFrame > currentFrame && __symbol.frames[0].objects != null)
 			{
-				__currentInstancesByFrameObjectID = new Map();
-			}
-
-			for (i in updateFrameStart...currentFrame)
-			{
-				frame = i + 1;
-				frameData = __symbol.frames[i];
-
-				if (frameData.objects == null) continue;
-
-				for (frameObject in frameData.objects)
+				// Do nothing (on looping) if this clip has only one frame
+				skipFrame = true;
+				for (i in 1...__symbol.frames.length)
 				{
-					switch (frameObject.type)
+					if (__symbol.frames[i].objects != null)
 					{
-						case CREATE:
-							instance = __activeInstancesByFrameObjectID.get(frameObject.id);
-
-							if (instance != null)
-							{
-								__currentInstancesByFrameObjectID.set(frameObject.id, instance);
-								__updateDisplayObject(instance.displayObject, frameObject, true);
-							}
-
-						case UPDATE:
-							instance = __currentInstancesByFrameObjectID.get(frameObject.id);
-
-							if (instance != null && instance.displayObject != null)
-							{
-								__updateDisplayObject(instance.displayObject, frameObject);
-							}
-
-						case DESTROY:
-							__currentInstancesByFrameObjectID.remove(frameObject.id);
-					}
-				}
-			}
-
-			// TODO: Less garbage?
-
-			var currentInstances = new Array<FrameSymbolInstance>();
-			var currentMasks = new Array<FrameSymbolInstance>();
-
-			for (instance in __currentInstancesByFrameObjectID)
-			{
-				if (currentInstances.indexOf(instance) == -1)
-				{
-					currentInstances.push(instance);
-
-					if (instance.clipDepth > 0)
-					{
-						currentMasks.push(instance);
-					}
-				}
-			}
-
-			currentInstances.sort(__sortDepths);
-
-			var existingChild:DisplayObject;
-			var targetDepth:Int;
-			var targetChild:DisplayObject;
-			var child:DisplayObject;
-			var maskApplied:Bool;
-
-			for (i in 0...currentInstances.length)
-			{
-				existingChild = (i < __sprite.numChildren) ? __sprite.getChildAt(i) : null;
-				instance = currentInstances[i];
-
-				targetDepth = instance.depth;
-				targetChild = instance.displayObject;
-
-				if (existingChild != targetChild)
-				{
-					__sprite.addChildAt(targetChild, i);
-				}
-
-				child = targetChild;
-				maskApplied = false;
-
-				for (mask in currentMasks)
-				{
-					if (targetDepth > mask.depth && targetDepth <= mask.clipDepth)
-					{
-						child.mask = mask.displayObject;
-						maskApplied = true;
+						skipFrame = false;
 						break;
 					}
 				}
-
-				if (currentMasks.length > 0 && !maskApplied && child.mask != null)
-				{
-					child.mask = null;
-				}
 			}
 
-			// TODO: How to tell if shapes are for a scale9Grid clip?
-			if (__sprite.scale9Grid != null)
+			if (!skipFrame)
 			{
-				__sprite.graphics.clear();
-				if (currentInstances.length > 0)
+				// Reset frame objects if starting over.
+				if (updateFrameStart <= 0)
 				{
-					var shape:Shape = cast currentInstances[0].displayObject;
-					__sprite.graphics.copyFrom(shape.graphics);
+					__currentInstancesByFrameObjectID = new Map();
 				}
-			}
-			else
-			{
-				var child;
-				var i = currentInstances.length;
-				var length = __sprite.numChildren;
 
-				while (i < length)
+				for (i in updateFrameStart...currentFrame)
 				{
-					child = __sprite.getChildAt(i);
+					frame = i + 1;
+					frameData = __symbol.frames[i];
 
-					// TODO: Faster method of determining if this was automatically added?
+					if (frameData.objects == null) continue;
 
-					for (instance in __activeInstances)
+					for (frameObject in frameData.objects)
 					{
-						if (instance.displayObject == child)
+						switch (frameObject.type)
 						{
-							// set MovieClips back to initial state (autoplay)
-							if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (child, MovieClip))
-							{
-								var movie:MovieClip = cast child;
-								movie.gotoAndPlay(1);
-							}
+							case CREATE:
+								instance = __activeInstancesByFrameObjectID.get(frameObject.id);
 
-							__sprite.removeChild(child);
-							i--;
-							length--;
+								if (instance != null)
+								{
+									__currentInstancesByFrameObjectID.set(frameObject.id, instance);
+									__updateDisplayObject(instance.displayObject, frameObject, true);
+								}
+
+							case UPDATE:
+								instance = __currentInstancesByFrameObjectID.get(frameObject.id);
+
+								if (instance != null && instance.displayObject != null)
+								{
+									__updateDisplayObject(instance.displayObject, frameObject);
+								}
+
+							case DESTROY:
+								__currentInstancesByFrameObjectID.remove(frameObject.id);
+						}
+					}
+				}
+
+				// TODO: Less garbage?
+
+				var currentInstances = new Array<FrameSymbolInstance>();
+				var currentMasks = new Array<FrameSymbolInstance>();
+
+				for (instance in __currentInstancesByFrameObjectID)
+				{
+					if (currentInstances.indexOf(instance) == -1)
+					{
+						currentInstances.push(instance);
+
+						if (instance.clipDepth > 0)
+						{
+							currentMasks.push(instance);
+						}
+					}
+				}
+
+				currentInstances.sort(__sortDepths);
+
+				var existingChild:DisplayObject;
+				var targetDepth:Int;
+				var targetChild:DisplayObject;
+				var child:DisplayObject;
+				var maskApplied:Bool;
+
+				for (i in 0...currentInstances.length)
+				{
+					existingChild = (i < __sprite.numChildren) ? __sprite.getChildAt(i) : null;
+					instance = currentInstances[i];
+
+					targetDepth = instance.depth;
+					targetChild = instance.displayObject;
+
+					if (existingChild != targetChild)
+					{
+						__sprite.addChildAt(targetChild, i);
+					}
+
+					child = targetChild;
+					maskApplied = false;
+
+					for (mask in currentMasks)
+					{
+						if (targetDepth > mask.depth && targetDepth <= mask.clipDepth)
+						{
+							child.mask = mask.displayObject;
+							maskApplied = true;
+							break;
 						}
 					}
 
-					i++;
+					if (currentMasks.length > 0 && !maskApplied && child.mask != null)
+					{
+						child.mask = null;
+					}
 				}
-			}
 
-			#if !openfljs
-			__updateInstanceFields();
-			#end
+				// TODO: How to tell if shapes are for a scale9Grid clip?
+				if (__sprite.scale9Grid != null)
+				{
+					__sprite.graphics.clear();
+					if (currentInstances.length > 0)
+					{
+						var shape:Shape = cast currentInstances[0].displayObject;
+						__sprite.graphics.copyFrom(shape.graphics);
+					}
+				}
+				else
+				{
+					var child;
+					var i = currentInstances.length;
+					var length = __sprite.numChildren;
+
+					while (i < length)
+					{
+						child = __sprite.getChildAt(i);
+
+						// TODO: Faster method of determining if this was automatically added?
+
+						for (instance in __activeInstances)
+						{
+							if (instance.displayObject == child)
+							{
+								// set MovieClips back to initial state (autoplay)
+								if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (child, MovieClip))
+								{
+									var movie:MovieClip = cast child;
+									movie.gotoAndPlay(1);
+								}
+
+								__sprite.removeChild(child);
+								i--;
+								length--;
+							}
+						}
+
+						i++;
+					}
+				}
+
+				#if !openfljs
+				__updateInstanceFields();
+				#end
+			}
 
 			__previousFrame = currentFrame;
 		}
