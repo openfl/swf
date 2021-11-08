@@ -707,6 +707,8 @@ import openfl.filters.GlowFilter;
 						__pixel(objectData.colorTransform[7])) : null;
 					object.depth = objectData.depth;
 					object.filters = __parseFilters(objectData.filters);
+					object.hasCharacter = objectData.hasCharacter;
+					object.hasMove = objectData.hasMove;
 					object.id = objectData.id;
 					object.matrix = __parseMatrix(objectData.matrix);
 					object.name = objectData.name;

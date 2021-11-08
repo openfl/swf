@@ -17,6 +17,8 @@ class AnimateFrameObject
 	public var colorTransform:ColorTransform;
 	public var depth:Int;
 	public var filters:Array<FilterType>;
+	public var hasCharacter:Bool;
+	public var hasMove:Bool;
 	public var id:Int;
 	public var matrix:Matrix;
 	public var name:String;

@@ -204,7 +204,6 @@ class AnimateLibraryExporter
 					var object = records[i];
 
 					var frameObject:Dynamic = {};
-					frameObject.type = SWFFrameObjectType.CREATE;
 					frameObject.symbol = object.characterId;
 					frameObject.id = i;
 
@@ -551,7 +550,6 @@ class AnimateLibraryExporter
 
 				frameObject = {};
 				frameObject.symbol = bitmap.id;
-				frameObject.type = SWFFrameObjectType.CREATE;
 				frameObject.id = i;
 				frameObject.depth = i;
 				frameObject.clipDepth = 0;
@@ -664,132 +662,207 @@ class AnimateLibraryExporter
 			symbol.id = untyped tag.characterId;
 		}
 
-		var instances = new Array<Int>();
 		var lastModified = new Map<Int, Int>();
-		var zeroCharacter = -1;
+		var frameObjectDepth = new Map<Int, Dynamic>();
+		var lastFrame:Dynamic;
 
 		var frame:Dynamic,
 			frameObject:Dynamic,
-			frameData,
-			placeTag:TagPlaceObject;
+			placedAtTag:TagPlaceObject,
+			lastModifiedTag:TagPlaceObject;
 
 		for (frameData in tag.frames)
 		{
 			frame = {};
+
+			if (frameData.label != null)
+			{
+				frame.label = frameData.label;
+			}
 
 			if (frameData.labels != null)
 			{
 				frame.labels = frameData.labels;
 			}
 
-			instances.splice(0, instances.length);
+			frame.objects = new Array();
+
+			var removeDepths = [];
+			for (depth in frameObjectDepth.keys())
+			{
+				if (frameData.objects[depth] == null)
+				{
+					removeDepths.push(depth);
+				}
+			}
+
+			for (depth in removeDepths)
+			{
+				frameObjectDepth.remove(depth);
+			}
 
 			for (object in frameData.getObjectsSortedByDepth())
 			{
-				instances.push(object.placedAtIndex);
-
-				if (object.placedAtIndex == 0 && object.characterId != zeroCharacter)
-				{
-					lastModified.remove(0);
-					zeroCharacter = object.characterId;
-				}
-
 				if (!lastModified.exists(object.placedAtIndex))
 				{
 					processTag(cast swfData.getCharacter(object.characterId));
-
-					placeTag = cast tag.tags[object.placedAtIndex];
 				}
-				else if (object.lastModifiedAtIndex > lastModified.get(object.placedAtIndex))
+
+				placedAtTag = cast tag.tags[object.placedAtIndex];
+
+				if (object.lastModifiedAtIndex > 0)
 				{
-					placeTag = cast tag.tags[object.lastModifiedAtIndex];
+					lastModifiedTag = cast tag.tags[object.lastModifiedAtIndex];
 				}
 				else
 				{
-					continue;
+					lastModifiedTag = null;
 				}
 
 				frameObject = {};
 				frameObject.symbol = object.characterId;
 				frameObject.id = object.placedAtIndex;
-				frameObject.name = placeTag.instanceName;
+				// frameObject.name = placeTag.instanceName;
 
-				if (!lastModified.exists(object.placedAtIndex))
+				if (lastModifiedTag != null
+					&& object.lastModifiedAtIndex >= frameData.tagIndexStart
+					&& object.lastModifiedAtIndex <= frameData.tagIndexEnd)
 				{
-					frameObject.type = SWFFrameObjectType.CREATE;
+					frameObject.hasCharacter = lastModifiedTag.hasCharacter;
+					frameObject.hasMove = lastModifiedTag.hasMove;
+				}
+				else if (object.placedAtIndex >= frameData.tagIndexStart && object.placedAtIndex <= frameData.tagIndexEnd)
+				{
+					frameObject.hasCharacter = placedAtTag.hasCharacter;
+					frameObject.hasMove = placedAtTag.hasMove;
 				}
 				else
 				{
-					frameObject.type = SWFFrameObjectType.UPDATE;
+					frameObject.hasCharacter = false;
+					frameObject.hasMove = false;
 				}
 
-				if (placeTag.matrix != null)
+				var workingObject:Dynamic = frameObjectDepth.get(object.depth);
+				if (workingObject != null && workingObject.symbol != frameObject.symbol)
 				{
-					var matrix = placeTag.matrix.matrix.clone();
+					workingObject = null;
+				}
+
+				var placedAtTagForWorkingObject = (workingObject != null && workingObject.id == object.placedAtIndex);
+
+				if (lastModifiedTag != null && lastModifiedTag.hasName)
+				{
+					frameObject.name = lastModifiedTag.instanceName;
+				}
+				else if (workingObject != null && workingObject.name != null && placedAtTagForWorkingObject)
+				{
+					frameObject.name = workingObject.name;
+				}
+				else if (placedAtTag.hasName)
+				{
+					frameObject.name = placedAtTag.instanceName;
+				}
+
+				if (lastModifiedTag != null && lastModifiedTag.hasMatrix)
+				{
+					var matrix = lastModifiedTag.matrix.matrix;
 					matrix.tx *= (1 / 20);
 					matrix.ty *= (1 / 20);
-
+					frameObject.matrix = serializeMatrix(matrix);
+				}
+				else if (workingObject != null && workingObject.matrix != null && placedAtTagForWorkingObject)
+				{
+					frameObject.matrix = workingObject.matrix;
+				}
+				else if (placedAtTag.hasMatrix)
+				{
+					var matrix = placedAtTag.matrix.matrix;
+					matrix.tx *= (1 / 20);
+					matrix.ty *= (1 / 20);
 					frameObject.matrix = serializeMatrix(matrix);
 				}
 
-				if (placeTag.colorTransform != null)
+				if (lastModifiedTag != null && lastModifiedTag.hasColorTransform)
 				{
-					frameObject.colorTransform = serializeColorTransform(placeTag.colorTransform.colorTransform);
+					frameObject.colorTransform = serializeColorTransform(lastModifiedTag.colorTransform.colorTransform);
+				}
+				else if (workingObject != null && workingObject.colorTransform != null && placedAtTagForWorkingObject)
+				{
+					frameObject.colorTransform = workingObject.colorTransform;
+				}
+				else if (placedAtTag.hasColorTransform)
+				{
+					frameObject.colorTransform = serializeColorTransform(placedAtTag.colorTransform.colorTransform);
 				}
 
-				if (placeTag.hasFilterList)
+				if (lastModifiedTag != null && lastModifiedTag.hasFilterList)
 				{
-					frameObject.filters = serializeFilters(placeTag.surfaceFilterList);
+					frameObject.filters = serializeFilters(lastModifiedTag.surfaceFilterList);
+				}
+				else if (workingObject != null && workingObject.filters != null && placedAtTagForWorkingObject)
+				{
+					frameObject.filters = workingObject.filters;
+				}
+				else if (placedAtTag.hasFilterList)
+				{
+					frameObject.filters = serializeFilters(placedAtTag.surfaceFilterList);
 				}
 
-				frameObject.depth = placeTag.depth;
-				frameObject.clipDepth = (placeTag.hasClipDepth ? placeTag.clipDepth : 0);
+				frameObject.depth = object.depth;
+				frameObject.clipDepth = object.clipDepth;
 
-				if (placeTag.hasVisible)
+				if (lastModifiedTag != null && lastModifiedTag.hasVisible)
 				{
-					frameObject.visible = placeTag.visible != 0;
+					frameObject.visible = lastModifiedTag.visible != 0;
+				}
+				else if (workingObject != null && workingObject.visible != null && placedAtTagForWorkingObject)
+				{
+					frameObject.visible = workingObject.visible;
+				}
+				else if (placedAtTag.hasVisible)
+				{
+					frameObject.visible = placedAtTag.visible != 0;
 				}
 
-				if (placeTag.hasBlendMode)
+				if (lastModifiedTag != null && lastModifiedTag.hasBlendMode)
 				{
-					var blendMode = BlendMode.toString(placeTag.blendMode);
+					var blendMode = BlendMode.toString(lastModifiedTag.blendMode);
+					frameObject.blendMode = blendMode;
+				}
+				else if (workingObject != null && workingObject.blendMode != null && placedAtTagForWorkingObject)
+				{
+					frameObject.blendMode = workingObject.blendMode;
+				}
+				else if (placedAtTag.hasBlendMode)
+				{
+					var blendMode = BlendMode.toString(placedAtTag.blendMode);
 					frameObject.blendMode = blendMode;
 				}
 
-				if (placeTag.hasCacheAsBitmap)
+				if (lastModifiedTag != null && lastModifiedTag.hasCacheAsBitmap)
 				{
-					frameObject.cacheAsBitmap = placeTag.bitmapCache != 0;
+					frameObject.cacheAsBitmap = lastModifiedTag.bitmapCache != 0;
+				}
+				else if (workingObject != null && workingObject.cacheAsBitmap != null && placedAtTagForWorkingObject)
+				{
+					frameObject.cacheAsBitmap = workingObject.cacheAsBitmap;
+				}
+				else if (placedAtTag.hasCacheAsBitmap)
+				{
+					frameObject.cacheAsBitmap = placedAtTag.bitmapCache != 0;
+				}
+
+				if (workingObject == null)
+				{
+					workingObject = Reflect.copy(frameObject);
+					frameObjectDepth.set(object.depth, workingObject);
 				}
 
 				lastModified.set(object.placedAtIndex, object.lastModifiedAtIndex);
-
-				if (frame.objects == null)
-				{
-					frame.objects = [];
-				}
-
 				frame.objects.push(frameObject);
 			}
 
-			for (id in lastModified.keys())
-			{
-				if (instances.indexOf(id) == -1)
-				{
-					lastModified.remove(id);
-
-					frameObject = {};
-					frameObject.id = id;
-					frameObject.type = SWFFrameObjectType.DESTROY;
-
-					if (frame.objects == null)
-					{
-						frame.objects = [];
-					}
-
-					frame.objects.push(frameObject);
-				}
-			}
-
+			lastFrame = frame;
 			symbol.frames.push(frame);
 		}
 
@@ -1529,13 +1602,6 @@ private class SWFDocument
 
 		return Json.stringify(output);
 	}
-}
-
-@:enum private abstract SWFFrameObjectType(Int) from Int to Int
-{
-	public var CREATE = 0;
-	public var UPDATE = 1;
-	public var DESTROY = 2;
 }
 
 @:enum private abstract SWFShapeCommandType(Int) from Int to Int
