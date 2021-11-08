@@ -46,6 +46,7 @@ class AnimateTimeline extends Timeline
 	@:noCompletion private var __activeInstancesByFrameObjectID:Map<Int, FrameSymbolInstance>;
 	@:noCompletion private var __currentInstancesByFrameObjectID:Map<Int, FrameSymbolInstance>;
 	@:noCompletion private var __instanceFields:Array<String>;
+	@:noCompletion private var __lastUpdated:Map<DisplayObject, AnimateFrameObject>;
 	@:noCompletion private var __library:AnimateLibrary;
 	@:noCompletion private var __previousFrame:Int;
 	@:noCompletion private var __sprite:Sprite;
@@ -200,27 +201,22 @@ class AnimateTimeline extends Timeline
 
 					for (frameObject in frameData.objects)
 					{
-						switch (frameObject.type)
-						{
-							case CREATE:
-								instance = __activeInstancesByFrameObjectID.get(frameObject.id);
+						instance = __activeInstancesByFrameObjectID.get(frameObject.id);
 
-								if (instance != null)
-								{
+						if (instance != null)
+						{
+							switch (frameObject.type)
+							{
+								case CREATE:
 									__currentInstancesByFrameObjectID.set(frameObject.id, instance);
 									__updateDisplayObject(instance.displayObject, frameObject, true);
-								}
 
-							case UPDATE:
-								instance = __currentInstancesByFrameObjectID.get(frameObject.id);
-
-								if (instance != null && instance.displayObject != null)
-								{
+								case UPDATE:
 									__updateDisplayObject(instance.displayObject, frameObject);
-								}
 
-							case DESTROY:
-								__currentInstancesByFrameObjectID.remove(frameObject.id);
+								case DESTROY:
+									__currentInstancesByFrameObjectID.remove(frameObject.id);
+							}
 						}
 					}
 				}
@@ -347,6 +343,7 @@ class AnimateTimeline extends Timeline
 		__activeInstances = [];
 		__activeInstancesByFrameObjectID = new Map();
 		__currentInstancesByFrameObjectID = new Map();
+		__lastUpdated = new Map();
 
 		var frame:Int;
 		var frameData:AnimateFrame;
@@ -445,6 +442,7 @@ class AnimateTimeline extends Timeline
 		__activeInstancesByFrameObjectID = null;
 		__currentInstancesByFrameObjectID = null;
 		__instanceFields = null;
+		__lastUpdated = null;
 		__sprite = null;
 		__previousFrame = -1;
 	}
@@ -457,6 +455,7 @@ class AnimateTimeline extends Timeline
 	@:noCompletion private function __updateDisplayObject(displayObject:DisplayObject, frameObject:AnimateFrameObject, reset:Bool = false):Void
 	{
 		if (displayObject == null) return;
+		if (__lastUpdated.get(displayObject) == frameObject) return;
 
 		if (frameObject.name != null)
 		{
@@ -526,6 +525,8 @@ class AnimateTimeline extends Timeline
 		#if openfljs
 		Reflect.setField(__sprite, displayObject.name, displayObject);
 		#end
+
+		__lastUpdated.set(displayObject, frameObject);
 	}
 
 	@:noCompletion private function __updateInstanceFields():Void
