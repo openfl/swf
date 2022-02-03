@@ -98,7 +98,14 @@ import openfl.filters.GlowFilter;
 		var symbol = symbolsByClassName.get(className);
 		if (symbol != null)
 		{
-			symbol.__init(this);
+			if (instance != null)
+			{
+				symbol.__initObject(this, instance);
+			}
+			else
+			{
+				symbol.__init(this);
+			}
 			return true;
 		}
 		#end
