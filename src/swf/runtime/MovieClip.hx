@@ -22,6 +22,10 @@ class MovieClip extends #if flash openfl.display.MovieClip.MovieClip2 #else open
 	{
 		super();
 		attachTimeline(new MovieClipTimeline(data));
+		
+		#if !flash
+		__enterFrame(0);
+		#end
 	}
 }
 
