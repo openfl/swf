@@ -7,6 +7,8 @@ import openfl.display.DisplayObject;
 import openfl.display.MovieClip;
 import openfl.geom.Rectangle;
 
+import #if (haxe_ver >= 4.2) Std.isOfType #else Std.is as isOfType #end;
+
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
@@ -97,7 +99,7 @@ class SpriteSymbol extends SWFSymbol
 		}
 
 		#if flash
-		if (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (movieClip, flash.display.MovieClip.MovieClip2))
+		if (!isOfType(movieClip, flash.display.MovieClip.MovieClip2))
 		{
 			movieClip.scale9Grid = scale9Grid;
 		}
