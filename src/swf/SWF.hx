@@ -109,11 +109,10 @@ class SWF extends EventDispatcher
 			symbol = data.getCharacter(charId);
 		}
 
-		// if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineButton2)) {
-
-		// 	return new SimpleButton (data, cast symbol);
-
-		// }
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, TagDefineButton2))
+		{
+			return new swf.runtime.SimpleButton(data, cast symbol);
+		}
 
 		return null;
 	}
@@ -143,11 +142,10 @@ class SWF extends EventDispatcher
 			}
 		}
 
-		// if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SWFTimelineContainer)) {
-
-		// 	return new MovieClip (cast symbol);
-
-		// }
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SWFTimelineContainer))
+		{
+			return new swf.runtime.MovieClip(cast symbol);
+		}
 
 		return null;
 	}
