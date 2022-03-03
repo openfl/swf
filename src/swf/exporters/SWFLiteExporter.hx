@@ -136,8 +136,8 @@ class SWFLiteExporter
 					if (object.placeMatrix != null)
 					{
 						var matrix = object.placeMatrix.matrix;
-						matrix.tx *= (1 / 20);
-						matrix.ty *= (1 / 20);
+						matrix.tx = object.placeMatrix.translateX / 20;
+						matrix.ty = object.placeMatrix.translateY / 20;
 
 						frameObject.matrix = matrix;
 					}
