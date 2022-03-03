@@ -135,8 +135,8 @@ class SWFLiteExporter
 					if (object.placeMatrix != null)
 					{
 						var matrix = object.placeMatrix.matrix;
-						matrix.tx *= (1 / 20);
-						matrix.ty *= (1 / 20);
+						matrix.tx = object.placeMatrix.translateX / 20;
+						matrix.ty = object.placeMatrix.translateY / 20;
 
 						frameObject.matrix = matrix;
 					}
@@ -556,8 +556,8 @@ class SWFLiteExporter
 				if (placeTag.matrix != null)
 				{
 					var matrix = placeTag.matrix.matrix;
-					matrix.tx *= (1 / 20);
-					matrix.ty *= (1 / 20);
+					matrix.tx = placeTag.matrix.translateX / 20;
+					matrix.ty = placeTag.matrix.translateY / 20;
 
 					frameObject.matrix = matrix;
 				}
@@ -808,8 +808,8 @@ class SWFLiteExporter
 		symbol.records = records;
 
 		var matrix = tag.textMatrix.matrix;
-		matrix.tx *= (1 / 20);
-		matrix.ty *= (1 / 20);
+		matrix.tx = tag.textMatrix.translateX / 20;
+		matrix.ty = tag.textMatrix.translateY / 20;
 
 		symbol.matrix = matrix;
 
