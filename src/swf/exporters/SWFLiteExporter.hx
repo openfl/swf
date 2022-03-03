@@ -1,6 +1,7 @@
 package swf.exporters;
 
 import openfl.display.BitmapData;
+import openfl.geom.Matrix;
 import openfl.text.TextFormatAlign;
 import openfl.utils.ByteArray;
 import format.png.Data;
@@ -555,7 +556,9 @@ class SWFLiteExporter
 
 				if (placeTag.matrix != null)
 				{
-					var matrix = placeTag.matrix.matrix;
+					var matrix = new Matrix();
+					matrix.copyFrom(placeTag.matrix.matrix);
+					
 					matrix.tx *= (1 / 20);
 					matrix.ty *= (1 / 20);
 
@@ -807,7 +810,8 @@ class SWFLiteExporter
 
 		symbol.records = records;
 
-		var matrix = tag.textMatrix.matrix;
+		var matrix = new Matrix();
+		matrix.copyFrom(tag.textMatrix.matrix);
 		matrix.tx *= (1 / 20);
 		matrix.ty *= (1 / 20);
 
