@@ -556,11 +556,9 @@ class SWFLiteExporter
 
 				if (placeTag.matrix != null)
 				{
-					var matrix = new Matrix();
-					matrix.copyFrom(placeTag.matrix.matrix);
-					
-					matrix.tx *= (1 / 20);
-					matrix.ty *= (1 / 20);
+					var matrix = placeTag.matrix.matrix;
+					matrix.tx = placeTag.matrix.translateX / 20;
+					matrix.ty = placeTag.matrix.translateY / 20;
 
 					frameObject.matrix = matrix;
 				}
@@ -809,11 +807,10 @@ class SWFLiteExporter
 		}
 
 		symbol.records = records;
-
-		var matrix = new Matrix();
-		matrix.copyFrom(tag.textMatrix.matrix);
-		matrix.tx *= (1 / 20);
-		matrix.ty *= (1 / 20);
+		
+		var matrix = tag.textMatrix.matrix;
+		matrix.tx = tag.textMatrix.translateX / 20;
+		matrix.ty = tag.textMatrix.translateY / 20;
 
 		symbol.matrix = matrix;
 
