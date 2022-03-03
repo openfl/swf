@@ -1,7 +1,6 @@
 package swf.exporters;
 
 import openfl.display.BitmapData;
-import openfl.geom.Matrix;
 import openfl.text.TextFormatAlign;
 import openfl.utils.ByteArray;
 import format.png.Data;
