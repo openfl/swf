@@ -48,8 +48,8 @@ class AnimateMorphShape extends openfl.display.Shape
             return;
         }
 
-        var a = ratio / 65535.0;
-        var b = 1.0 - ratio;
+        var b = ratio / 65535.0;
+        var a = 1.0 - b;
 
 		for (command in symbol.commands)
 		{
@@ -113,10 +113,10 @@ class AnimateMorphShape extends openfl.display.Shape
 					}
 
 				case LineTo(startX, startY, endX, endY):
-					graphics.lineTo(lerpf(startX, startY, a, b), lerpf(endX, endY, a, b));
+					graphics.lineTo(lerpf(startX, endX, a, b), lerpf(startY, endY, a, b));
 
 				case MoveTo(startX, startY, endX, endY):
-					graphics.moveTo(lerpf(startX, startY, a, b), lerpf(endX, endY, a, b));
+					graphics.moveTo(lerpf(startX, endX, a, b), lerpf(startY, endY, a, b));
 			}
 		}
 
