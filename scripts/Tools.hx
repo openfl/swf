@@ -292,10 +292,13 @@ class Tools
 											{
 												className = "openfl.display.BitmapData";
 											}
-											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineShape)
-												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineMorphShape))
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineShape))
 											{
 												className = "openfl.display.Shape";
+											}
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineMorphShape))
+											{
+												className = "swf.exporters.animate.AnimateMorphShape";
 											}
 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineText)
 												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineEditText))
@@ -622,8 +625,8 @@ class Tools
 			}
 			else if (words.length > 2)
 			{
-				try
-				{
+				// try
+				// {
 					var projectData = File.getContent(inputPath);
 
 					var unserializer = new Unserializer(projectData);
@@ -636,11 +639,11 @@ class Tools
 					{
 						File.saveContent(outputPath, Serializer.run(output));
 					}
-				}
-				catch (e:Dynamic)
-				{
-					Log.error(e);
-				}
+				// }
+				// catch (e:Dynamic)
+				// {
+				// 	Log.error(e);
+				// }
 			}
 		}
 	}

@@ -513,9 +513,9 @@ import swf.utils.BitArray;
 	/////////////////////////////////////////////////////////
 	// Shape and shape records
 	/////////////////////////////////////////////////////////
-	public function readSHAPE(unitDivisor:Float = 20):SWFShape
+	public function readSHAPE(unitDivisor:Float = 20, noStyleInfo:Bool = false):SWFShape
 	{
-		return new SWFShape(this, 1, unitDivisor);
+		return new SWFShape(this, 1, unitDivisor, noStyleInfo);
 	}
 
 	public function writeSHAPE(value:SWFShape):Void

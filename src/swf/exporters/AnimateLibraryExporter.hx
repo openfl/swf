@@ -6,7 +6,18 @@ import swf.data.consts.BitmapFormat;
 import swf.data.consts.BlendMode;
 import swf.data.filters.IFilter;
 import swf.data.SWFButtonRecord;
+import swf.data.SWFMatrix;
+import swf.data.SWFMorphFillStyle;
+import swf.data.SWFMorphFocalGradient;
+import swf.data.SWFMorphGradient;
+import swf.data.SWFMorphLineStyle;
+import swf.data.SWFMorphLineStyle2;
 import swf.data.SWFSymbol;
+import swf.data.SWFShape;
+import swf.data.SWFShapeRecord;
+import swf.data.SWFShapeRecordCurvedEdge;
+import swf.data.SWFShapeRecordStraightEdge;
+import swf.data.SWFShapeRecordStyleChange;
 import swf.exporters.ShapeBitmapExporter;
 import swf.exporters.ShapeCommandExporter;
 import swf.tags.IDefinitionTag;
@@ -20,6 +31,7 @@ import swf.tags.TagDefineEditText;
 import swf.tags.TagDefineFont;
 import swf.tags.TagDefineFont2;
 import swf.tags.TagDefineFont4;
+import swf.tags.TagDefineMorphShape;
 import swf.tags.TagDefineScalingGrid;
 import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSound;
@@ -30,6 +42,7 @@ import swf.tags.TagSymbolClass;
 import swf.SWFRoot;
 import swf.SWFTimelineContainer;
 import haxe.Template;
+import haxe.rtti.Rtti;
 import hxp.Haxelib;
 import hxp.Log;
 import hxp.Path;
@@ -92,7 +105,8 @@ class AnimateLibraryExporter
 		libraryData = new SWFDocument();
 		outputList = new List();
 
-		var uuid = StringTools.generateUUID(20);
+		// var uuid = StringTools.generateUUID(20);
+		var uuid = "sdthx-lib";
 
 		manifestData.libraryType = "swf.exporters.animate.AnimateLibrary";
 		manifestData.libraryArgs = ["data.json", uuid];
@@ -212,11 +226,7 @@ class AnimateLibraryExporter
 
 					if (object.placeMatrix != null)
 					{
-						var matrix = object.placeMatrix.matrix.clone();
-						matrix.tx *= (1 / 20);
-						matrix.ty *= (1 / 20);
-
-						frameObject.matrix = serializeMatrix(matrix);
+						frameObject.matrix = serializeSWFMatrix(object.placeMatrix);
 					}
 
 					if (object.colorTransform != null)
@@ -573,84 +583,34 @@ class AnimateLibraryExporter
 			symbol.type = SWFSymbolType.SHAPE;
 			symbol.id = tag.characterId;
 
-			var commands:Array<Dynamic> = [];
-
-			for (command in handler.commands)
-			{
-				switch (command)
-				{
-					case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, joints, miterLimit):
-						if (thickness == null && color == null && alpha == null)
-						{
-							commands.push(SWFShapeCommandType.CLEAR_LINE_STYLE);
-						}
-						else
-						{
-							commands = commands.concat([
-								SWFShapeCommandType.LINE_STYLE,
-								thickness,
-								color,
-								alpha,
-								pixelHinting,
-								scaleMode,
-								startCaps,
-								joints,
-								miterLimit
-							]);
-						}
-
-					case BeginFill(color, alpha):
-						commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
-
-					case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						commands = commands.concat([
-							SWFShapeCommandType.BEGIN_GRADIENT_FILL,
-							type,
-							colors,
-							alphas,
-							ratios,
-							serializeMatrix(matrix),
-							spreadMethod,
-							interpolationMethod,
-							focalPointRatio
-						]);
-
-					case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-						commands = commands.concat([
-							SWFShapeCommandType.BEGIN_BITMAP_FILL,
-							bitmapID,
-							serializeMatrix(matrix),
-							repeat,
-							smooth
-						]);
-						processTag(cast swfData.getCharacter(bitmapID));
-
-					case EndFill:
-						commands.push(SWFShapeCommandType.END_FILL);
-
-					case MoveTo(x, y):
-						commands = commands.concat([SWFShapeCommandType.MOVE_TO, twip(x), twip(y)]);
-
-					case LineTo(x, y):
-						commands = commands.concat([SWFShapeCommandType.LINE_TO, twip(x), twip(y)]);
-
-					case CurveTo(controlX, controlY, anchorX, anchorY):
-						commands = commands.concat([
-							SWFShapeCommandType.CURVE_TO,
-							twip(controlX),
-							twip(controlY),
-							twip(anchorX),
-							twip(anchorY)
-						]);
-
-					default:
-				}
-			}
-
-			symbol.commands = commands;
+			symbol.commands = serializeShape(handler);
 			libraryData.symbols.set(symbol.id, symbol);
 			return symbol;
 		}
+	}
+
+	private function addMorphShape(tag:TagDefineMorphShape):Dynamic
+	{
+        var symbol:Dynamic = {};
+        symbol.type = SWFSymbolType.MORPH_SHAPE;
+        symbol.id = tag.characterId;
+
+        var handler = new ShapeCommandExporter(swfData);
+        tag.exportHandler = handler;
+		tag.export(0);
+        symbol.startCommands = serializeShape(handler);
+
+        var handler = new ShapeCommandExporter(swfData);
+        tag.exportHandler = handler;
+		tag.export(1.0);
+        symbol.endCommands = serializeShape(handler);
+
+        if (symbol.startCommands.length != symbol.endCommands.length) {
+            throw "Morph shape edges don't have the same number of commands: " + symbol.startCommands.length + " != " + symbol.endCommands.length;
+        }
+
+        libraryData.symbols.set(symbol.id, symbol);
+        return symbol;
 	}
 
 	private function addSprite(tag:SWFTimelineContainer, root:Bool = false):Dynamic
@@ -725,11 +685,7 @@ class AnimateLibraryExporter
 
 				if (placeTag.matrix != null)
 				{
-					var matrix = placeTag.matrix.matrix.clone();
-					matrix.tx *= (1 / 20);
-					matrix.ty *= (1 / 20);
-
-					frameObject.matrix = serializeMatrix(matrix);
+					frameObject.matrix = serializeSWFMatrix(placeTag.matrix);
 				}
 
 				if (placeTag.colorTransform != null)
@@ -759,6 +715,11 @@ class AnimateLibraryExporter
 				if (placeTag.hasCacheAsBitmap)
 				{
 					frameObject.cacheAsBitmap = placeTag.bitmapCache != 0;
+				}
+
+				if (placeTag.hasRatio)
+				{
+					frameObject.ratio = placeTag.ratio;
 				}
 
 				lastModified.set(object.placedAtIndex, object.lastModifiedAtIndex);
@@ -1038,12 +999,7 @@ class AnimateLibraryExporter
 		}
 
 		symbol.records = records;
-
-		var matrix = tag.textMatrix.matrix.clone();
-		matrix.tx *= (1 / 20);
-		matrix.ty *= (1 / 20);
-
-		symbol.matrix = serializeMatrix(matrix);
+		symbol.matrix = serializeSWFMatrix(tag.textMatrix);
 
 		libraryData.symbols.set(symbol.id, symbol);
 
@@ -1293,9 +1249,9 @@ class AnimateLibraryExporter
 
 											if (className != null)
 											{
-												objectReferences[object.name] = true;
-												classProperties.push({name: object.name, type: className, hidden: true});
-											}
+                                                objectReferences[object.name] = true;
+                                                classProperties.push({name: object.name, type: className, hidden: true});
+                                            }
 										}
 									}
 								}
@@ -1383,6 +1339,10 @@ class AnimateLibraryExporter
 			{
 				return addShape(cast tag);
 			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineMorphShape))
+			{
+				return addMorphShape(cast tag);
+			}
 			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont)
 				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont4))
 			{
@@ -1414,6 +1374,85 @@ class AnimateLibraryExporter
 			twip(colorTransform.alphaOffset)
 		];
 	}
+
+    private function serializeShape(handler: ShapeCommandExporter) : Array<Dynamic>
+    {
+        var commands = new Array<Dynamic>();
+
+		for (command in handler.commands)
+		{
+			switch (command)
+			{
+				case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, joints, miterLimit):
+					if (thickness == null && color == null && alpha == null)
+					{
+						commands.push(SWFShapeCommandType.CLEAR_LINE_STYLE);
+					}
+					else
+					{
+						commands = commands.concat([
+							SWFShapeCommandType.LINE_STYLE,
+							thickness,
+							color,
+							alpha,
+							pixelHinting,
+							scaleMode,
+							startCaps,
+							joints,
+							miterLimit
+						]);
+					}
+
+				case BeginFill(color, alpha):
+					commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
+
+				case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					commands = commands.concat([
+						SWFShapeCommandType.BEGIN_GRADIENT_FILL,
+						type,
+						colors,
+						alphas,
+						ratios,
+						serializeMatrix(matrix),
+						spreadMethod,
+						interpolationMethod,
+						focalPointRatio
+					]);
+
+				case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
+					commands = commands.concat([
+						SWFShapeCommandType.BEGIN_BITMAP_FILL,
+						bitmapID,
+						serializeMatrix(matrix),
+						repeat,
+						smooth
+					]);
+					processTag(cast swfData.getCharacter(bitmapID));
+
+				case EndFill:
+					commands.push(SWFShapeCommandType.END_FILL);
+
+				case MoveTo(x, y):
+					commands = commands.concat([SWFShapeCommandType.MOVE_TO, twip(x), twip(y)]);
+
+				case LineTo(x, y):
+					commands = commands.concat([SWFShapeCommandType.LINE_TO, twip(x), twip(y)]);
+
+				case CurveTo(controlX, controlY, anchorX, anchorY):
+					commands = commands.concat([
+						SWFShapeCommandType.CURVE_TO,
+						twip(controlX),
+						twip(controlY),
+						twip(anchorX),
+						twip(anchorY)
+					]);
+
+				default:
+			}
+		}
+
+        return commands;
+    }
 
 	private function serializeFilters(filters:Array<IFilter>):Array<Array<Dynamic>>
 	{
@@ -1465,108 +1504,390 @@ class AnimateLibraryExporter
 		return [matrix.a, matrix.b, matrix.c, matrix.d, twip(matrix.tx), twip(matrix.ty)];
 	}
 
+	private function serializeSWFMatrix(swfMatrix:SWFMatrix):Array<Float>
+	{
+        var matrix = swfMatrix.matrix.clone();
+        matrix.tx *= (1 / 20);
+        matrix.ty *= (1 / 20);
+
+		return serializeMatrix(matrix);
+	}
+
 	private function serializeRect(rect:Rectangle):Array<Int>
 	{
 		return [twip(rect.x), twip(rect.y), twip(rect.width), twip(rect.height)];
 	}
 
-	private inline function twip(value:Float):Int
-	{
-		return Math.round(value * 20);
-	}
+	// private function serializeMorphShapeEdges(startEdges: SWFShape, endEdges: SWFShape):Array<Dynamic>
+	// {
+    //     var result: Array<Dynamic> = [];
+	// 	var numEdges:Int = startEdges.records.length;
+
+    //     var i = 0;
+    //     var j = 0;
+	// 	while (i < numEdges)
+	// 	{
+    //         var record: Array<Dynamic> = [];
+
+    //         var startX = 0;
+    //         var startY = 0;
+    //         var endX = 0;
+    //         var endY = 0;
+
+    //         var startRecord = startEdges.records[i];
+    //         var endRecord = endEdges.records[j];
+
+    //         if (endRecord == null) {
+    //             throw("End record is null! " + i + ", " + j);
+    //         }
+
+    //         if (startRecord.type == SWFShapeRecord.TYPE_STYLECHANGE && endRecord.type == SWFShapeRecord.TYPE_STYLECHANGE)
+    //         {
+    //             var startStyleChange: SWFShapeRecordStyleChange = cast startRecord;
+    //             var endStyleChange: SWFShapeRecordStyleChange = cast endRecord;
+
+    //             record = serializeStyleChange(startStyleChange);
+
+    //             if (startStyleChange.moveTo || endStyleChange.moveTo)
+    //             {
+    //                 if (startStyleChange.moveTo) {
+    //                     startX = startStyleChange.moveDeltaX;
+    //                     startY = startStyleChange.moveDeltaY;
+    //                 }
+    //                 if (endStyleChange.moveTo) {
+    //                     endX = endStyleChange.moveDeltaX;
+    //                     endY = endStyleChange.moveDeltaY;
+    //                 }
+
+    //                 record.push([[twip(startX), twip(startY)], [twip(endX), twip(endY)]]);
+    //             }
+
+    //             i++;
+    //             j++;
+    //         }
+    //         else if (startRecord.type == SWFShapeRecord.TYPE_STYLECHANGE)
+    //         {
+    //             var startStyleChange: SWFShapeRecordStyleChange = cast startRecord;
+
+    //             record = serializeStyleChange(startStyleChange);
+
+    //             if (startStyleChange.moveTo)
+    //             {
+    //                 startX = startStyleChange.moveDeltaX;
+    //                 startY = startStyleChange.moveDeltaY;
+
+    //                 record.push([[twip(startX), twip(startY)], [twip(endX), twip(endY)]]);
+    //             }
+
+    //             i++;
+    //         }
+    //         else if (endRecord.type == SWFShapeRecord.TYPE_STYLECHANGE)
+    //         {
+    //             record = serializeStyleChange(endStyleChange);
+
+    //             var endStyleChange: SWFShapeRecordStyleChange = cast endRecord;
+
+    //             if (endStyleChange.moveTo)
+    //             {
+    //                 endX = endStyleChange.moveDeltaX;
+    //                 endY = endStyleChange.moveDeltaY;
+
+    //                 record.push([[twip(startX), twip(startY)], [twip(endX), twip(endY)]]);
+    //             }
+
+    //             j++;
+    //         }
+    //         else if (startRecord.type == SWFShapeRecord.TYPE_END && endRecord.type == SWFShapeRecord.TYPE_END) {
+    //             record = [SWFShapeRecord.TYPE_END];
+    //             i++;
+    //             j++;
+    //         }
+    //         else {
+    //             record = serializeMorphShapeEdge(startRecord, endRecord);
+    //             i++;
+    //             j++;
+    //         }
+
+    //         result.push(record);
+    //     }
+
+    //     return result;
+    // }
+
+    // private function serializeMorphShapeEdge(startRecord: SWFShapeRecord, endRecord: SWFShapeRecord): Array<Dynamic>
+    // {
+    //     if (startRecord.type == SWFShapeRecord.TYPE_STRAIGHTEDGE && endRecord.type == SWFShapeRecord.TYPE_STRAIGHTEDGE)
+    //     {
+    //         var sse:SWFShapeRecordStraightEdge = cast startRecord;
+    //         var ese:SWFShapeRecordStraightEdge = cast endRecord;
+    //         return [SWFShapeRecord.TYPE_STRAIGHTEDGE, [twip(sse.deltaX), twip(sse.deltaY)], [twip(ese.deltaX), twip(ese.deltaY)]];
+    //     }
+    //     else if (startRecord.type == SWFShapeRecord.TYPE_STRAIGHTEDGE && endRecord.type == SWFShapeRecord.TYPE_CURVEDEDGE)
+    //     {
+    //         var sse:SWFShapeRecordStraightEdge = cast startRecord;
+    //         var ece:SWFShapeRecordCurvedEdge = cast endRecord;
+    //         return [SWFShapeRecord.TYPE_CURVEDEDGE, straightToCurved(sse), serializeCurvedRecord(ece)];
+    //     }
+    //     else if (startRecord.type == SWFShapeRecord.TYPE_CURVEDEDGE && endRecord.type == SWFShapeRecord.TYPE_STRAIGHTEDGE)
+    //     {
+    //         var sce:SWFShapeRecordCurvedEdge = cast startRecord;
+    //         var ese:SWFShapeRecordStraightEdge = cast endRecord;
+    //         return [SWFShapeRecord.TYPE_CURVEDEDGE, serializeCurvedRecord(sce), straightToCurved(ese)];
+    //     }
+    //     else if (startRecord.type == SWFShapeRecord.TYPE_CURVEDEDGE && endRecord.type == SWFShapeRecord.TYPE_CURVEDEDGE)
+    //     {
+    //         var sce:SWFShapeRecordCurvedEdge = cast startRecord;
+    //         var ece:SWFShapeRecordCurvedEdge = cast endRecord;
+    //         return [SWFShapeRecord.TYPE_CURVEDEDGE, serializeCurvedRecord(sce),
+    //                                                 serializeCurvedRecord(ece)];
+    //     }
+    //     else
+    //     {
+    //         throw "Invalid morph shape edge pairs!";
+    //     }
+    // }
+
+    // private function serializeCurvedRecord(cr: SWFShapeRecordCurvedEdge): Array<Float>
+    // {
+    //     return [twip(cr.controlDeltaX), twip(cr.controlDeltaY), twip(cr.anchorDeltaX), twip(cr.anchorDeltaY)];
+    // }
+
+    // private function straightToCurved(sc: SWFShapeRecordStraightEdge): Array<Float>
+    // {
+    //     return [twip(sc.deltaX / 2), twip(sc.deltaY / 2), twip(sc.deltaX / 2), twip(sc.deltaY / 2)];
+    // }
+
+    // private function serializeStyleChange(sc: SWFShapeRecordStyleChange): Array<Dynamic>
+    // {
+    //     return [SWFShapeRecord.TYPE_STYLECHANGE, sc.stateNewStyles, sc.stateLineStyle, sc.stateFillStyle1, sc.stateFillStyle0, sc.fillStyle0, sc.fillStyle1, sc.lineStyle, sc.numFillBits, sc.numLineBits, serializeFillStyles(sc.fillStyles), serializeLineStyles(sc.lineStyles)];
+    // }
+
+    // private function serializeFillStyles(fillStyles: Array<SWFFillStyle>): Array<Dynamic>
+    // {
+    //     var result: Array<Dynamic> = [];
+
+    //     for (fs in fillStyles) {
+    //         if (type != null)
+    //         {
+    //             switch (type)
+    //             {
+    //                 case SWFMorphFillType.SOLID:
+    //                     result.push([fs.type, fs.rgb]);
+    //                 case SWFMorphFillType.LINEAR_GRADIENT:
+    //                 case SWFMorphFillType.RADIAL_GRADIENT:
+    //                 case SWFMorphFillType.FOCAL_RADIAL_GRADIENT:
+    //                     result.push([fs.type, serializeSWFMatrix(fs.gradientMatrix), serializeGradient(fs.gradient)]);
+    //                 case SWFMorphFillType.REPEATING_BITMAP:
+    //                 case SWFMorphFillType.CLIPPED_BITMAP:
+    //                 case SWFMorphFillType.REPEATING_BITMAP_NON_SMOOTHED:
+    //                 case SWFMorphFillType.CLIPPED_BITMAP_NON_SMOOTHED:
+    //                     result.push([fs.type, fs.bitmapId, serializeSWFMatrix(fs.bitmapMatrix)]);
+    //                 default:
+    //                     throw "Invalid fill style! " + fs.type;
+    //             }
+    //         }
+    //     }
+
+    //     return result;
+    // }
+
+    // private function serializeLineStyles(lineStyles: Array<SWFLineStyle>): Array<Dynamic>
+    // {
+    //     var result: Array<Dynamic> = [];
+    //     for (ls in lineStyles) {
+    //         if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (mls, SWFLineStyle2)) {
+    //             return [SWFLineStyleType.V2, mls.startWidth, mls.endWidth, mls.startColor, mls.endColor,
+    //                     mls.startCapsStyle, mls.endCapsStyle, mls.jointStyle, mls.hasFillFlag, mls.noHScaleFlag, mls.noVScaleFlag,
+    //                     mls.pixelHintingFlag, mls.noClose, mls.miterLimitFactor, serializeMorphFillStyle(mls.fillType)];
+    //         }
+
+    //         return [SWFLineStyleType.V1, mls.startWidth, mls.endWidth, mls.startColor, mls.endColor];
+    //     }
+    //     return result;
+    // }
+
+    // private function serializeMorphFillStyle(mfs:SWFMorphFillStyle):Array<Dynamic>
+    // {
+    //     if (mfs == null) {
+    //         return null;
+    //     }
+
+    //     var type = mfs.type;
+
+    //     if (type != null)
+    //     {
+    //         switch (type)
+    //         {
+    //             case SWFMorphFillType.SOLID:
+    //                 return [mfs.type, mfs.startColor, mfs.endColor];
+    //             case SWFMorphFillType.LINEAR_GRADIENT:
+    //             case SWFMorphFillType.RADIAL_GRADIENT:
+    //             case SWFMorphFillType.FOCAL_RADIAL_GRADIENT:
+    //                 return [mfs.type, serializeSWFMatrix(mfs.startGradientMatrix), serializeSWFMatrix(mfs.endGradientMatrix), serializeMorphGradient(mfs.gradient)];
+    //             case SWFMorphFillType.REPEATING_BITMAP:
+    //             case SWFMorphFillType.CLIPPED_BITMAP:
+    //             case SWFMorphFillType.REPEATING_BITMAP_NON_SMOOTHED:
+    //             case SWFMorphFillType.CLIPPED_BITMAP_NON_SMOOTHED:
+    //                 return [mfs.type,
+    //                         mfs.bitmapId,
+    //                         serializeSWFMatrix(mfs.startBitmapMatrix),
+    //                         serializeSWFMatrix(mfs.endBitmapMatrix)];
+    //             default:
+    //                 throw "Invalid fill style!";
+    //         }
+    //     }
+
+    //     return null;
+    // }
+
+    // private function serializeMorphLineStyle(mls:SWFMorphLineStyle):Array<Dynamic>
+    // {
+    //     if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (mls, SWFMorphLineStyle2)) {
+    //         return [SWFLineStyleType.V2, mls.startWidth, mls.endWidth, mls.startColor, mls.endColor,
+    //                 mls.startCapsStyle, mls.endCapsStyle, mls.jointStyle, mls.hasFillFlag, mls.noHScaleFlag, mls.noVScaleFlag,
+    //                 mls.pixelHintingFlag, mls.noClose, mls.miterLimitFactor, serializeMorphFillStyle(mls.fillType)];
+    //     }
+
+    //     return [SWFLineStyleType.V1, mls.startWidth, mls.endWidth, mls.startColor, mls.endColor];
+    // }
+
+    // private function serializeMorphGradient(mg:SWFMorphGradient):Array<Dynamic>
+    // {
+    //     var records: Array<Dynamic> = [];
+
+    //     for (record in mg.records) {
+    //         records.push([record.startRatio, record.startColor, record.endRatio, record.endColor]);
+    //     }
+
+    //     if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (mg, SWFMorphFocalGradient)) {
+    //         return [SWFMorphGradientType.FOCAL, mg.spreadMode, mg.interpolationMode, records, mg.startFocalPoint, mg.endFocalPoint];
+    //     }
+
+    //     return [SWFMorphGradientType.NORMAL, mg.spreadMode, mg.interpolationMode, records];
+    // }
+
+    private inline function twip(value:Float):Int
+    {
+        return Math.round(value * 20);
+    }
 }
 
 private enum BitmapType
 {
-	PNG;
-	JPEG_ALPHA;
-	JPEG;
+    PNG;
+    JPEG_ALPHA;
+    JPEG;
 }
 
 private enum SoundType
 {
-	UNCOMPRESSED_NATIVE_ENDIAN;
-	ADPCM;
-	MP3;
-	UNCOMPRESSED_LITTLE_ENDIAN;
-	NELLYMOSER_16_KHZ;
-	NELLYMOSER_8_KHZ;
-	NELLYMOSER;
-	SPEEX;
+    UNCOMPRESSED_NATIVE_ENDIAN;
+    ADPCM;
+    MP3;
+    UNCOMPRESSED_LITTLE_ENDIAN;
+    NELLYMOSER_16_KHZ;
+    NELLYMOSER_8_KHZ;
+    NELLYMOSER;
+    SPEEX;
 }
 
 private class SWFDocument
 {
-	public var frameRate:Float;
-	public var uuid:String;
-	public var root:Dynamic;
-	public var symbols:Map<Int, Dynamic>;
+    public var frameRate:Float;
+    public var uuid:String;
+    public var root:Dynamic;
+    public var symbols:Map<Int, Dynamic>;
 
-	// public var version:Int;
+    // public var version:Int;
 
-	public function new()
-	{
-		symbols = new Map();
-	}
+    public function new()
+    {
+        symbols = new Map();
+    }
 
-	public function serialize():Dynamic
-	{
-		var output:Dynamic = {};
-		output.frameRate = frameRate;
-		output.uuid = uuid;
-		output.root = 0;
-		output.version = 0.1;
+    public function serialize():Dynamic
+    {
+        var output:Dynamic = {};
+        output.frameRate = frameRate;
+        output.uuid = uuid;
+        output.root = 0;
+        output.version = 0.1;
 
-		var symbolArray = new Array<Dynamic>();
-		symbolArray.push(root);
+        var symbolArray = new Array<Dynamic>();
+        symbolArray.push(root);
 
-		for (key in symbols.keys())
-		{
-			symbolArray.push(symbols.get(key));
-		}
+        for (key in symbols.keys())
+        {
+            symbolArray.push(symbols.get(key));
+        }
 
-		output.symbols = symbolArray;
+        output.symbols = symbolArray;
 
-		return Json.stringify(output);
-	}
+        return Json.stringify(output);
+    }
 }
 
 @:enum private abstract SWFFrameObjectType(Int) from Int to Int
-{
-	public var CREATE = 0;
-	public var UPDATE = 1;
-	public var DESTROY = 2;
+  {
+      public var CREATE = 0;
+      public var UPDATE = 1;
+      public var DESTROY = 2;
 }
 
 @:enum private abstract SWFShapeCommandType(Int) from Int to Int
-{
-	public var BEGIN_BITMAP_FILL = 0;
-	public var BEGIN_FILL = 1;
-	public var BEGIN_GRADIENT_FILL = 2;
-	public var CLEAR_LINE_STYLE = 3;
-	public var CURVE_TO = 4;
-	public var END_FILL = 5;
-	public var LINE_STYLE = 6;
-	public var LINE_TO = 7;
-	public var MOVE_TO = 8;
+  {
+      public var BEGIN_BITMAP_FILL = 0;
+      public var BEGIN_FILL = 1;
+      public var BEGIN_GRADIENT_FILL = 2;
+      public var CLEAR_LINE_STYLE = 3;
+      public var CURVE_TO = 4;
+      public var END_FILL = 5;
+      public var LINE_STYLE = 6;
+      public var LINE_TO = 7;
+      public var MOVE_TO = 8;
 }
 
 @:enum private abstract SWFSymbolType(Int) from Int to Int
-{
-	public var BITMAP = 0;
-	public var BUTTON = 1;
-	public var DYNAMIC_TEXT = 2;
-	public var FONT = 3;
-	public var SHAPE = 4;
-	public var SPRITE = 5;
-	public var STATIC_TEXT = 6;
+  {
+      public var BITMAP = 0;
+      public var BUTTON = 1;
+      public var DYNAMIC_TEXT = 2;
+      public var FONT = 3;
+      public var SHAPE = 4;
+      public var SPRITE = 5;
+      public var STATIC_TEXT = 6;
+      public var MORPH_SHAPE = 7;
 }
 
 @:enum private abstract SWFFilterType(Int) from Int to Int
-{
-	public var BLUR = 0;
-	public var COLOR_MATRIX = 1;
-	public var DROP_SHADOW = 2;
-	public var GLOW = 3;
-	// TODO: More
+  {
+      public var BLUR = 0;
+      public var COLOR_MATRIX = 1;
+      public var DROP_SHADOW = 2;
+      public var GLOW = 3;
+      // TODO: More
+}
+
+@:enum private abstract SWFMorphFillType(Int) from Int to Int
+  {
+      public var SOLID = 0x00;
+      public var LINEAR_GRADIENT = 0x10;
+      public var RADIAL_GRADIENT = 0x12;
+      public var FOCAL_RADIAL_GRADIENT = 0x13;
+      public var REPEATING_BITMAP = 0x40;
+      public var CLIPPED_BITMAP = 0x41;
+      public var REPEATING_BITMAP_NON_SMOOTHED = 0x42;
+      public var CLIPPED_BITMAP_NON_SMOOTHED = 0x43;
+}
+
+@:enum private abstract SWFLineStyleType(Int) from Int to Int
+  {
+      public var V1 = 0;
+      public var V2 = 1;
+}
+
+@:enum private abstract SWFGradientType(Int) from Int to Int
+  {
+      public var NORMAL = 0;
+      public var FOCAL = 1;
 }

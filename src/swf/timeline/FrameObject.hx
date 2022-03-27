@@ -21,8 +21,10 @@ class FrameObject
 	public var isKeyframe:Bool;
 	// The index of the layer this object resides on
 	public var layer:Int = -1;
+	// The ratio of this object if it's a MorphShape
+	public var ratio:Int = 0;
 
-	public function new(depth:Int, clipDepth:Int, characterId:Int, className:String, placedAtIndex:Int, lastModifiedAtIndex:Int = 0, isKeyframe:Bool = false)
+	public function new(depth:Int, clipDepth:Int, characterId:Int, className:String, placedAtIndex:Int, lastModifiedAtIndex:Int = 0, isKeyframe:Bool = false, ratio:Int = 0)
 	{
 		this.depth = depth;
 		this.clipDepth = clipDepth;
@@ -32,11 +34,12 @@ class FrameObject
 		this.lastModifiedAtIndex = lastModifiedAtIndex;
 		this.isKeyframe = isKeyframe;
 		this.layer = -1;
+        this.ratio = ratio;
 	}
 
 	public function clone():FrameObject
 	{
-		return new FrameObject(depth, clipDepth, characterId, className, placedAtIndex, lastModifiedAtIndex, false);
+		return new FrameObject(depth, clipDepth, characterId, className, placedAtIndex, lastModifiedAtIndex, false, ratio);
 	}
 
 	public function toString( /*indent:Int = 0*/):String

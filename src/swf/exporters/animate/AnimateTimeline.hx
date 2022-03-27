@@ -352,7 +352,6 @@ class AnimateTimeline extends Timeline
         switch Type.typeof(__sprite) {
             case TClass(c):
                 if (Rtti.hasRtti(c)) {
-                    var s = Reflect.field(c, "__rtti");
                     var rtti = Rtti.getRtti(c);
                     for (field in rtti.fields) {
                         switch (field.type) {
@@ -545,6 +544,10 @@ class AnimateTimeline extends Timeline
 		{
 			displayObject.cacheAsBitmap = frameObject.cacheAsBitmap;
 		}
+
+        if (frameObject.ratio != null && #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, AnimateMorphShape)) {
+            cast(displayObject, AnimateMorphShape).render(frameObject.ratio);
+        }
 
 		#if openfljs
 		Reflect.setField(__sprite, displayObject.name, displayObject);

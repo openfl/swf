@@ -75,7 +75,10 @@ class TagDefineMorphShape implements IDefinitionTag
 			morphLineStyles.push(data.readMORPHLINESTYLE());
 		}
 		startEdges = data.readSHAPE();
-		endEdges = data.readSHAPE();
+        // endEdges are a special kind of shape, they only contain edge data
+        // and no style info, which messes up the exporter if it doesn't understand
+        // the difference
+		endEdges = data.readSHAPE(true);
 	}
 
 	public function publish(data:SWFData, version:Int):Void
