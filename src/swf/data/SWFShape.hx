@@ -25,7 +25,6 @@ class SWFShape
 	public var fillStyles(default, null):Array<SWFFillStyle>;
 	public var lineStyles(default, null):Array<SWFLineStyle>;
 	public var referencePoint(default, null):Point;
-	public var noStyleInfo(default, null):Bool;
 
 	private var fillEdgeMaps:Array<Map<Int, Array<IEdge>>>;
 	private var lineEdgeMaps:Array<Map<Int, Array<IEdge>>>;
@@ -36,14 +35,13 @@ class SWFShape
 	private var unitDivisor:Float;
 	private var edgeMapsCreated:Bool = false;
 
-	public function new(data:SWFData = null, level:Int = 1, unitDivisor:Float = 20, noStyleInfo: Bool = false)
+	public function new(data:SWFData = null, level:Int = 1, unitDivisor:Float = 20)
 	{
 		records = new Array<SWFShapeRecord>();
 		fillStyles = new Array<SWFFillStyle>();
 		lineStyles = new Array<SWFLineStyle>();
 		referencePoint = new Point(0, 0);
 		this.unitDivisor = unitDivisor;
-        this.noStyleInfo = noStyleInfo;
 		if (data != null)
 		{
 			parse(data, level);
@@ -250,10 +248,7 @@ class SWFShape
 		// TODO: This is a temporary bug fix. edgeMaps shouldn't need to be recreated for subsequent exports
 		edgeMapsCreated = false;
 		// Create edge maps
-		// "noStyleInfo" means this shape is the endEdges of a MorphShape
-		// MorphShape endEdges have no styling info, only edges, so we want to export them even when there's
-		// no styling info
-		createEdgeMaps(noStyleInfo);
+		createEdgeMaps();
 		// If no handler is passed, default to DefaultShapeExporter (does nothing)
 		if (handler == null)
 		{
@@ -273,7 +268,7 @@ class SWFShape
 		handler.endShape();
 	}
 
-	private function createEdgeMaps(noStyleInfo: Bool = false):Void
+	private function createEdgeMaps():Void
 	{
 		if (!edgeMapsCreated)
 		{
@@ -300,9 +295,9 @@ class SWFShape
 				{
 					case SWFShapeRecord.TYPE_STYLECHANGE:
 						var styleChangeRecord:SWFShapeRecordStyleChange = cast(shapeRecord, SWFShapeRecordStyleChange);
-						if (styleChangeRecord.stateLineStyle || styleChangeRecord.stateFillStyle0 || styleChangeRecord.stateFillStyle1 || noStyleInfo)
+						if (styleChangeRecord.stateLineStyle || styleChangeRecord.stateFillStyle0 || styleChangeRecord.stateFillStyle1)
 						{
-							processSubPath(subPath, currentLineStyleIdx, currentFillStyleIdx0, currentFillStyleIdx1, noStyleInfo);
+							processSubPath(subPath, currentLineStyleIdx, currentFillStyleIdx0, currentFillStyleIdx1);
 							subPath = new Array<IEdge>();
 						}
 						if (styleChangeRecord.stateNewStyles)
@@ -393,7 +388,7 @@ class SWFShape
 						subPath.push(new CurvedEdge(from, control, to, currentLineStyleIdx, currentFillStyleIdx1));
 					case SWFShapeRecord.TYPE_END:
 						// We're done. Process the last subpath, if any
-						processSubPath(subPath, currentLineStyleIdx, currentFillStyleIdx0, currentFillStyleIdx1, noStyleInfo);
+						processSubPath(subPath, currentLineStyleIdx, currentFillStyleIdx0, currentFillStyleIdx1);
 						cleanEdgeMap(currentFillEdgeMap);
 						cleanEdgeMap(currentLineEdgeMap);
 						fillEdgeMaps.push(currentFillEdgeMap);
@@ -405,10 +400,10 @@ class SWFShape
 		}
 	}
 
-	private function processSubPath(subPath:Array<IEdge>, lineStyleIdx:Int, fillStyleIdx0:Int, fillStyleIdx1:Int, noStyleInfo: Bool = false):Void
+	private function processSubPath(subPath:Array<IEdge>, lineStyleIdx:Int, fillStyleIdx0:Int, fillStyleIdx1:Int):Void
 	{
 		var path:Array<IEdge>;
-		if (fillStyleIdx0 != 0 || noStyleInfo)
+		if (fillStyleIdx0 != 0)
 		{
 			path = currentFillEdgeMap.get(fillStyleIdx0);
 			if (path == null)
@@ -433,7 +428,7 @@ class SWFShape
 			}
 			appendEdges(path, subPath);
 		}
-		if (lineStyleIdx != 0 || noStyleInfo)
+		if (lineStyleIdx != 0)
 		{
 			path = currentLineEdgeMap.get(lineStyleIdx);
 			if (path == null)

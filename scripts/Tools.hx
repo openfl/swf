@@ -625,8 +625,8 @@ class Tools
 			}
 			else if (words.length > 2)
 			{
-				// try
-				// {
+				try
+				{
 					var projectData = File.getContent(inputPath);
 
 					var unserializer = new Unserializer(projectData);
@@ -639,11 +639,11 @@ class Tools
 					{
 						File.saveContent(outputPath, Serializer.run(output));
 					}
-				// }
-				// catch (e:Dynamic)
-				// {
-				// 	Log.error(e);
-				// }
+				}
+				catch (e:Dynamic)
+				{
+					Log.error(e);
+				}
 			}
 		}
 	}

@@ -839,27 +839,3 @@ import openfl.filters.GlowFilter;
 	public var STATIC_TEXT = 6;
 	public var MORPH_SHAPE = 7;
 }
-
-@:enum abstract SWFMorphFillType(Int) from Int to Int
-{
-	public var SOLID = 0x00;
-	public var LINEAR_GRADIENT = 0x10;
-	public var RADIAL_GRADIENT = 0x12;
-	public var FOCAL_RADIAL_GRADIENT = 0x13;
-	public var REPEATING_BITMAP = 0x40;
-	public var CLIPPED_BITMAP = 0x41;
-	public var REPEATING_BITMAP_NON_SMOOTHED = 0x42;
-	public var CLIPPED_BITMAP_NON_SMOOTHED = 0x43;
-}
-
-@:enum abstract SWFMorphLineStyleType(Int) from Int to Int
-{
-	public var V1 = 0;
-	public var V2 = 1;
-}
-
-@:enum abstract SWFMorphGradientType(Int) from Int to Int
-{
-	public var NORMAL = 0;
-	public var FOCAL = 1;
-}
