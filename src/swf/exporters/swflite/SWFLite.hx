@@ -53,7 +53,7 @@ import openfl.Assets;
 			{
 				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, SpriteSymbol))
 				{
-					return cast(symbol, SpriteSymbol).__createObject(this);
+					return cast cast(symbol, SpriteSymbol).__createObject(this);
 				}
 			}
 		}
