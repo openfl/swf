@@ -5,6 +5,7 @@ import swf.exporters.swflite.SWFLite;
 import openfl.display.SimpleButton;
 import openfl.utils.Assets;
 
+@:access(swf.exporters.swflite)
 
 class ::CLASS_NAME:: extends ::BASE_CLASS_NAME:: {
 
