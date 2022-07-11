@@ -51,13 +51,13 @@ Tell haxelib where your development copy of SWF is installed:
 
     haxelib dev swf swf
 
-Go to the tools folder:
+Go to the cloned folder:
 
-    cd swf/tools
-    
-Tell haxe to build:
+    cd swf
 
-    haxe build.hxml
+Tell haxe to build the tools:
+
+    haxe rebuild.hxml
 
 To return to release builds:
 
