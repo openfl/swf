@@ -22,6 +22,10 @@ class MovieClip extends #if flash openfl.display.MovieClip.MovieClip2 #else open
 	{
 		super();
 		attachTimeline(new MovieClipTimeline(data));
+		
+		#if !flash
+		__enterFrame(0);
+		#end
 	}
 }
 
@@ -218,7 +222,20 @@ class MovieClipTimeline extends Timeline
 		}
 
 		#if !flash
+		setChildField(displayObject);
+		#end
+	}
+
+	@:noCompletion private inline function setChildField(displayObject:DisplayObject)
+	{
+		#if (openfl_dynamic && haxe_ver < "4.0.0")
 		Reflect.setField(movieClip, displayObject.name, displayObject);
+		#else
+		// Check that the type allows this field
+		if (Type.getInstanceFields(Type.getClass(movieClip)).indexOf(displayObject.name) != -1)
+		{
+			Reflect.setField(movieClip, displayObject.name, displayObject);
+		}
 		#end
 	}
 

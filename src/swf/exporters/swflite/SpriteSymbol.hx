@@ -5,13 +5,15 @@ import swf.exporters.swflite.timeline.Frame;
 import swf.exporters.swflite.timeline.SymbolTimeline;
 import openfl.display.DisplayObject;
 import openfl.display.MovieClip;
+import openfl.display.Sprite;
 import openfl.geom.Rectangle;
+
+import #if (haxe_ver >= 4.2) Std.isOfType #else Std.is as isOfType #end;
 
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
-@:access(openfl.display.MovieClip)
 class SpriteSymbol extends SWFSymbol
 {
 	public var baseClassName:String;
@@ -27,7 +29,15 @@ class SpriteSymbol extends SWFSymbol
 		frames = new Array<Frame>();
 	}
 
-	private function __constructor(movieClip:MovieClip):Void
+	private function __spriteConstructor(sprite:Sprite):Void
+	{
+		if (!isOfType(sprite, MovieClip))
+			throw "expected movieclip";
+		
+		__movieClipConstructor(cast sprite);
+	}
+
+	private function __movieClipConstructor(movieClip:MovieClip):Void
 	{
 		var timeline = new SymbolTimeline(swf, this);
 		#if flash
@@ -38,11 +48,21 @@ class SpriteSymbol extends SWFSymbol
 		movieClip.scale9Grid = scale9Grid;
 	}
 
-	private override function __createObject(swf:SWFLite):MovieClip
+	private inline function __setConstructor()
 	{
 		#if (!macro && !flash)
-		MovieClip.__constructor = __constructor;
+			@:privateAccess
+			#if (openfl <= "9.1.0")
+			MovieClip.__constructor = __movieClipConstructor;
+			#else
+			Sprite.__constructor = __spriteConstructor;
+			#end
 		#end
+	}
+
+	private override function __createObject(swf:SWFLite):MovieClip
+	{
+		__setConstructor();
 		this.swf = swf;
 
 		#if flash
@@ -97,7 +117,7 @@ class SpriteSymbol extends SWFSymbol
 		}
 
 		#if flash
-		if (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (movieClip, flash.display.MovieClip.MovieClip2))
+		if (!isOfType(movieClip, flash.display.MovieClip.MovieClip2))
 		{
 			movieClip.scale9Grid = scale9Grid;
 		}
@@ -108,15 +128,13 @@ class SpriteSymbol extends SWFSymbol
 
 	private override function __init(swf:SWFLite):Void
 	{
-		#if (!macro && !flash)
-		MovieClip.__constructor = __constructor;
-		#end
+		__setConstructor();
 		this.swf = swf;
 	}
 
 	private override function __initObject(swf:SWFLite, instance:DisplayObject):Void
 	{
 		this.swf = swf;
-		__constructor(cast instance);
+		__movieClipConstructor(cast instance);
 	}
 }
