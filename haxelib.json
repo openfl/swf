@@ -2,10 +2,14 @@
 	"name": "swf",
 	"url": "http://github.com/openfl/swf",
 	"license": "MIT",
-	"tags": [ ],
+	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
-	"version": "3.0.2",
-	"releasenote": "Haxe 4 compilation fix",
-	"contributors": [ "singmajesty" ],
+	"version": "3.1.0",
+	"releasenote": "New @:bind base class support, SWC support, fixes and improvements",
+	"contributors": [
+		"singmajesty",
+		"bowlerhat",
+		"Dimensionscape"
+	],
 	"classPath": "src"
 }
