@@ -4,7 +4,7 @@
 	"license": "MIT",
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
-	"version": "3.1.0",
+	"version": "3.1.1",
 	"releasenote": "New @:bind base class support, SWC support, fixes and improvements",
 	"contributors": [
 		"singmajesty",
