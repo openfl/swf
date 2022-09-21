@@ -926,6 +926,11 @@ class Tools
 							System.mkdir(cacheDirectory);
 						}
 
+						if (!Log.verbose)
+						{
+							Log.info("\x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
+						}
+
 						var bytes:ByteArray = File.getBytes(library.sourcePath);
 						bytes = readSWC(bytes);
 						var swf = new SWF(bytes);
