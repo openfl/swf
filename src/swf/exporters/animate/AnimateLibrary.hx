@@ -212,6 +212,26 @@ import openfl.filters.GlowFilter;
 	#end
 
 	#if lime
+	public override function list(type:String):Array<String>
+	{
+		var requestedType = type != null ? cast(type, AssetType) : null;
+		var items = [];
+
+		if (symbolsByClassName != null)
+		{
+			items.push("");
+
+			for (id in symbolsByClassName.keys())
+			{
+				items.push(id);
+			}
+		}
+
+		return items;
+	}
+	#end
+
+	#if lime
 	public override function load():Future<lime.utils.AssetLibrary>
 	{
 		if (id != null)
