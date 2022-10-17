@@ -588,6 +588,10 @@ class Tools
 						argument = "-verbose";
 						Log.verbose = true;
 					}
+					else if (argument == "-nocolor")
+					{
+						Log.enableColor = false;
+					}
 
 					targetFlags.set(argument.substr(1), "");
 				}
@@ -598,18 +602,24 @@ class Tools
 			}
 		}
 
-		if (words[0] == "process")
+		Log.accentColor = "\x1b[36;1m";
+
+		if (words.length == 0 || words[0] == "help" || targetFlags.exists("-h") || targetFlags.exists("-help") || targetFlags.exists("--help"))
 		{
-			if (words.length == 1)
+			displayHelp();
+		}
+		else if (words[0] == "process" || words[0] == "generate")
+		{
+			if (targetFlags.exists("-v") || targetFlags.exists("-verbose"))
 			{
-				Log.error("Incorrect number of arguments for command 'process'");
-				return;
+				Log.verbose = true;
+				displayInfo();
 			}
 
-			var inputPath = words[1];
+			var inputPath = words.length > 1 ? words[1] : Sys.getCwd();
 			var outputPath = words.length > 2 ? words[2] : null;
 
-			if (words.length == 1 || Path.extension(inputPath) == "swf" || Path.extension(inputPath) == "swc")
+			if (words.length < 2 || Path.extension(inputPath) == "swf" || Path.extension(inputPath) == "swc")
 			{
 				if (words.length > 3)
 				{
@@ -617,8 +627,60 @@ class Tools
 					return;
 				}
 
-				Log.info("", Log.accentColor + "Running command: PROCESS" + Log.resetColor);
-				processFile(inputPath, outputPath, filePrefix);
+				// Log.info("", Log.accentColor + "Running command: PROCESS" + Log.resetColor);
+
+				if (!FileSystem.exists(inputPath))
+				{
+					Log.error("Cannot process path (does not exist): " + inputPath);
+				}
+
+				if (FileSystem.isDirectory(inputPath))
+				{
+					if (outputPath == null)
+					{
+						outputPath = inputPath;
+					}
+
+					var files = System.readDirectory(inputPath);
+					for (file in files)
+					{
+						var ext = Path.extension(file).toLowerCase();
+						if (ext != "swf" && ext != "swc") continue;
+
+						var relativePath = file;
+						var output = Path.combine(outputPath, Path.withoutExtension(file) + ".zip");
+
+						var fileLabel = file;
+						if (StringTools.startsWith(file, Sys.getCwd()))
+						{
+							fileLabel = Path.normalize(file.substr(Sys.getCwd().length + 1));
+						}
+						else
+						{
+							fileLabel = Path.normalize(file);
+						}
+
+						Log.info("\x1b[1mProcessing file:\x1b[0m "
+							+ fileLabel,
+							" - \x1b[1mProcessing file:\x1b[0m "
+							+ file
+							+ " \x1b[3;37m->\x1b[0m "
+							+ output);
+
+						processFile(file, output, filePrefix);
+					}
+				}
+				else
+				{
+					Log.info("\x1b[1mProcessing file:\x1b[0m "
+						+ inputPath,
+						" - \x1b[1mProcessing file:\x1b[0m "
+						+ inputPath
+						+ " \x1b[3;37m->\x1b[0m "
+						+ outputPath);
+
+					processFile(inputPath, outputPath, filePrefix);
+				}
 			}
 			else if (words.length > 2)
 			{
@@ -645,9 +707,73 @@ class Tools
 		}
 	}
 
+	private static function displayHelp():Void
+	{
+		displayInfo(true);
+
+		Log.println("");
+		Log.println(" " + Log.accentColor + "Usage:\x1b[0m \x1b[1mhaxelib run swf generate\x1b[0m \x1b[3;37m[input path] [output path] [flags]\x1b[0m");
+
+		Log.println("");
+		Log.println(" " + Log.accentColor + "Commands:" + Log.resetColor);
+		Log.println("");
+
+		Log.println("  \x1b[1m" + "generate" + "\x1b[0m -- " + "Generate Lime asset bundles for each *.swf in the specified path");
+
+		Log.println("");
+		Log.println(" " + Log.accentColor + "Flags:" + Log.resetColor);
+		Log.println("");
+
+		Log.println("  \x1b[1m-v\x1b[0;3m/\x1b[0m\x1b[1m-verbose\x1b[0m -- Print additional information (when available)");
+		Log.println("  \x1b[1m-h\x1b[0m/\x1b[0m\x1b[1m-help\x1b[0m -- Display help information (if available)");
+		Log.println("  \x1b[1m-nocolor\x1b[0m -- Disable ANSI format codes in output");
+
+		// Log.println("");
+		// Log.println(" " + Log.accentColor + "Options:" + Log.resetColor);
+		// Log.println("");
+
+		// Log.println("  \x1b[1m--install-hxp-alias\x1b[0m -- Installs the 'hxp' command alias");
+	}
+
+	private static function displayInfo(showLogo:Bool = false, showHint:Bool = false):Void
+	{
+		if (System.hostPlatform == WINDOWS)
+		{
+			Log.println("");
+		}
+
+		// if (showLogo)
+		// {
+		// Log.println("\x1b[36;1m ,dPb,                              \x1b[0m");
+		// Log.println("\x1b[36;1m IP`Yb                              \x1b[0m");
+		// Log.println("\x1b[36;1m I8 8I                              \x1b[0m");
+		// Log.println("\x1b[36;1m I8 8'                              \x1b[0m");
+		// Log.println("\x1b[36;1m I8d8Pgg,       ,gg,   ,gg gg,gggg,   \x1b[0m");
+		// Log.println("\x1b[36;1m I8dP\" \"8I    d8\"\"8b,dP\"  I8P\"  \"Yb  \x1b[0m");
+		// Log.println("\x1b[36;1m I8P    I8   dP   ,88\"    I8'    ,8i \x1b[0m");
+		// Log.println("\x1b[36;1m,d8     I8,,dP  ,dP\"Y8,  ,I8 _  ,d8' \x1b[0m");
+		// Log.println("\x1b[36;1md8P     `Y88\"  dP\"   \"Y88PI8 YY88P\x1b[0m");
+		// Log.println("\x1b[36;1m                          I8         \x1b[0m");
+		// Log.println("\x1b[36;1m                          I8         \x1b[0m");
+		// Log.println("");
+		// Log.println("\x1b[1mHXP Command-Line Tools\x1b[0;1m (" + getToolsVersion() + ")\x1b[0m");
+		// }
+		// else
+		{
+			var version = Haxelib.getVersion();
+			if (version == null) version = "0.0.0";
+
+			Log.println("\x1b[36;1mSWF Command-Line Tools (" + version + ")\x1b[0m");
+		}
+
+		if (showHint)
+		{
+			Log.println("Use \x1b[3mhaxelib run swf help\x1b[0m for instructions");
+		}
+	}
+
 	private static function processFile(sourcePath:String, targetPath:String, prefix:String = null):Bool
 	{
-		// #if false // TODO: Make default
 		if (targetPath == null)
 		{
 			targetPath = Path.withoutExtension(sourcePath) + ".zip";
