@@ -1,7 +1,21 @@
+3.2.0 (10/27/2022)
+------------------
+
+* Added `AnimateLibrary.loadFromFile` for processed ZIP files
+* Added `AnimateLibrary.loadFromBytes` and `AnimateLibrary.loadFromBundle`
+* Added `haxelib run swf generate` to generate SWF classes
+* Improved `haxelib run swf process` to support directories and files
+* Improved `haxelib run swf` as a standalone tool for SWF pre-processing
+* Improved log output for better feedback
+* Fixed blend mode support in Animate libraries
+* Fixed support for `Assets.list` and `AssetType.MOVIE_CLIP`
+
+
 3.1.1 (09/12/2022)
 ------------------
 
 * Fixed "Invalid field access : length" error
+
 
 3.1.0 (08/31/2022)
 ------------------
