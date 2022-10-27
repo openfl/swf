@@ -610,6 +610,8 @@ class Tools
 		}
 		else if (words[0] == "process" || words[0] == "generate")
 		{
+			var generate = (words[0] == "generate");
+
 			if (targetFlags.exists("-v") || targetFlags.exists("-verbose"))
 			{
 				Log.verbose = true;
@@ -667,7 +669,7 @@ class Tools
 							+ " \x1b[3;37m->\x1b[0m "
 							+ output);
 
-						processFile(file, output, filePrefix);
+						processFile(file, output, filePrefix, generate);
 					}
 				}
 				else
@@ -679,7 +681,13 @@ class Tools
 						+ " \x1b[3;37m->\x1b[0m "
 						+ outputPath);
 
-					processFile(inputPath, outputPath, filePrefix);
+					if (!StringTools.endsWith(outputPath, ".zip"))
+					{
+						outputPath = Path.combine(outputPath, Path.withoutExtension(Path.withoutDirectory(inputPath)) + ".zip");
+						trace(outputPath);
+					}
+
+					processFile(inputPath, outputPath, filePrefix, generate);
 				}
 			}
 			else if (words.length > 2)
@@ -712,13 +720,14 @@ class Tools
 		displayInfo(true);
 
 		Log.println("");
-		Log.println(" " + Log.accentColor + "Usage:\x1b[0m \x1b[1mhaxelib run swf generate\x1b[0m \x1b[3;37m[input path] [output path] [flags]\x1b[0m");
+		Log.println(" " + Log.accentColor + "Usage:\x1b[0m \x1b[1mhaxelib run swf (command)\x1b[0m \x1b[3;37m[path] [destination] [flags]\x1b[0m");
 
 		Log.println("");
 		Log.println(" " + Log.accentColor + "Commands:" + Log.resetColor);
 		Log.println("");
 
-		Log.println("  \x1b[1m" + "generate" + "\x1b[0m -- " + "Generate Lime asset bundles for each *.swf in the specified path");
+		Log.println("  \x1b[1m" + "process" + "\x1b[0m -- " + "Converts *.swf and *.swc files into an OpenFL library");
+		Log.println("  \x1b[1m" + "generate" + "\x1b[0m -- " + "Generates Haxe linkage classes (implies 'process')");
 
 		Log.println("");
 		Log.println(" " + Log.accentColor + "Flags:" + Log.resetColor);
@@ -772,18 +781,32 @@ class Tools
 		}
 	}
 
-	private static function processFile(sourcePath:String, targetPath:String, prefix:String = null):Bool
+	private static function processFile(sourcePath:String, targetPath:String, prefix:String = null, generate:Bool = false):Bool
 	{
 		if (targetPath == null)
 		{
 			targetPath = Path.withoutExtension(sourcePath) + ".zip";
 		}
+
 		System.mkdir(Path.directory(targetPath));
 
 		var bytes:ByteArray = File.getBytes(sourcePath);
 		bytes = readSWC(bytes);
 		var swf = new SWF(bytes);
 		var exporter = new AnimateLibraryExporter(swf.data, targetPath);
+
+		if (generate)
+		{
+			var generatePath = Path.tryFullPath(Path.directory(targetPath));
+
+			var output = [];
+			var generatedClasses = exporter.generateClasses("", output, prefix);
+
+			for (asset in output)
+			{
+				AssetHelper.copyAsset(asset, Path.combine(generatePath, asset.targetPath));
+			}
+		}
 
 		return true;
 		// 		#else

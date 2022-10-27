@@ -19,7 +19,10 @@ import openfl.utils.AssetType;
 import openfl.utils.Future;
 import openfl.utils.Promise;
 #if lime
+import lime.utils.AssetBundle;
 import lime.utils.AssetManifest;
+import lime.utils.AssetLibrary as LimeAssetLibrary;
+import lime.utils.Bytes;
 #else
 import openfl.utils.AssetManifest;
 #end
@@ -356,6 +359,45 @@ import openfl.filters.GlowFilter;
 		return promise.future;
 	}
 	#end
+
+	public static function loadFromBundle(bundle:AssetBundle):#if (java && lime) Future<LimeAssetLibrary> #else Future<AnimateLibrary> #end
+	{
+		var library = AssetLibrary.fromBundle(bundle);
+
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (library, AnimateLibrary))
+		{
+			var animateLibrary:AnimateLibrary = cast library;
+			return cast animateLibrary.load();
+		}
+		else
+		{
+			return cast Future.withError("Bundle is not an AnimateLibrary");
+		}
+	}
+
+	public static function loadFromBytes(bytes:Bytes):#if (java && lime) Future<LimeAssetLibrary> #else Future<AnimateLibrary> #end
+	{
+		#if lime
+		return AssetBundle.loadFromBytes(bytes).then(function(bundle)
+		{
+			return loadFromBundle(bundle);
+		});
+		#else
+		return cast Future.withValue(null);
+		#end
+	}
+
+	public static function loadFromFile(path:String):#if (java && lime) Future<AnimateLibrary> #else Future<AnimateLibrary> #end
+	{
+		#if lime
+		return AssetBundle.loadFromFile(path).then(function(bundle)
+		{
+			return loadFromBundle(bundle);
+		});
+		#else
+		return cast Future.withValue(null);
+		#end
+	}
 
 	#if lime
 	public override function loadImage(id:String):Future<Image>
