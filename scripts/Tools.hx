@@ -681,10 +681,9 @@ class Tools
 						+ " \x1b[3;37m->\x1b[0m "
 						+ outputPath);
 
-					if (!StringTools.endsWith(outputPath, ".zip"))
+					if (outputPath != null && !StringTools.endsWith(outputPath, ".zip"))
 					{
 						outputPath = Path.combine(outputPath, Path.withoutExtension(Path.withoutDirectory(inputPath)) + ".zip");
-						trace(outputPath);
 					}
 
 					processFile(inputPath, outputPath, filePrefix, generate);
