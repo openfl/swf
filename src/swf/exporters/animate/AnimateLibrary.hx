@@ -290,6 +290,8 @@ import openfl.filters.GlowFilter;
 						symbol = spriteSymbol;
 					case STATIC_TEXT:
 						symbol = __parseStaticText(data);
+					case MORPH_SHAPE:
+						symbol = __parseMorphShape(data);
 					default:
 				}
 
@@ -730,6 +732,75 @@ import openfl.filters.GlowFilter;
 		return symbol;
 	}
 
+	private function __parseMorphShape(data:Dynamic):AnimateMorphShapeSymbol
+	{
+		var symbol = new AnimateMorphShapeSymbol();
+		symbol.id = data.id;
+		symbol.commands = [];
+
+		var startData:Array<Dynamic> = data.startCommands;
+		var endData:Array<Dynamic> = data.endCommands;
+		var commands = symbol.commands;
+		var i = 0;
+
+		while (i < startData.length)
+		{
+			switch (startData[i])
+			{
+				case BEGIN_BITMAP_FILL:
+					commands.push(BeginBitmapFill(startData[i + 1],
+                                                  __parseMatrix(startData[i + 2]), __parseMatrix(endData[i + 2]),
+                                                  startData[i + 3], startData[i + 4]));
+					i += 5;
+				case BEGIN_FILL:
+					commands.push(BeginFill(startData[i + 1], endData[i + 1],
+                                            startData[i + 2], endData[i + 2]));
+					i += 3;
+				case BEGIN_GRADIENT_FILL:
+					commands.push(BeginGradientFill(startData[i + 1],
+                                                    startData[i + 2], endData[i + 2],
+                                                    startData[i + 3], endData[i + 3],
+                                                    startData[i + 4], endData[i + 4],
+                                                    __parseMatrix(startData[i + 5]), __parseMatrix(endData[i + 5]),
+                                                    startData[i + 6],
+                                                    startData[i + 7],
+						startData[i + 8]));
+					i += 9;
+				case CLEAR_LINE_STYLE:
+					commands.push(LineStyle(null, null, null, null, null, null, null, null, null, null, null));
+					i++;
+				case CURVE_TO:
+					commands.push(CurveTo(__pixel(startData[i + 1]), __pixel(startData[i + 2]), __pixel(startData[i + 3]), __pixel(startData[i + 4]),
+                                          __pixel(endData[i + 1]), __pixel(endData[i + 2]), __pixel(endData[i + 3]), __pixel(endData[i + 4])));
+                    i += 5;
+                case END_FILL:
+                    commands.push(EndFill);
+                    i++;
+                case LINE_STYLE:
+					commands.push(LineStyle(startData[i + 1], endData[i + 1],
+                                            startData[i + 2], endData[i + 2],
+                                            startData[i + 3], endData[i + 3],
+                                            startData[i + 4],
+                                            startData[i + 5],
+                                            startData[i + 6],
+                                            startData[i + 7],
+                                            startData[i + 8]));
+					i += 9;
+				case LINE_TO:
+					commands.push(LineTo(__pixel(startData[i + 1]), __pixel(startData[i + 2]),
+                                         __pixel(endData[i + 1]), __pixel(endData[i + 2])));
+					i += 3;
+				case MOVE_TO:
+					commands.push(MoveTo(__pixel(startData[i + 1]), __pixel(startData[i + 2]),
+                                         __pixel(endData[i + 1]), __pixel(endData[i + 2])));
+					i += 3;
+				default:
+					i++;
+			}
+		}
+		return symbol;
+	}
+
 	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
 	{
 		if (data == null) return null;
@@ -782,6 +853,7 @@ import openfl.filters.GlowFilter;
 					object.symbol = objectData.symbol;
 					object.type = objectData.type;
 					object.visible = objectData.visible;
+                    object.ratio = objectData.ratio;
 					frame.objects.push(object);
 				}
 			}
@@ -827,4 +899,5 @@ import openfl.filters.GlowFilter;
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var MORPH_SHAPE = 7;
 }

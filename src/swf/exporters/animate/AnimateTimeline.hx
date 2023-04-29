@@ -18,6 +18,7 @@ import openfl.filters.DisplacementMapFilter;
 import openfl.filters.DropShadowFilter;
 import openfl.filters.GlowFilter;
 import openfl.geom.ColorTransform;
+import haxe.rtti.Rtti;
 #if hscript
 import hscript.Interp;
 import hscript.Parser;
@@ -51,6 +52,7 @@ class AnimateTimeline extends Timeline
 	@:noCompletion private var __previousFrame:Int;
 	@:noCompletion private var __sprite:Sprite;
 	@:noCompletion private var __symbol:AnimateSpriteSymbol;
+	@:noCompletion private var __fieldNameToType:Map<String, String>;
 
 	public function new(library:AnimateLibrary, symbol:AnimateSpriteSymbol)
 	{
@@ -345,12 +347,29 @@ class AnimateTimeline extends Timeline
 		__currentInstancesByFrameObjectID = new Map();
 		__lastUpdated = new Map();
 
-		var frame:Int;
-		var frameData:AnimateFrame;
-		var instance:FrameSymbolInstance;
-		var duplicate:Bool;
-		var symbol:AnimateSymbol;
-		var displayObject:DisplayObject;
+        __fieldNameToType = new Map();
+
+        switch Type.typeof(__sprite) {
+            case TClass(c):
+                if (Rtti.hasRtti(c)) {
+                    var rtti = Rtti.getRtti(c);
+                    for (field in rtti.fields) {
+                        switch (field.type) {
+                            case CClass(cname, params):
+                                __fieldNameToType.set(field.name, cname);
+                            default:
+                        }
+                    }
+                }
+           default:
+        }
+
+        var frame:Int;
+        var frameData:AnimateFrame;
+        var instance:FrameSymbolInstance;
+        var duplicate:Bool;
+        var symbol:AnimateSymbol;
+        var displayObject:DisplayObject;
 
 		// TODO: Create later?
 
@@ -394,7 +413,11 @@ class AnimateTimeline extends Timeline
 
 						if (symbol != null)
 						{
-							displayObject = symbol.__createObject(__library);
+                            if (frameObject.name != null && __fieldNameToType.exists(frameObject.name)) {
+                                symbol.className = __fieldNameToType.get(frameObject.name);
+                            }
+
+                            displayObject = symbol.__createObject(__library);
 
 							if (displayObject != null)
 							{
@@ -522,6 +545,10 @@ class AnimateTimeline extends Timeline
 			displayObject.cacheAsBitmap = frameObject.cacheAsBitmap;
 		}
 
+        if (frameObject.ratio != null && #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, AnimateMorphShape)) {
+            cast(displayObject, AnimateMorphShape).render(frameObject.ratio);
+        }
+
 		#if openfljs
 		Reflect.setField(__sprite, displayObject.name, displayObject);
 		#end
@@ -539,7 +566,7 @@ class AnimateTimeline extends Timeline
 				var child = __sprite.getChildAt(i);
 				if (child.name == field)
 				{
-					Reflect.setField(__sprite, field, child);
+                    Reflect.setField(__sprite, field, child);
 					break;
 				}
 			}

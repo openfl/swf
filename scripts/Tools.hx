@@ -292,10 +292,13 @@ class Tools
 											{
 												className = "openfl.display.BitmapData";
 											}
-											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineShape)
-												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineMorphShape))
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineShape))
 											{
 												className = "openfl.display.Shape";
+											}
+											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineMorphShape))
+											{
+												className = "swf.exporters.animate.AnimateMorphShape";
 											}
 											else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineText)
 												|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (childSymbol, TagDefineEditText))

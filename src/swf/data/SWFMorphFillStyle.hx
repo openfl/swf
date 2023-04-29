@@ -82,12 +82,14 @@ class SWFMorphFillStyle
 		{
 			case 0x00:
 				fillStyle.rgb = ColorUtils.interpolate(startColor, endColor, ratio);
-			case 0x10, 0x12:
+			case 0x10, 0x12, 0x13:
 				fillStyle.gradientMatrix = MatrixUtils.interpolate(startGradientMatrix, endGradientMatrix, ratio);
 				fillStyle.gradient = gradient.getMorphedGradient(ratio);
 			case 0x40, 0x41, 0x42, 0x43:
 				fillStyle.bitmapId = bitmapId;
 				fillStyle.bitmapMatrix = MatrixUtils.interpolate(startBitmapMatrix, endBitmapMatrix, ratio);
+            default:
+				throw(new Error("Unknown fill style type: 0x" + StringTools.hex(type)));
 		}
 		return fillStyle;
 	}
