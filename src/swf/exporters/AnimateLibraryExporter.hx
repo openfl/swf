@@ -1499,14 +1499,18 @@ private class SWFDocument
 	}
 }
 
-@:enum private abstract SWFFrameObjectType(Int) from Int to Int
+#if (haxe_ver < 4.0) @:enum #end
+private #if (haxe_ver >= 4.0) enum #end abstract SWFFrameObjectType(Int) from Int to Int
+
 {
 	public var CREATE = 0;
 	public var UPDATE = 1;
 	public var DESTROY = 2;
 }
 
-@:enum private abstract SWFShapeCommandType(Int) from Int to Int
+#if (haxe_ver < 4.0) @:enum #end
+private #if (haxe_ver >= 4.0) enum #end abstract SWFShapeCommandType(Int) from Int to Int
+
 {
 	public var BEGIN_BITMAP_FILL = 0;
 	public var BEGIN_FILL = 1;
@@ -1519,7 +1523,9 @@ private class SWFDocument
 	public var MOVE_TO = 8;
 }
 
-@:enum private abstract SWFSymbolType(Int) from Int to Int
+#if (haxe_ver < 4.0) @:enum #end
+private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to Int
+
 {
 	public var BITMAP = 0;
 	public var BUTTON = 1;
@@ -1530,7 +1536,9 @@ private class SWFDocument
 	public var STATIC_TEXT = 6;
 }
 
-@:enum private abstract SWFFilterType(Int) from Int to Int
+#if (haxe_ver < 4.0) @:enum #end
+private #if (haxe_ver >= 4.0) enum #end abstract SWFFilterType(Int) from Int to Int
+
 {
 	public var BLUR = 0;
 	public var COLOR_MATRIX = 1;

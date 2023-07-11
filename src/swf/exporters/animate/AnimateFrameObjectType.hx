@@ -1,6 +1,6 @@
 package swf.exporters.animate;
 
-@:enum abstract AnimateFrameObjectType(Int) from Int to Int
+#if (haxe_ver >= 4.0) enum #else @:enum #end AnimateFrameObjectType(Int) from Int to Int
 {
 	public var CREATE = 0;
 	public var UPDATE = 1;
