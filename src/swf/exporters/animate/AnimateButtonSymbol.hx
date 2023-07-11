@@ -1,5 +1,6 @@
 package swf.exporters.animate;
 
+import swf.utils.SymbolUtils;
 import openfl.display.DisplayObject;
 import openfl.display.SimpleButton;
 
@@ -60,7 +61,7 @@ class AnimateButtonSymbol extends AnimateSymbol
 
 		if (className != null)
 		{
-			var symbolType = Type.resolveClass(className);
+			var symbolType = Type.resolveClass(SymbolUtils.formatClassName(className));
 
 			if (symbolType != null)
 			{

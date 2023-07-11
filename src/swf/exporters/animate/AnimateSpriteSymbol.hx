@@ -1,5 +1,6 @@
 package swf.exporters.animate;
 
+import swf.utils.SymbolUtils;
 import openfl.display.DisplayObject;
 import openfl.display.MovieClip;
 import openfl.display.Sprite;
@@ -63,7 +64,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 		if (className != null)
 		{
-			symbolType = Type.resolveClass(className);
+			symbolType = Type.resolveClass(SymbolUtils.formatClassName(className));
 
 			if (symbolType == null)
 			{
@@ -80,7 +81,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 			}
 			#end
 
-			symbolType = Type.resolveClass(baseClassName);
+			symbolType = Type.resolveClass(SymbolUtils.formatClassName(baseClassName));
 
 			if (symbolType == null)
 			{
