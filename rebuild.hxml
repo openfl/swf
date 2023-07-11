@@ -9,4 +9,3 @@
 -D lime-cairo
 -D lime-cffi
 -D optional-cffi
---no-inline
