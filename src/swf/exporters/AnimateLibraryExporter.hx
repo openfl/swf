@@ -27,6 +27,7 @@ import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
+import swf.utils.SymbolUtils;
 import swf.SWFRoot;
 import swf.SWFTimelineContainer;
 import haxe.Template;
@@ -1120,39 +1121,6 @@ class AnimateLibraryExporter
 		return;
 	}
 
-	private function formatClassName(className:String, prefix:String = null):String
-	{
-		if (className == null) return null;
-		if (prefix == null) prefix = "";
-
-		var lastIndexOfPeriod = className.lastIndexOf(".");
-
-		var packageName = "";
-		var name = "";
-
-		if (lastIndexOfPeriod == -1)
-		{
-			name = prefix + className;
-		}
-		else
-		{
-			packageName = className.substr(0, lastIndexOfPeriod);
-			name = prefix + className.substr(lastIndexOfPeriod + 1);
-		}
-
-		packageName = packageName.charAt(0).toLowerCase() + packageName.substr(1);
-		name = name.substr(0, 1).toUpperCase() + name.substr(1);
-
-		if (packageName != "")
-		{
-			return StringTools.trim(packageName + "." + name);
-		}
-		else
-		{
-			return StringTools.trim(name);
-		}
-	}
-
 	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = ""):Array<String>
 	{
 		#if commonjs
@@ -1217,7 +1185,7 @@ class AnimateLibraryExporter
 					name = className.substr(lastIndexOfPeriod + 1);
 				}
 
-				name = formatClassName(name, prefix);
+				name = SymbolUtils.formatClassName(name, prefix);
 
 				// TODO: Is this right? Is this hard-coded in Flash Player for internal classes?
 				if (packageName == "privatePkg") continue;
@@ -1287,7 +1255,7 @@ class AnimateLibraryExporter
 												}
 												else
 												{
-													className = formatClassName(className, prefix);
+													className = SymbolUtils.formatClassName(className, prefix);
 												}
 											}
 

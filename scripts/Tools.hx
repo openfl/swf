@@ -13,6 +13,7 @@ import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
 import swf.tags.TagPlaceObject;
+import swf.utils.SymbolUtils;
 import swf.SWFTimelineContainer;
 import swf.SWF;
 import haxe.io.BytesInput;
@@ -128,39 +129,6 @@ class Tools
 	}
 	#end
 
-	private static function formatClassName(className:String, prefix:String = null):String
-	{
-		if (className == null) return null;
-		if (prefix == null) prefix = "";
-
-		var lastIndexOfPeriod = className.lastIndexOf(".");
-
-		var packageName = "";
-		var name = "";
-
-		if (lastIndexOfPeriod == -1)
-		{
-			name = prefix + className;
-		}
-		else
-		{
-			packageName = className.substr(0, lastIndexOfPeriod);
-			name = prefix + className.substr(lastIndexOfPeriod + 1);
-		}
-
-		packageName = packageName.charAt(0).toLowerCase() + packageName.substr(1);
-		name = name.substr(0, 1).toUpperCase() + name.substr(1);
-
-		if (packageName != "")
-		{
-			return StringTools.trim(packageName + "." + name);
-		}
-		else
-		{
-			return StringTools.trim(name);
-		}
-	}
-
 	private static function generateSWFClasses(project:HXProject, output:HXProject, swfAsset:Asset, prefix:String = ""):Array<String>
 	{
 		var bitmapDataTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/swf/BitmapData.mtt");
@@ -203,7 +171,7 @@ class Tools
 			}
 
 			packageName = packageName.charAt(0).toLowerCase() + packageName.substr(1);
-			name = formatClassName(name, prefix);
+			name = SymbolUtils.formatClassName(name, prefix);
 
 			// TODO: Is this right? Is this hard-coded in Flash Player for internal classes?
 			if (packageName == "privatePkg") continue;
@@ -317,7 +285,7 @@ class Tools
 											}
 											else
 											{
-												className = formatClassName(className, prefix);
+												className = SymbolUtils.formatClassName(className, prefix);
 											}
 										}
 
