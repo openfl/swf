@@ -285,8 +285,17 @@ class AnimateTimeline extends Timeline
 					__sprite.graphics.clear();
 					if (currentInstances.length > 0)
 					{
-						var shape:Shape = cast currentInstances[0].displayObject;
-						__sprite.graphics.copyFrom(shape.graphics);
+						var displayObject = currentInstances[0].displayObject;
+						if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, Shape))
+						{
+							var shape:Shape = cast displayObject;
+							__sprite.graphics.copyFrom(shape.graphics);
+						}
+						else
+						{
+							var sprite:Sprite = cast displayObject;
+							__sprite.graphics.copyFrom(sprite.graphics);
+						}
 					}
 				}
 				else
