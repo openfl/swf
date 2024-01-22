@@ -120,10 +120,11 @@ class AnimateDynamicTextSymbol extends AnimateSymbol
 		if (!found)
 		{
 			var alpha = ~/[^a-zA-Z]+/g;
+			var spaces = ~/\s/g;
 
 			for (font in Font.enumerateFonts())
 			{
-				if (alpha.replace(font.fontName, "").substr(0, fontName.length) == fontName)
+				if (alpha.replace(font.fontName, "").substr(0, fontName.length) == spaces.replace(fontName, ""))
 				{
 					format.font = font.fontName;
 					found = true;
