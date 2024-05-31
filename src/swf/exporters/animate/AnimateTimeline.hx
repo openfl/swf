@@ -67,7 +67,7 @@ class AnimateTimeline extends Timeline
 		var frameData:AnimateFrame;
 
 		#if hscript
-		var parser = null;
+		var parser:Parser = null;
 		#end
 
 		for (i in 0...__symbol.frames.length)
@@ -98,41 +98,11 @@ class AnimateTimeline extends Timeline
 						parser.allowTypes = true;
 					}
 
-					var program = parser.parseString(frameData.scriptSource);
-					var interp = new Interp();
-
-					var script = function(scope:MovieClip)
-					{
-						interp.variables.set("this", scope);
-						interp.execute(program);
-					};
-
+					var script = __createScriptCallback(parser, frameData.scriptSource);
 					scripts.push(new FrameScript(script, frame));
 					#elseif js
-					var script = untyped untyped #if haxe4 js.Syntax.code #else __js__ #end ("eval({0})", "(function(){" + frameData.scriptSource + "})");
-					var wrapper = function(scope:MovieClip)
-					{
-						try
-						{
-							script.call(scope);
-						}
-						catch (e:Dynamic)
-						{
-							Log.info("Error evaluating frame script\n "
-								+ e
-								+ "\n"
-								+ haxe.CallStack.exceptionStack().map(function(a)
-								{
-									return untyped a[2];
-								}).join("\n")
-								+ "\n"
-								+ e.stack
-								+ "\n"
-								+ untyped script.toString());
-						}
-					}
-
-					scripts.push(new FrameScript(wrapper, frame));
+					var script = __createScriptCallback(frameData.scriptSource);
+					scripts.push(new FrameScript(script, frame));
 					#end
 				}
 				catch (e:Dynamic)
@@ -554,6 +524,48 @@ class AnimateTimeline extends Timeline
 			}
 		}
 	}
+
+	#if hscript
+	@:noCompletion private function __createScriptCallback(parser:Parser, scriptSource:String):MovieClip->Void
+	{
+		var program = parser.parseString(scriptSource);
+		var interp = new Interp();
+
+		return function(scope:MovieClip):Void
+		{
+			interp.variables.set("this", scope);
+			interp.execute(program);
+		};
+	}
+	#end
+
+	#if js
+	@:noCompletion private function __createScriptCallback(scriptSource:String):MovieClip->Void
+	{
+		var script = untyped untyped #if haxe4 js.Syntax.code #else __js__ #end ("eval({0})", "(function(){" + scriptSource + "})");
+		return function(scope:MovieClip):Void
+		{
+			try
+			{
+				script.call(scope);
+			}
+			catch (e:Dynamic)
+			{
+				Log.info("Error evaluating frame script\n "
+					+ e
+					+ "\n"
+					+ haxe.CallStack.exceptionStack().map(function(a)
+					{
+						return untyped a[2];
+					}).join("\n")
+					+ "\n"
+					+ e.stack
+					+ "\n"
+					+ untyped script.toString());
+			}
+		};
+	}
+	#end
 }
 
 #if !openfl_debug
