@@ -1253,16 +1253,12 @@ class AnimateLibraryExporter
 													className = "Dynamic";
 													hidden = true;
 												}
-												else
-												{
-													className = SymbolUtils.formatClassName(className, prefix);
-												}
 											}
 
 											if (className != null)
 											{
 												objectReferences[object.name] = true;
-												classProperties.push({name: object.name, type: className, hidden: true});
+												classProperties.push({name: object.name, type: SymbolUtils.formatClassName(className, prefix), hidden: true});
 											}
 										}
 									}
@@ -1271,6 +1267,7 @@ class AnimateLibraryExporter
 						}
 					}
 				}
+				className = SymbolUtils.formatClassName(className, prefix);
 
 				var context:Dynamic = {
 					UUID: libraryData.uuid,
@@ -1289,8 +1286,8 @@ class AnimateLibraryExporter
 
 				var template = new Template(templateData);
 
-				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(symbol.className.split(".").join("/"))), name + ".hx"),
-					cast AssetType.TEMPLATE);
+				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(className.split(".").join("/"))), name + ".hx"),
+				cast AssetType.TEMPLATE);
 				templateFile.embed = false;
 				templateFile.data = template.execute(context);
 				output.push(templateFile);
