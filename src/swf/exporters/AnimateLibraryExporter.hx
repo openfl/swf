@@ -1167,6 +1167,7 @@ class AnimateLibraryExporter
 			if (templateData != null && Reflect.hasField(symbol, "className") && symbol.className != null)
 			{
 				var className:String = symbol.className;
+				className = SymbolUtils.formatClassName(className, prefix);
 				var hidden = false;
 
 				var name = className;
@@ -1184,8 +1185,6 @@ class AnimateLibraryExporter
 
 					name = className.substr(lastIndexOfPeriod + 1);
 				}
-
-				name = SymbolUtils.formatClassName(name, prefix);
 
 				// TODO: Is this right? Is this hard-coded in Flash Player for internal classes?
 				if (packageName == "privatePkg") continue;
@@ -1289,7 +1288,7 @@ class AnimateLibraryExporter
 
 				var template = new Template(templateData);
 
-				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(symbol.className.split(".").join("/"))), name + ".hx"),
+				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(className.split(".").join("/"))), name + ".hx"),
 					cast AssetType.TEMPLATE);
 				templateFile.embed = false;
 				templateFile.data = template.execute(context);
