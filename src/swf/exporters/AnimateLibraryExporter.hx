@@ -1212,57 +1212,57 @@ class AnimateLibraryExporter
 										if (libraryData.symbols.exists(object.symbol))
 										{
 											var childSymbol = libraryData.symbols.get(object.symbol);
-											var className = Reflect.hasField(childSymbol, "className") ? childSymbol.className : null;
+											var childClassName = Reflect.hasField(childSymbol, "className") ? childSymbol.className : null;
 
-											if (className == null)
+											if (childClassName == null)
 											{
 												var childType:SWFSymbolType = cast childSymbol.type;
 												if (childType == SPRITE)
 												{
-													className = "openfl.display.MovieClip";
+													childClassName = "openfl.display.MovieClip";
 												}
 												else if (childType == BITMAP)
 												{
-													className = "openfl.display.BitmapData";
+													childClassName = "openfl.display.BitmapData";
 												}
 												else if (childType == SHAPE)
 												{
-													className = "openfl.display.Shape";
+													childClassName = "openfl.display.Shape";
 												}
 													// else if (childType == BITMAP)
 													// {
-													// 	className = "openfl.display.Bitmap";
+													// 	childClassName = "openfl.display.Bitmap";
 												// }
 												else if (childType == DYNAMIC_TEXT)
 												{
-													className = "openfl.text.TextField";
+													childClassName = "openfl.text.TextField";
 												}
 												else if (childType == BUTTON)
 												{
-													className = "openfl.display.SimpleButton";
+													childClassName = "openfl.display.SimpleButton";
 												}
 												else
 												{
-													className = "Dynamic";
+													childClassName = "Dynamic";
 												}
 											}
 											else
 											{
-												if (StringTools.startsWith(className, "privatePkg."))
+												if (StringTools.startsWith(childClassName, "privatePkg."))
 												{
-													className = "Dynamic";
+													childClassName = "Dynamic";
 													hidden = true;
 												}
 												else
 												{
-													className = SymbolUtils.formatClassName(className, prefix);
+													childClassName = SymbolUtils.formatClassName(childClassName, prefix);
 												}
 											}
 
-											if (className != null)
+											if (childClassName != null)
 											{
 												objectReferences[object.name] = true;
-												classProperties.push({name: object.name, type: className, hidden: true});
+												classProperties.push({name: object.name, type: childClassName, hidden: true});
 											}
 										}
 									}
