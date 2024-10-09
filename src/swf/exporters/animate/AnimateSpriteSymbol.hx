@@ -48,7 +48,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 	private override function __createObject(library:AnimateLibrary):Sprite
 	{
-		#if !macro
+		#if (!macro && !flash)
 		Sprite.__constructor = __constructor;
 		#end
 		this.library = library;
@@ -116,7 +116,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 	private override function __init(library:AnimateLibrary):Void
 	{
-		#if !macro
+		#if (!macro && !flash)
 		Sprite.__constructor = __constructor;
 		#end
 		this.library = library;
