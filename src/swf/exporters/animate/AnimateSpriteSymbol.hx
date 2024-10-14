@@ -29,7 +29,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 	private function __constructor(sprite:Sprite):Void
 	{
 		var timeline = new AnimateTimeline(library, this);
-		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (sprite, MovieClip))
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (sprite, #if flash flash.display.MovieClip.MovieClip2 #else MovieClip #end))
 		{
 			var movieClip:MovieClip = cast sprite;
 			#if flash
@@ -48,10 +48,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 	private override function __createObject(library:AnimateLibrary):Sprite
 	{
-		#if (!macro && !flash)
-		Sprite.__constructor = __constructor;
-		#end
-		this.library = library;
+		__init(library);
 
 		#if flash
 		if (className == "flash.display.MovieClip")
@@ -107,7 +104,8 @@ class AnimateSpriteSymbol extends AnimateSymbol
 		#if flash
 		if (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (sprite, flash.display.MovieClip.MovieClip2))
 		{
-			sprite.scale9Grid = scale9Grid;
+			MovieClip.__constructor = null;
+			__constructor(sprite);
 		}
 		#end
 
@@ -116,9 +114,12 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 	private override function __init(library:AnimateLibrary):Void
 	{
-		#if (!macro && !flash)
+		#if flash
+		MovieClip.__constructor = __constructor;
+		#elseif !macro
 		Sprite.__constructor = __constructor;
 		#end
+
 		this.library = library;
 	}
 
