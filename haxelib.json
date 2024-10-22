@@ -5,7 +5,7 @@
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
 	"version": "3.3.0",
-	"releasenote": "New features for CLI pre-processing of SWF assets",
+	"releasenote": "Support for arm64 Mac, new utility class and misc fixes",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",
