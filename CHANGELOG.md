@@ -1,3 +1,15 @@
+3.3.0 (10/22/2024)
+------------------
+
+* Added `SymbolUtils` utility class to reduce duplicate code
+* Added Implementation for `IDisplayObjectLoader`
+* Improved garbage collection performance
+* Fixed `haxelib run swf process` with a single argument
+* Fixed memory leak
+* Fixed crash when `Sprite` is cast as a `Shape`
+* Fixed ndll loader path for arm64 Mac
+  
+
 3.2.0 (10/27/2022)
 ------------------
 
