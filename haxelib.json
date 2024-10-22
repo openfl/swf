@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
-	"version": "3.3.0",
-	"releasenote": "Support for arm64 Mac, new utility class and misc fixes",
+	"version": "3.3.1",
+	"releasenote": "Fixes run script",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",
