@@ -1,5 +1,6 @@
 package swf;
 
+#if (openfl >= "9.5.0")
 import openfl.display.DisplayObject;
 import openfl.display.IDisplayObjectLoader;
 import openfl.display.LoaderInfo;
@@ -13,13 +14,21 @@ import openfl.system.LoaderContext;
 import openfl.utils.ByteArray;
 import openfl.utils.Future;
 import openfl.utils.Promise;
+#end
 
-class SWFLoader implements IDisplayObjectLoader
+class SWFLoader #if (openfl >= "9.5.0") implements IDisplayObjectLoader #end
 {
-	public function new() {}
-
+	public function new() {
+		#if (openfl < "9.5.0")
+		openfl.Lib.notImplemented();
+		#end
+	}
+	
 	public function load(request:URLRequest, context:LoaderContext, contentLoaderInfo:LoaderInfo):Future<DisplayObject>
 	{
+		#if (openfl < "9.5.0")
+		openfl.Lib.notImplemented();
+		#else
 		if (contentLoaderInfo.contentType != null && contentLoaderInfo.contentType == "application/x-shockwave-flash")
 		{
 			var promise = new Promise<DisplayObject>();
@@ -46,15 +55,20 @@ class SWFLoader implements IDisplayObjectLoader
 		{
 			return null;
 		}
+		#end
 	}
 
 	public function loadBytes(buffer:ByteArray, context:LoaderContext, contentLoaderInfo:LoaderInfo):Future<DisplayObject>
 	{
+		#if (openfl < "9.5.0")
+		openfl.Lib.notImplemented();
+		#else
 		var swf = new SWF(buffer);
 		var content:DisplayObject = new swf.runtime.MovieClip(swf.data);
 		@:privateAccess contentLoaderInfo.width = swf.width;
 		@:privateAccess contentLoaderInfo.height = swf.height;
 		@:privateAccess contentLoaderInfo.frameRate = swf.frameRate;
 		return Future.withValue(content);
+		#end
 	}
 }

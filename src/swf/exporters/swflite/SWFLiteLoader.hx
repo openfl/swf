@@ -1,5 +1,5 @@
 package swf.exporters.swflite;
-
+#if (openfl >= "9.5.0")
 import lime.graphics.Image;
 import openfl.display.DisplayObject;
 import openfl.display.IDisplayObjectLoader;
@@ -15,14 +15,21 @@ import openfl.utils.ByteArray;
 import openfl.utils.Future;
 import openfl.utils.Promise;
 import swf.exporters.SWFLiteExporter;
-
+#end
 @:access(swf.exporters.swflite.SWFLiteLibrary)
 class SWFLiteLoader implements IDisplayObjectLoader
 {
-	public function new() {}
+	public function new() {
+		#if (openfl < "9.5.0")
+		openfl.Lib.notImplemented();
+		#end
+	}
 
 	public function load(request:URLRequest, context:LoaderContext, contentLoaderInfo:LoaderInfo):Future<DisplayObject>
 	{
+		#if (openfl < "9.5.0")
+		openfl.Lib.notImplemented();
+		#else
 		if (contentLoaderInfo.contentType != null && contentLoaderInfo.contentType == "application/x-shockwave-flash")
 		{
 			var promise = new Promise<DisplayObject>();
@@ -49,10 +56,14 @@ class SWFLiteLoader implements IDisplayObjectLoader
 		{
 			return null;
 		}
+		#end
 	}
 
 	public function loadBytes(buffer:ByteArray, context:LoaderContext, contentLoaderInfo:LoaderInfo):Future<DisplayObject>
 	{
+		#if (openfl < "9.5.0")
+		openfl.Lib.notImplemented();
+		#else
 		// TODO: No intermediate format
 		var swf = new SWF(buffer);
 		var exporter = new SWFLiteExporter(swf.data);
@@ -82,5 +93,6 @@ class SWFLiteLoader implements IDisplayObjectLoader
 		@:privateAccess contentLoaderInfo.frameRate = swf.frameRate;
 		@:privateAccess contentLoaderInfo.assetLibrary = library;
 		return Future.withValue(content);
+		#end
 	}
 }
