@@ -273,11 +273,6 @@ class AnimateTimeline extends Timeline
 							var shape:Shape = cast displayObject;
 							__sprite.graphics.copyFrom(shape.graphics);
 						}
-						else
-						{
-							var sprite:Sprite = cast displayObject;
-							__sprite.graphics.copyFrom(sprite.graphics);
-						}
 					}
 				}
 				else
