@@ -271,7 +271,11 @@ class AnimateTimeline extends Timeline
 						if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, Shape))
 						{
 							var shape:Shape = cast displayObject;
+							// for scale9Grid to work with the shape's graphics,
+							// we need to move them to the __sprite instead
+							// because scale9Grid does not apply to children
 							__sprite.graphics.copyFrom(shape.graphics);
+							__sprite.removeChild(displayObject);
 						}
 					}
 				}
