@@ -37,3 +37,58 @@ jobs:
             !neko-*-*/
             !.git/
           if-no-files-found: error
+
+  samples:
+    needs: package-haxelib
+    strategy:
+      matrix:
+        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: ${{ matrix.haxe-version }}
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: swf-haxelib
+          path: swf-haxelib
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib run openfl setup -alias -y
+          haxelib git openfl-samples https://github.com/openfl/openfl-samples --quiet
+          haxelib dev swf swf-haxelib
+
+      - name: Create OpenFL samples
+        run: |
+          openfl create NyanCat -verbose -nocolor
+          openfl create SimpleSWFLayout -verbose -nocolor
+
+      - name: Build Neko samples
+        run: |
+          lime build NyanCat html5 -release -verbose -nocolor
+          lime build SimpleSWFLayout html5 -release -verbose -nocolor
+
+      - name: Build Neko samples
+        run: |
+          lime build NyanCat neko -release -verbose -nocolor
+          lime build SimpleSWFLayout neko -release -verbose -nocolor
+
+      - name: Build Flash samples
+        run: |
+          lime build NyanCat flash -release -verbose -nocolor
+          lime build SimpleSWFLayout flash -release -verbose -nocolor
+
+      - name: Build HashLink samples
+        if: ${{ matrix.haxe-version != '3.4.7' }}
+        run: |
+          lime build NyanCat hl -release -verbose -nocolor
+          lime build SimpleSWFLayout hl -release -verbose -nocolor
