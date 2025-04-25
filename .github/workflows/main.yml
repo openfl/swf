@@ -63,6 +63,7 @@ jobs:
         run: |
           haxelib install lime --quiet
           haxelib install openfl --quiet
+          haxelib install layout --quiet
           haxelib run openfl setup -alias -y
           haxelib git openfl-samples https://github.com/openfl/openfl-samples --quiet
           haxelib dev swf swf-haxelib
