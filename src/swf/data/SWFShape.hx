@@ -444,8 +444,7 @@ class SWFShape
 	{
 		var path:Array<IEdge> = createPathFromEdgeMap(fillEdgeMaps[groupIndex]);
 		var pos:Point = new Point(SWFData.MAX_FLOAT_VALUE, SWFData.MAX_FLOAT_VALUE);
-		// var fillStyleIdx:Int = uint.MAX_VALUE;
-		var fillStyleIdx:Int = Std.int(SWFData.MAX_FLOAT_VALUE);
+		var fillStyleIdx:Int = SWFData.MAX_INT_VALUE;
 		if (path.length > 0)
 		{
 			handler.beginFills();
@@ -454,8 +453,7 @@ class SWFShape
 				var e:IEdge = path[i];
 				if (fillStyleIdx != e.fillStyleIdx)
 				{
-					// if(fillStyleIdx != uint.MAX_VALUE) {
-					if (fillStyleIdx != SWFData.MAX_FLOAT_VALUE)
+					if (fillStyleIdx != SWFData.MAX_INT_VALUE)
 					{
 						handler.endFill();
 					}
@@ -528,8 +526,7 @@ class SWFShape
 				}
 				pos = e.to;
 			}
-			// if(fillStyleIdx != uint.MAX_VALUE) {
-			if (fillStyleIdx != SWFData.MAX_FLOAT_VALUE)
+			if (fillStyleIdx != SWFData.MAX_INT_VALUE)
 			{
 				handler.endFill();
 			}
@@ -541,8 +538,7 @@ class SWFShape
 	{
 		var path:Array<IEdge> = createPathFromEdgeMap(lineEdgeMaps[groupIndex]);
 		var pos:Point = new Point(SWFData.MAX_FLOAT_VALUE, SWFData.MAX_FLOAT_VALUE);
-		// var lineStyleIdx:Int = uint.MAX_VALUE;
-		var lineStyleIdx:Int = Std.int(SWFData.MAX_FLOAT_VALUE);
+		var lineStyleIdx:Int = SWFData.MAX_INT_VALUE;
 		var lineStyle:SWFLineStyle;
 		if (path.length > 0)
 		{
