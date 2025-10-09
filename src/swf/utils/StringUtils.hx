@@ -384,8 +384,7 @@ class StringUtils
 						///////////////////////////
 						switch (c)
 						{
-							case "h":
-							case "l":
+							case "h" | "l":
 								if (++i == format.length)
 								{
 									trace("ERR eof after length");
@@ -406,9 +405,7 @@ class StringUtils
 									c = c1;
 								}
 								break;
-							case "L":
-							case "z":
-							case "j":
+							case "L" | "z" | "j":
 							case "t":
 								if (++i == format.length)
 								{
@@ -459,8 +456,7 @@ class StringUtils
 								// valueStr = Std.string (value).getAt(0);
 								valueStr = Std.string(value).charAt(0);
 								break;
-							case "d":
-							case "i":
+							case "d" | "i":
 								valueInt = ((#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
 									Float)) ? cast value : Std.parseInt(Std.string(value)));
 								valueStr = Std.string(Math.abs(valueInt));
@@ -470,12 +466,7 @@ class StringUtils
 								valueStr = Std.string((#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
 									Float)) ? cast value : Std.parseInt(Std.string(value)));
 								break;
-							case "f":
-							case "F":
-							case "e":
-							case "E":
-							case "g":
-							case "G":
+							case "f" | "F" | "e" | "E" | "g" | "G":
 								if (precision == -1)
 								{
 									precision = 6;
@@ -504,9 +495,7 @@ class StringUtils
 								}
 								sign = (valueFloat < 0) ? SIGN_NEG : SIGN_POS;
 								break;
-							case "x":
-							case "X":
-							case "p":
+							case "x" | "X" | "p":
 								valueStr = (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (value,
 									Float)) ? Std.string(Std.int(value)) : StringTools.hex(Std.parseInt(value));
 								if (type == "X")
