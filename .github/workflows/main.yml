@@ -128,6 +128,41 @@ jobs:
         run: |
           haxelib run openfl test hl
 
+  unit-test-air:
+    strategy:
+      matrix:
+        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: ${{ matrix.haxe-version }}
+
+      - uses: joshtynjala/setup-adobe-air-action@v2
+        with:
+          air-version: "33.1"
+          accept-license: true
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$Env:HAXE_STD_PATH\.." >> $Env:GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+          haxelib run lime config AIR_SDK ${{ env.AIR_HOME }}
+
+      - name: Run tests on Adobe AIR
+        working-directory: tests
+        run: |
+          haxelib run openfl test air
+
   samples-openfl-develop:
     needs: package-haxelib
     strategy:
