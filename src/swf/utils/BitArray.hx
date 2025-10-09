@@ -116,8 +116,7 @@ class BitArray extends ByteArrayData
 	public function calculateMaxBits(signed:Bool, values:Array<Int>):Int
 	{
 		var b:Int = 0;
-		// var vmax:Int = int.MIN_VALUE;
-		var vmax:Int = Std.int(SWFData.MIN_FLOAT_VALUE);
+		var vmax:Int = SWFData.MIN_INT_VALUE;
 		if (!signed)
 		{
 			for (usvalue in values)
