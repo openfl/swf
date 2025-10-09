@@ -4,7 +4,7 @@ import swf.utils.ColorUtils;
 import openfl.filters.BitmapFilter;
 import openfl.filters.BitmapFilterType;
 #if flash
-import openfl.filters.GradientBevelFilter; // Not supported on native yet
+import flash.filters.GradientBevelFilter; // Not supported on native yet
 
 #end
 class FilterGradientBevel extends FilterGradientGlow implements IFilter

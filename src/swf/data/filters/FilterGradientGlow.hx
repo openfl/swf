@@ -6,7 +6,7 @@ import swf.utils.StringUtils;
 import openfl.filters.BitmapFilter;
 import openfl.filters.BitmapFilterType;
 #if flash
-import openfl.filters.GradientGlowFilter; // Not supported on native yet
+import flash.filters.GradientGlowFilter; // Not supported on native yet
 
 #end
 class FilterGradientGlow extends Filter implements IFilter
