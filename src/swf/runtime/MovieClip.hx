@@ -217,7 +217,7 @@ class MovieClipTimeline extends Timeline
 			if (lastTag != null) cast(displayObject, MorphShape).render(lastTag.ratio);
 		}
 
-		#if !flash
+		#if (!flash && !hl && !cpp)
 		Reflect.setField(movieClip, displayObject.name, displayObject);
 		#end
 	}
