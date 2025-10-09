@@ -196,6 +196,7 @@ jobs:
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
+      - uses: actions/checkout@v4
 
       - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
         with:
