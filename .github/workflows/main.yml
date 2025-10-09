@@ -226,6 +226,10 @@ jobs:
           haxelib dev swf ${{ github.workspace }}
           haxelib run lime config AIR_SDK ${{ env.AIR_HOME }}
 
+      - name: Rebuild swf run.n
+        run: |
+          haxe rebuild.hxml
+
       - name: Create OpenFL samples
         run: |
           openfl create NyanCat -verbose -nocolor
