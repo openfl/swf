@@ -2,8 +2,10 @@ package swf.data.filters;
 
 import swf.SWFData;
 import swf.utils.ColorUtils;
-#if flash
+#if (openfl >= "9.5.0")
 import openfl.filters.BevelFilter;
+#elseif flash
+import flash.filters.BevelFilter;
 #end
 import openfl.filters.BitmapFilter;
 import openfl.filters.BitmapFilterType;
@@ -43,7 +45,7 @@ class FilterBevel extends Filter implements IFilter
 		{
 			filterType = (innerShadow) ? BitmapFilterType.INNER : BitmapFilterType.OUTER;
 		}
-		#if flash
+		#if (flash || openfl >= "9.5.0")
 		return new BevelFilter(distance, angle * 180 / Math.PI, ColorUtils.rgb(highlightColor), ColorUtils.alpha(highlightColor), ColorUtils.rgb(shadowColor),
 			ColorUtils.alpha(shadowColor), blurX, blurY, strength, passes, filterType, knockout);
 		#else
