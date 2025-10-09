@@ -193,7 +193,6 @@ jobs:
           haxelib run openfl test air
 
   samples-and-unit-test-openfl-develop:
-    needs: package-haxelib
     strategy:
       matrix:
         haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
@@ -214,21 +213,18 @@ jobs:
         run: |
           echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: swf-haxelib
-          path: swf-haxelib
-
       - name: Install Haxe dependencies
         run: |
           haxelib install format --quiet
           haxelib install lime --quiet
           haxelib git openfl https://github.com/openfl/openfl --quiet
+          haxelib install hxp --quiet
           haxelib install layout --quiet
           haxelib install utest --quiet
           haxelib run openfl setup -alias -y
           haxelib git openfl-samples https://github.com/openfl/openfl-samples --quiet
-          haxelib dev swf swf-haxelib
+          haxelib dev swf ${{ github.workspace }}
+          haxelib run lime config AIR_SDK ${{ env.AIR_HOME }}
 
       - name: Create OpenFL samples
         run: |
