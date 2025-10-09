@@ -64,6 +64,14 @@ import swf.utils.BitArray;
 	public static inline var MAX_FLOAT_VALUE:Float = 1.7976931348623158e+308;
 	#end
 
+	#if flash
+	public static var MIN_INT_VALUE:Int = untyped __global__["int"].MIN_VALUE;
+	public static var MAX_INT_VALUE:Int = untyped __global__["int"].MAX_VALUE;
+	#else
+	public static inline var MIN_INT_VALUE:Int = -0x80000000;
+	public static inline var MAX_INT_VALUE:Int = 0x7FFFFFFF;
+	#end
+
 	public var length(get, set):Int;
 
 	public function new()
@@ -1102,7 +1110,8 @@ import swf.utils.BitArray;
 		return 0;
 		#elseif flash
 		return this.length;
-		#else @:privateAccess return this.__length;
+		#else
+		@:privateAccess return this.__length;
 		#end
 	}
 
