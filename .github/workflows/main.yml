@@ -114,6 +114,7 @@ jobs:
 
       - name: Install Haxe dependencies
         run: |
+          haxelib install format --quiet
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install utest --quiet
