@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<meta title="SWF Tests"/>
+	<app main="TestMain" file="SWFTests"/>
+	<window hidden="true"/>
+
+	<source path="src"/>
+	<source path="../src"/>
+
+	<haxelib name="openfl"/>
+	<haxelib name="format"/>
+	<haxelib name="utest"/>
+
+	<assets type="binary" path="fixtures/shapes.swf" preload="true"/>
+
+	<template path="templates" if="html5"/>
+</project>

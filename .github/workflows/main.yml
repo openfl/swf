@@ -94,6 +94,39 @@ jobs:
           lime build NyanCat hl -release -verbose -nocolor
           lime build SimpleSWFLayout hl -release -verbose -nocolor
 
+  unit-test-hashlink:
+    strategy:
+      matrix:
+        # HashLink is not supported by Haxe 3
+        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.6]
+    # AL init fails on both windows and ubuntu
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+        with:
+          haxe-version: ${{ matrix.haxe-version }}
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Setup environment
+        run: |
+
+      - name: Run tests on HashLink
+        working-directory: tests
+        run: |
+          haxelib run openfl test hl
+
   samples-openfl-develop:
     needs: package-haxelib
     strategy:
