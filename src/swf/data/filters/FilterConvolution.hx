@@ -4,10 +4,8 @@ import swf.SWFData;
 import swf.utils.ColorUtils;
 import swf.utils.StringUtils;
 import openfl.filters.BitmapFilter;
-#if flash
-import openfl.filters.ConvolutionFilter; // Not supported on native yet
+import openfl.filters.ConvolutionFilter;
 
-#end
 class FilterConvolution extends Filter implements IFilter
 {
 	public var matrixX:Int;
@@ -32,16 +30,8 @@ class FilterConvolution extends Filter implements IFilter
 		{
 			convolutionMatrix.push(matrix[i]);
 		}
-		#if flash
 		return new ConvolutionFilter(matrixX, matrixY, convolutionMatrix, divisor, bias, preserveAlpha, clamp, ColorUtils.rgb(defaultColor),
 			ColorUtils.alpha(defaultColor));
-		#else
-		#if ((cpp || neko) && openfl_legacy)
-		return new BitmapFilter("");
-		#else
-		return new BitmapFilter();
-		#end
-		#end
 	}
 
 	override public function parse(data:SWFData):Void
