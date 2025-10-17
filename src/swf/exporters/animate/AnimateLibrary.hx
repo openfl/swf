@@ -66,14 +66,12 @@ import openfl.filters.GlowFilter;
 	private var rootPath:String;
 	private var symbols:Map<Int, AnimateSymbol>;
 	private var symbolsByClassName:Map<String, AnimateSymbol>;
-	private var uuid:String;
 
 	public function new(id:String, uuid:String = null)
 	{
 		super();
 
 		this.id = id;
-		this.uuid = uuid;
 
 		instanceID = uuid != null ? uuid : id;
 
@@ -86,7 +84,7 @@ import openfl.filters.GlowFilter;
 		rootPath = "";
 		#end
 
-		instances.set(uuid, this);
+		instances.set(instanceID, this);
 
 		// Hack to include filter classes, macro.include is not working properly
 
@@ -446,7 +444,7 @@ import openfl.filters.GlowFilter;
 	#if lime
 	public override function unload():Void
 	{
-		instances.remove(uuid);
+		instances.remove(instanceID);
 		if (symbols == null) return;
 		// if (swf == null) return;
 
