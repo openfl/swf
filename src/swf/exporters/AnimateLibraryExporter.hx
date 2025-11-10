@@ -669,10 +669,7 @@ class AnimateLibraryExporter
 		var lastModified = new Map<Int, Int>();
 		var zeroCharacter = -1;
 
-		var frame:Dynamic,
-			frameObject:Dynamic,
-			frameData,
-			placeTag:TagPlaceObject;
+		var frame:Dynamic, frameObject:Dynamic, frameData, placeTag:TagPlaceObject;
 
 		for (frameData in tag.frames)
 		{
@@ -742,7 +739,6 @@ class AnimateLibraryExporter
 				{
 					frameObject.filters = serializeFilters(placeTag.surfaceFilterList);
 				}
-
 				frameObject.depth = placeTag.depth;
 				frameObject.clipDepth = (placeTag.hasClipDepth ? placeTag.clipDepth : 0);
 
@@ -760,6 +756,11 @@ class AnimateLibraryExporter
 				if (placeTag.hasCacheAsBitmap)
 				{
 					frameObject.cacheAsBitmap = placeTag.bitmapCache != 0;
+				}
+
+				if (placeTag.metaData != null)
+				{
+					frameObject.metaData = placeTag.metaData;
 				}
 
 				lastModified.set(object.placedAtIndex, object.lastModifiedAtIndex);
@@ -1404,7 +1405,18 @@ class AnimateLibraryExporter
 
 					case DropShadowFilter(distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject):
 						result.push([
-							SWFFilterType.DROP_SHADOW, distance, angle, color, alpha, blurX, blurY, strength, quality, inner, knockout, hideObject
+							SWFFilterType.DROP_SHADOW,
+							distance,
+							angle,
+							color,
+							alpha,
+							blurX,
+							blurY,
+							strength,
+							quality,
+							inner,
+							knockout,
+							hideObject
 						]);
 
 					case GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout):
@@ -1500,7 +1512,6 @@ private class SWFDocument
 
 #if (haxe_ver < 4.0) @:enum #end
 private #if (haxe_ver >= 4.0) enum #end abstract SWFFrameObjectType(Int) from Int to Int
-
 {
 	public var CREATE = 0;
 	public var UPDATE = 1;
@@ -1509,7 +1520,6 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFFrameObjectType(Int) from In
 
 #if (haxe_ver < 4.0) @:enum #end
 private #if (haxe_ver >= 4.0) enum #end abstract SWFShapeCommandType(Int) from Int to Int
-
 {
 	public var BEGIN_BITMAP_FILL = 0;
 	public var BEGIN_FILL = 1;
@@ -1524,7 +1534,6 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFShapeCommandType(Int) from I
 
 #if (haxe_ver < 4.0) @:enum #end
 private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to Int
-
 {
 	public var BITMAP = 0;
 	public var BUTTON = 1;
@@ -1537,7 +1546,6 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to 
 
 #if (haxe_ver < 4.0) @:enum #end
 private #if (haxe_ver >= 4.0) enum #end abstract SWFFilterType(Int) from Int to Int
-
 {
 	public var BLUR = 0;
 	public var COLOR_MATRIX = 1;

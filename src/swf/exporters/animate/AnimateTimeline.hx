@@ -516,6 +516,11 @@ class AnimateTimeline extends Timeline
 			displayObject.cacheAsBitmap = frameObject.cacheAsBitmap;
 		}
 
+		if (frameObject.metaData != null)
+		{
+			displayObject.metaData = frameObject.metaData;
+		}
+
 		#if openfljs
 		Reflect.setField(__sprite, displayObject.name, displayObject);
 		#end

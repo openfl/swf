@@ -783,6 +783,7 @@ import openfl.filters.GlowFilter;
 					object.symbol = objectData.symbol;
 					object.type = objectData.type;
 					object.visible = objectData.visible;
+					object.metaData = objectData.metaData;
 					frame.objects.push(object);
 				}
 			}
@@ -807,7 +808,6 @@ import openfl.filters.GlowFilter;
 }
 
 #if (haxe_ver >= 4.0) enum #else @:enum #end abstract SWFShapeCommandType(Int) from Int to Int
-
 {
 	public var BEGIN_BITMAP_FILL = 0;
 	public var BEGIN_FILL = 1;
@@ -821,7 +821,6 @@ import openfl.filters.GlowFilter;
 }
 
 #if (haxe_ver >= 4.0) enum #else @:enum #end abstract SWFSymbolType(Int) from Int to Int
-
 {
 	public var BITMAP = 0;
 	public var BUTTON = 1;

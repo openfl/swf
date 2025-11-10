@@ -23,6 +23,7 @@ class AnimateFrameObject
 	public var symbol:Int;
 	public var type:AnimateFrameObjectType;
 	public var visible:Null<Bool>;
+	public var metaData:Null<Dynamic>;
 
 	public function new() {}
 }
