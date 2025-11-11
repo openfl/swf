@@ -5,7 +5,7 @@
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
 	"version": "3.4.0",
-	"releasenote": "Fix duplicate scale9Grid graphics, improved clipping layers",
+	"releasenote": "Fix duplicate scale9Grid graphics, improved clipping layers, new filters",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",
