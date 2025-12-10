@@ -190,6 +190,19 @@ class SWF extends EventDispatcher
 		return null;
 	}
 
+	public function getTextData(className:String):String{
+		var symbol:TagDefineBinaryData = null;
+		
+			
+		if (symbols.exists(className))
+		{			
+			symbol = cast data.getCharacter(symbols.get(className));
+			return symbol.binaryData.readUTFBytes(symbol.binaryData.length);			
+		}
+		
+		return "";
+	}
+
 	public function hasSymbol(className:String):Bool
 	{
 		return symbols.exists(className);
