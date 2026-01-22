@@ -762,6 +762,11 @@ class AnimateLibraryExporter
 					frameObject.cacheAsBitmap = placeTag.bitmapCache != 0;
 				}
 
+				if (placeTag.metaData != null)
+				{
+					frameObject.metaData = placeTag.metaData;
+				}
+
 				lastModified.set(object.placedAtIndex, object.lastModifiedAtIndex);
 
 				if (frame.objects == null)

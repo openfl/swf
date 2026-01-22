@@ -1,5 +1,6 @@
 package swf.tags;
 
+import openfl.net.ObjectEncoding;
 import swf.SWFData;
 import swf.utils.StringUtils;
 
@@ -29,8 +30,10 @@ class TagPlaceObject4 extends TagPlaceObject3 implements IDisplayListTag
 		super.parse(data, length, version, async);
 		if (data.bytesAvailable > 0)
 		{
-			// TODO
-			// metaData = data.readObject();
+			var oldEncoding = data.objectEncoding;
+			data.objectEncoding = ObjectEncoding.AMF3;
+			metaData = data.readObject();
+			data.objectEncoding = oldEncoding;
 		}
 	}
 
@@ -40,8 +43,10 @@ class TagPlaceObject4 extends TagPlaceObject3 implements IDisplayListTag
 
 		if (metaData != null)
 		{
-			// TODO
-			// body.writeObject(metaData);
+			var oldEncoding = data.objectEncoding;
+			data.objectEncoding = ObjectEncoding.AMF3;
+			body.writeObject(metaData);
+			data.objectEncoding = oldEncoding;
 		}
 
 		data.writeTagHeader(type, body.length);

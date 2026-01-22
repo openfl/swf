@@ -784,6 +784,7 @@ import openfl.filters.GlowFilter;
 					object.symbol = objectData.symbol;
 					object.type = objectData.type;
 					object.visible = objectData.visible;
+					object.metaData = objectData.metaData;
 					frame.objects.push(object);
 				}
 			}
