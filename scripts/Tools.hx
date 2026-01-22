@@ -325,7 +325,7 @@ class Tools
 					CLASS_PROPERTIES: classProperties
 				};
 				var template = new Template(templateData);
-				var targetPath;
+				var targetPath:String;
 
 				// if (project.target == IOS) {
 
@@ -636,12 +636,7 @@ class Tools
 							fileLabel = Path.normalize(file);
 						}
 
-						Log.info("\x1b[1mProcessing file:\x1b[0m "
-							+ fileLabel,
-							" - \x1b[1mProcessing file:\x1b[0m "
-							+ file
-							+ " \x1b[3;37m->\x1b[0m "
-							+ output);
+						Log.info("\x1b[1mProcessing file:\x1b[0m " + fileLabel, " - \x1b[1mProcessing file:\x1b[0m " + file + " \x1b[3;37m->\x1b[0m " + output);
 
 						processFile(file, output, filePrefix, generate);
 					}
@@ -1060,7 +1055,7 @@ class Tools
 
 						if (library.generate != false)
 						{
-							var targetPath;
+							var targetPath:String;
 
 							if (project.target == IOS)
 							{
@@ -1459,7 +1454,7 @@ class Tools
 		{
 			output.haxelibs.push(new Haxelib("swf"));
 
-			var generatedPath;
+			var generatedPath:String;
 
 			if (project.target == IOS)
 			{

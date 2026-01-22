@@ -10,6 +10,7 @@ import swf.data.consts.BlendMode;
 import swf.data.SWFButtonRecord;
 import swf.exporters.core.FilterType;
 import swf.exporters.core.ShapeCommand;
+import swf.exporters.ShapeBitmapExporter.BitmapFill;
 import swf.runtime.Bitmap;
 // #if hxp
 // import hxp.Log;
@@ -422,7 +423,8 @@ class SWFLiteExporter
 			var symbol = new SpriteSymbol();
 			var frame = new Frame();
 			frame.objects = [];
-			var bitmap, frameObject;
+			var bitmap:BitmapFill;
+			var frameObject:Dynamic;
 
 			for (i in 0...bitmaps.length)
 			{
