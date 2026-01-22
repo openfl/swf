@@ -285,7 +285,7 @@ class AnimateTimeline extends Timeline
 				}
 				else
 				{
-					var child;
+					var child:DisplayObject;
 					var i = currentInstances.length;
 					var length = __sprite.numChildren;
 

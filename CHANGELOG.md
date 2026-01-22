@@ -1,9 +1,20 @@
+3.4.0 (11/11/2025)
+------------------
+
+* Added `BevelFilter` and `ConvolutionFilter` support
+* Fixed duplicate `scale9Grid` graphics
+* Fixed clipping layers in OpenFL 9.5 and newer, since masks cannot be shared
+* Fixed some filter imports on Flash target
+* Fixed wrong minimum and maximum integer values used for certain comparisons
+* Fixed string formatting conversion from ActionScript to Haxe
+* Fixed `swf.runtime.MovieClip` exception when setting field that does not exist on some targets
+
 3.3.1 (10/22/2024)
 ------------------
 
 * Fixed run script
 
-  
+
 3.3.0 (10/22/2024)
 ------------------
 
@@ -14,7 +25,7 @@
 * Fixed memory leak
 * Fixed crash when `Sprite` is cast as a `Shape`
 * Fixed ndll loader path for arm64 Mac
-  
+
 
 3.2.0 (10/27/2022)
 ------------------

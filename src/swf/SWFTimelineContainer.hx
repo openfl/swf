@@ -531,7 +531,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 					switch (soundStream.compression)
 					{
 						case SoundCompression.ADPCM: // ADPCM
-						// TODO
+							// TODO
 						case SoundCompression.MP3: // MP3
 							var numSamples:Int = soundData.readUnsignedShort();
 							var seekSamples:Int = soundData.readShort();
@@ -583,7 +583,7 @@ class SWFTimelineContainer extends SWFEventDispatcher
 			var ops = new Array();
 			while (true)
 			{
-				var op;
+				var op:Int;
 				try
 					op = i.readByte()
 				catch (e:haxe.io.Eof)

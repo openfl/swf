@@ -6,9 +6,9 @@ jobs:
   package-haxelib:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+      - uses: krdlab/setup-haxe@v2
         with:
           haxe-version: 4.2.5
 
@@ -27,7 +27,7 @@ jobs:
         run: |
           haxe rebuild.hxml
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: swf-haxelib
           path: |
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+      - uses: krdlab/setup-haxe@v2
         with:
           haxe-version: ${{ matrix.haxe-version }}
 
@@ -54,7 +54,7 @@ jobs:
         run: |
           echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: swf-haxelib
           path: swf-haxelib
@@ -103,9 +103,9 @@ jobs:
       SDL_VIDEODRIVER: "dummy"
       SDL_AUDIODRIVER: "disk"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+      - uses: krdlab/setup-haxe@v2
         with:
           haxe-version: ${{ matrix.haxe-version }}
 
@@ -134,9 +134,9 @@ jobs:
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+      - uses: krdlab/setup-haxe@v2
         with:
           haxe-version: ${{ matrix.haxe-version }}
 
@@ -163,9 +163,9 @@ jobs:
         haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+      - uses: krdlab/setup-haxe@v2
         with:
           haxe-version: ${{ matrix.haxe-version }}
 
@@ -196,9 +196,9 @@ jobs:
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: krdlab/setup-haxe@8f35d1215b93e940a76f9470e22e8a5ba6149598
+      - uses: krdlab/setup-haxe@v2
         with:
           haxe-version: "4.3.6"
 

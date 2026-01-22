@@ -376,7 +376,7 @@ class SymbolTimeline extends Timeline
 				}
 			}
 
-			var child;
+			var child:DisplayObject;
 			var i = currentInstances.length;
 			var length = __movieClip.numChildren;
 

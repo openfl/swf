@@ -48,7 +48,8 @@ class AnimateStaticTextSymbol extends AnimateSymbol
 			var offsetX = matrix.tx;
 			var offsetY = matrix.ty;
 
-			var scale, index;
+			var scale:Float;
+			var index:Int;
 
 			for (record in records)
 			{

@@ -8,6 +8,7 @@ import swf.data.filters.IFilter;
 import swf.data.SWFButtonRecord;
 import swf.data.SWFSymbol;
 import swf.exporters.ShapeBitmapExporter;
+import swf.exporters.ShapeBitmapExporter.BitmapFill;
 import swf.exporters.ShapeCommandExporter;
 import swf.tags.IDefinitionTag;
 import swf.tags.TagDefineBits;
@@ -27,6 +28,7 @@ import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
+import swf.timeline.Frame;
 import swf.utils.SymbolUtils;
 import swf.SWFRoot;
 import swf.SWFTimelineContainer;
@@ -526,7 +528,8 @@ class AnimateLibraryExporter
 
 			var frame:Dynamic = {};
 			frame.objects = [];
-			var bitmap, frameObject:Dynamic;
+			var bitmap:BitmapFill;
+			var frameObject:Dynamic;
 
 			for (i in 0...bitmaps.length)
 			{
@@ -669,7 +672,7 @@ class AnimateLibraryExporter
 		var lastModified = new Map<Int, Int>();
 		var zeroCharacter = -1;
 
-		var frame:Dynamic, frameObject:Dynamic, frameData, placeTag:TagPlaceObject;
+		var frame:Dynamic, frameObject:Dynamic, frameData:Frame, placeTag:TagPlaceObject;
 
 		for (frameData in tag.frames)
 		{

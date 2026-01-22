@@ -257,8 +257,9 @@ import openfl.filters.GlowFilter;
 			var rootIndex = json.root;
 			var symbolData:Array<Dynamic> = json.symbols;
 
-			var data, type:SWFSymbolType, symbol:AnimateSymbol = null;
-			var bitmapSymbol, spriteSymbol;
+			var data:Dynamic, type:SWFSymbolType, symbol:AnimateSymbol = null;
+			var bitmapSymbol:AnimateBitmapSymbol;
+			var spriteSymbol:AnimateSpriteSymbol;
 
 			symbols = new Map();
 			symbolsByClassName = new Map();
