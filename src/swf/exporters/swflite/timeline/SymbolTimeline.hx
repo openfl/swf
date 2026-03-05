@@ -39,6 +39,8 @@ import hscript.Parser;
 @:access(openfl.geom.ColorTransform)
 class SymbolTimeline extends Timeline
 {
+	@:noCompletion private static var __instanceFieldsCacheByClassName:Map<String, Array<String>> = new Map();
+
 	#if openfljs
 	@:noCompletion private static var __useParentFPS:Bool;
 	#else
@@ -257,7 +259,7 @@ class SymbolTimeline extends Timeline
 		}
 
 		#if !openfljs
-		__instanceFields = Type.getInstanceFields(Type.getClass(movieClip));
+		__instanceFields = __getCachedInstanceFields(movieClip);
 		#end
 
 		enterFrame(1);
@@ -534,6 +536,30 @@ class SymbolTimeline extends Timeline
 				}
 			}
 		}
+	}
+
+	@:noCompletion private static function __getCachedInstanceFields(displayObject:DisplayObject):Array<String>
+	{
+		var clazz = Type.getClass(displayObject);
+		if (clazz == null)
+		{
+			return [];
+		}
+
+		var className = Type.getClassName(clazz);
+		if (className == null)
+		{
+			return Type.getInstanceFields(clazz);
+		}
+
+		var cached = __instanceFieldsCacheByClassName.get(className);
+		if (cached == null)
+		{
+			cached = Type.getInstanceFields(clazz);
+			__instanceFieldsCacheByClassName.set(className, cached);
+		}
+
+		return cached;
 	}
 }
 

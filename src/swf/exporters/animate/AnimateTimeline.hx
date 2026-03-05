@@ -34,6 +34,8 @@ import hscript.Parser;
 @:access(openfl.geom.ColorTransform)
 class AnimateTimeline extends Timeline
 {
+	@:noCompletion private static var __instanceFieldsCacheByClassName:Map<String, Array<String>> = new Map();
+
 	#if 0
 	// Suppress checkstyle warning
 	private static var __unusedImport:Array<Class<Dynamic>> = [
@@ -432,7 +434,7 @@ class AnimateTimeline extends Timeline
 		}
 
 		#if !openfljs
-		__instanceFields = Type.getInstanceFields(Type.getClass(__sprite));
+		__instanceFields = __getCachedInstanceFields(__sprite);
 		#end
 
 		enterFrame(1);
@@ -569,6 +571,30 @@ class AnimateTimeline extends Timeline
 				}
 			}
 		}
+	}
+
+	@:noCompletion private static function __getCachedInstanceFields(displayObject:DisplayObject):Array<String>
+	{
+		var clazz = Type.getClass(displayObject);
+		if (clazz == null)
+		{
+			return [];
+		}
+
+		var className = Type.getClassName(clazz);
+		if (className == null)
+		{
+			return Type.getInstanceFields(clazz);
+		}
+
+		var cached = __instanceFieldsCacheByClassName.get(className);
+		if (cached == null)
+		{
+			cached = Type.getInstanceFields(clazz);
+			__instanceFieldsCacheByClassName.set(className, cached);
+		}
+
+		return cached;
 	}
 
 	#if hscript
