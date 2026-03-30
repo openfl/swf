@@ -6,6 +6,7 @@ import swf.data.consts.BitmapFormat;
 import swf.data.consts.BlendMode;
 import swf.data.filters.IFilter;
 import swf.data.SWFButtonRecord;
+import swf.data.SWFRawTag;
 import swf.data.SWFSymbol;
 import swf.exporters.ShapeBitmapExporter;
 import swf.exporters.ShapeBitmapExporter.BitmapFill;
@@ -26,11 +27,14 @@ import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSound;
 import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
+import swf.tags.TagExportAssets;
+import swf.tags.TagNameCharacter;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
 import swf.timeline.Frame;
 import swf.utils.SymbolUtils;
 import swf.SWFRoot;
+import swf.SWFData;
 import swf.SWFTimelineContainer;
 import haxe.Template;
 import hxp.Haxelib;
@@ -50,6 +54,7 @@ import openfl.text.TextFormatAlign;
 import openfl.utils.AssetManifest;
 import openfl.utils.AssetType;
 import openfl.utils.ByteArray;
+import openfl.utils.Endian;
 import haxe.crypto.Crc32;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
@@ -71,7 +76,7 @@ class AnimateLibraryExporter
 	private var symbolsByTagID:Map<Int, SWFSymbol>;
 	private var targetPath:String;
 
-	public function new(swfData:SWFRoot, targetPath:String)
+	public function new(swfData:SWFRoot, targetPath:String, sourceBytes:ByteArray = null)
 	{
 		this.swfData = swfData;
 		this.targetPath = targetPath;
@@ -79,16 +84,35 @@ class AnimateLibraryExporter
 		symbols = [];
 		symbolsByTagID = new Map();
 
-		for (tag in swfData.tags)
+		var registerSymbol = function(symbol:SWFSymbol)
 		{
-			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
+			if (symbol == null || symbol.name == null || symbol.name == "")
 			{
-				for (symbol in cast(tag, TagSymbolClass).symbols)
+				return;
+			}
+
+			var replaced = false;
+			for (i in 0...symbols.length)
+			{
+				if (symbols[i].tagId == symbol.tagId)
 				{
-					symbols.push(symbol);
-					symbolsByTagID.set(symbol.tagId, symbol);
+					symbols[i] = symbol;
+					replaced = true;
+					break;
 				}
 			}
+
+			if (!replaced)
+			{
+				symbols.push(symbol);
+			}
+
+			symbolsByTagID.set(symbol.tagId, symbol);
+		}
+
+		for (symbol in collectLinkageSymbols(sourceBytes))
+		{
+			registerSymbol(symbol);
 		}
 
 		manifestData = new AssetManifest();
@@ -275,6 +299,230 @@ class AnimateLibraryExporter
 		libraryData.symbols.set(symbol.id, symbol);
 
 		return symbol;
+	}
+
+	private function extractNameCharacterSymbol(tag:TagNameCharacter):SWFSymbol
+	{
+		if (tag == null || tag.binaryData == null || tag.binaryData.length == 0)
+		{
+			return null;
+		}
+
+		tag.binaryData.position = 0;
+		var name = tag.binaryData.readUTFBytes(tag.binaryData.length - 1);
+		tag.binaryData.position = 0;
+		return SWFSymbol.create(tag.characterId, name);
+	}
+
+	private function collectLinkageSymbols(sourceBytes:ByteArray):Array<SWFSymbol>
+	{
+		var result:Array<SWFSymbol> = [];
+
+		for (tag in swfData.tags)
+		{
+			appendSymbols(result, extractTagSymbols(tag));
+		}
+
+		for (tagRaw in swfData.tagsRaw)
+		{
+			appendSymbols(result, extractRawTagSymbols(tagRaw));
+		}
+
+		if (sourceBytes != null)
+		{
+			appendSymbols(result, extractLinkageSymbols(sourceBytes));
+		}
+
+		return result;
+	}
+
+	private function extractTagSymbols(tag:Dynamic):Array<SWFSymbol>
+	{
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
+		{
+			return cast(tag, TagSymbolClass).symbols.copy();
+		}
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
+		{
+			return cast(tag, TagExportAssets).symbols.copy();
+		}
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagNameCharacter))
+		{
+			var symbol = extractNameCharacterSymbol(cast tag);
+			return symbol != null ? [symbol] : [];
+		}
+
+		return [];
+	}
+
+	private function extractRawTagSymbols(tagRaw:SWFRawTag):Array<SWFSymbol>
+	{
+		switch (tagRaw.header.type)
+		{
+			case TagSymbolClass.TYPE, TagExportAssets.TYPE:
+				return extractRawAssetSymbols(tagRaw);
+
+			case TagNameCharacter.TYPE:
+				var symbol = extractRawNameCharacterSymbol(tagRaw);
+				return symbol != null ? [symbol] : [];
+
+			default:
+				return [];
+		}
+	}
+
+	private function appendSymbols(target:Array<SWFSymbol>, values:Array<SWFSymbol>):Void
+	{
+		if (values == null || values.length == 0)
+		{
+			return;
+		}
+
+		for (value in values)
+		{
+			if (value != null)
+			{
+				target.push(value);
+			}
+		}
+	}
+
+	private function extractRawAssetSymbols(tagRaw:SWFRawTag):Array<SWFSymbol>
+	{
+		var data = cloneRawTagData(tagRaw);
+		if (data == null)
+		{
+			return [];
+		}
+
+		data.readTagHeader();
+		var count = data.readUI16();
+		var result:Array<SWFSymbol> = [];
+		for (i in 0...count)
+		{
+			result.push(new SWFSymbol(data));
+		}
+		return result;
+	}
+
+	private function extractRawNameCharacterSymbol(tagRaw:SWFRawTag):SWFSymbol
+	{
+		var data = cloneRawTagData(tagRaw);
+		if (data == null)
+		{
+			return null;
+		}
+
+		data.readTagHeader();
+		var characterId = data.readUI16();
+		var name = data.readSTRING();
+		return name != null && name != "" ? SWFSymbol.create(characterId, name) : null;
+	}
+
+	private function cloneRawTagData(tagRaw:SWFRawTag):SWFData
+	{
+		if (tagRaw == null || tagRaw.bytes == null)
+		{
+			return null;
+		}
+
+		var data = new SWFData();
+		data.writeBytes(tagRaw.bytes);
+		data.position = 0;
+		return data;
+	}
+
+	private function extractLinkageSymbols(sourceBytes:ByteArray):Array<SWFSymbol>
+	{
+		var data = getUncompressedSWFData(sourceBytes);
+		var result:Array<SWFSymbol> = [];
+		if (data == null)
+		{
+			return result;
+		}
+
+		data.position = 8;
+		data.readRECT();
+		data.readFIXED8();
+		data.readUI16();
+
+		while (data.position + 1 < data.length)
+		{
+			var header = data.readTagHeader();
+			if (header.type == 0)
+			{
+				break;
+			}
+			var tagEnd = data.position + header.contentLength;
+
+			switch (header.type)
+			{
+				case TagSymbolClass.TYPE, TagExportAssets.TYPE:
+					var count = data.readUI16();
+					for (i in 0...count)
+					{
+						result.push(new SWFSymbol(data));
+					}
+
+				case TagNameCharacter.TYPE:
+					var characterId = data.readUI16();
+					var name = data.readSTRING();
+					if (name != null && name != "")
+					{
+						result.push(SWFSymbol.create(characterId, name));
+					}
+
+				default:
+			}
+
+			data.position = tagEnd;
+		}
+
+		return result;
+	}
+
+	private function getUncompressedSWFData(sourceBytes:ByteArray):SWFData
+	{
+		if (sourceBytes == null || sourceBytes.length < 8)
+		{
+			return null;
+		}
+
+		var input = new ByteArray();
+		input.writeBytes(sourceBytes, 0, sourceBytes.length);
+		input.position = 0;
+
+		var signature = input.readUTFBytes(3);
+		var version = input.readUnsignedByte();
+		var fileLength = input.readUnsignedInt();
+
+		var body = new ByteArray();
+		body.writeBytes(input, 8, input.length - 8);
+		body.position = 0;
+
+		switch (signature)
+		{
+			case "FWS":
+				// already uncompressed
+
+			case "CWS":
+				body.uncompress();
+
+			case "ZWS":
+				Log.warn("LZMA-compressed SWF linkages are not currently supported for audio export");
+				return null;
+
+			default:
+				return null;
+		}
+
+		var data = new SWFData();
+		data.writeUTFBytes("FWS");
+		data.writeByte(version);
+		data.writeUI32(fileLength);
+		data.writeBytes(body, 0, body.length);
+		data.position = 0;
+		return data;
 	}
 
 	private function addBitmap(tag:IDefinitionTag):Dynamic
@@ -1056,74 +1304,140 @@ class AnimateLibraryExporter
 		return symbol;
 	}
 
-	private function addSound(tag:IDefinitionTag):Void
+	private function addSound(tag:IDefinitionTag):Dynamic
 	{
 		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 		{
 			var defineSound:TagDefineSound = cast tag;
-
-			var byteArray = defineSound.soundData;
-			var type:SoundType = switch (defineSound.soundFormat)
+			var soundType = getSoundType(defineSound.soundFormat);
+	
+			var export = exportSound(defineSound);
+			if (export == null)
 			{
-				case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
-				case 1: SoundType.ADPCM;
-				case 2: SoundType.MP3;
-				case 3: SoundType.UNCOMPRESSED_LITTLE_ENDIAN;
-				case 4: SoundType.NELLYMOSER_16_KHZ;
-				case 5: SoundType.NELLYMOSER_8_KHZ;
-				case 6: SoundType.NELLYMOSER;
-				case 7: SoundType.SPEEX;
-				case _: throw("invalid sound type!");
+				var soundTypeName = soundType != null ? Std.string(soundType) : "UNKNOWN";
+				Log.warn('Skipping unsupported DefineSound id=${defineSound.characterId} format=${defineSound.soundFormat} type=${soundTypeName}');
+				return null;
 			}
 
-			// TODO
+			var symbol:Dynamic = {};
+			symbol.type = SWFSymbolType.SOUND;
+			symbol.id = defineSound.characterId;
+			symbol.path = "sounds/" + symbol.id + "." + export.extension;
 
-			// 			var entry:Entry = {
-			// 				fileName: symbol.path,
-			// 				fileSize: byteArray.length,
-			// 				fileTime: Date.now(),
-			// 				compressed: false,
-			// 				dataSize: 0,
-			// 				data: byteArray,
-			// 				crc32: Crc32.make(byteArray)
-			// 			};
-			// 			outputList.add(entry);
+			var entry:Entry = {
+				fileName: symbol.path,
+				fileSize: export.bytes.length,
+				fileTime: Date.now(),
+				compressed: false,
+				dataSize: 0,
+				data: export.bytes,
+				crc32: Crc32.make(export.bytes)
+			};
+			outputList.add(entry);
 
-			// createdDirectory = false;
-			// 		for (id in exporter.sounds.keys())
-			// 		{
-			// 			if (!createdDirectory)
-			// 			{
-			// 				System.mkdir(Path.combine(targetPath, "sounds"));
-			// 				createdDirectory = true;
-			// 			}
+			manifestData.assets.push({
+				path: symbol.path,
+				type: AssetType.SOUND
+			});
 
-			// 			var symbolClassName = exporter.soundSymbolClassNames.get(id);
-			// 			var typeId = exporter.soundTypes.get(id);
-
-			// 			Log.info("", " - \x1b[1mExporting sound:\x1b[0m [id=" + id + ", type=" + typeId + ", symbolClassName=" + symbolClassName + "]");
-
-			// 			var type;
-			// 			switch (typeId)
-			// 			{
-			// 				case SoundType.MP3:
-			// 					type = "mp3";
-			// 				case SoundType.ADPCM:
-			// 					type = "adpcm";
-			// 				case _:
-			// 					throw "unsupported sound type " + id + ", type " + typeId + ", symbol class name " + symbolClassName;
-			// 			};
-			// 			var path = "sounds/" + symbolClassName + "." + type;
-			// 			var assetData = exporter.sounds.get(id);
-
-			// 			File.saveBytes(Path.combine(targetPath, path), assetData);
-
-			// 			// NOTICE: everything must be .mp3 in its final form, even though we write out various formats to disk
-			// 			var soundAsset = new Asset("", "sounds/" + symbolClassName + ".mp3", AssetType.SOUND);
-			// 			project.assets.push(soundAsset);
+			libraryData.symbols.set(symbol.id, symbol);
+			return symbol;
 		}
 
-		return;
+		return null;
+	}
+
+	private function exportSound(defineSound:TagDefineSound):{bytes:ByteArray, extension:String}
+	{
+		// Not all SWF DefineSound compression modes are implemented yet.
+		// For now, only formats that map directly to standard container formats
+		// are exported.
+		switch (getSoundType(defineSound.soundFormat))
+		{
+			case MP3:
+				var mp3 = new ByteArray();
+				if (defineSound.soundData.length > 2)
+				{
+					mp3.writeBytes(defineSound.soundData, 2, defineSound.soundData.length - 2);
+				}
+				mp3.position = 0;
+				return {bytes: mp3, extension: "mp3"};
+	
+			case UNCOMPRESSED_NATIVE_ENDIAN, UNCOMPRESSED_LITTLE_ENDIAN:
+				return {bytes: buildWAVFromPCM(defineSound), extension: "wav"};
+	
+			case ADPCM, NELLYMOSER_16_KHZ, NELLYMOSER_8_KHZ, NELLYMOSER, SPEEX, null:
+				return null;
+		}
+	}
+
+	private function getSoundType(soundFormat:Int):Null<SoundType>
+	{
+		return switch (soundFormat)
+		{
+			case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
+			case 1: SoundType.ADPCM;
+			case 2: SoundType.MP3;
+			case 3: SoundType.UNCOMPRESSED_LITTLE_ENDIAN;
+			case 4: SoundType.NELLYMOSER_16_KHZ;
+			case 5: SoundType.NELLYMOSER_8_KHZ;
+			case 6: SoundType.NELLYMOSER;
+			case 11: SoundType.SPEEX;
+			case _: null;
+		}
+	}
+
+	private function buildWAVFromPCM(defineSound:TagDefineSound):ByteArray
+	{
+		var pcmData = new ByteArray();
+		pcmData.writeBytes(defineSound.soundData, 0, defineSound.soundData.length);
+		pcmData.position = 0;
+
+		var channels = getSoundChannels(defineSound.soundType);
+		var sampleRate = getSoundSampleRate(defineSound.soundRate);
+		var bitsPerSample = getSoundBitsPerSample(defineSound.soundSize);
+		var blockAlign = channels * Std.int(bitsPerSample / 8);
+		var byteRate = sampleRate * blockAlign;
+		var wav = new ByteArray();
+		wav.endian = Endian.LITTLE_ENDIAN;
+		wav.writeUTFBytes("RIFF");
+		wav.writeInt(36 + pcmData.length);
+		wav.writeUTFBytes("WAVE");
+		wav.writeUTFBytes("fmt ");
+		wav.writeInt(16);
+		wav.writeShort(1);
+		wav.writeShort(channels);
+		wav.writeInt(sampleRate);
+		wav.writeInt(byteRate);
+		wav.writeShort(blockAlign);
+		wav.writeShort(bitsPerSample);
+		wav.writeUTFBytes("data");
+		wav.writeInt(pcmData.length);
+		wav.writeBytes(pcmData, 0, pcmData.length);
+		wav.position = 0;
+		return wav;
+	}
+
+	private function getSoundBitsPerSample(soundSize:Int):Int
+	{
+		return soundSize == swf.data.consts.SoundSize.BIT_16 ? 16 : 8;
+	}
+
+	private function getSoundChannels(soundType:Int):Int
+	{
+		return soundType == swf.data.consts.SoundType.STEREO ? 2 : 1;
+	}
+
+	private function getSoundSampleRate(soundRate:Int):Int
+	{
+		return switch (soundRate)
+		{
+			case swf.data.consts.SoundRate.KHZ_5: 5512;
+			case swf.data.consts.SoundRate.KHZ_11: 11025;
+			case swf.data.consts.SoundRate.KHZ_22: 22050;
+			case swf.data.consts.SoundRate.KHZ_44: 44100;
+			case _: 44100;
+		}
 	}
 
 	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = ""):Array<String>
@@ -1362,7 +1676,7 @@ class AnimateLibraryExporter
 			}
 			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 			{
-				addSound(tag);
+				return addSound(tag);
 			}
 
 			return null;
@@ -1546,6 +1860,7 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to 
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var SOUND = 7;
 }
 
 #if (haxe_ver < 4.0) @:enum #end

@@ -66,7 +66,10 @@ class SWFLiteLoader implements IDisplayObjectLoader
 		#else
 		// TODO: No intermediate format
 		var swf = new SWF(buffer);
-		var exporter = new SWFLiteExporter(swf.data);
+		var sourceBytes = new ByteArray();
+		sourceBytes.writeBytes(buffer, 0, buffer.length);
+		sourceBytes.position = 0;
+		var exporter = new SWFLiteExporter(swf.data, sourceBytes);
 		var swfLite = exporter.swfLite;
 		var library = new SWFLiteLibrary("test");
 		swfLite.library = library;

@@ -8,15 +8,12 @@ import format.png.Writer;
 import swf.data.consts.BitmapFormat;
 import swf.data.consts.BlendMode;
 import swf.data.SWFButtonRecord;
+import swf.data.SWFRawTag;
 import swf.exporters.core.FilterType;
 import swf.exporters.core.ShapeCommand;
 import swf.exporters.ShapeBitmapExporter.BitmapFill;
 import swf.runtime.Bitmap;
-// #if hxp
-// import hxp.Log;
-// #else
-// import lime.tools.helpers.LogHelper in Log;
-// #end
+import hxp.Log;
 import lime.graphics.Image;
 import swf.exporters.swflite.BitmapSymbol;
 import swf.exporters.swflite.ButtonSymbol;
@@ -45,8 +42,11 @@ import swf.tags.TagDefineScalingGrid;
 import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
+import swf.tags.TagExportAssets;
+import swf.tags.TagNameCharacter;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
+import swf.SWFData;
 import swf.SWFRoot;
 import swf.SWFTimelineContainer;
 import haxe.io.Bytes;
@@ -74,7 +74,7 @@ class SWFLiteExporter
 	private var data:SWFRoot;
 	private var symbolsByTagID:Map<Int, swf.data.SWFSymbol>;
 
-	public function new(data:SWFRoot)
+	public function new(data:SWFRoot, sourceBytes:ByteArray = null)
 	{
 		this.data = data;
 
@@ -92,17 +92,265 @@ class SWFLiteExporter
 
 		addSprite(data, true);
 
-		for (tag in data.tags)
+		var symbols:Array<swf.data.SWFSymbol> = [];
+		var registerSymbol = function(symbol:swf.data.SWFSymbol)
 		{
-			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
+			if (symbol == null || symbol.name == null || symbol.name == "")
 			{
-				for (symbol in cast(tag, TagSymbolClass).symbols)
+				return;
+			}
+
+			var replaced = false;
+			for (i in 0...symbols.length)
+			{
+				if (symbols[i].tagId == symbol.tagId)
 				{
-					processSymbol(symbol);
-					symbolsByTagID.set(symbol.tagId, symbol);
+					symbols[i] = symbol;
+					replaced = true;
+					break;
 				}
 			}
+
+			if (!replaced)
+			{
+				symbols.push(symbol);
+			}
+
+			symbolsByTagID.set(symbol.tagId, symbol);
 		}
+
+		for (symbol in collectLinkageSymbols(sourceBytes))
+		{
+			registerSymbol(symbol);
+		}
+
+		for (symbol in symbols)
+		{
+			processSymbol(symbol);
+		}
+	}
+
+	private function extractNameCharacterSymbol(tag:TagNameCharacter):swf.data.SWFSymbol
+	{
+		if (tag == null || tag.binaryData == null || tag.binaryData.length == 0)
+		{
+			return null;
+		}
+
+		tag.binaryData.position = 0;
+		var name = tag.binaryData.readUTFBytes(tag.binaryData.length - 1);
+		tag.binaryData.position = 0;
+		return swf.data.SWFSymbol.create(tag.characterId, name);
+	}
+
+	private function collectLinkageSymbols(sourceBytes:ByteArray):Array<swf.data.SWFSymbol>
+	{
+		var result:Array<swf.data.SWFSymbol> = [];
+
+		for (tag in data.tags)
+		{
+			appendSymbols(result, extractTagSymbols(tag));
+		}
+
+		for (tagRaw in data.tagsRaw)
+		{
+			appendSymbols(result, extractRawTagSymbols(tagRaw));
+		}
+
+		if (sourceBytes != null)
+		{
+			appendSymbols(result, extractLinkageSymbols(sourceBytes));
+		}
+
+		return result;
+	}
+
+	private function extractTagSymbols(tag:Dynamic):Array<swf.data.SWFSymbol>
+	{
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
+		{
+			return cast(tag, TagSymbolClass).symbols.copy();
+		}
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
+		{
+			return cast(tag, TagExportAssets).symbols.copy();
+		}
+		else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagNameCharacter))
+		{
+			var symbol = extractNameCharacterSymbol(cast tag);
+			return symbol != null ? [symbol] : [];
+		}
+
+		return [];
+	}
+
+	private function extractRawTagSymbols(tagRaw:SWFRawTag):Array<swf.data.SWFSymbol>
+	{
+		switch (tagRaw.header.type)
+		{
+			case TagSymbolClass.TYPE, TagExportAssets.TYPE:
+				return extractRawAssetSymbols(tagRaw);
+
+			case TagNameCharacter.TYPE:
+				var symbol = extractRawNameCharacterSymbol(tagRaw);
+				return symbol != null ? [symbol] : [];
+
+			default:
+				return [];
+		}
+	}
+
+	private function appendSymbols(target:Array<swf.data.SWFSymbol>, values:Array<swf.data.SWFSymbol>):Void
+	{
+		if (values == null || values.length == 0)
+		{
+			return;
+		}
+
+		for (value in values)
+		{
+			if (value != null)
+			{
+				target.push(value);
+			}
+		}
+	}
+
+	private function extractRawAssetSymbols(tagRaw:SWFRawTag):Array<swf.data.SWFSymbol>
+	{
+		var data = cloneRawTagData(tagRaw);
+		if (data == null)
+		{
+			return [];
+		}
+
+		data.readTagHeader();
+		var count = data.readUI16();
+		var result:Array<swf.data.SWFSymbol> = [];
+		for (i in 0...count)
+		{
+			result.push(new swf.data.SWFSymbol(data));
+		}
+		return result;
+	}
+
+	private function extractRawNameCharacterSymbol(tagRaw:SWFRawTag):swf.data.SWFSymbol
+	{
+		var data = cloneRawTagData(tagRaw);
+		if (data == null)
+		{
+			return null;
+		}
+
+		data.readTagHeader();
+		var characterId = data.readUI16();
+		var name = data.readSTRING();
+		return name != null && name != "" ? swf.data.SWFSymbol.create(characterId, name) : null;
+	}
+
+	private function cloneRawTagData(tagRaw:SWFRawTag):SWFData
+	{
+		if (tagRaw == null || tagRaw.bytes == null)
+		{
+			return null;
+		}
+
+		var data = new SWFData();
+		data.writeBytes(tagRaw.bytes);
+		data.position = 0;
+		return data;
+	}
+
+	private function extractLinkageSymbols(sourceBytes:ByteArray):Array<swf.data.SWFSymbol>
+	{
+		var data = getUncompressedSWFData(sourceBytes);
+		var result:Array<swf.data.SWFSymbol> = [];
+		if (data == null)
+		{
+			return result;
+		}
+
+		data.position = 8;
+		data.readRECT();
+		data.readFIXED8();
+		data.readUI16();
+
+		while (data.position + 1 < data.length)
+		{
+			var header = data.readTagHeader();
+			if (header.type == 0)
+			{
+				break;
+			}
+			var tagEnd = data.position + header.contentLength;
+
+			switch (header.type)
+			{
+				case TagSymbolClass.TYPE, TagExportAssets.TYPE:
+					var count = data.readUI16();
+					for (i in 0...count)
+					{
+						result.push(new swf.data.SWFSymbol(data));
+					}
+
+				case TagNameCharacter.TYPE:
+					var characterId = data.readUI16();
+					var name = data.readSTRING();
+					if (name != null && name != "")
+					{
+						result.push(swf.data.SWFSymbol.create(characterId, name));
+					}
+
+				default:
+			}
+
+			data.position = tagEnd;
+		}
+
+		return result;
+	}
+
+	private function getUncompressedSWFData(sourceBytes:ByteArray):SWFData
+	{
+		if (sourceBytes == null || sourceBytes.length < 8)
+		{
+			return null;
+		}
+
+		var input = new ByteArray();
+		input.writeBytes(sourceBytes, 0, sourceBytes.length);
+		input.position = 0;
+
+		var signature = input.readUTFBytes(3);
+		var version = input.readUnsignedByte();
+		var fileLength = input.readUnsignedInt();
+
+		var body = new ByteArray();
+		body.writeBytes(input, 8, input.length - 8);
+		body.position = 0;
+
+		switch (signature)
+		{
+			case "FWS":
+				// already uncompressed
+
+			case "CWS":
+				body.uncompress();
+
+			case "ZWS":
+				Log.warn("LZMA-compressed SWF linkages are not currently supported for SWFLite export");
+				return null;
+			default:
+				return null;
+		}
+
+		var data = new SWFData();
+		data.writeUTFBytes("FWS");
+		data.writeByte(version);
+		data.writeUI32(fileLength);
+		data.writeBytes(body, 0, body.length);
+		data.position = 0;
+		return data;
 	}
 
 	private function addButton(tag:IDefinitionTag):SWFSymbol
@@ -820,30 +1068,40 @@ class SWFLiteExporter
 		return symbol;
 	}
 
-	private function addSound(tag:IDefinitionTag):Void
+	private function addSound(tag:IDefinitionTag):Bool
 	{
 		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 		{
 			var defineSound:TagDefineSound = cast tag;
-
 			var byteArray = defineSound.soundData;
-			var type:SoundType = switch (defineSound.soundFormat)
+			var type = getSoundType(defineSound.soundFormat);
+			if (type == null)
 			{
-				case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
-				case 1: SoundType.ADPCM;
-				case 2: SoundType.MP3;
-				case 3: SoundType.UNCOMPRESSED_LITTLE_ENDIAN;
-				case 4: SoundType.NELLYMOSER_16_KHZ;
-				case 5: SoundType.NELLYMOSER_8_KHZ;
-				case 6: SoundType.NELLYMOSER;
-				case 7: SoundType.SPEEX;
-				case _: throw("invalid sound type!");
+				Log.warn('Skipping unsupported DefineSound id=${defineSound.characterId} format=${defineSound.soundFormat} type=UNKNOWN');
+				return false;
 			}
 			sounds.set(tag.characterId, byteArray);
 			soundTypes.set(tag.characterId, type);
+			return true;
 		}
 
-		return;
+		return false;
+	}
+
+	private function getSoundType(soundFormat:Int):Null<SoundType>
+	{
+		return switch (soundFormat)
+		{
+			case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
+			case 1: SoundType.ADPCM;
+			case 2: SoundType.MP3;
+			case 3: SoundType.UNCOMPRESSED_LITTLE_ENDIAN;
+			case 4: SoundType.NELLYMOSER_16_KHZ;
+			case 5: SoundType.NELLYMOSER_8_KHZ;
+			case 6: SoundType.NELLYMOSER;
+			case 11: SoundType.SPEEX;
+			case _: null;
+		}
 	}
 
 	private function processSymbol(symbol:swf.data.SWFSymbol):Void
@@ -861,6 +1119,10 @@ class SWFLiteExporter
 		{
 			data2.className = symbol.name;
 			data2.baseClassName = FrameScriptParser.getBaseClassName(data, symbol.name);
+		}
+		else if (sounds.exists(symbol.tagId) && symbol.name != null)
+		{
+			soundSymbolClassNames.set(symbol.tagId, symbol.name);
 		}
 	}
 

@@ -64,6 +64,7 @@ import openfl.filters.GlowFilter;
 	private var preloading:Bool;
 	private var root:AnimateSpriteSymbol;
 	private var rootPath:String;
+	private var soundClassNames:Map<String, String>;
 	private var symbols:Map<Int, AnimateSymbol>;
 	private var symbolsByClassName:Map<String, AnimateSymbol>;
 	private var uuid:String;
@@ -79,6 +80,7 @@ import openfl.filters.GlowFilter;
 
 		alphaCheck = new Map();
 		bitmapClassNames = new Map();
+		soundClassNames = new Map();
 
 		#if (ios || tvos)
 		rootPath = "assets/";
@@ -129,7 +131,22 @@ import openfl.filters.GlowFilter;
 
 			if (type == null || type == (cast AssetType.IMAGE) || type == (cast AssetType.MOVIE_CLIP))
 			{
-				return (symbolsByClassName != null && symbolsByClassName.exists(id));
+				if (symbolsByClassName != null && symbolsByClassName.exists(id))
+				{
+					return true;
+				}
+
+				if (type == null)
+				{
+					return soundClassNames != null && soundClassNames.exists(id);
+				}
+
+				return false;
+			}
+
+			if (type == (cast AssetType.SOUND) || type == (cast AssetType.MUSIC))
+			{
+				return soundClassNames != null && soundClassNames.exists(id);
 			}
 		}
 
@@ -178,6 +195,18 @@ import openfl.filters.GlowFilter;
 	#end
 
 	#if lime
+	public override function getAudioBuffer(id:String):lime.media.AudioBuffer
+	{
+		if (soundClassNames != null && soundClassNames.exists(id))
+		{
+			id = soundClassNames.get(id);
+		}
+
+		return super.getAudioBuffer(id);
+	}
+	#end
+
+	#if lime
 	public override function getMovieClip(id:String):MovieClip
 	{
 		if (symbols == null) return null;
@@ -221,11 +250,39 @@ import openfl.filters.GlowFilter;
 		var requestedType = type != null ? cast(type, AssetType) : null;
 		var items = [];
 
-		if (symbolsByClassName != null)
+		if (requestedType == null || requestedType == MOVIE_CLIP)
 		{
 			items.push("");
+		}
 
+		if (symbolsByClassName != null)
+		{
 			for (id in symbolsByClassName.keys())
+			{
+				var symbol = symbolsByClassName.get(id);
+				if (symbol == null)
+				{
+					continue;
+				}
+
+				if (requestedType == null)
+				{
+					items.push(id);
+				}
+				else if (requestedType == IMAGE && #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateBitmapSymbol))
+				{
+					items.push(id);
+				}
+				else if (requestedType == MOVIE_CLIP && #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateSpriteSymbol))
+				{
+					items.push(id);
+				}
+			}
+		}
+
+		if (requestedType == null || requestedType == SOUND || requestedType == MUSIC)
+		{
+			for (id in soundClassNames.keys())
 			{
 				items.push(id);
 			}
@@ -264,6 +321,7 @@ import openfl.filters.GlowFilter;
 			symbols = new Map();
 			symbolsByClassName = new Map();
 			bitmapSymbols = new Array();
+			soundClassNames = new Map();
 
 			for (i in 0...symbolData.length)
 			{
@@ -290,6 +348,8 @@ import openfl.filters.GlowFilter;
 						spriteSymbol = __parseSprite(data);
 						if (i == rootIndex) root = spriteSymbol;
 						symbol = spriteSymbol;
+					case SOUND:
+						symbol = __parseSound(data);
 					case STATIC_TEXT:
 						symbol = __parseStaticText(data);
 					default:
@@ -299,10 +359,17 @@ import openfl.filters.GlowFilter;
 				symbols.set(symbol.id, symbol);
 				if (symbol.className != null)
 				{
-					symbolsByClassName.set(symbol.className, symbol);
-					#if (openfl > "9.1.0")
-					Assets.registerBinding(symbol.className, this);
-					#end
+					if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateSoundSymbol))
+					{
+						soundClassNames.set(symbol.className, cast(symbol, AnimateSoundSymbol).path);
+					}
+					else
+					{
+						symbolsByClassName.set(symbol.className, symbol);
+						#if (openfl > "9.1.0")
+						Assets.registerBinding(symbol.className, this);
+						#end
+					}
 				}
 			}
 
@@ -441,6 +508,18 @@ import openfl.filters.GlowFilter;
 		}
 
 		return super.loadImage(id);
+	}
+	#end
+
+	#if lime
+	public override function loadAudioBuffer(id:String):Future<lime.media.AudioBuffer>
+	{
+		if (soundClassNames != null && soundClassNames.exists(id))
+		{
+			id = soundClassNames.get(id);
+		}
+
+		return super.loadAudioBuffer(id);
 	}
 	#end
 
@@ -732,6 +811,15 @@ import openfl.filters.GlowFilter;
 		return symbol;
 	}
 
+	private function __parseSound(data:Dynamic):AnimateSoundSymbol
+	{
+		var symbol = new AnimateSoundSymbol();
+		symbol.id = data.id;
+		symbol.className = data.className;
+		symbol.path = data.path;
+		return symbol;
+	}
+
 	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
 	{
 		if (data == null) return null;
@@ -830,4 +918,5 @@ import openfl.filters.GlowFilter;
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var SOUND = 7;
 }

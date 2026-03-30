@@ -760,8 +760,11 @@ class Tools
 
 		var bytes:ByteArray = File.getBytes(sourcePath);
 		bytes = readSWC(bytes);
+		var sourceBytes = new ByteArray();
+		sourceBytes.writeBytes(bytes, 0, bytes.length);
+		sourceBytes.position = 0;
 		var swf = new SWF(bytes);
-		var exporter = new AnimateLibraryExporter(swf.data, targetPath);
+		var exporter = new AnimateLibraryExporter(swf.data, targetPath, sourceBytes);
 
 		if (generate)
 		{
@@ -1050,8 +1053,11 @@ class Tools
 
 						var bytes:ByteArray = File.getBytes(library.sourcePath);
 						bytes = readSWC(bytes);
+						var sourceBytes = new ByteArray();
+						sourceBytes.writeBytes(bytes, 0, bytes.length);
+						sourceBytes.position = 0;
 						var swf = new SWF(bytes);
-						var exporter = new AnimateLibraryExporter(swf.data, cacheFile);
+						var exporter = new AnimateLibraryExporter(swf.data, cacheFile, sourceBytes);
 
 						if (library.generate != false)
 						{
