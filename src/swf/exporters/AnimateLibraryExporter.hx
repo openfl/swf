@@ -27,6 +27,7 @@ import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSound;
 import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
+import swf.tags.TagExportAssets;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
 import swf.tags.TagExportAssets;
@@ -92,7 +93,7 @@ class AnimateLibraryExporter
 					symbolsByTagID.set(symbol.tagId, symbol);
 				}
 			}
-			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
 			{
 				for (symbol in cast(tag, TagExportAssets).symbols)
 				{
@@ -100,7 +101,7 @@ class AnimateLibraryExporter
 					symbolsByTagID.set(symbol.tagId, symbol);
 				}
 			}
-			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagFileAttributes))
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagFileAttributes))
 			{
 				isActionScript3 = cast(tag, TagFileAttributes).actionscript3;
 			}
@@ -194,6 +195,7 @@ class AnimateLibraryExporter
 		var outputFile = File.write(targetPath, true);
 		var writer = new ZipWriter(outputFile);
 		writer.write(outputList);
+		outputFile.close();
 	}
 
 	private function addButton(tag:IDefinitionTag):Dynamic
@@ -819,9 +821,6 @@ class AnimateLibraryExporter
 		{
 			symbol.scale9Grid = serializeRect(scalingGrid.splitter.rect);
 		}
-
-		var scripts = null;
-		var found = false;
 
 		var swfSymbol = symbolsByTagID.get(symbol.id);
 		if (swfSymbol != null && isActionScript3)

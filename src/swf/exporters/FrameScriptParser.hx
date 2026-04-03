@@ -13,7 +13,18 @@ class FrameScriptParser
 
 	public static function getBaseClassName(swfData:SWFRoot, className:String):String
 	{
-		var classData = swfData.abcData.findClassByName(className);
+		if (swfData == null || className == null)
+		{
+			return null;
+		}
+
+		var classData:ClassDef = null;
+		// symbols from the ExportAssets tag will have a name, but it does not
+		// necessarily represent a class name, so there may not be abcData
+		if (swfData.abcData != null)
+		{
+			classData = swfData.abcData.findClassByName(className);
+		}
 		if (classData != null && classData.superclass != null)
 		{
 			var superClassName = swfData.abcData.resolveMultiNameByIndex(classData.superclass);
@@ -36,9 +47,20 @@ class FrameScriptParser
 
 	public static function convertToJS(swfData:SWFRoot, className:String):Array<String>
 	{
+		if (swfData == null || className == null)
+		{
+			return null;
+		}
+
 		indentationLevel = 0;
-		var cls = swfData.abcData.findClassByName(className);
-		var scripts = null;
+		var cls:ClassDef = null;
+		// symbols from the ExportAssets tag will have a name, but it does not
+		// necessarily represent a class name, so there may not be abcData
+		if (swfData.abcData != null)
+		{
+			cls = swfData.abcData.findClassByName(className);
+		}
+		var scripts:Array<String> = null;
 
 		if (cls != null && cls.fields != null && cls.fields.length > 0)
 		{
@@ -77,7 +99,7 @@ class FrameScriptParser
 										case OPop:
 											stack.pop();
 										case OFindPropStrict(nameIndex):
-										//										prop = swfData.abcData.resolveMultiNameByIndex(nameIndex);
+											//										prop = swfData.abcData.resolveMultiNameByIndex(nameIndex);
 										case OGetLex(nameIndex):
 											// Log.info("", "OGetLex: " + nameIndex);
 											prop = swfData.abcData.resolveMultiNameByIndex(nameIndex);
@@ -824,7 +846,9 @@ class AVM2
 
 	public static function findClassByName(abcData:ABCData, s:String):ClassDef
 	{
-		if (s == null) return null;
+		// symbols from the ExportAssets tag will have a name, but it does not
+		// necessarily represent a class name, so there may not be abcData
+		if (abcData == null || s == null) return null;
 
 		var x = s.lastIndexOf(".");
 		var pkgName = "";
@@ -858,6 +882,11 @@ class AVM2
 
 	public static function classHasField(abcData:ABCData, cls:ClassDef, name:String):Bool
 	{
+		if (abcData == null || cls == null || name == null)
+		{
+			return false;
+		}
+
 		var classHasField = false;
 
 		for (field in cls.fields)
