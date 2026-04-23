@@ -978,7 +978,7 @@ class Tools
 				data.libraryType = "swf.SWFLibrary";
 				data.libraryArgs = [library.name + ".swf"];
 				data.name = library.name;
-				data.rootPath = "lib/" + library.name;
+				data.rootPath = "";
 
 				swf.library = library.name;
 

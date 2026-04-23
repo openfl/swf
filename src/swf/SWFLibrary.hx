@@ -15,6 +15,9 @@ import openfl.utils.AssetType;
 import openfl.utils.ByteArray;
 import openfl.utils.Future;
 import openfl.utils.Promise;
+#if lime
+import lime.utils.AssetManifest;
+#end
 #if flash
 import flash.display.AVM1Movie;
 #end
@@ -30,12 +33,19 @@ import flash.display.AVM1Movie;
 	private var context:LoaderContext;
 	private var id:String;
 	private var loader:Loader;
+	private var rootPath:String;
 
 	public function new(id:String)
 	{
 		super();
 
 		this.id = id;
+
+		#if (ios || tvos)
+		rootPath = "assets/";
+		#else
+		rootPath = "";
+		#end
 	}
 
 	public override function exists(id:String, type:String):Bool
@@ -97,6 +107,17 @@ import flash.display.AVM1Movie;
 
 		if (bytes != null || paths.exists(id))
 		{
+			var path:String;
+
+			if (paths.exists(id))
+			{
+				path = paths.get(id);
+			}
+			else
+			{
+				path = (rootPath != null && rootPath != "") ? rootPath + "/" + id : id;
+			}
+
 			context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
 			context.allowCodeImport = true;
 
@@ -121,17 +142,23 @@ import flash.display.AVM1Movie;
 			}
 			else
 			{
-				loader.load(new URLRequest(paths.get(id)), context);
+				loader.load(new URLRequest(path), context);
 			}
 		}
 		else
 		{
-			// Assume it's been included using -swf-lib, binary embeds don't appear to work
-
 			applicationDomain = ApplicationDomain.currentDomain;
 			promise.complete(this);
 		}
 
 		return promise.future;
 	}
+
+	#if lime
+	private override function __fromManifest(manifest:AssetManifest):Void
+	{
+		rootPath = manifest.rootPath;
+		super.__fromManifest(manifest);
+	}
+	#end
 }
