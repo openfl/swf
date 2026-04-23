@@ -105,50 +105,42 @@ import flash.display.AVM1Movie;
 			bytes = cast(Type.createInstance(classTypes.get(id), []), ByteArray);
 		}
 
-		if (bytes != null || paths.exists(id))
+		var path:String;
+
+		if (paths.exists(id))
 		{
-			var path:String;
-
-			if (paths.exists(id))
-			{
-				path = paths.get(id);
-			}
-			else
-			{
-				path = (rootPath != null && rootPath != "") ? rootPath + "/" + id : id;
-			}
-
-			context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
-			context.allowCodeImport = true;
-
-			loader = new Loader();
-			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(event)
-			{
-				promise.error(event.text);
-			});
-			loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, function(event)
-			{
-				promise.progress(Std.int(event.bytesLoaded), Std.int(event.bytesTotal));
-			});
-			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
-			{
-				applicationDomain = loader.contentLoaderInfo.applicationDomain;
-				promise.complete(this);
-			});
-
-			if (bytes != null)
-			{
-				loader.loadBytes(bytes, context);
-			}
-			else
-			{
-				loader.load(new URLRequest(path), context);
-			}
+			path = paths.get(id);
 		}
 		else
 		{
-			applicationDomain = ApplicationDomain.currentDomain;
+			path = (rootPath != null && rootPath != "") ? rootPath + "/" + id : id;
+		}
+
+		context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
+		context.allowCodeImport = true;
+
+		loader = new Loader();
+		loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(event)
+		{
+			promise.error(event.text);
+		});
+		loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, function(event)
+		{
+			promise.progress(Std.int(event.bytesLoaded), Std.int(event.bytesTotal));
+		});
+		loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
+		{
+			applicationDomain = loader.contentLoaderInfo.applicationDomain;
 			promise.complete(this);
+		});
+
+		if (bytes != null)
+		{
+			loader.loadBytes(bytes, context);
+		}
+		else
+		{
+			loader.load(new URLRequest(path), context);
 		}
 
 		return promise.future;
