@@ -955,6 +955,22 @@ class Tools
 
 				Log.info("", " - \x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
 
+				var cacheAvailable = false;
+				var cacheDirectory = targetDirectory != null ? targetDirectory + "/obj/libraries" : null;
+				var cacheFile = cacheDirectory != null ? cacheDirectory + "/" + library.name + ".cache" : null;
+
+				if (cacheFile != null && FileSystem.exists(cacheFile))
+				{
+					var cacheDate = FileSystem.stat(cacheFile).mtime;
+					var toolDate = FileSystem.stat(Haxelib.getPath(new Haxelib("swf"), true) + "/run.n").mtime;
+					var sourceDate = FileSystem.stat(library.sourcePath).mtime;
+
+					if (sourceDate.getTime() < cacheDate.getTime() && toolDate.getTime() < cacheDate.getTime())
+					{
+						cacheAvailable = true;
+					}
+				}
+
 				var swf = new Asset(library.sourcePath, library.name + ".swf", AssetType.BINARY);
 				// swf.library = library.name;
 
@@ -992,11 +1008,59 @@ class Tools
 
 				if (library.generate != false)
 				{
-					var generatedClasses = generateSWFClasses(project, output, swf, library.prefix);
-
-					for (className in generatedClasses)
+					if (!cacheAvailable)
 					{
-						output.haxeflags.push(className);
+						if (!Log.verbose)
+						{
+							Log.info("\x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
+						}
+
+						var assetsCountBefore = output.assets.length;
+						var generatedClasses = generateSWFClasses(project, output, swf, library.prefix);
+
+						for (className in generatedClasses)
+						{
+							output.haxeflags.push(className);
+						}
+
+						if (cacheDirectory != null)
+						{
+							System.mkdir(cacheDirectory);
+
+							var cacheEntries:Array<Dynamic> = [];
+							for (className in generatedClasses)
+							{
+								cacheEntries.push({className: className});
+							}
+							var i = 0;
+							for (idx in assetsCountBefore...output.assets.length)
+							{
+								var a = output.assets[idx];
+								if (i < cacheEntries.length)
+								{
+									cacheEntries[i].targetPath = a.targetPath;
+									cacheEntries[i].data = a.data;
+								}
+								i++;
+							}
+							File.saveContent(cacheFile, Json.stringify(cacheEntries));
+						}
+					}
+					else
+					{
+						var cacheEntries:Array<Dynamic> = Json.parse(File.getContent(cacheFile));
+
+						for (entry in cacheEntries)
+						{
+							output.haxeflags.push(entry.className);
+
+							if (entry.targetPath != null)
+							{
+								var templateFile = new Asset("", entry.targetPath, AssetType.TEMPLATE);
+								templateFile.data = entry.data;
+								output.assets.push(templateFile);
+							}
+						}
 					}
 				}
 
