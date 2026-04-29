@@ -376,6 +376,11 @@ class SymbolTimeline extends Timeline
 				}
 			}
 
+			for (mask in currentMasks)
+			{
+				__markTimelineMask(mask.displayObject);
+			}
+
 			var child:DisplayObject;
 			var i = currentInstances.length;
 			var length = __movieClip.numChildren;
@@ -417,6 +422,16 @@ class SymbolTimeline extends Timeline
 	@:noCompletion private function __sortDepths(a:FrameSymbolInstance, b:FrameSymbolInstance):Int
 	{
 		return a.depth - b.depth;
+	}
+
+	@:noCompletion private inline function __markTimelineMask(displayObject:DisplayObject):Void
+	{
+		// SWF clipDepth>0 placements are masks even before a child exists in their depth range.
+		if (!displayObject.__isMask)
+		{
+			displayObject.__isMask = true;
+			displayObject.__setRenderDirty();
+		}
 	}
 
 	@:noCompletion private function __updateDisplayObject(displayObject:DisplayObject, frameObject:FrameObject, reset:Bool = false):Void
