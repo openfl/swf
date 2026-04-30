@@ -90,7 +90,18 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 		if (symbolType != null)
 		{
-			sprite = Type.createInstance(symbolType, []);
+			AnimateGeneratedTypeContext.setSprite(library, this);
+
+			try
+			{
+				sprite = Type.createInstance(symbolType, []);
+				AnimateGeneratedTypeContext.clearSpriteIfMatches(library, this);
+			}
+			catch (e:Dynamic)
+			{
+				AnimateGeneratedTypeContext.clearSprite();
+				throw e;
+			}
 		}
 		else
 		{

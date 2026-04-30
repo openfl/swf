@@ -55,6 +55,67 @@ class Tools
 	private static var targetDirectory:String;
 	private static var targetFlags:Map<String, String>;
 
+	private static function readGeneratedClassesFile(path:String):Array<String>
+	{
+		if (path == null || !FileSystem.exists(path))
+		{
+			return null;
+		}
+
+		var generatedClasses = [];
+		for (line in File.getContent(path).split("\n"))
+		{
+			var className = StringTools.trim(line);
+			if (className != "" && !StringTools.startsWith(className, "#"))
+			{
+				generatedClasses.push(className);
+			}
+		}
+
+		return generatedClasses;
+	}
+
+	private static function writeGeneratedClassesCache(path:String, generatedClasses:Array<String>):Void
+	{
+		if (path == null)
+		{
+			return;
+		}
+
+		File.saveContent(path, generatedClasses.join("\n"));
+	}
+
+	private static function deleteGeneratedClassFiles(targetPath:String, classNames:Array<String>):Void
+	{
+		if (targetPath == null || classNames == null)
+		{
+			return;
+		}
+
+		for (className in classNames)
+		{
+			if (className == null || className == "")
+			{
+				continue;
+			}
+
+			var classPath = Path.combine(targetPath, className.split(".").join("/") + ".hx");
+
+			if (FileSystem.exists(classPath))
+			{
+				FileSystem.deleteFile(classPath);
+			}
+		}
+	}
+
+	private static function pushUniqueHaxeflag(output:HXProject, value:String):Void
+	{
+		if (value != null && output.haxeflags.indexOf(value) == -1)
+		{
+			output.haxeflags.push(value);
+		}
+	}
+
 	#if neko
 	public static function __init__()
 	{
@@ -996,7 +1057,7 @@ class Tools
 
 					for (className in generatedClasses)
 					{
-						output.haxeflags.push(className);
+						pushUniqueHaxeflag(output, className);
 					}
 				}
 
@@ -1018,11 +1079,14 @@ class Tools
 				var cacheAvailable = false;
 				var cacheDirectory = null;
 				var cacheFile = null;
+				var generatedClassesFile = null;
+				var cachedGeneratedClasses:Array<String> = null;
 
 				if (targetDirectory != null)
 				{
 					cacheDirectory = targetDirectory + "/obj/libraries";
 					cacheFile = cacheDirectory + "/" + library.name + ".zip";
+					generatedClassesFile = cacheDirectory + "/" + library.name + ".classes.txt";
 
 					if (FileSystem.exists(cacheFile))
 					{
@@ -1033,6 +1097,16 @@ class Tools
 						if (sourceDate.getTime() < cacheDate.getTime() && toolDate.getTime() < cacheDate.getTime())
 						{
 							cacheAvailable = true;
+						}
+					}
+
+					if (cacheAvailable && library.generate != false)
+					{
+						cachedGeneratedClasses = readGeneratedClassesFile(generatedClassesFile);
+
+						if (cachedGeneratedClasses == null)
+						{
+							cacheAvailable = false;
 						}
 					}
 
@@ -1056,6 +1130,7 @@ class Tools
 						if (library.generate != false)
 						{
 							var targetPath:String;
+							var previousGeneratedClasses = readGeneratedClassesFile(generatedClassesFile);
 
 							if (project.target == IOS)
 							{
@@ -1067,26 +1142,42 @@ class Tools
 							}
 
 							var generatedClasses = exporter.generateClasses(targetPath, output.assets, library.prefix);
+							var generatedLookup = new Map<String, Bool>();
 
-							// for (className in generatedClasses)
-							// {
-							// 	output.haxeflags.push(className);
-							// }
+							for (className in generatedClasses)
+							{
+								generatedLookup.set(className, true);
+							}
 
-							// if (cacheDirectory != null)
-							// {
-							// 	File.saveContent(cacheDirectory + "/classNames.txt", generatedClasses.join("\n"));
-							// }
+							if (previousGeneratedClasses != null)
+							{
+								var removedGeneratedClasses = [];
+
+								for (className in previousGeneratedClasses)
+								{
+									if (!generatedLookup.exists(className))
+									{
+										removedGeneratedClasses.push(className);
+									}
+								}
+
+								deleteGeneratedClassFiles(targetPath, removedGeneratedClasses);
+							}
+
+								for (className in generatedClasses)
+								{
+									pushUniqueHaxeflag(output, className);
+								}
+
+							writeGeneratedClassesCache(generatedClassesFile, generatedClasses);
 						}
 					}
-					else
+					else if (library.generate != false && cachedGeneratedClasses != null)
 					{
-						// var generatedClasses = File.getContent(cacheDirectory + "/classNames.txt").split("\n");
-
-						// for (className in generatedClasses)
-						// {
-						// 	output.haxeflags.push(className);
-						// }
+						for (className in cachedGeneratedClasses)
+						{
+							pushUniqueHaxeflag(output, className);
+						}
 					}
 
 					var asset = new Asset(cacheFile, "lib/" + library.name + ".zip", AssetType.BUNDLE);

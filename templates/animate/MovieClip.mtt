@@ -9,9 +9,17 @@ class ::CLASS_NAME:: extends ::if BASE_CLASS_NAME::::BASE_CLASS_NAME::::else::#i
 
 	public function new()
 	{
-		var library = swf.exporters.animate.AnimateLibrary.get("::UUID::");
-		var symbol = library.symbols.get(::SYMBOL_ID::);
-		symbol.__init(library);
+		var context = swf.exporters.animate.AnimateGeneratedTypeContext.consumeSprite();
+		if (context != null)
+		{
+			context.symbol.__init(context.library);
+		}
+		else
+		{
+			var library = swf.exporters.animate.AnimateLibrary.get("::UUID::");
+			var symbol = library.symbols.get(::SYMBOL_ID::);
+			symbol.__init(library);
+		}
 
 		super();
 	}
