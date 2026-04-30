@@ -372,7 +372,8 @@ class AnimateTimeline extends Timeline
 						{
 							if (activeInstance.displayObject != null
 								&& activeInstance.characterID == frameObject.symbol
-								&& activeInstance.depth == frameObject.depth)
+								&& activeInstance.depth == frameObject.depth
+								&& activeInstance.clipDepth == frameObject.clipDepth)
 							{
 								// TODO: Fix duplicates in exporter
 								instance = activeInstance;
