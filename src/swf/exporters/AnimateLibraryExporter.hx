@@ -1,5 +1,6 @@
 package swf.exporters;
 
+import swf.tags.TagFileAttributes;
 import format.png.Data;
 import format.png.Writer as PNGWriter;
 import swf.data.consts.BitmapFormat;
@@ -29,6 +30,7 @@ import swf.tags.TagDefineText;
 import swf.tags.TagExportAssets;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
+import swf.tags.TagExportAssets;
 import swf.timeline.Frame;
 import swf.utils.SymbolUtils;
 import swf.SWFRoot;
@@ -71,6 +73,7 @@ class AnimateLibraryExporter
 	private var symbols:Array<SWFSymbol>;
 	private var symbolsByTagID:Map<Int, SWFSymbol>;
 	private var targetPath:String;
+	private var isActionScript3:Bool = true;
 
 	public function new(swfData:SWFRoot, targetPath:String)
 	{
@@ -97,6 +100,10 @@ class AnimateLibraryExporter
 					symbols.push(symbol);
 					symbolsByTagID.set(symbol.tagId, symbol);
 				}
+			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagFileAttributes))
+			{
+				isActionScript3 = cast(tag, TagFileAttributes).actionscript3;
 			}
 		}
 
@@ -816,7 +823,7 @@ class AnimateLibraryExporter
 		}
 
 		var swfSymbol = symbolsByTagID.get(symbol.id);
-		if (swfSymbol != null)
+		if (swfSymbol != null && isActionScript3)
 		{
 			var scripts = FrameScriptParser.convertToJS(swfData, swfSymbol.name);
 			if (scripts != null)
@@ -1325,7 +1332,7 @@ class AnimateLibraryExporter
 		if (data2 != null && symbol.name != null)
 		{
 			data2.className = symbol.name;
-			data2.baseClassName = FrameScriptParser.getBaseClassName(swfData, symbol.name);
+			data2.baseClassName = isActionScript3 ? FrameScriptParser.getBaseClassName(swfData, symbol.name) : "flash.display.MovieClip";
 		}
 	}
 
