@@ -80,6 +80,8 @@ class ButtonSymbol extends SWFSymbol
 			simpleButton = #if flash new flash.display.SimpleButton.SimpleButton2() #else new SimpleButton() #end;
 		}
 
+		__applyInstanceProperties(simpleButton);
+
 		#if flash
 		if (!#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (simpleButton, flash.display.SimpleButton.SimpleButton2))
 		{
@@ -101,6 +103,7 @@ class ButtonSymbol extends SWFSymbol
 	private override function __initObject(swf:SWFLite, instance:DisplayObject):Void
 	{
 		this.swf = swf;
+		__applyInstanceProperties(instance);
 		__constructor(cast instance);
 	}
 }

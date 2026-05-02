@@ -172,6 +172,7 @@ class DynamicTextSymbol extends SWFSymbol
 		}
 
 		// textField.autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
+		__applyInstanceProperties(textField);
 		return textField;
 	}
 }

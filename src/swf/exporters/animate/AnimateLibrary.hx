@@ -142,6 +142,27 @@ import openfl.filters.GlowFilter;
 		return instances.get(uuid);
 	}
 
+	public function getRootInstanceProperties():Dynamic
+	{
+		return root != null ? root.instanceProperties : null;
+	}
+
+	public function getSymbolInstanceProperties(className:String):Dynamic
+	{
+		if (className == null || symbolsByClassName == null)
+		{
+			return null;
+		}
+
+		var symbol = symbolsByClassName.get(className);
+		if (symbol != null && #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateSpriteSymbol))
+		{
+			return cast(symbol, AnimateSpriteSymbol).instanceProperties;
+		}
+
+		return null;
+	}
+
 	#if lime
 	public override function getImage(id:String):Image
 	{
@@ -740,6 +761,7 @@ import openfl.filters.GlowFilter;
 		symbol.id = data.id;
 		symbol.className = data.className;
 		symbol.baseClassName = data.baseClassName;
+		symbol.instanceProperties = data.instanceProperties;
 		symbol.scale9Grid = data.scale9Grid != null ? new Rectangle(__pixel(data.scale9Grid[0]), __pixel(data.scale9Grid[1]), __pixel(data.scale9Grid[2]),
 			__pixel(data.scale9Grid[3])) : null;
 		var frames:Array<Dynamic> = data.frames;

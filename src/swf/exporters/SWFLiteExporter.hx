@@ -860,7 +860,7 @@ class SWFLiteExporter
 
 		var data2 = processTag(cast data.getCharacter(symbol.tagId));
 
-		if (data2 == null && ~/_fla\.MainTimeline$/.match(symbol.name))
+		if (data2 == null && (symbol.tagId == 0 || ~/_fla\.MainTimeline$/.match(symbol.name)))
 		{
 			data2 = swfLite.root;
 		}
@@ -869,6 +869,11 @@ class SWFLiteExporter
 		{
 			data2.className = symbol.name;
 			data2.baseClassName = FrameScriptParser.getBaseClassName(data, symbol.name);
+			var instanceProperties = FrameScriptParser.extractSerializableInstanceProperties(data, symbol.name);
+			if (instanceProperties != null)
+			{
+				data2.instanceProperties = instanceProperties;
+			}
 		}
 	}
 

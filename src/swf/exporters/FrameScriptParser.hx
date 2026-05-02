@@ -10,6 +10,11 @@ using StringTools;
 class FrameScriptParser
 {
 	private static var indentationLevel:Int = 0;
+	private static var CONSTRUCTOR_THIS_MARKER:Dynamic = {};
+	private static var OBJECT_CTOR_MARKER:Dynamic = {};
+	private static var ARRAY_CTOR_MARKER:Dynamic = {};
+	private static var INT_CTOR_MARKER:Dynamic = {};
+	private static var UNSUPPORTED_VALUE_MARKER:Dynamic = {};
 
 	public static function getBaseClassName(swfData:SWFRoot, className:String):String
 	{
@@ -43,6 +48,230 @@ class FrameScriptParser
 			}
 		}
 		return null;
+	}
+
+	public static function getRootClassName(swfData:SWFRoot, symbolClassNames:Array<String>):String
+	{
+		if (swfData == null || swfData.abcData == null)
+		{
+			return null;
+		}
+
+		var exported = new Map<String, Bool>();
+		if (symbolClassNames != null)
+		{
+			for (name in symbolClassNames)
+			{
+				if (name != null && name.length > 0)
+				{
+					exported.set(name, true);
+				}
+			}
+		}
+
+		var fallback:String = null;
+
+		for (cls in swfData.abcData.classes)
+		{
+			if (cls == null || cls.isInterface)
+			{
+				continue;
+			}
+
+			var multiName = swfData.abcData.resolveMultiNameByIndex(cls.name);
+			if (multiName == null)
+			{
+				continue;
+			}
+
+			var className = (multiName.nameSpaceName != null && multiName.nameSpaceName != "" ? multiName.nameSpaceName + "." : "") + multiName.name;
+			if (exported.exists(className))
+			{
+				continue;
+			}
+
+			if (className.indexOf("_fla.MainTimeline") != -1)
+			{
+				return className;
+			}
+
+			var baseClassName = getBaseClassName(swfData, className);
+			if (baseClassName == "flash.display.MovieClip" || baseClassName == "flash.display.Sprite")
+			{
+				if (fallback == null)
+				{
+					fallback = className;
+				}
+				else
+				{
+					fallback = null;
+					break;
+				}
+			}
+		}
+
+		return fallback;
+	}
+
+	public static function extractSerializableInstanceProperties(swfData:SWFRoot, className:String):Dynamic
+	{
+		if (swfData == null || swfData.abcData == null || swfData.pcode == null)
+		{
+			return null;
+		}
+
+		var cls = swfData.abcData.findClassByName(className);
+		if (cls == null || cls.constructor == null)
+		{
+			return null;
+		}
+
+		var constructorIndex = cls.constructor.getIndex();
+		if (constructorIndex < 0 || constructorIndex >= swfData.pcode.length)
+		{
+			return null;
+		}
+
+		var props:Dynamic = {};
+		var hasProps = false;
+		var stack:Array<Dynamic> = [];
+		var registers = new Map<Int, Dynamic>();
+		registers.set(0, CONSTRUCTOR_THIS_MARKER);
+
+		for (instruction in swfData.pcode[constructorIndex])
+		{
+			switch (instruction.opr)
+			{
+				case OThis:
+					stack.push(CONSTRUCTOR_THIS_MARKER);
+
+				case OSetThis:
+					__popStackValue(stack);
+
+				case OReg(register):
+					stack.push(registers.exists(register) ? registers.get(register) : UNSUPPORTED_VALUE_MARKER);
+
+				case OSetReg(register):
+					registers.set(register, __popStackValue(stack));
+
+				case ORegKill(register):
+					registers.remove(register);
+
+				case OPop | OScope | OPopScope:
+					__popStackValue(stack);
+
+				case ODup:
+					stack.push(stack.length > 0 ? stack[stack.length - 1] : UNSUPPORTED_VALUE_MARKER);
+
+				case OSwap:
+					if (stack.length >= 2)
+					{
+						var top = stack.pop();
+						var next = stack.pop();
+						stack.push(top);
+						stack.push(next);
+					}
+
+				case ONull | OUndefined:
+					stack.push(null);
+
+				case OTrue:
+					stack.push(true);
+
+				case OFalse:
+					stack.push(false);
+
+				case ONaN:
+					stack.push(Math.NaN);
+
+				case OSmallInt(value) | OInt(value):
+					stack.push(value);
+
+				case OIntRef(value):
+					stack.push(swfData.abcData.getIntByIndex(value));
+
+				case OUIntRef(value):
+					stack.push(swfData.abcData.uints[value.getIndex() - 1]);
+
+				case OFloat(value):
+					stack.push(swfData.abcData.getFloatByIndex(value));
+
+				case OString(value):
+					stack.push(swfData.abcData.getStringByIndex(value));
+
+				case OArray(count):
+					stack.push(__buildArrayValue(stack, count));
+
+				case OObject(count):
+					stack.push(__buildObjectValue(stack, count));
+
+				case OGetLex(name) | OFindPropStrict(name) | OFindProp(name) | OFindDefinition(name):
+					stack.push(__resolveReferenceValue(swfData, cls, name));
+
+				case OConstruct(argCount):
+					var args = __popArguments(stack, argCount);
+					var target = __popStackValue(stack);
+					stack.push(__constructValue(target, args));
+
+				case OConstructProperty(name, argCount):
+					var args = __popArguments(stack, argCount);
+					__popStackValue(stack);
+					stack.push(__constructValue(__resolveReferenceValue(swfData, cls, name), args));
+
+				case OCallProperty(name, argCount):
+					var args = __popArguments(stack, argCount);
+					var target = __popStackValue(stack);
+					stack.push(__callValue(target, __resolveReferenceValue(swfData, cls, name), args));
+
+				case OCallPropLex(name, argCount):
+					var args = __popArguments(stack, argCount);
+					var target = __popStackValue(stack);
+					stack.push(__callValue(target, __resolveReferenceValue(swfData, cls, name), args));
+
+				case OCallMethod(_, argCount) | OCallStatic(_, argCount):
+					__popArguments(stack, argCount);
+					__popStackValue(stack);
+					stack.push(UNSUPPORTED_VALUE_MARKER);
+
+				case OCallPropVoid(_, argCount) | OCallSuper(_, argCount) | OCallSuperVoid(_, argCount) | OCallStack(argCount)
+					| OApplyType(argCount):
+					__popArguments(stack, argCount);
+					__popStackValue(stack);
+
+				case OConstructSuper(argCount):
+					__popArguments(stack, argCount);
+					__popStackValue(stack);
+
+				case OGetProp(name):
+					var property = swfData.abcData.resolveMultiNameByIndex(name);
+					var key = __resolvePropertyKey(stack, property);
+					var target = __popStackValue(stack);
+					stack.push(__readPropertyValue(target, key, props));
+
+				case OInitProp(name) | OSetProp(name):
+					var property = swfData.abcData.resolveMultiNameByIndex(name);
+					var value = __popStackValue(stack);
+					var key = __resolvePropertyKey(stack, property);
+					var target = __popStackValue(stack);
+					if (__assignPropertyValue(target, key, value, props))
+					{
+						hasProps = true;
+					}
+
+				case OGetGlobalScope | OGetScope(_) | OGetSuper(_) | OSetSuper(_) | OGetDescendants(_) | OGetSlot(_) | OSetSlot(_)
+					| ONewBlock | OClassDef(_) | ONamespace(_) | OFunction(_) | ONext(_, _) | OHasNext | OForIn | OForEach
+					| OToString | OToXml | OToXmlAttr | OToInt | OToUInt | OToNumber | OToBool | OToObject | OCheckIsXml
+					| OCast(_) | OAsAny | OAsString | OAsType(_) | OAsObject | OTypeof | OInstanceOf | OIsType(_) | ODeleteProp(_)
+					| OIncrReg(_) | ODecrReg(_) | OIncrIReg(_) | ODecrIReg(_) | OOp(_) | OJump(_, _) | OSwitch(_, _) | OThrow
+					| OBreakPoint | OBreakPointLine(_) | ODebugReg(_, _, _) | ODebugLine(_) | ODebugFile(_) | OTimestamp
+					| OLabel | ONop | ODxNs(_) | ODxNsLate | OCatch(_) | ORet | ORetVoid | OUnknown(_):
+
+				case OPushWith:
+					__popStackValue(stack);
+			}
+		}
+
+		return hasProps ? props : null;
 	}
 
 	public static function convertToJS(swfData:SWFRoot, className:String):Array<String>
@@ -745,6 +974,321 @@ class FrameScriptParser
 		for (_ in 0...indentationLevel)
 			a += "	";
 		return a;
+	}
+
+	private static function __popStackValue(stack:Array<Dynamic>):Dynamic
+	{
+		return stack.length > 0 ? stack.pop() : UNSUPPORTED_VALUE_MARKER;
+	}
+
+	private static function __popArguments(stack:Array<Dynamic>, count:Int):Array<Dynamic>
+	{
+		var args = [];
+		for (_ in 0...count)
+		{
+			args.push(__popStackValue(stack));
+		}
+		args.reverse();
+		return args;
+	}
+
+	private static function __buildArrayValue(stack:Array<Dynamic>, count:Int):Dynamic
+	{
+		var values = [];
+		for (_ in 0...count)
+		{
+			values.push(__popStackValue(stack));
+		}
+		values.reverse();
+		for (value in values)
+		{
+			if (!__isSerializableValue(value))
+			{
+				return UNSUPPORTED_VALUE_MARKER;
+			}
+		}
+		return values;
+	}
+
+	private static function __buildObjectValue(stack:Array<Dynamic>, count:Int):Dynamic
+	{
+		var entries:Array<{name:String, value:Dynamic}> = [];
+		for (_ in 0...count)
+		{
+			var value = __popStackValue(stack);
+			var name = __popStackValue(stack);
+			if (!Std.isOfType(name, String) || !__isSerializableValue(value))
+			{
+				return UNSUPPORTED_VALUE_MARKER;
+			}
+			entries.push({
+				name: cast name,
+				value: value
+			});
+		}
+		entries.reverse();
+
+		var object:Dynamic = {};
+		for (entry in entries)
+		{
+			Reflect.setField(object, entry.name, entry.value);
+		}
+		return object;
+	}
+
+	private static function __resolveReferenceValue(swfData:SWFRoot, cls:ClassDef, name:IName):Dynamic
+	{
+		var property = swfData.abcData.resolveMultiNameByIndex(name);
+		var fullName = AVM2.getFullName(swfData.abcData, property, cls);
+		return switch (fullName)
+		{
+			case "Object": OBJECT_CTOR_MARKER;
+			case "Array": ARRAY_CTOR_MARKER;
+			case "int": INT_CTOR_MARKER;
+			default: fullName;
+		}
+	}
+
+	private static function __constructValue(target:Dynamic, args:Array<Dynamic>):Dynamic
+	{
+		if (target == OBJECT_CTOR_MARKER)
+		{
+			return args.length == 0 ? {} : UNSUPPORTED_VALUE_MARKER;
+		}
+
+		if (target == ARRAY_CTOR_MARKER)
+		{
+			return args.length == 0 ? [] : (args.length == 1 && Std.isOfType(args[0], Int) ? [for (_ in 0...cast(args[0], Int)) null] : args);
+		}
+
+		if (target == INT_CTOR_MARKER)
+		{
+			if (args.length == 0) return 0;
+			return __toIntValue(args[0]);
+		}
+
+		return UNSUPPORTED_VALUE_MARKER;
+	}
+
+	private static function __callValue(target:Dynamic, property:Dynamic, args:Array<Dynamic>):Dynamic
+	{
+		if (property == ARRAY_CTOR_MARKER || target == ARRAY_CTOR_MARKER || property == "Array")
+		{
+			return args.copy();
+		}
+
+		if (property == INT_CTOR_MARKER || target == INT_CTOR_MARKER || property == "int")
+		{
+			if (args.length == 0) return 0;
+			return __toIntValue(args[0]);
+		}
+
+		return UNSUPPORTED_VALUE_MARKER;
+	}
+
+	private static function __resolvePropertyKey(stack:Array<Dynamic>, property:MultiName):Dynamic
+	{
+		if (property == null)
+		{
+			return null;
+		}
+
+		if (property.name != null)
+		{
+			return property.name;
+		}
+
+		return __popStackValue(stack);
+	}
+
+	private static function __readPropertyValue(target:Dynamic, key:Dynamic, rootProperties:Dynamic):Dynamic
+	{
+		if (target == CONSTRUCTOR_THIS_MARKER)
+		{
+			return __readDynamicProperty(rootProperties, key);
+		}
+
+		if (target == UNSUPPORTED_VALUE_MARKER)
+		{
+			return UNSUPPORTED_VALUE_MARKER;
+		}
+
+		return __readDynamicProperty(target, key);
+	}
+
+	private static function __assignPropertyValue(target:Dynamic, key:Dynamic, value:Dynamic, rootProperties:Dynamic):Bool
+	{
+		if (key == null || !__isSerializableValue(value))
+		{
+			return false;
+		}
+
+		if (target == CONSTRUCTOR_THIS_MARKER)
+		{
+			__writeDynamicProperty(rootProperties, key, __cloneSerializableValue(value));
+			return true;
+		}
+
+		if (target == UNSUPPORTED_VALUE_MARKER)
+		{
+			return false;
+		}
+
+		return __writeDynamicProperty(target, key, value);
+	}
+
+	private static function __readDynamicProperty(target:Dynamic, key:Dynamic):Dynamic
+	{
+		var index = __dynamicIndex(key);
+		if (index != null && Std.isOfType(target, Array))
+		{
+			var values:Array<Dynamic> = cast target;
+			return index >= 0 && index < values.length ? values[index] : UNSUPPORTED_VALUE_MARKER;
+		}
+
+		if (Std.isOfType(key, String) && target != null && !Std.isOfType(target, String) && !Std.isOfType(target, Bool)
+			&& !Std.isOfType(target, Int) && !Std.isOfType(target, Float))
+		{
+			return Reflect.field(target, cast key);
+		}
+
+		return UNSUPPORTED_VALUE_MARKER;
+	}
+
+	private static function __writeDynamicProperty(target:Dynamic, key:Dynamic, value:Dynamic):Bool
+	{
+		if (target == null)
+		{
+			return false;
+		}
+
+		var index = __dynamicIndex(key);
+		if (index != null && Std.isOfType(target, Array))
+		{
+			var values:Array<Dynamic> = cast target;
+			while (values.length <= index)
+			{
+				values.push(null);
+			}
+			values[index] = value;
+			return true;
+		}
+
+		if (Std.isOfType(key, String) && !Std.isOfType(target, String) && !Std.isOfType(target, Bool) && !Std.isOfType(target, Int)
+			&& !Std.isOfType(target, Float))
+		{
+			Reflect.setField(target, cast key, value);
+			return true;
+		}
+
+		return false;
+	}
+
+	private static function __dynamicIndex(value:Dynamic):Null<Int>
+	{
+		if (Std.isOfType(value, Int))
+		{
+			return cast value;
+		}
+
+		if (Std.isOfType(value, String))
+		{
+			var parsed = Std.parseInt(cast value);
+			if (parsed != null && Std.string(parsed) == value)
+			{
+				return parsed;
+			}
+		}
+
+		return null;
+	}
+
+	private static function __isSerializableValue(value:Dynamic):Bool
+	{
+		if (value == null || value == CONSTRUCTOR_THIS_MARKER || value == OBJECT_CTOR_MARKER || value == ARRAY_CTOR_MARKER
+			|| value == INT_CTOR_MARKER || value == UNSUPPORTED_VALUE_MARKER)
+		{
+			return value == null;
+		}
+
+		if (Std.isOfType(value, Bool) || Std.isOfType(value, String) || Std.isOfType(value, Int))
+		{
+			return true;
+		}
+
+		if (Std.isOfType(value, Float))
+		{
+			var floatValue:Float = cast value;
+			return !Math.isNaN(floatValue) && Math.isFinite(floatValue);
+		}
+
+		if (Std.isOfType(value, Array))
+		{
+			for (item in cast(value, Array<Dynamic>))
+			{
+				if (!__isSerializableValue(item))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		for (field in Reflect.fields(value))
+		{
+			if (!__isSerializableValue(Reflect.field(value, field)))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static function __cloneSerializableValue(value:Dynamic):Dynamic
+	{
+		if (value == null || Std.isOfType(value, Bool) || Std.isOfType(value, String) || Std.isOfType(value, Int) || Std.isOfType(value, Float))
+		{
+			return value;
+		}
+
+		if (Std.isOfType(value, Array))
+		{
+			var copy = [];
+			for (item in cast(value, Array<Dynamic>))
+			{
+				copy.push(__cloneSerializableValue(item));
+			}
+			return copy;
+		}
+
+		var clone:Dynamic = {};
+		for (field in Reflect.fields(value))
+		{
+			Reflect.setField(clone, field, __cloneSerializableValue(Reflect.field(value, field)));
+		}
+		return clone;
+	}
+
+	private static function __toIntValue(value:Dynamic):Int
+	{
+		if (Std.isOfType(value, Int))
+		{
+			return cast value;
+		}
+
+		if (Std.isOfType(value, Float))
+		{
+			return Std.int(cast value);
+		}
+
+		if (Std.isOfType(value, String))
+		{
+			var parsedFloat = Std.parseFloat(cast value);
+			return Math.isNaN(parsedFloat) ? 0 : Std.int(parsedFloat);
+		}
+
+		return 0;
 	}
 }
 

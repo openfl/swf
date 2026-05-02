@@ -113,6 +113,8 @@ class SpriteSymbol extends SWFSymbol
 		}
 		#end
 
+		__applyInstanceProperties(sprite);
+
 		return sprite;
 	}
 
@@ -127,6 +129,7 @@ class SpriteSymbol extends SWFSymbol
 	private override function __initObject(swf:SWFLite, instance:DisplayObject):Void
 	{
 		this.swf = swf;
+		__applyInstanceProperties(instance);
 		__constructor(cast instance);
 	}
 }

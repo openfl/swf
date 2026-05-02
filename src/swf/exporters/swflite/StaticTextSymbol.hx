@@ -114,6 +114,7 @@ class StaticTextSymbol extends SWFSymbol
 		rendered.text = text;
 		rendered.__graphics.copyFrom(staticText.__graphics);
 
+		__applyInstanceProperties(staticText);
 		return staticText;
 	}
 }

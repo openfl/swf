@@ -23,7 +23,9 @@ class BitmapSymbol extends SWFSymbol
 	private override function __createObject(swf:SWFLite):Bitmap
 	{
 		#if lime
-		return new Bitmap(BitmapData.fromImage(swf.library.getImage(path)), PixelSnapping.AUTO, smooth != false);
+		var bitmap = new Bitmap(BitmapData.fromImage(swf.library.getImage(path)), PixelSnapping.AUTO, smooth != false);
+		__applyInstanceProperties(bitmap);
+		return bitmap;
 		#else
 		return null;
 		#end

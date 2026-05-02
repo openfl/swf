@@ -114,6 +114,17 @@ class AnimateLibraryExporter
 		libraryData.uuid = uuid;
 		libraryData.frameRate = swfData.frameRate;
 		addSprite(swfData, true);
+		var rootClassName = FrameScriptParser.getRootClassName(swfData, [for (symbol in symbols) symbol.name]);
+		if (rootClassName != null)
+		{
+			libraryData.root.className = rootClassName;
+			libraryData.root.baseClassName = FrameScriptParser.getBaseClassName(swfData, rootClassName);
+			var rootInstanceProperties = FrameScriptParser.extractSerializableInstanceProperties(swfData, rootClassName);
+			if (rootInstanceProperties != null)
+			{
+				libraryData.root.instanceProperties = rootInstanceProperties;
+			}
+		}
 
 		for (symbol in symbols)
 		{
@@ -1317,7 +1328,7 @@ class AnimateLibraryExporter
 	{
 		var data2 = processTag(cast swfData.getCharacter(symbol.tagId));
 
-		if (data2 == null && ~/_fla\.MainTimeline$/.match(symbol.name))
+		if (data2 == null && (symbol.tagId == 0 || ~/_fla\.MainTimeline$/.match(symbol.name)))
 		{
 			data2 = libraryData.root;
 		}
@@ -1326,6 +1337,11 @@ class AnimateLibraryExporter
 		{
 			data2.className = symbol.name;
 			data2.baseClassName = FrameScriptParser.getBaseClassName(swfData, symbol.name);
+			var instanceProperties = FrameScriptParser.extractSerializableInstanceProperties(swfData, symbol.name);
+			if (instanceProperties != null)
+			{
+				data2.instanceProperties = instanceProperties;
+			}
 		}
 	}
 
