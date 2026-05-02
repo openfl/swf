@@ -234,6 +234,7 @@ class SymbolTimeline extends Timeline
 								// displayObject.stage = __movieClip.stage;
 
 								// if (__movieClip.stage != null) displayObject.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
+								displayObject.__removedChildCleanupDelay = Math.POSITIVE_INFINITY;
 
 								instance = new FrameSymbolInstance(frame, frameObject.id, frameObject.symbol, frameObject.depth, displayObject,
 									frameObject.clipDepth);

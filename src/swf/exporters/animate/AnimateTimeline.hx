@@ -398,6 +398,7 @@ class AnimateTimeline extends Timeline
 
 								// if (__sprite.stage != null) displayObject.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
 								#end
+								displayObject.__removedChildCleanupDelay = Math.POSITIVE_INFINITY;
 
 								instance = new FrameSymbolInstance(frame, frameObject.id, frameObject.symbol, frameObject.depth, displayObject,
 									frameObject.clipDepth);
