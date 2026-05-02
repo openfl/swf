@@ -20,6 +20,11 @@ import openfl.Assets;
 {
 	public static var instances:Map<String, SWFLite> = new Map();
 
+	private static var resolvedClasses:Map<String, Class<Dynamic>> = new Map();
+	private static var resolvedClassMisses:Map<String, Bool> = new Map();
+	private static var resolvedEnums:Map<String, Dynamic> = new Map();
+	private static var resolvedEnumMisses:Map<String, Bool> = new Map();
+
 	public var frameRate:Float;
 	public var library:SWFLiteLibrary;
 	public var root:SpriteSymbol;
@@ -85,6 +90,16 @@ import openfl.Assets;
 	@SuppressWarnings("checkstyle:Dynamic")
 	private static function resolveClass(name:String):Class<Dynamic>
 	{
+		if (resolvedClasses.exists(name))
+		{
+			return resolvedClasses.get(name);
+		}
+
+		if (resolvedClassMisses.exists(name))
+		{
+			return null;
+		}
+
 		var value = Type.resolveClass(name);
 
 		#if flash
@@ -98,12 +113,31 @@ import openfl.Assets;
 		if (value == null) value = Type.resolveClass(StringTools.replace(name, "openfl._v2", "openfl"));
 		#end
 
+		if (value != null)
+		{
+			resolvedClasses.set(name, value);
+		}
+		else
+		{
+			resolvedClassMisses.set(name, true);
+		}
+
 		return value;
 	}
 
 	@SuppressWarnings("checkstyle:Dynamic")
 	private static function resolveEnum(name:String):Enum<Dynamic>
 	{
+		if (resolvedEnums.exists(name))
+		{
+			return cast resolvedEnums.get(name);
+		}
+
+		if (resolvedEnumMisses.exists(name))
+		{
+			return null;
+		}
+
 		var value = Type.resolveEnum(name);
 
 		#if flash
@@ -120,6 +154,15 @@ import openfl.Assets;
 		if (value == null) value = Type.resolveEnum(StringTools.replace(name, "openfl._legacy", "openfl"));
 		if (value == null) value = Type.resolveEnum(StringTools.replace(name, "openfl._v2", "openfl"));
 		#end
+
+		if (value != null)
+		{
+			resolvedEnums.set(name, value);
+		}
+		else
+		{
+			resolvedEnumMisses.set(name, true);
+		}
 
 		return value;
 	}

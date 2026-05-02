@@ -20,6 +20,10 @@ class SpriteSymbol extends SWFSymbol
 	public var scale9Grid:Rectangle;
 
 	private var swf:SWFLite;
+	private var resolvedBaseSymbolType:Class<Dynamic>;
+	private var resolvedBaseSymbolTypeReady = false;
+	private var resolvedSymbolType:Class<Dynamic>;
+	private var resolvedSymbolTypeReady = false;
 
 	public function new()
 	{
@@ -54,42 +58,7 @@ class SpriteSymbol extends SWFSymbol
 		Sprite.__constructor = __constructor;
 		#end
 		this.swf = swf;
-
-		#if flash
-		if (className == "flash.display.MovieClip")
-		{
-			className = "flash.display.MovieClip2";
-		}
-		#end
-
-		var symbolType = null;
-
-		if (className != null)
-		{
-			symbolType = Type.resolveClass(className);
-
-			if (symbolType == null)
-			{
-				// Log.warn ("Could not resolve class \"" + className + "\"");
-			}
-		}
-
-		if (symbolType == null && baseClassName != null)
-		{
-			#if flash
-			if (baseClassName == "flash.display.MovieClip")
-			{
-				baseClassName = "flash.display.MovieClip2";
-			}
-			#end
-
-			symbolType = Type.resolveClass(baseClassName);
-
-			if (symbolType == null)
-			{
-				// Log.warn ("Could not resolve class \"" + className + "\"");
-			}
-		}
+		var symbolType = __resolveSymbolType();
 
 		var sprite:Sprite = null;
 
@@ -128,5 +97,59 @@ class SpriteSymbol extends SWFSymbol
 	{
 		this.swf = swf;
 		__constructor(cast instance);
+	}
+
+	private function __resolveSymbolType():Class<Dynamic>
+	{
+		var symbolType = __resolveClassName(className, false);
+
+		if (symbolType == null)
+		{
+			symbolType = __resolveClassName(baseClassName, true);
+		}
+
+		return symbolType;
+	}
+
+	private function __resolveClassName(name:String, useBaseClass:Bool):Class<Dynamic>
+	{
+		if (name == null)
+		{
+			return null;
+		}
+
+		if (useBaseClass)
+		{
+			if (resolvedBaseSymbolTypeReady)
+			{
+				return resolvedBaseSymbolType;
+			}
+		}
+		else if (resolvedSymbolTypeReady)
+		{
+			return resolvedSymbolType;
+		}
+
+		#if flash
+		if (name == "flash.display.MovieClip")
+		{
+			name = "flash.display.MovieClip2";
+		}
+		#end
+
+		var symbolType = Type.resolveClass(name);
+
+		if (useBaseClass)
+		{
+			resolvedBaseSymbolType = symbolType;
+			resolvedBaseSymbolTypeReady = true;
+		}
+		else
+		{
+			resolvedSymbolType = symbolType;
+			resolvedSymbolTypeReady = true;
+		}
+
+		return symbolType;
 	}
 }

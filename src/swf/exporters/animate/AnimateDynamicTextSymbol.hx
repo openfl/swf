@@ -15,6 +15,10 @@ import openfl.text.TextFormatAlign;
 @:access(openfl.text.TextFormat)
 class AnimateDynamicTextSymbol extends AnimateSymbol
 {
+	private static var cachedFontCount = -1;
+	private static var cachedFontNames:Array<String>;
+	private static var resolvedFontNames:Map<String, String> = new Map();
+
 	public var align: /*TextFormatAlign*/ String;
 	public var border:Bool;
 	public var color:Null<Int>;
@@ -98,39 +102,12 @@ class AnimateDynamicTextSymbol extends AnimateSymbol
 		}
 
 		format.font = fontName;
+		var resolvedFontName = resolveFontName(format.font);
+		var found = resolvedFontName != null;
 
-		var found = false;
-
-		switch (format.font)
+		if (found && resolvedFontName != format.font)
 		{
-			case "_sans", "_serif", "_typewriter", "", null:
-				found = true;
-
-			default:
-				for (font in Font.enumerateFonts())
-				{
-					if (font.fontName == format.font)
-					{
-						found = true;
-						break;
-					}
-				}
-		}
-
-		if (!found)
-		{
-			var alpha = ~/[^a-zA-Z]+/g;
-			var spaces = ~/\s/g;
-
-			for (font in Font.enumerateFonts())
-			{
-				if (alpha.replace(font.fontName, "").substr(0, fontName.length) == spaces.replace(fontName, ""))
-				{
-					format.font = font.fontName;
-					found = true;
-					break;
-				}
-			}
+			format.font = resolvedFontName;
 		}
 
 		if (found)
@@ -173,5 +150,71 @@ class AnimateDynamicTextSymbol extends AnimateSymbol
 
 		// textField.autoSize = (tag.autoSize) ? TextFieldAutoSize.LEFT : TextFieldAutoSize.NONE;
 		return textField;
+	}
+
+	private static function getCachedFontNames():Array<String>
+	{
+		var fonts = Font.enumerateFonts();
+
+		if (cachedFontNames == null || cachedFontCount != fonts.length)
+		{
+			cachedFontCount = fonts.length;
+			cachedFontNames = [];
+			resolvedFontNames = new Map();
+
+			for (font in fonts)
+			{
+				cachedFontNames.push(font.fontName);
+			}
+		}
+
+		return cachedFontNames;
+	}
+
+	private static function resolveFontName(name:String):String
+	{
+		switch (name)
+		{
+			case "_sans", "_serif", "_typewriter", "", null:
+				return name;
+			default:
+		}
+
+		if (resolvedFontNames.exists(name))
+		{
+			return resolvedFontNames.get(name);
+		}
+
+		var fontNames = getCachedFontNames();
+
+		for (fontName in fontNames)
+		{
+			if (fontName == name)
+			{
+				resolvedFontNames.set(name, fontName);
+				return fontName;
+			}
+		}
+
+		var normalizedName = normalizeFontName(name);
+
+		for (fontName in fontNames)
+		{
+			if (normalizeFontName(fontName).substr(0, normalizedName.length) == normalizedName)
+			{
+				resolvedFontNames.set(name, fontName);
+				return fontName;
+			}
+		}
+
+		resolvedFontNames.set(name, null);
+		return null;
+	}
+
+	private static function normalizeFontName(name:String):String
+	{
+		var alpha = ~/[^a-zA-Z]+/g;
+		var spaces = ~/\s/g;
+		return spaces.replace(alpha.replace(name, ""), "");
 	}
 }

@@ -17,6 +17,8 @@ class ButtonSymbol extends SWFSymbol
 	public var upState:SpriteSymbol;
 
 	private var swf:SWFLite;
+	private var resolvedSymbolType:Class<Dynamic>;
+	private var resolvedSymbolTypeReady = false;
 
 	public function new()
 	{
@@ -53,26 +55,11 @@ class ButtonSymbol extends SWFSymbol
 		SimpleButton.__constructor = __constructor;
 		#end
 		this.swf = swf;
+		var symbolType = __resolveSymbolType();
 
-		#if flash
-		if (className == "flash.display.SimpleButton")
+		if (symbolType != null)
 		{
-			className = "flash.display.SimpleButton2";
-		}
-		#end
-
-		if (className != null)
-		{
-			var symbolType = Type.resolveClass(className);
-
-			if (symbolType != null)
-			{
-				simpleButton = Type.createInstance(symbolType, []);
-			}
-			else
-			{
-				// Log.warn ("Could not resolve class \"" + symbol.className + "\"");
-			}
+			simpleButton = Type.createInstance(symbolType, []);
 		}
 
 		if (simpleButton == null)
@@ -102,5 +89,31 @@ class ButtonSymbol extends SWFSymbol
 	{
 		this.swf = swf;
 		__constructor(cast instance);
+	}
+
+	private function __resolveSymbolType():Class<Dynamic>
+	{
+		if (className == null)
+		{
+			return null;
+		}
+
+		if (resolvedSymbolTypeReady)
+		{
+			return resolvedSymbolType;
+		}
+
+		var resolvedClassName = className;
+
+		#if flash
+		if (resolvedClassName == "flash.display.SimpleButton")
+		{
+			resolvedClassName = "flash.display.SimpleButton2";
+		}
+		#end
+
+		resolvedSymbolType = Type.resolveClass(resolvedClassName);
+		resolvedSymbolTypeReady = true;
+		return resolvedSymbolType;
 	}
 }
