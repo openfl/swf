@@ -12,6 +12,7 @@ import swf.events.SWFProgressEvent;
 import openfl.utils.ByteArray;
 import openfl.utils.CompressionAlgorithm;
 import openfl.errors.Error;
+import swf.tags.TagExportAssets;
 import swf.tags.TagSymbolClass;
 
 class SWFRoot extends SWFTimelineContainer
@@ -58,6 +59,13 @@ class SWFRoot extends SWFTimelineContainer
 			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
 			{
 				for (symbol in cast(tag, TagSymbolClass).symbols)
+				{
+					symbols.set(symbol.name, symbol.tagId);
+				}
+			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
+			{
+				for (symbol in cast(tag, TagExportAssets).symbols)
 				{
 					symbols.set(symbol.name, symbol.tagId);
 				}

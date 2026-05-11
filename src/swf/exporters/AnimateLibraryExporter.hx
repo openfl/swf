@@ -26,6 +26,7 @@ import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSound;
 import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
+import swf.tags.TagExportAssets;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
 import swf.timeline.Frame;
@@ -84,6 +85,14 @@ class AnimateLibraryExporter
 			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
 			{
 				for (symbol in cast(tag, TagSymbolClass).symbols)
+				{
+					symbols.push(symbol);
+					symbolsByTagID.set(symbol.tagId, symbol);
+				}
+			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
+			{
+				for (symbol in cast(tag, TagExportAssets).symbols)
 				{
 					symbols.push(symbol);
 					symbolsByTagID.set(symbol.tagId, symbol);
@@ -179,6 +188,7 @@ class AnimateLibraryExporter
 		var outputFile = File.write(targetPath, true);
 		var writer = new ZipWriter(outputFile);
 		writer.write(outputList);
+		outputFile.close();
 	}
 
 	private function addButton(tag:IDefinitionTag):Dynamic
@@ -804,9 +814,6 @@ class AnimateLibraryExporter
 		{
 			symbol.scale9Grid = serializeRect(scalingGrid.splitter.rect);
 		}
-
-		var scripts = null;
-		var found = false;
 
 		var swfSymbol = symbolsByTagID.get(symbol.id);
 		if (swfSymbol != null)

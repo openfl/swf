@@ -15,6 +15,9 @@ import openfl.utils.AssetType;
 import openfl.utils.ByteArray;
 import openfl.utils.Future;
 import openfl.utils.Promise;
+#if lime
+import lime.utils.AssetManifest;
+#end
 #if flash
 import flash.display.AVM1Movie;
 #end
@@ -30,12 +33,19 @@ import flash.display.AVM1Movie;
 	private var context:LoaderContext;
 	private var id:String;
 	private var loader:Loader;
+	private var rootPath:String;
 
 	public function new(id:String)
 	{
 		super();
 
 		this.id = id;
+
+		#if (ios || tvos)
+		rootPath = "assets/";
+		#else
+		rootPath = "";
+		#end
 	}
 
 	public override function exists(id:String, type:String):Bool
@@ -95,43 +105,61 @@ import flash.display.AVM1Movie;
 			bytes = cast(Type.createInstance(classTypes.get(id), []), ByteArray);
 		}
 
-		if (bytes != null || paths.exists(id))
+		var path:String;
+
+		if (paths.exists(id))
 		{
-			context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
-			context.allowCodeImport = true;
-
-			loader = new Loader();
-			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(event)
-			{
-				promise.error(event.text);
-			});
-			loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, function(event)
-			{
-				promise.progress(Std.int(event.bytesLoaded), Std.int(event.bytesTotal));
-			});
-			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
-			{
-				applicationDomain = loader.contentLoaderInfo.applicationDomain;
-				promise.complete(this);
-			});
-
-			if (bytes != null)
-			{
-				loader.loadBytes(bytes, context);
-			}
-			else
-			{
-				loader.load(new URLRequest(paths.get(id)), context);
-			}
+			path = paths.get(id);
 		}
 		else
 		{
-			// Assume it's been included using -swf-lib, binary embeds don't appear to work
+			path = (rootPath != null && rootPath != "") ? rootPath + "/" + id : id;
+		}
 
-			applicationDomain = ApplicationDomain.currentDomain;
+		context = new LoaderContext(false, ApplicationDomain.currentDomain, null);
+		context.allowCodeImport = true;
+
+		loader = new Loader();
+		loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, function(event)
+		{
+			if (bytes != null || paths.exists(id))
+			{
+				promise.error(event.text);
+			}
+			else
+			{
+				// Assume it's been included using -swf-lib, binary embeds don't appear to work
+				applicationDomain = ApplicationDomain.currentDomain;
+				promise.complete(this);
+			}
+		});
+		loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, function(event)
+		{
+			promise.progress(Std.int(event.bytesLoaded), Std.int(event.bytesTotal));
+		});
+		loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function(_)
+		{
+			applicationDomain = loader.contentLoaderInfo.applicationDomain;
 			promise.complete(this);
+		});
+
+		if (bytes != null)
+		{
+			loader.loadBytes(bytes, context);
+		}
+		else
+		{
+			loader.load(new URLRequest(path), context);
 		}
 
 		return promise.future;
 	}
+
+	#if lime
+	private override function __fromManifest(manifest:AssetManifest):Void
+	{
+		rootPath = manifest.rootPath;
+		super.__fromManifest(manifest);
+	}
+	#end
 }

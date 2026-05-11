@@ -769,7 +769,7 @@ import openfl.filters.GlowFilter;
 				for (objectData in objects)
 				{
 					object = new AnimateFrameObject();
-					object.blendMode = Std.string(objectData.blendMode);
+					object.blendMode = objectData.blendMode != null ? Std.string(objectData.blendMode) : null;
 					object.cacheAsBitmap = objectData.cacheAsBitmap;
 					object.clipDepth = objectData.clipDepth;
 					object.colorTransform = objectData.colorTransform != null ? new ColorTransform(__pixel(objectData.colorTransform[0]),

@@ -45,6 +45,7 @@ import swf.tags.TagDefineScalingGrid;
 import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSprite;
 import swf.tags.TagDefineText;
+import swf.tags.TagExportAssets;
 import swf.tags.TagPlaceObject;
 import swf.tags.TagSymbolClass;
 import swf.SWFRoot;
@@ -97,6 +98,14 @@ class SWFLiteExporter
 			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagSymbolClass))
 			{
 				for (symbol in cast(tag, TagSymbolClass).symbols)
+				{
+					processSymbol(symbol);
+					symbolsByTagID.set(symbol.tagId, symbol);
+				}
+			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagExportAssets))
+			{
+				for (symbol in cast(tag, TagExportAssets).symbols)
 				{
 					processSymbol(symbol);
 					symbolsByTagID.set(symbol.tagId, symbol);
@@ -644,7 +653,6 @@ class SWFLiteExporter
 			symbol.scale9Grid = scalingGrid.splitter.rect;
 		}
 
-		var scripts = null;
 		var swfSymbol = symbolsByTagID.get(symbol.id);
 		if (swfSymbol != null)
 		{
