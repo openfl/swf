@@ -1133,16 +1133,16 @@ class AnimateLibraryExporter
 		return;
 	}
 
-	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = ""):Array<String>
+	public function generateClasses(targetPath:String, output:Array<Asset>, language:String = "haxe", prefix:String = ""):Array<String>
 	{
 		#if commonjs
-		var bitmapDataTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/animate/BitmapData.mtt"));
-		var movieClipTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/animate/MovieClip.mtt"));
-		var simpleButtonTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/animate/SimpleButton.mtt"));
+		var bitmapDataTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/" + language + "/BitmapData.mtt"));
+		var movieClipTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/" + language + "/MovieClip.mtt"));
+		var simpleButtonTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/" + language + "/SimpleButton.mtt"));
 		#else
-		var bitmapDataTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/animate/BitmapData.mtt");
-		var movieClipTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/animate/MovieClip.mtt");
-		var simpleButtonTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/animate/SimpleButton.mtt");
+		var bitmapDataTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/" + language + "/BitmapData.mtt");
+		var movieClipTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/" + language + "/MovieClip.mtt");
+		var simpleButtonTemplate = File.getContent(Haxelib.getPath(new Haxelib("swf"), true) + "/templates/" + language + "/SimpleButton.mtt");
 		#end
 
 		var generatedClasses = [];
@@ -1298,9 +1298,13 @@ class AnimateLibraryExporter
 					context.BASE_CLASS_NAME = baseClassName;
 				}
 
+				var languageExtension:String = ".hx";
+				if(language == "es5" || language == "es6") languageExtension = ".js";
+				if(language == "as3") languageExtension = ".as";
+
 				var template = new Template(templateData);
 
-				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(className.split(".").join("/"))), name + ".hx"),
+				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(className.split(".").join("/"))), name + languageExtension),
 					cast AssetType.TEMPLATE);
 				templateFile.embed = false;
 				templateFile.data = template.execute(context);
