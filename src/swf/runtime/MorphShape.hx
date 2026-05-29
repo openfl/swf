@@ -70,6 +70,9 @@ class MorphShape extends openfl.display.Shape
 					}
 
 				case LineGradientStyle(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					#if flash
+					var colors:Array<UInt> = cast colors;
+					#end
 					graphics.lineGradientStyle(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
 
 				case LineTo(x, y):
