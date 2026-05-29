@@ -69,6 +69,9 @@ class MorphShape extends openfl.display.Shape
 						graphics.lineStyle();
 					}
 
+				case LineGradientStyle(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					graphics.lineGradientStyle(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio);
+
 				case LineTo(x, y):
 					graphics.lineTo(x, y);
 
