@@ -613,6 +613,19 @@ class AnimateLibraryExporter
 							]);
 						}
 
+					case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+						commands = commands.concat([
+							SWFShapeCommandType.LINE_GRADIENT_STYLE,
+							type,
+							colors,
+							alphas,
+							ratios,
+							serializeMatrix(matrix),
+							spreadMethod,
+							interpolationMethod,
+							focalPointRatio
+						]);
+
 					case BeginFill(color, alpha):
 						commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
 
@@ -991,6 +1004,19 @@ class AnimateLibraryExporter
 											miterLimit
 										]);
 									}
+
+								case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+									commands = commands.concat([
+										SWFShapeCommandType.LINE_GRADIENT_STYLE,
+										type,
+										colors,
+										alphas,
+										ratios,
+										serializeMatrix(matrix),
+										spreadMethod,
+										interpolationMethod,
+										focalPointRatio
+									]);
 
 								case BeginFill(color, alpha):
 									commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
@@ -1541,6 +1567,7 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFShapeCommandType(Int) from I
 	public var LINE_STYLE = 6;
 	public var LINE_TO = 7;
 	public var MOVE_TO = 8;
+	public var LINE_GRADIENT_STYLE = 9;
 }
 
 #if (haxe_ver < 4.0) @:enum #end
