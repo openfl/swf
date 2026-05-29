@@ -25,6 +25,8 @@ enum ShapeCommand
 	EndFill;
 	LineStyle(thickness:Null<Float>, color:Null<Int>, alpha:Null<Float>, pixelHinting:Null<Bool>, scaleMode:LineScaleMode, caps:CapsStyle, joints:JointStyle,
 		miterLimit:Null<Float>);
+	LineGradientStyle(fillType:GradientType, colors:Array<Int>, alphas:Array<Float>, ratios:Array<Int>, matrix:Matrix, spreadMethod:SpreadMethod,
+		interpolationMethod:InterpolationMethod, focalPointRatio:Float);
 	LineTo(x:Float, y:Float);
 	MoveTo(x:Float, y:Float);
 }

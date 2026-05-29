@@ -662,6 +662,10 @@ import openfl.filters.GlowFilter;
 								commands.push(LineStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7],
 									data[i + 8]));
 								i += 9;
+							case LINE_GRADIENT_STYLE:
+								commands.push(LineGradientStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], __parseMatrix(data[i + 5]), data[i + 6],
+									data[i + 7], data[i + 8]));
+								i += 9;
 							case LINE_TO:
 								commands.push(LineTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
 								i += 3;
@@ -718,6 +722,10 @@ import openfl.filters.GlowFilter;
 					i++;
 				case LINE_STYLE:
 					commands.push(LineStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7], data[i + 8]));
+					i += 9;
+				case LINE_GRADIENT_STYLE:
+					commands.push(LineGradientStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], __parseMatrix(data[i + 5]), data[i + 6],
+						data[i + 7], data[i + 8]));
 					i += 9;
 				case LINE_TO:
 					commands.push(LineTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
@@ -819,6 +827,7 @@ import openfl.filters.GlowFilter;
 	public var LINE_STYLE = 6;
 	public var LINE_TO = 7;
 	public var MOVE_TO = 8;
+	public var LINE_GRADIENT_STYLE = 9;
 }
 
 #if (haxe_ver >= 4.0) enum #else @:enum #end abstract SWFSymbolType(Int) from Int to Int
