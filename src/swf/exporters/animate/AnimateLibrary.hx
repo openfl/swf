@@ -687,48 +687,7 @@ import openfl.filters.GlowFilter;
 	{
 		var symbol = new AnimateShapeSymbol();
 		symbol.id = data.id;
-		symbol.commands = [];
-
-		var data:Array<Dynamic> = data.commands;
-		var commands = symbol.commands;
-		var i = 0;
-
-		while (i < data.length)
-		{
-			switch (data[i])
-			{
-				case BEGIN_BITMAP_FILL:
-					commands.push(BeginBitmapFill(data[i + 1], __parseMatrix(data[i + 2]), data[i + 3], data[i + 4]));
-					i += 5;
-				case BEGIN_FILL:
-					commands.push(BeginFill(data[i + 1], data[i + 2]));
-					i += 3;
-				case BEGIN_GRADIENT_FILL:
-					commands.push(BeginGradientFill(data[i + 1], data[i + 2], data[i + 3], data[i + 4], __parseMatrix(data[i + 5]), data[i + 6], data[i + 7],
-						data[i + 8]));
-					i += 9;
-				case CLEAR_LINE_STYLE:
-					commands.push(LineStyle(null, null, null, null, null, null, null, null));
-					i++;
-				case CURVE_TO:
-					commands.push(CurveTo(__pixel(data[i + 1]), __pixel(data[i + 2]), __pixel(data[i + 3]), __pixel(data[i + 4])));
-					i += 5;
-				case END_FILL:
-					commands.push(EndFill);
-					i++;
-				case LINE_STYLE:
-					commands.push(LineStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7], data[i + 8]));
-					i += 9;
-				case LINE_TO:
-					commands.push(LineTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
-					i += 3;
-				case MOVE_TO:
-					commands.push(MoveTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
-					i += 3;
-				default:
-					i++;
-			}
-		}
+		symbol.__setCompactCommands(data.commands);
 		return symbol;
 	}
 
