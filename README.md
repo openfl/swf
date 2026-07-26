@@ -23,6 +23,22 @@ There are three primary code paths within the library:
 
 This library can be called automatically by the OpenFL/Lime command-line tools to process `<library />` tags, or it can be used on the command-line to process SWF files into Animate ZIP files.
 
+Hardware-only Animate bitmap cache
+==================================
+
+Native hardware-rendered projects may define `swf_hardware_bitmap_cache` to
+share each Animate bitmap asset between bitmap instances. After its texture is
+uploaded, the decoded CPU image is released. Bitmap-filled shapes are probed
+against OpenFL's hardware graphics compatibility rules. Hardware-compatible
+shapes use the same cache, while shapes that fall back to software rendering
+keep one shared readable `BitmapData`. Shapes used directly by scale9 grids are
+also kept readable.
+
+This mode is opt-in because cached bitmap assets used by direct `Bitmap`
+instances become non-readable. Pixel read/write APIs and software-renderer
+fallback are not supported for those bitmaps, and their textures cannot be
+restored after a graphics context is lost.
+
 
 Usage
 =====

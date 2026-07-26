@@ -125,6 +125,7 @@ jobs:
         working-directory: tests
         run: |
           haxelib run openfl test neko
+          haxelib run openfl test neko -D swf_hardware_bitmap_cache
 
   unit-test-hashlink:
     strategy:

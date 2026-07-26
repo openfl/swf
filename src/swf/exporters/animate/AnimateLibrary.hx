@@ -5,6 +5,7 @@ import lime.graphics.Image;
 import lime.graphics.ImageChannel;
 import lime.math.Vector2;
 import swf.exporters.core.FilterType;
+import openfl.display.BitmapData;
 import openfl.display.MovieClip;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -59,6 +60,10 @@ import openfl.filters.GlowFilter;
 	private var bitmapClassNames:Map<String, String>;
 	private var bitmapSymbols:Array<AnimateBitmapSymbol>;
 	private var frameRate:Float;
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	private var hardwareBitmapData:Map<String, BitmapData>;
+	private var readableShapeBitmapData:Map<String, BitmapData>;
+	#end
 	private var id:String;
 	private var instanceID:String;
 	private var preloading:Bool;
@@ -79,6 +84,10 @@ import openfl.filters.GlowFilter;
 
 		alphaCheck = new Map();
 		bitmapClassNames = new Map();
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 
 		#if (ios || tvos)
 		rootPath = "assets/";
@@ -141,6 +150,111 @@ import openfl.filters.GlowFilter;
 	{
 		return instances.get(uuid);
 	}
+
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	@:allow(swf.exporters.animate.AnimateBitmapSymbol)
+	private function __getHardwareBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		var bitmapData = hardwareBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				bitmapData.disposeImage();
+				hardwareBitmapData.set(key, bitmapData);
+
+				if (symbol.path != null)
+				{
+					cachedImages.remove(symbol.path);
+					alphaCheck.remove(symbol.path);
+				}
+
+				if (symbol.alpha != null)
+				{
+					cachedImages.remove(symbol.alpha);
+				}
+			}
+		}
+
+		return bitmapData;
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __getReadableShapeBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		var bitmapData = readableShapeBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				readableShapeBitmapData.set(key, bitmapData);
+			}
+		}
+
+		return bitmapData;
+	}
+
+	private function __getBitmapDataKey(symbol:AnimateBitmapSymbol):String
+	{
+		return symbol.path != null
+			? "path:" + symbol.path + "|alpha:" + (symbol.alpha != null ? symbol.alpha : "")
+			: "symbol:" + symbol.id;
+	}
+
+	private function __markScale9GridShapesReadable():Void
+	{
+		for (symbol in symbols)
+		{
+			var spriteSymbol:AnimateSpriteSymbol;
+			#if (haxe_ver >= 4.2)
+			if (!Std.isOfType(symbol, AnimateSpriteSymbol))
+			#else
+			if (!Std.is(symbol, AnimateSpriteSymbol))
+			#end
+			{
+				continue;
+			}
+			else
+			{
+				spriteSymbol = cast symbol;
+			}
+
+			if (spriteSymbol.scale9Grid == null)
+			{
+				continue;
+			}
+
+			for (frame in spriteSymbol.frames)
+			{
+				if (frame.objects == null)
+				{
+					continue;
+				}
+
+				for (frameObject in frame.objects)
+				{
+					var childSymbol = symbols.get(frameObject.symbol);
+					#if (haxe_ver >= 4.2)
+					if (Std.isOfType(childSymbol, AnimateShapeSymbol))
+					#else
+					if (Std.is(childSymbol, AnimateShapeSymbol))
+					#end
+					{
+						cast(childSymbol, AnimateShapeSymbol).requiresReadableBitmapData = true;
+					}
+				}
+			}
+		}
+	}
+	#end
 
 	#if lime
 	public override function getImage(id:String):Image
@@ -306,6 +420,10 @@ import openfl.filters.GlowFilter;
 				}
 			}
 
+			#if (lime && !flash && swf_hardware_bitmap_cache)
+			__markScale9GridShapesReadable();
+			#end
+
 			// SWFLite.instances.set(instanceID, swf);
 
 			__load().onProgress(promise.progress).onError(promise.error).onComplete(function(_)
@@ -448,6 +566,10 @@ import openfl.filters.GlowFilter;
 	public override function unload():Void
 	{
 		instances.remove(uuid);
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 		if (symbols == null) return;
 		// if (swf == null) return;
 

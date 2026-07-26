@@ -9,6 +9,7 @@ class TestMain extends Sprite
 		super();
 
 		var runner = new Runner();
+		runner.addCase(new tests.AnimateBitmapSymbolTest());
 		runner.addCase(new tests.ShapesTest());
 
 		Report.create(runner);
