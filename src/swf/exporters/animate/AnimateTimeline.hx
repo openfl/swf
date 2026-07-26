@@ -18,6 +18,7 @@ import openfl.filters.DisplacementMapFilter;
 import openfl.filters.DropShadowFilter;
 import openfl.filters.GlowFilter;
 import openfl.geom.ColorTransform;
+import openfl.geom.Matrix;
 #if hscript
 import hscript.Interp;
 import hscript.Parser;
@@ -28,10 +29,13 @@ import hscript.Parser;
 @:noDebug
 #end
 @:access(swf.exporters.animate.AnimateLibrary)
+@:access(swf.exporters.animate.AnimateSpriteSymbol)
 @:access(swf.exporters.animate.AnimateSymbol)
+@:access(swf.exporters.animate.AnimateTimelineData)
 @:access(openfl.display.DisplayObject)
 @:access(openfl.display.MovieClip)
 @:access(openfl.geom.ColorTransform)
+@:access(openfl.geom.Transform)
 class AnimateTimeline extends Timeline
 {
 	#if 0
@@ -59,6 +63,7 @@ class AnimateTimeline extends Timeline
 	@:noCompletion private var __currentInstancesByFrameObjectID:Map<Int, FrameSymbolInstance>;
 	@:noCompletion private var __instanceFields:Array<String>;
 	@:noCompletion private var __lastUpdated:Map<DisplayObject, AnimateFrameObject>;
+	@:noCompletion private var __lastUpdatedCompact:Map<DisplayObject, Int>;
 	@:noCompletion private var __library:AnimateLibrary;
 	@:noCompletion private var __previousFrame:Int;
 	@:noCompletion private var __sprite:Sprite;
@@ -77,29 +82,34 @@ class AnimateTimeline extends Timeline
 
 		var frame:Int;
 		var frameData:AnimateFrame;
+		var frameCount = __symbol.compactTimeline != null ? __symbol.compactTimeline.frameCount : __symbol.frames.length;
+		var frameLabels:Array<String>;
+		var scriptSource:String;
 
 		#if hscript
 		var parser:Parser = null;
 		#end
 
-		for (i in 0...__symbol.frames.length)
+		for (i in 0...frameCount)
 		{
 			frame = i + 1;
-			frameData = __symbol.frames[i];
+			frameData = __symbol.compactTimeline == null ? __symbol.frames[i] : null;
+			frameLabels = frameData != null ? frameData.labels : __symbol.compactTimeline.getLabels(i);
+			scriptSource = frameData != null ? frameData.scriptSource : __symbol.compactTimeline.getScriptSource(i);
 
-			if (frameData.labels != null)
+			if (frameLabels != null)
 			{
-				for (label in frameData.labels)
+				for (label in frameLabels)
 				{
 					labels.push(new FrameLabel(label, frame));
 				}
 			}
 
-			if (frameData.script != null)
+			if (frameData != null && frameData.script != null)
 			{
 				scripts.push(new FrameScript(frameData.script, frame));
 			}
-			else if (frameData.scriptSource != null)
+			else if (scriptSource != null)
 			{
 				try
 				{
@@ -110,10 +120,10 @@ class AnimateTimeline extends Timeline
 						parser.allowTypes = true;
 					}
 
-					var script = __createScriptCallback(parser, frameData.scriptSource);
+					var script = __createScriptCallback(parser, scriptSource);
 					scripts.push(new FrameScript(script, frame));
 					#elseif js
-					var script = __createScriptCallback(frameData.scriptSource);
+					var script = __createScriptCallback(scriptSource);
 					scripts.push(new FrameScript(script, frame));
 					#end
 				}
@@ -122,17 +132,17 @@ class AnimateTimeline extends Timeline
 					if (__symbol.className != null)
 					{
 						Log.warn("Unable to evaluate frame script source for symbol \"" + __symbol.className + "\" frame " + frame + "\n"
-							+ frameData.scriptSource);
+							+ scriptSource);
 					}
 					else
 					{
-						Log.warn("Unable to evaluate frame script source:\n" + frameData.scriptSource);
+						Log.warn("Unable to evaluate frame script source:\n" + scriptSource);
 					}
 				}
 			}
 		}
 
-		scenes = [new Scene("", labels, __symbol.frames.length)];
+		scenes = [new Scene("", labels, frameCount)];
 	}
 
 	public override function attachMovieClip(movieClip:MovieClip):Void
@@ -142,6 +152,12 @@ class AnimateTimeline extends Timeline
 
 	public override function enterFrame(currentFrame:Int):Void
 	{
+		if (__symbol != null && __symbol.compactTimeline != null)
+		{
+			__enterCompactFrame(currentFrame);
+			return;
+		}
+
 		if (__symbol != null && currentFrame != __previousFrame)
 		{
 			var frame:Int;
@@ -222,107 +238,186 @@ class AnimateTimeline extends Timeline
 				}
 
 				currentInstances.sort(__sortDepths);
-
-				var existingChild:DisplayObject;
-				var targetDepth:Int;
-				var targetChild:DisplayObject;
-				var child:DisplayObject;
-				var maskApplied:Bool;
-
-				for (i in 0...currentInstances.length)
-				{
-					existingChild = (i < __sprite.numChildren) ? __sprite.getChildAt(i) : null;
-					instance = currentInstances[i];
-
-					targetDepth = instance.depth;
-					targetChild = instance.displayObject;
-
-					if (existingChild != targetChild)
-					{
-						__sprite.addChildAt(targetChild, i);
-					}
-
-					child = targetChild;
-					maskApplied = false;
-
-					for (mask in currentMasks)
-					{
-						if (targetDepth > mask.depth && targetDepth <= mask.clipDepth)
-						{
-							#if (openfl >= "9.5.0" && !flash)
-							child.clippingLayer = mask.displayObject;
-							#else
-							child.mask = mask.displayObject;
-							#end
-							maskApplied = true;
-							break;
-						}
-					}
-
-					if (currentMasks.length > 0 && !maskApplied && child.mask != null)
-					{
-						child.mask = null;
-					}
-				}
-
-				// TODO: How to tell if shapes are for a scale9Grid clip?
-				if (__sprite.scale9Grid != null)
-				{
-					__sprite.graphics.clear();
-					if (currentInstances.length > 0)
-					{
-						var displayObject = currentInstances[0].displayObject;
-						if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, Shape))
-						{
-							var shape:Shape = cast displayObject;
-							// for scale9Grid to work with the shape's graphics,
-							// we need to move them to the __sprite instead
-							// because scale9Grid does not apply to children
-							__sprite.graphics.copyFrom(shape.graphics);
-							__sprite.removeChild(displayObject);
-						}
-					}
-				}
-				else
-				{
-					var child:DisplayObject;
-					var i = currentInstances.length;
-					var length = __sprite.numChildren;
-
-					while (i < length)
-					{
-						child = __sprite.getChildAt(i);
-
-						// TODO: Faster method of determining if this was automatically added?
-
-						for (instance in __activeInstances)
-						{
-							if (instance.displayObject == child)
-							{
-								// set MovieClips back to initial state (autoplay)
-								if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (child, MovieClip))
-								{
-									var movie:MovieClip = cast child;
-									movie.gotoAndPlay(1);
-								}
-
-								__sprite.removeChild(child);
-								i--;
-								length--;
-							}
-						}
-
-						i++;
-					}
-				}
-
-				#if !openfljs
-				__updateInstanceFields();
-				#end
+				__applyCurrentInstances(currentInstances, currentMasks);
 			}
 
 			__previousFrame = currentFrame;
 		}
+	}
+
+	private function __enterCompactFrame(currentFrame:Int):Void
+	{
+		if (currentFrame == __previousFrame) return;
+
+		var timeline = __symbol.compactTimeline;
+		var data = timeline.objects;
+		var updateFrameStart = __previousFrame < currentFrame ? (__previousFrame == -1 ? 0 : __previousFrame) : 0;
+		var skipFrame = false;
+
+		if (currentFrame == 1 && __previousFrame > currentFrame && timeline.getFrameStart(0) != timeline.getFrameEnd(0))
+		{
+			skipFrame = true;
+			for (i in 1...timeline.frameCount)
+			{
+				if (timeline.getFrameStart(i) != timeline.getFrameEnd(i))
+				{
+					skipFrame = false;
+					break;
+				}
+			}
+		}
+
+		if (!skipFrame)
+		{
+			if (updateFrameStart <= 0)
+			{
+				__currentInstancesByFrameObjectID = new Map();
+			}
+
+			for (i in updateFrameStart...currentFrame)
+			{
+				var position = timeline.getFrameStart(i);
+				var end = timeline.getFrameEnd(i);
+
+				while (position < end)
+				{
+					var objectPosition = position;
+					var type:AnimateFrameObjectType = cast Std.int(data[position]);
+					var id = Std.int(data[position + 1]);
+					var instance = __activeInstancesByFrameObjectID.get(id);
+					position = timeline.getNextObjectPosition(position);
+
+					if (instance != null)
+					{
+						switch (type)
+						{
+							case CREATE:
+								__currentInstancesByFrameObjectID.set(id, instance);
+								__updateDisplayObjectCompact(instance.displayObject, objectPosition, true);
+
+							case UPDATE:
+								__updateDisplayObjectCompact(instance.displayObject, objectPosition);
+
+							case DESTROY:
+								__currentInstancesByFrameObjectID.remove(id);
+						}
+					}
+				}
+			}
+
+			var currentInstances = new Array<FrameSymbolInstance>();
+			var currentMasks = new Array<FrameSymbolInstance>();
+
+			for (instance in __currentInstancesByFrameObjectID)
+			{
+				if (currentInstances.indexOf(instance) == -1)
+				{
+					currentInstances.push(instance);
+					if (instance.clipDepth > 0)
+					{
+						currentMasks.push(instance);
+					}
+				}
+			}
+
+			currentInstances.sort(__sortDepths);
+			__applyCurrentInstances(currentInstances, currentMasks);
+		}
+
+		__previousFrame = currentFrame;
+	}
+
+	private function __applyCurrentInstances(currentInstances:Array<FrameSymbolInstance>, currentMasks:Array<FrameSymbolInstance>):Void
+	{
+		var child:DisplayObject;
+		var instance:FrameSymbolInstance;
+
+		for (i in 0...currentInstances.length)
+		{
+			var existingChild = (i < __sprite.numChildren) ? __sprite.getChildAt(i) : null;
+			instance = currentInstances[i];
+			var targetDepth = instance.depth;
+			var targetChild = instance.displayObject;
+
+			if (existingChild != targetChild)
+			{
+				__sprite.addChildAt(targetChild, i);
+			}
+
+			child = targetChild;
+			var maskApplied = false;
+
+			for (mask in currentMasks)
+			{
+				if (targetDepth > mask.depth && targetDepth <= mask.clipDepth)
+				{
+					#if (openfl >= "9.5.0" && !flash)
+					child.clippingLayer = mask.displayObject;
+					#else
+					child.mask = mask.displayObject;
+					#end
+					maskApplied = true;
+					break;
+				}
+			}
+
+			if (currentMasks.length > 0 && !maskApplied && child.mask != null)
+			{
+				child.mask = null;
+			}
+		}
+
+		// TODO: How to tell if shapes are for a scale9Grid clip?
+		if (__sprite.scale9Grid != null)
+		{
+			__sprite.graphics.clear();
+			if (currentInstances.length > 0)
+			{
+				var displayObject = currentInstances[0].displayObject;
+				if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, Shape))
+				{
+					var shape:Shape = cast displayObject;
+					// for scale9Grid to work with the shape's graphics,
+					// we need to move them to the __sprite instead
+					// because scale9Grid does not apply to children
+					__sprite.graphics.copyFrom(shape.graphics);
+					__sprite.removeChild(displayObject);
+				}
+			}
+		}
+		else
+		{
+			var i = currentInstances.length;
+			var length = __sprite.numChildren;
+
+			while (i < length)
+			{
+				child = __sprite.getChildAt(i);
+
+				// TODO: Faster method of determining if this was automatically added?
+				for (activeInstance in __activeInstances)
+				{
+					if (activeInstance.displayObject == child)
+					{
+						if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (child, MovieClip))
+						{
+							var movie:MovieClip = cast child;
+							movie.gotoAndPlay(1);
+						}
+
+						__sprite.removeChild(child);
+						i--;
+						length--;
+					}
+				}
+
+				i++;
+			}
+		}
+
+		#if !openfljs
+		__updateInstanceFields();
+		#end
 	}
 
 	private function init(sprite:Sprite):Void
@@ -330,89 +425,95 @@ class AnimateTimeline extends Timeline
 		if (__activeInstances != null) return;
 
 		__sprite = sprite;
-
 		__instanceFields = [];
 		__previousFrame = -1;
-
 		__activeInstances = [];
 		__activeInstancesByFrameObjectID = new Map();
 		__currentInstancesByFrameObjectID = new Map();
-		__lastUpdated = new Map();
 
-		var frame:Int;
-		var frameData:AnimateFrame;
-		var instance:FrameSymbolInstance;
-		var duplicate:Bool;
-		var symbol:AnimateSymbol;
-		var displayObject:DisplayObject;
-
-		// TODO: Create later?
-
-		for (i in 0...scenes[0].numFrames)
+		if (__symbol.compactTimeline != null)
 		{
-			frame = i + 1;
-			frameData = __symbol.frames[i];
+			__lastUpdatedCompact = new Map();
+			__initCompactInstances();
+		}
+		else
+		{
+			__lastUpdated = new Map();
 
-			if (frameData.objects == null) continue;
+			var frame:Int;
+			var frameData:AnimateFrame;
+			var instance:FrameSymbolInstance;
+			var duplicate:Bool;
+			var symbol:AnimateSymbol;
+			var displayObject:DisplayObject;
 
-			for (frameObject in frameData.objects)
+			// TODO: Create later?
+			for (i in 0...scenes[0].numFrames)
 			{
-				if (frameObject.type == AnimateFrameObjectType.CREATE)
+				frame = i + 1;
+				frameData = __symbol.frames[i];
+
+				if (frameData.objects == null) continue;
+
+				for (frameObject in frameData.objects)
 				{
-					if (__activeInstancesByFrameObjectID.exists(frameObject.id))
+					if (frameObject.type == AnimateFrameObjectType.CREATE)
 					{
-						continue;
-					}
-					else
-					{
-						instance = null;
-						duplicate = false;
-
-						for (activeInstance in __activeInstances)
+						if (__activeInstancesByFrameObjectID.exists(frameObject.id))
 						{
-							if (activeInstance.displayObject != null
-								&& activeInstance.characterID == frameObject.symbol
-								&& activeInstance.depth == frameObject.depth)
+							continue;
+						}
+						else
+						{
+							instance = null;
+							duplicate = false;
+
+							for (activeInstance in __activeInstances)
 							{
-								// TODO: Fix duplicates in exporter
-								instance = activeInstance;
-								duplicate = true;
-								break;
+								if (activeInstance.displayObject != null
+									&& activeInstance.characterID == frameObject.symbol
+									&& activeInstance.depth == frameObject.depth)
+								{
+									// TODO: Fix duplicates in exporter
+									instance = activeInstance;
+									duplicate = true;
+									break;
+								}
 							}
 						}
-					}
 
-					if (instance == null)
-					{
-						symbol = __library.symbols.get(frameObject.symbol);
-
-						if (symbol != null)
+						if (instance == null)
 						{
-							displayObject = symbol.__createObject(__library);
+							symbol = __library.symbols.get(frameObject.symbol);
 
-							if (displayObject != null)
+							if (symbol != null)
 							{
-								#if !flash
-								// displayObject.parent = __sprite;
-								// displayObject.stage = __sprite.stage;
+								displayObject = symbol.__createObject(__library);
 
-								// if (__sprite.stage != null) displayObject.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
-								#end
+								if (displayObject != null)
+								{
+									#if !flash
+									// displayObject.parent = __sprite;
+									// displayObject.stage = __sprite.stage;
 
-								instance = new FrameSymbolInstance(frame, frameObject.id, frameObject.symbol, frameObject.depth, displayObject,
-									frameObject.clipDepth);
+									// if (__sprite.stage != null) displayObject.dispatchEvent(new Event(Event.ADDED_TO_STAGE, false, false));
+									#end
+
+									instance = new FrameSymbolInstance(frame, frameObject.id, frameObject.symbol, frameObject.depth, displayObject,
+										frameObject.clipDepth);
+								}
 							}
 						}
-					}
 
-					if (instance != null)
-					{
-						__activeInstancesByFrameObjectID.set(frameObject.id, instance);
-
-						if (!duplicate)
+						if (instance != null)
 						{
-							__activeInstances.push(instance);
-							__updateDisplayObject(instance.displayObject, frameObject);
+							__activeInstancesByFrameObjectID.set(frameObject.id, instance);
+
+							if (!duplicate)
+							{
+								__activeInstances.push(instance);
+								__updateDisplayObject(instance.displayObject, frameObject);
+							}
 						}
 					}
 				}
@@ -426,6 +527,75 @@ class AnimateTimeline extends Timeline
 		enterFrame(1);
 	}
 
+	private function __initCompactInstances():Void
+	{
+		var timeline = __symbol.compactTimeline;
+		var data = timeline.objects;
+
+		for (i in 0...timeline.frameCount)
+		{
+			var frame = i + 1;
+			var position = timeline.getFrameStart(i);
+			var end = timeline.getFrameEnd(i);
+
+			while (position < end)
+			{
+				var objectPosition = position;
+				var type:AnimateFrameObjectType = cast Std.int(data[position]);
+				var id = Std.int(data[position + 1]);
+				var symbolID = Std.int(data[position + 2]);
+				var depth = Std.int(data[position + 3]);
+				var clipDepth = Std.int(data[position + 4]);
+				position = timeline.getNextObjectPosition(position);
+
+				if (type != AnimateFrameObjectType.CREATE || __activeInstancesByFrameObjectID.exists(id))
+				{
+					continue;
+				}
+
+				var instance:FrameSymbolInstance = null;
+				var duplicate = false;
+
+				for (activeInstance in __activeInstances)
+				{
+					if (activeInstance.displayObject != null
+						&& activeInstance.characterID == symbolID
+						&& activeInstance.depth == depth)
+					{
+						// TODO: Fix duplicates in exporter
+						instance = activeInstance;
+						duplicate = true;
+						break;
+					}
+				}
+
+				if (instance == null)
+				{
+					var symbol = __library.symbols.get(symbolID);
+					if (symbol != null)
+					{
+						var displayObject = symbol.__createObject(__library);
+						if (displayObject != null)
+						{
+							instance = new FrameSymbolInstance(frame, id, symbolID, depth, displayObject, clipDepth);
+						}
+					}
+				}
+
+				if (instance != null)
+				{
+					__activeInstancesByFrameObjectID.set(id, instance);
+
+					if (!duplicate)
+					{
+						__activeInstances.push(instance);
+						__updateDisplayObjectCompact(instance.displayObject, objectPosition);
+					}
+				}
+			}
+		}
+	}
+
 	public override function initializeSprite(sprite:Sprite):Void
 	{
 		if (__activeInstances != null) return;
@@ -437,6 +607,7 @@ class AnimateTimeline extends Timeline
 		__currentInstancesByFrameObjectID = null;
 		__instanceFields = null;
 		__lastUpdated = null;
+		__lastUpdatedCompact = null;
 		__sprite = null;
 		__previousFrame = -1;
 	}
@@ -528,6 +699,142 @@ class AnimateTimeline extends Timeline
 		#end
 
 		__lastUpdated.set(displayObject, frameObject);
+	}
+
+	@:noCompletion private function __updateDisplayObjectCompact(displayObject:DisplayObject, objectPosition:Int, reset:Bool = false):Void
+	{
+		if (displayObject == null) return;
+		if (__lastUpdatedCompact.get(displayObject) == objectPosition) return;
+
+		var timeline = __symbol.compactTimeline;
+		var data = timeline.objects;
+		var references = timeline.references;
+		var flags = Std.int(data[objectPosition + 5]);
+		var position = objectPosition + 6;
+
+		if ((flags & AnimateTimelineData.HAS_MATRIX) != 0)
+		{
+			#if flash
+			displayObject.transform.matrix = new Matrix(data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4] / 20,
+				data[position + 5] / 20);
+			#else
+			displayObject.transform.__setTransform(data[position], data[position + 1], data[position + 2], data[position + 3], data[position + 4] / 20,
+				data[position + 5] / 20);
+			#end
+			position += 6;
+		}
+
+		if ((flags & AnimateTimelineData.HAS_COLOR_TRANSFORM) != 0)
+		{
+			#if flash
+			displayObject.transform.colorTransform = new ColorTransform(data[position] / 20, data[position + 1] / 20, data[position + 2] / 20,
+				data[position + 3] / 20, data[position + 4] / 20, data[position + 5] / 20, data[position + 6] / 20, data[position + 7] / 20);
+			#else
+			var colorTransform = ColorTransform.__pool.get();
+			colorTransform.redMultiplier = data[position] / 20;
+			colorTransform.greenMultiplier = data[position + 1] / 20;
+			colorTransform.blueMultiplier = data[position + 2] / 20;
+			colorTransform.alphaMultiplier = data[position + 3] / 20;
+			colorTransform.redOffset = data[position + 4] / 20;
+			colorTransform.greenOffset = data[position + 5] / 20;
+			colorTransform.blueOffset = data[position + 6] / 20;
+			colorTransform.alphaOffset = data[position + 7] / 20;
+			displayObject.transform.colorTransform = colorTransform;
+			ColorTransform.__pool.release(colorTransform);
+			#end
+			position += 8;
+		}
+		else if (reset #if !flash && !displayObject.transform.colorTransform.__isDefault(false) #end)
+		{
+			#if flash
+			displayObject.transform.colorTransform = new ColorTransform();
+			#else
+			var colorTransform = ColorTransform.__pool.get();
+			displayObject.transform.colorTransform = colorTransform;
+			ColorTransform.__pool.release(colorTransform);
+			#end
+		}
+
+		#if flash
+		displayObject.transform = displayObject.transform;
+		#end
+
+		if ((flags & AnimateTimelineData.HAS_FILTERS) != 0)
+		{
+			var filters:Array<BitmapFilter> = [];
+			var filtersEnd = position + 1 + Std.int(data[position]);
+			position++;
+
+			while (position < filtersEnd)
+			{
+				var filterType = Std.int(data[position++]);
+				switch (filterType)
+				{
+					case 0:
+						filters.push(new BlurFilter(data[position++], data[position++], Std.int(data[position++])));
+
+					case 1:
+						var matrixLength = Std.int(data[position++]);
+						var matrix:Array<Float> = [];
+						for (i in 0...matrixLength)
+						{
+							matrix.push(data[position++]);
+						}
+						filters.push(new ColorMatrixFilter(matrix));
+
+					case 2:
+						filters.push(new DropShadowFilter(data[position++], data[position++], Std.int(data[position++]), data[position++], data[position++],
+							data[position++], data[position++], Std.int(data[position++]), data[position++] != 0, data[position++] != 0,
+							data[position++] != 0));
+
+					case 3:
+						filters.push(new GlowFilter(Std.int(data[position++]), data[position++], data[position++], data[position++], data[position++],
+							Std.int(data[position++]), data[position++] != 0, data[position++] != 0));
+
+					default:
+						position = filtersEnd;
+				}
+			}
+
+			displayObject.filters = filters;
+		}
+		else
+		{
+			displayObject.filters = null;
+		}
+
+		if ((flags & AnimateTimelineData.HAS_NAME) != 0)
+		{
+			displayObject.name = cast references[Std.int(data[position++])];
+		}
+
+		if ((flags & AnimateTimelineData.HAS_BLEND_MODE) != 0)
+		{
+			displayObject.blendMode = cast references[Std.int(data[position++])];
+		}
+
+		if ((flags & AnimateTimelineData.HAS_CACHE_AS_BITMAP) != 0)
+		{
+			displayObject.cacheAsBitmap = (flags & AnimateTimelineData.CACHE_AS_BITMAP) != 0;
+		}
+
+		if ((flags & AnimateTimelineData.HAS_VISIBLE) != 0)
+		{
+			displayObject.visible = (flags & AnimateTimelineData.VISIBLE) != 0;
+		}
+
+		#if (openfl >= "9.5.0")
+		if ((flags & AnimateTimelineData.HAS_META_DATA) != 0)
+		{
+			displayObject.metaData = references[Std.int(data[position++])];
+		}
+		#end
+
+		#if openfljs
+		Reflect.setField(__sprite, displayObject.name, displayObject);
+		#end
+
+		__lastUpdatedCompact.set(displayObject, objectPosition);
 	}
 
 	@:noCompletion private function __updateInstanceFields():Void
