@@ -23,6 +23,22 @@ There are three primary code paths within the library:
 
 This library can be called automatically by the OpenFL/Lime command-line tools to process `<library />` tags, or it can be used on the command-line to process SWF files into Animate ZIP files.
 
+Compact Animate timelines
+=========================
+
+Projects with large Animate libraries may define
+`swf_compact_animate_timelines` to keep serialized timeline events in compact
+numeric buffers. The default parser creates one `AnimateFrame` and
+`AnimateFrameObject` graph for every frame and event, including separate
+matrix, color-transform and filter objects. The compact mode decodes these
+values directly during playback, reducing retained managed memory and the
+amount of graph traversal performed by full garbage collections.
+
+The exported Animate asset format does not change, and standard timeline
+playback remains compatible. This mode is opt-in because code that accesses
+`AnimateSpriteSymbol.frames` directly will not receive the eagerly expanded
+legacy metadata.
+
 
 Usage
 =====

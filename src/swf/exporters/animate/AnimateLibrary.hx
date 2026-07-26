@@ -38,6 +38,7 @@ import openfl.filters.GlowFilter;
 @:noDebug
 #end
 @:access(swf.exporters.animate.AnimateSpriteSymbol)
+@:access(swf.exporters.animate.AnimateTimelineData)
 @:access(swf.exporters.animate)
 @SuppressWarnings("checkstyle:FieldDocComment")
 @:keep class AnimateLibrary extends AssetLibrary
@@ -743,6 +744,9 @@ import openfl.filters.GlowFilter;
 		symbol.scale9Grid = data.scale9Grid != null ? new Rectangle(__pixel(data.scale9Grid[0]), __pixel(data.scale9Grid[1]), __pixel(data.scale9Grid[2]),
 			__pixel(data.scale9Grid[3])) : null;
 		var frames:Array<Dynamic> = data.frames;
+		#if swf_compact_animate_timelines
+		symbol.__setCompactTimeline(frames);
+		#else
 		var frame:AnimateFrame,
 			objects:Array<Dynamic>,
 			object:AnimateFrameObject;
@@ -790,6 +794,7 @@ import openfl.filters.GlowFilter;
 			}
 			symbol.frames.push(frame);
 		}
+		#end
 		return symbol;
 	}
 
