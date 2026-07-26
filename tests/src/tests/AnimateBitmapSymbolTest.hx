@@ -134,11 +134,63 @@ class AnimateBitmapSymbolTest extends Test
 		Assert.isTrue(bitmapData.image == image);
 
 		var directBitmapData = bitmapSymbol.__createBitmapData(library);
-		Assert.isFalse(directBitmapData.readable);
-		Assert.isFalse(bitmapData == directBitmapData);
-		Assert.isFalse(library.cachedImages.exists(bitmapSymbol.path));
+		Assert.isTrue(directBitmapData.readable);
+		Assert.isTrue(bitmapData == directBitmapData);
+		Assert.isTrue(library.cachedImages.exists(bitmapSymbol.path));
 		#else
 		Assert.isTrue(bitmapData.readable);
+		#end
+	}
+
+	public function testBitmapSharedByHardwareAndSoftwareShapesStaysReadable():Void
+	{
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		var library = new AnimateLibrary("shared-shape-bitmap-test", "shared-shape-bitmap-test");
+		library.bitmapSymbols = [];
+		library.symbols = new Map();
+		var image = new Image(null, 0, 0, 32, 32, 0xFF336699);
+		var bitmapSymbol = new AnimateBitmapSymbol();
+		bitmapSymbol.id = 1;
+		bitmapSymbol.path = "shared-shape-bitmap.png";
+		library.cachedImages.set(bitmapSymbol.path, image);
+		library.symbols.set(bitmapSymbol.id, bitmapSymbol);
+
+		var hardwareShapeSymbol = new AnimateShapeSymbol();
+		hardwareShapeSymbol.id = 2;
+		hardwareShapeSymbol.commands = [
+			BeginBitmapFill(bitmapSymbol.id, null, true, true),
+			MoveTo(0, 0),
+			LineTo(32, 0),
+			LineTo(32, 32),
+			LineTo(0, 32),
+			EndFill
+		];
+		library.symbols.set(hardwareShapeSymbol.id, hardwareShapeSymbol);
+
+		var softwareShapeSymbol = new AnimateShapeSymbol();
+		softwareShapeSymbol.id = 3;
+		softwareShapeSymbol.commands = [
+			BeginBitmapFill(bitmapSymbol.id, null, true, true),
+			BeginGradientFill(0, [0x000000, 0xFFFFFF], [1.0, 1.0], [0, 255], null, 0, 0, 0),
+			EndFill
+		];
+		library.symbols.set(softwareShapeSymbol.id, softwareShapeSymbol);
+
+		// Cache preparation must make the result independent of which shape is
+		// instantiated first.
+		library.__prepareBitmapCaches();
+
+		var hardwareShape = hardwareShapeSymbol.__createObject(library);
+		var hardwareBitmapData:BitmapData = cast hardwareShape.graphics.__commands.o[0];
+		var softwareShape = softwareShapeSymbol.__createObject(library);
+		var softwareBitmapData:BitmapData = cast softwareShape.graphics.__commands.o[0];
+
+		Assert.isTrue(hardwareBitmapData.readable);
+		Assert.isTrue(hardwareBitmapData == softwareBitmapData);
+		Assert.isTrue(hardwareBitmapData.image == image);
+		Assert.isTrue(library.cachedImages.exists(bitmapSymbol.path));
+		#else
+		Assert.isTrue(true);
 		#end
 	}
 

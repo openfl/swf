@@ -62,6 +62,7 @@ import openfl.filters.GlowFilter;
 	private var frameRate:Float;
 	#if (lime && !flash && swf_hardware_bitmap_cache)
 	private var hardwareBitmapData:Map<String, BitmapData>;
+	private var readableBitmapDataKeys:Map<String, Bool>;
 	private var readableShapeBitmapData:Map<String, BitmapData>;
 	#end
 	private var id:String;
@@ -86,6 +87,7 @@ import openfl.filters.GlowFilter;
 		bitmapClassNames = new Map();
 		#if (lime && !flash && swf_hardware_bitmap_cache)
 		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
 		readableShapeBitmapData = new Map();
 		#end
 
@@ -156,6 +158,11 @@ import openfl.filters.GlowFilter;
 	private function __getHardwareBitmapData(symbol:AnimateBitmapSymbol):BitmapData
 	{
 		var key = __getBitmapDataKey(symbol);
+		if (readableBitmapDataKeys.exists(key))
+		{
+			return __getReadableShapeBitmapData(symbol);
+		}
+
 		var bitmapData = hardwareBitmapData.get(key);
 
 		if (bitmapData == null)
@@ -181,6 +188,15 @@ import openfl.filters.GlowFilter;
 		}
 
 		return bitmapData;
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __markBitmapDataReadable(symbol:AnimateBitmapSymbol):Void
+	{
+		if (symbol != null)
+		{
+			readableBitmapDataKeys.set(__getBitmapDataKey(symbol), true);
+		}
 	}
 
 	@:allow(swf.exporters.animate.AnimateShapeSymbol)
@@ -251,6 +267,21 @@ import openfl.filters.GlowFilter;
 						cast(childSymbol, AnimateShapeSymbol).requiresReadableBitmapData = true;
 					}
 				}
+			}
+		}
+	}
+
+	private function __prepareBitmapCaches():Void
+	{
+		for (symbol in symbols)
+		{
+			#if (haxe_ver >= 4.2)
+			if (Std.isOfType(symbol, AnimateShapeSymbol))
+			#else
+			if (Std.is(symbol, AnimateShapeSymbol))
+			#end
+			{
+				cast(symbol, AnimateShapeSymbol).__prepareBitmapCache(this);
 			}
 		}
 	}
@@ -422,6 +453,7 @@ import openfl.filters.GlowFilter;
 
 			#if (lime && !flash && swf_hardware_bitmap_cache)
 			__markScale9GridShapesReadable();
+			__prepareBitmapCaches();
 			#end
 
 			// SWFLite.instances.set(instanceID, swf);
@@ -568,6 +600,7 @@ import openfl.filters.GlowFilter;
 		instances.remove(uuid);
 		#if (lime && !flash && swf_hardware_bitmap_cache)
 		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
 		readableShapeBitmapData = new Map();
 		#end
 		if (symbols == null) return;

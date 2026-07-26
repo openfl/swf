@@ -55,16 +55,8 @@ class AnimateShapeSymbol extends AnimateSymbol
 
 		var hardwareBitmapFills = false;
 		#if (lime && !flash && swf_hardware_bitmap_cache)
-		if (!requiresReadableBitmapData)
-		{
-			if (hardwareCompatible == null)
-			{
-				var probe = new Shape();
-				__renderCommands(probe.graphics, library, false, true);
-				hardwareCompatible = Context3DGraphics.isCompatible(probe.graphics);
-			}
-			hardwareBitmapFills = hardwareCompatible == true;
-		}
+		__prepareBitmapCache(library);
+		hardwareBitmapFills = !requiresReadableBitmapData && hardwareCompatible == true;
 		#end
 
 		__renderCommands(graphics, library, hardwareBitmapFills, false);
@@ -75,6 +67,41 @@ class AnimateShapeSymbol extends AnimateSymbol
 
 		return shape;
 	}
+
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	@:allow(swf.exporters.animate.AnimateLibrary)
+	private function __prepareBitmapCache(library:AnimateLibrary):Void
+	{
+		if (hardwareCompatible == null)
+		{
+			var probe = new Shape();
+			__renderCommands(probe.graphics, library, false, true);
+			hardwareCompatible = Context3DGraphics.isCompatible(probe.graphics);
+		}
+
+		if (requiresReadableBitmapData || hardwareCompatible != true)
+		{
+			__markBitmapFillsReadable(library);
+		}
+	}
+
+	private function __markBitmapFillsReadable(library:AnimateLibrary):Void
+	{
+		if (commands != null)
+		{
+			for (command in commands)
+			{
+				switch (command)
+				{
+					case BeginBitmapFill(bitmapID, _, _, _):
+						library.__markBitmapDataReadable(cast library.symbols.get(bitmapID));
+
+					default:
+				}
+			}
+		}
+	}
+	#end
 
 	private function __renderCommands(graphics:openfl.display.Graphics, library:AnimateLibrary, hardwareBitmapFills:Bool, probeBitmapFills:Bool):Void
 	{
