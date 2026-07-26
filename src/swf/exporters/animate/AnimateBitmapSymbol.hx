@@ -22,9 +22,25 @@ class AnimateBitmapSymbol extends AnimateSymbol
 	private override function __createObject(library:AnimateLibrary):Bitmap
 	{
 		#if lime
-		return new Bitmap(BitmapData.fromImage(library.getImage(path)), PixelSnapping.AUTO, smooth != false);
+		return new Bitmap(__createBitmapData(library), PixelSnapping.AUTO, smooth != false);
 		#else
 		return null;
 		#end
+	}
+
+	private function __createBitmapData(library:AnimateLibrary):BitmapData
+	{
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		return library.__getHardwareBitmapData(this);
+		#else
+		return __createBitmapDataUncached(library);
+		#end
+	}
+
+	@:allow(swf.exporters.animate.AnimateLibrary)
+	private function __createBitmapDataUncached(library:AnimateLibrary):BitmapData
+	{
+		var image = library.getImage(path);
+		return image != null ? BitmapData.fromImage(image) : null;
 	}
 }
