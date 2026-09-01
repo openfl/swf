@@ -3,12 +3,11 @@ package swf.data.filters;
 import swf.SWFData;
 import swf.utils.ColorUtils;
 import swf.utils.StringUtils;
+import swf.exporters.core.FilterType;
 import openfl.filters.BitmapFilter;
+import openfl.filters.GradientGlowFilter;
 import openfl.filters.BitmapFilterType;
-#if flash
-import flash.filters.GradientGlowFilter; // Not supported on native yet
 
-#end
 class FilterGradientGlow extends Filter implements IFilter
 {
 	public var numColors:Int;
@@ -17,7 +16,7 @@ class FilterGradientGlow extends Filter implements IFilter
 	public var angle:Float;
 	public var distance:Float;
 	public var strength:Float;
-	public var innerShadow:Bool;
+	public var inner:Bool;
 	public var knockout:Bool;
 	public var compositeSource:Bool;
 	public var onTop:Bool;
@@ -35,38 +34,36 @@ class FilterGradientGlow extends Filter implements IFilter
 
 	override private function get_filter():BitmapFilter
 	{
+		#if ((cpp || neko) && openfl_legacy)
+		return new BitmapFilter("");
+		#else
 		var gradientGlowColors:Array<Int> = [];
 		var gradientGlowAlphas:Array<Float> = [];
-		var gradientGlowRatios:Array<Float> = [];
+		var gradientGlowRatios:Array<Int> = [];
 		for (i in 0...numColors)
 		{
 			gradientGlowColors.push(ColorUtils.rgb(gradientColors[i]));
 			gradientGlowAlphas.push(ColorUtils.alpha(gradientColors[i]));
 			gradientGlowRatios.push(gradientRatios[i]);
 		}
-		#if flash
-		var filterType:BitmapFilterType;
-		#else
-		var filterType:String;
+		var filterType = getBitmapFilterType();
+		return new GradientGlowFilter(distance, angle * 180 / Math.PI, gradientGlowColors, gradientGlowAlphas, gradientGlowRatios, blurX, blurY, strength, passes, filterType, knockout);
 		#end
-		if (onTop)
+	}
+
+	override private function get_type():FilterType
+	{
+		var colors:Array<Int> = [];
+		var alphas:Array<Float> = [];
+		var ratios:Array<Int> = [];
+		for (i in 0...numColors)
 		{
-			filterType = BitmapFilterType.FULL;
+			colors.push(ColorUtils.rgb(gradientColors[i]));
+			alphas.push(ColorUtils.alpha(gradientColors[i]));
+			ratios.push(gradientRatios[i]);
 		}
-		else
-		{
-			filterType = (innerShadow) ? BitmapFilterType.INNER : BitmapFilterType.OUTER;
-		}
-		#if flash
-		return new GradientGlowFilter(distance, angle * 180 / Math.PI, gradientGlowColors, gradientGlowAlphas, gradientGlowRatios, blurX, blurY, strength,
-			passes, filterType, knockout);
-		#else
-		#if ((cpp || neko) && openfl_legacy)
-		return new BitmapFilter("");
-		#else
-		return new BitmapFilter();
-		#end
-		#end
+		var filterType = getBitmapFilterType();
+		return GradientGlowFilter(distance, angle * 180 / Math.PI, colors, alphas, ratios, blurX, blurY, strength, passes, filterType, knockout);
 	}
 
 	override public function parse(data:SWFData):Void
@@ -87,7 +84,7 @@ class FilterGradientGlow extends Filter implements IFilter
 		distance = data.readFIXED();
 		strength = data.readFIXED8();
 		var flags:Int = data.readUI8();
-		innerShadow = ((flags & 0x80) != 0);
+		inner = ((flags & 0x80) != 0);
 		knockout = ((flags & 0x40) != 0);
 		compositeSource = ((flags & 0x20) != 0);
 		onTop = ((flags & 0x10) != 0);
@@ -112,7 +109,7 @@ class FilterGradientGlow extends Filter implements IFilter
 		data.writeFIXED(distance);
 		data.writeFIXED8(strength);
 		var flags:Int = (passes & 0x0f);
-		if (innerShadow)
+		if (inner)
 		{
 			flags |= 0x80;
 		}
@@ -150,11 +147,16 @@ class FilterGradientGlow extends Filter implements IFilter
 		filter.distance = distance;
 		filter.strength = strength;
 		filter.passes = passes;
-		filter.innerShadow = innerShadow;
+		filter.inner = inner;
 		filter.knockout = knockout;
 		filter.compositeSource = compositeSource;
 		filter.onTop = onTop;
 		return filter;
+	}
+
+	private  function getBitmapFilterType()
+	{
+		return onTop ? BitmapFilterType.FULL : (inner ? BitmapFilterType.INNER : BitmapFilterType.OUTER);
 	}
 
 	override public function toString(indent:Int = 0):String
@@ -163,7 +165,7 @@ class FilterGradientGlow extends Filter implements IFilter
 		var str:String = "[" + filterName + "] " + "BlurX: " + blurX + ", " + "BlurY: " + blurY + ", " + "Angle: " + angle + ", " + "Distance: " + distance
 			+ ", " + "Strength: " + strength + ", " + "Passes: " + passes;
 		var flags:Array<String> = [];
-		if (innerShadow)
+		if (inner)
 		{
 			flags.push("InnerShadow");
 		}

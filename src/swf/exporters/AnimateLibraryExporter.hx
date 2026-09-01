@@ -1442,6 +1442,38 @@ class AnimateLibraryExporter
 							inner,
 							knockout
 						]);
+
+					case GradientGlowFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
+						result.push([
+							SWFFilterType.GRADIENT_GLOW,
+							distance,
+							angle,
+							colors,
+							alphas,
+							ratios,
+							blurX,
+							blurY,
+							strength,
+							quality,
+							type,
+							knockout
+						]);
+
+					case GradientBevelFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
+						result.push([
+							SWFFilterType.GRADIENT_BEVEL,
+							distance,
+							angle,
+							colors,
+							alphas,
+							ratios,
+							blurX,
+							blurY,
+							strength,
+							quality,
+							type,
+							knockout
+						]);
 				}
 				// filterClasses.set (Type.getClassName (Type.getClass (surfaceFilter.filter)), true);
 			}
@@ -1562,5 +1594,6 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFFilterType(Int) from Int to 
 	public var COLOR_MATRIX = 1;
 	public var DROP_SHADOW = 2;
 	public var GLOW = 3;
-	// TODO: More
+	public var GRADIENT_GLOW = 4;
+	public var GRADIENT_BEVEL = 5;
 }

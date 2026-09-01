@@ -28,6 +28,8 @@ import openfl.filters.ConvolutionFilter;
 import openfl.filters.DisplacementMapFilter;
 import openfl.filters.DropShadowFilter;
 import openfl.filters.GlowFilter;
+import openfl.filters.GradientGlowFilter;
+import openfl.filters.GradientBevelFilter;
 import openfl.geom.ColorTransform;
 #if hscript
 import hscript.Interp;
@@ -463,6 +465,12 @@ class SymbolTimeline extends Timeline
 
 					case GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout):
 						filters.push(new GlowFilter(color, alpha, blurX, blurY, strength, quality, inner, knockout));
+
+					case GradientGlowFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
+						filters.push(new GradientGlowFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout));
+
+					case GradientBevelFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout):
+						filters.push(new GradientBevelFilter(distance, angle, colors, alphas, ratios, blurX, blurY, strength, quality, type, knockout));
 				}
 			}
 
