@@ -18,6 +18,7 @@ import openfl.display.LineScaleMode;
 import openfl.geom.Matrix;
 import openfl.geom.Point;
 import openfl.errors.Error;
+import haxe.ds.ObjectMap;
 
 class SWFShape
 {
@@ -655,37 +656,56 @@ class SWFShape
 			var subPath:Array<IEdge> = edgeMap.get(styleIdx);
 			if (subPath != null && subPath.length > 0)
 			{
-				var idx:Int;
-				var prevEdge:IEdge = null;
+				var n = subPath.length;
+				var nextFree = new Array<Int>();
+				var prevFree = new Array<Int>();
+				var edgeIndexMap = new ObjectMap<IEdge, Int>();
+
+				for (i in 0...n)
+				{
+					nextFree.push(i + 1);
+					prevFree.push(i - 1);
+					edgeIndexMap.set(subPath[i], i);
+				}
+
 				var tmpPath:Array<IEdge> = new Array<IEdge>();
 				createCoordMap(subPath);
-				while (subPath.length > 0)
+
+				var head = 0;
+				var idx = 0;
+				var remaining = n;
+				var prevEdge:IEdge = null;
+
+				while (remaining > 0)
 				{
-					idx = 0;
-					while (idx < subPath.length)
+					var cand = subPath[idx];
+					if (prevEdge == null || prevEdge.to.equals(cand.from))
 					{
-						if (prevEdge == null || prevEdge.to.equals(subPath[idx].from))
+						remaining--;
+						tmpPath.push(cand);
+						removeEdgeFromCoordMap(cand);
+						prevEdge = cand;
+
+						var next = nextFree[idx];
+						var prev = prevFree[idx];
+
+						if (prev >= 0) nextFree[prev] = next;
+						else head = next;
+
+						if (next < n) prevFree[next] = prev;
+						idx = next < n ? next : head;
+					}
+					else
+					{
+						var edge = findNextEdgeInCoordMap(prevEdge);
+						if (edge != null)
 						{
-							var edge:IEdge = subPath.splice(idx, 1)[0];
-							tmpPath.push(edge);
-							removeEdgeFromCoordMap(edge);
-							prevEdge = edge;
+							idx = edgeIndexMap.get(edge);
 						}
 						else
 						{
-							var edge = findNextEdgeInCoordMap(prevEdge);
-							if (edge != null)
-							{
-								for (i in 0...subPath.length)
-								{
-									if (subPath[i] == edge) idx = i;
-								}
-							}
-							else
-							{
-								idx = 0;
-								prevEdge = null;
-							}
+							idx = head;
+							prevEdge = null;
 						}
 					}
 				}

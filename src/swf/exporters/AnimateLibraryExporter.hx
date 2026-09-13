@@ -600,62 +600,60 @@ class AnimateLibraryExporter
 						}
 						else
 						{
-							commands = commands.concat([
-								SWFShapeCommandType.LINE_STYLE,
-								thickness,
-								color,
-								alpha,
-								pixelHinting,
-								scaleMode,
-								startCaps,
-								joints,
-								miterLimit
-							]);
+							commands.push(SWFShapeCommandType.LINE_STYLE);
+							commands.push(thickness);
+							commands.push(color);
+							commands.push(alpha);
+							commands.push(pixelHinting);
+							commands.push(scaleMode);
+							commands.push(startCaps);
+							commands.push(joints);
+							commands.push(miterLimit);
 						}
 
 					case BeginFill(color, alpha):
-						commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
+						commands.push(SWFShapeCommandType.BEGIN_FILL);
+						commands.push(color);
+						commands.push(alpha);
 
 					case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						commands = commands.concat([
-							SWFShapeCommandType.BEGIN_GRADIENT_FILL,
-							type,
-							colors,
-							alphas,
-							ratios,
-							serializeMatrix(matrix),
-							spreadMethod,
-							interpolationMethod,
-							focalPointRatio
-						]);
+						commands.push(SWFShapeCommandType.BEGIN_GRADIENT_FILL);
+						commands.push(type);
+						commands.push(colors);
+						commands.push(alphas);
+						commands.push(ratios);
+						commands.push(serializeMatrix(matrix));
+						commands.push(spreadMethod);
+						commands.push(interpolationMethod);
+						commands.push(focalPointRatio);
 
 					case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-						commands = commands.concat([
-							SWFShapeCommandType.BEGIN_BITMAP_FILL,
-							bitmapID,
-							serializeMatrix(matrix),
-							repeat,
-							smooth
-						]);
+						commands.push(SWFShapeCommandType.BEGIN_BITMAP_FILL);
+						commands.push(bitmapID);
+						commands.push(serializeMatrix(matrix));
+						commands.push(repeat);
+						commands.push(smooth);
 						processTag(cast swfData.getCharacter(bitmapID));
 
 					case EndFill:
 						commands.push(SWFShapeCommandType.END_FILL);
 
 					case MoveTo(x, y):
-						commands = commands.concat([SWFShapeCommandType.MOVE_TO, twip(x), twip(y)]);
+						commands.push(SWFShapeCommandType.MOVE_TO);
+						commands.push(twip(x));
+						commands.push(twip(y));
 
 					case LineTo(x, y):
-						commands = commands.concat([SWFShapeCommandType.LINE_TO, twip(x), twip(y)]);
+						commands.push(SWFShapeCommandType.LINE_TO);
+						commands.push(twip(x));
+						commands.push(twip(y));
 
 					case CurveTo(controlX, controlY, anchorX, anchorY):
-						commands = commands.concat([
-							SWFShapeCommandType.CURVE_TO,
-							twip(controlX),
-							twip(controlY),
-							twip(anchorX),
-							twip(anchorY)
-						]);
+						commands.push(SWFShapeCommandType.CURVE_TO);
+						commands.push(twip(controlX));
+						commands.push(twip(controlY));
+						commands.push(twip(anchorX));
+						commands.push(twip(anchorY));
 
 					default:
 				}
@@ -979,62 +977,60 @@ class AnimateLibraryExporter
 									}
 									else
 									{
-										commands = commands.concat([
-											SWFShapeCommandType.LINE_STYLE,
-											thickness,
-											color,
-											alpha,
-											pixelHinting,
-											scaleMode,
-											startCaps,
-											joints,
-											miterLimit
-										]);
+										commands.push(SWFShapeCommandType.LINE_STYLE);
+										commands.push(thickness);
+										commands.push(color);
+										commands.push(alpha);
+										commands.push(pixelHinting);
+										commands.push(scaleMode);
+										commands.push(startCaps);
+										commands.push(joints);
+										commands.push(miterLimit);
 									}
 
 								case BeginFill(color, alpha):
-									commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
+									commands.push(SWFShapeCommandType.BEGIN_FILL);
+									commands.push(color);
+									commands.push(alpha);
 
 								case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-									commands = commands.concat([
-										SWFShapeCommandType.BEGIN_GRADIENT_FILL,
-										type,
-										colors,
-										alphas,
-										ratios,
-										serializeMatrix(matrix),
-										spreadMethod,
-										interpolationMethod,
-										focalPointRatio
-									]);
+									commands.push(SWFShapeCommandType.BEGIN_GRADIENT_FILL);
+									commands.push(type);
+									commands.push(colors);
+									commands.push(alphas);
+									commands.push(ratios);
+									commands.push(serializeMatrix(matrix));
+									commands.push(spreadMethod);
+									commands.push(interpolationMethod);
+									commands.push(focalPointRatio);
 
 								case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-									commands = commands.concat([
-										SWFShapeCommandType.BEGIN_BITMAP_FILL,
-										bitmapID,
-										serializeMatrix(matrix),
-										repeat,
-										smooth
-									]);
+									commands.push(SWFShapeCommandType.BEGIN_BITMAP_FILL);
+									commands.push(bitmapID);
+									commands.push(serializeMatrix(matrix));
+									commands.push(repeat);
+									commands.push(smooth);
 									processTag(cast swfData.getCharacter(bitmapID));
 
 								case EndFill:
 									commands.push(SWFShapeCommandType.END_FILL);
 
 								case MoveTo(x, y):
-									commands = commands.concat([SWFShapeCommandType.MOVE_TO, twip(x), twip(y)]);
+									commands.push(SWFShapeCommandType.MOVE_TO);
+									commands.push(twip(x));
+									commands.push(twip(y));
 
 								case LineTo(x, y):
-									commands = commands.concat([SWFShapeCommandType.LINE_TO, twip(x), twip(y)]);
+									commands.push(SWFShapeCommandType.LINE_TO);
+									commands.push(twip(x));
+									commands.push(twip(y));
 
 								case CurveTo(controlX, controlY, anchorX, anchorY):
-									commands = commands.concat([
-										SWFShapeCommandType.CURVE_TO,
-										twip(controlX),
-										twip(controlY),
-										twip(anchorX),
-										twip(anchorY)
-									]);
+									commands.push(SWFShapeCommandType.CURVE_TO);
+									commands.push(twip(controlX));
+									commands.push(twip(controlY));
+									commands.push(twip(anchorX));
+									commands.push(twip(anchorY));
 
 								default:
 							}
