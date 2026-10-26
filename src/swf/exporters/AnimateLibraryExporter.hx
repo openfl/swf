@@ -1301,7 +1301,7 @@ class AnimateLibraryExporter
 				var template = new Template(templateData);
 
 				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(className.split(".").join("/"))), name + ".hx"),
-					cast AssetType.TEMPLATE);
+					lime.tools.AssetType.TEMPLATE);
 				templateFile.embed = false;
 				templateFile.data = template.execute(context);
 				output.push(templateFile);
