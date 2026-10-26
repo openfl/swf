@@ -43,6 +43,7 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 
 	override public function parse(data:SWFData, length:Int, version:Int, async:Bool = false):Void
 	{
+		var start:Int = data.position;
 		characterId = data.readUI16();
 		var flags:Int = data.readUI8();
 		hasLayout = ((flags & 0x80) != 0);
@@ -82,6 +83,12 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 				codeTable.push(wideCodes ? data.readUI16() : data.readUI8());
 			}
 		}
+		else if (length - (data.position - start) > (hasLayout ? 8 : 0))
+		{
+			// Flash may write a CodeTableOffset even when there are no glyphs.
+			// Without glyphs to kern, the layout that follows is 8 bytes.
+			data.skipBytes(wideOffsets ? 4 : 2);
+		}
 		if (hasLayout)
 		{
 			ascent = data.readUI16();
@@ -103,7 +110,6 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 		}
 		else
 		{
-			data.skipBytes(2);
 			ascent = 0;
 			descent = 0;
 			leading = 0;
