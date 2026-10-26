@@ -612,17 +612,15 @@ class AnimateLibraryExporter
 						}
 
 					case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						commands = commands.concat([
-							SWFShapeCommandType.LINE_GRADIENT_STYLE,
-							type,
-							colors,
-							alphas,
-							ratios,
-							serializeMatrix(matrix),
-							spreadMethod,
-							interpolationMethod,
-							focalPointRatio
-						]);
+						commands.push(SWFShapeCommandType.LINE_GRADIENT_STYLE);
+						commands.push(type);
+						commands.push(colors);
+						commands.push(alphas);
+						commands.push(ratios);
+						commands.push(serializeMatrix(matrix));
+						commands.push(spreadMethod);
+						commands.push(interpolationMethod);
+						commands.push(focalPointRatio);
 
 					case BeginFill(color, alpha):
 						commands.push(SWFShapeCommandType.BEGIN_FILL);
@@ -1002,17 +1000,15 @@ class AnimateLibraryExporter
 									}
 
 								case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-									commands = commands.concat([
-										SWFShapeCommandType.LINE_GRADIENT_STYLE,
-										type,
-										colors,
-										alphas,
-										ratios,
-										serializeMatrix(matrix),
-										spreadMethod,
-										interpolationMethod,
-										focalPointRatio
-									]);
+									commands.push(SWFShapeCommandType.LINE_GRADIENT_STYLE);
+									commands.push(type);
+									commands.push(colors);
+									commands.push(alphas);
+									commands.push(ratios);
+									commands.push(serializeMatrix(matrix));
+									commands.push(spreadMethod);
+									commands.push(interpolationMethod);
+									commands.push(focalPointRatio);
 
 								case BeginFill(color, alpha):
 									commands.push(SWFShapeCommandType.BEGIN_FILL);
