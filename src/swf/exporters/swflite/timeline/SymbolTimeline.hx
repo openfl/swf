@@ -377,10 +377,12 @@ class SymbolTimeline extends Timeline
 				}
 			}
 
+			#if !flash
 			for (mask in currentMasks)
 			{
 				__markTimelineMask(mask.displayObject);
 			}
+			#end
 
 			var child:DisplayObject;
 			var i = currentInstances.length;
@@ -425,6 +427,7 @@ class SymbolTimeline extends Timeline
 		return a.depth - b.depth;
 	}
 
+	#if !flash
 	@:noCompletion private inline function __markTimelineMask(displayObject:DisplayObject):Void
 	{
 		// SWF clipDepth>0 placements are masks even before a child exists in their depth range.
@@ -434,6 +437,7 @@ class SymbolTimeline extends Timeline
 			displayObject.__setRenderDirty();
 		}
 	}
+	#end
 
 	@:noCompletion private function __updateDisplayObject(displayObject:DisplayObject, frameObject:FrameObject, reset:Bool = false):Void
 	{

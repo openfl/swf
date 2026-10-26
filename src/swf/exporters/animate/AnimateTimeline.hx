@@ -243,7 +243,6 @@ class AnimateTimeline extends Timeline
 					}
 
 					child = targetChild;
-
 					maskApplied = false;
 
 					for (mask in currentMasks)
@@ -266,10 +265,12 @@ class AnimateTimeline extends Timeline
 					}
 				}
 
+				#if !flash
 				for (mask in currentMasks)
 				{
 					__markTimelineMask(mask.displayObject);
 				}
+				#end
 
 				// TODO: How to tell if shapes are for a scale9Grid clip?
 				if (__sprite.scale9Grid != null)
@@ -453,6 +454,7 @@ class AnimateTimeline extends Timeline
 		return a.depth - b.depth;
 	}
 
+	#if !flash
 	@:noCompletion private inline function __markTimelineMask(displayObject:DisplayObject):Void
 	{
 		// SWF clipDepth>0 placements are masks even before a child exists in their depth range.
@@ -462,6 +464,7 @@ class AnimateTimeline extends Timeline
 			displayObject.__setRenderDirty();
 		}
 	}
+	#end
 
 	@:noCompletion private function __updateDisplayObject(displayObject:DisplayObject, frameObject:AnimateFrameObject, reset:Bool = false):Void
 	{
