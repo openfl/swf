@@ -337,7 +337,7 @@ class Tools
 
 				// }
 
-				var templateFile = new Asset("", Path.combine(targetPath, Path.directory(className.split(".").join("/"))) + "/" + prefix + name + ".hx",
+				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, packageName.split(".").join("/")), name + ".hx"),
 					AssetType.TEMPLATE);
 				templateFile.data = template.execute(context);
 				output.assets.push(templateFile);
