@@ -13,5 +13,7 @@
 
 	<assets type="binary" path="fixtures/shapes.swf" preload="true"/>
 
+	<!-- OpenFL 9.4 and later only start utest apps on HTML5 with this define -->
+	<haxedef name="openfl_enable_utest_legacy_mode" if="html5"/>
 	<template path="templates" if="html5"/>
 </project>

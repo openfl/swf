@@ -203,6 +203,44 @@ jobs:
           haxe tools.hxml -D swf_compact_animate_timelines
           neko bin/tools.n
 
+  unit-test-html5:
+    strategy:
+      matrix:
+        flags: ["", "-Dswf_compact_animate_timelines -Dswf_hardware_bitmap_cache"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.3.7
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Build tests for HTML5
+        working-directory: tests
+        run: |
+          haxelib run openfl build html5 ${{ matrix.flags }}
+
+      - name: Run tests in headless Chrome
+        working-directory: tests
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 --directory bin/html5/bin &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8000/index.html > report.html
+          sed -e 's/<[^>]*>/ /g' report.html
+          grep -q "TEST OK" report.html
+
   unit-test-hashlink:
     strategy:
       matrix:

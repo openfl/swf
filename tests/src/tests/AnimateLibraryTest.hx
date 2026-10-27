@@ -58,10 +58,7 @@ class AnimateLibraryTest extends Test
 		library.soundClassNames.set("TestSound", "sounds/1.wav");
 		library.cachedBytes.set("sounds/1.wav", createWAV());
 
-		var buffer = library.getAudioBuffer("TestSound");
-		Assert.notNull(buffer);
-		Assert.equals(11025, buffer.sampleRate);
-		Assert.equals(1, buffer.channels);
+		assertDecodedWAV(library.getAudioBuffer("TestSound"));
 		Assert.isFalse(library.cachedBytes.exists("sounds/1.wav"));
 
 		library.unload();
@@ -98,9 +95,7 @@ class AnimateLibraryTest extends Test
 		AnimateLibrary.loadFromBytes(zip).onComplete(function(value)
 		{
 			var library:AnimateLibrary = cast value;
-			var buffer = library.getAudioBuffer("TestSound");
-			Assert.notNull(buffer);
-			Assert.equals(11025, buffer.sampleRate);
+			assertDecodedWAV(library.getAudioBuffer("TestSound"));
 			Assert.isTrue(library.exists("TestSound", cast AssetType.SOUND));
 			Assert.isFalse(library.symbolsByClassName.exists("TestSound"));
 			Assert.isFalse(library.symbolsByClassName.exists("Unknown"));
@@ -112,6 +107,18 @@ class AnimateLibraryTest extends Test
 			Assert.fail("Could not load library: " + error);
 			async.done();
 		});
+	}
+
+	private static function assertDecodedWAV(buffer:AudioBuffer):Void
+	{
+		Assert.notNull(buffer);
+		#if (js && html5)
+		// Howler plays the sound on HTML5, and does not expose its samples
+		Assert.notNull(buffer.src);
+		#else
+		Assert.equals(11025, buffer.sampleRate);
+		Assert.equals(1, buffer.channels);
+		#end
 	}
 
 	private static function createWAV():Bytes
