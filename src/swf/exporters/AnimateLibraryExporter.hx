@@ -1151,7 +1151,14 @@ class AnimateLibraryExporter
 		return;
 	}
 
-	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = ""):Array<String>
+	/**
+		Generates linkage classes as template assets, and returns their class names.
+
+		If `includedClasses` is provided, it is filled with the generated classes that are
+		safe to compile without being referenced: classes that only depend on OpenFL and
+		other included classes, and not on ActionScript classes outside of this library.
+	**/
+	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = "", includedClasses:Array<String> = null):Array<String>
 	{
 		#if commonjs
 		var bitmapDataTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/animate/BitmapData.mtt"));
@@ -1164,6 +1171,7 @@ class AnimateLibraryExporter
 		#end
 
 		var generatedClasses = [];
+		var classDependencies = new Map<String, Array<String>>();
 
 		for (symbolID in libraryData.symbols.keys())
 		{
@@ -1324,7 +1332,60 @@ class AnimateLibraryExporter
 				templateFile.data = template.execute(context);
 				output.push(templateFile);
 
-				generatedClasses.push((packageName.length > 0 ? packageName + "." : "") + name);
+				var generatedClassName = (packageName.length > 0 ? packageName + "." : "") + name;
+				generatedClasses.push(generatedClassName);
+
+				var dependencies = [];
+				if (baseClassName != null)
+				{
+					dependencies.push(baseClassName);
+				}
+				for (property in classProperties)
+				{
+					var propertyType:String = property.type;
+					if (propertyType != "Dynamic" && !StringTools.startsWith(propertyType, "openfl."))
+					{
+						dependencies.push(propertyType);
+					}
+				}
+				classDependencies.set(generatedClassName, dependencies);
+			}
+		}
+
+		if (includedClasses != null)
+		{
+			var included = new Map<String, Bool>();
+			for (className in generatedClasses)
+			{
+				included.set(className, true);
+			}
+
+			var changed = true;
+			while (changed)
+			{
+				changed = false;
+				for (className in generatedClasses)
+				{
+					if (!included.exists(className)) continue;
+
+					for (dependency in classDependencies.get(className))
+					{
+						if (!included.exists(dependency))
+						{
+							included.remove(className);
+							changed = true;
+							break;
+						}
+					}
+				}
+			}
+
+			for (className in generatedClasses)
+			{
+				if (included.exists(className))
+				{
+					includedClasses.push(className);
+				}
 			}
 		}
 

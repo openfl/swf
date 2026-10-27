@@ -749,6 +749,29 @@ class Tools
 		}
 	}
 
+	private static function getGeneratedPath(project:HXProject):String
+	{
+		if (project.target == IOS)
+		{
+			return Path.tryFullPath(targetDirectory) + "/" + project.app.file + "/" + "/haxe/_generated";
+		}
+		else
+		{
+			return Path.tryFullPath(targetDirectory) + "/haxe/_generated";
+		}
+	}
+
+	private static function isCacheCurrent(cacheFile:String, sourcePath:String):Bool
+	{
+		if (!FileSystem.exists(cacheFile)) return false;
+
+		var cacheDate = FileSystem.stat(cacheFile).mtime;
+		var toolDate = FileSystem.stat(Haxelib.getPath(new Haxelib("swf"), true) + "/run.n").mtime;
+		var sourceDate = FileSystem.stat(sourcePath).mtime;
+
+		return sourceDate.getTime() < cacheDate.getTime() && toolDate.getTime() < cacheDate.getTime();
+	}
+
 	private static function processFile(sourcePath:String, targetPath:String, prefix:String = null, generate:Bool = false):Bool
 	{
 		if (targetPath == null)
@@ -992,7 +1015,30 @@ class Tools
 
 				if (library.generate != false)
 				{
-					var generatedClasses = generateSWFClasses(project, output, swf, library.prefix);
+					var generatedClasses:Array<String> = null;
+					var cacheFile = null;
+
+					if (targetDirectory != null)
+					{
+						cacheFile = targetDirectory + "/obj/libraries/" + library.name + ".classes.json";
+						generatedClasses = readGeneratedClassesCache(cacheFile, library.sourcePath, library.prefix, output);
+					}
+
+					if (generatedClasses == null)
+					{
+						if (!Log.verbose)
+						{
+							Log.info("\x1b[1mProcessing library:\x1b[0m " + library.sourcePath + " [SWF]");
+						}
+
+						var firstTemplate = output.assets.length;
+						generatedClasses = generateSWFClasses(project, output, swf, library.prefix);
+
+						if (cacheFile != null)
+						{
+							writeGeneratedClassesCache(cacheFile, library.prefix, generatedClasses, output.assets.slice(firstTemplate));
+						}
+					}
 
 					for (className in generatedClasses)
 					{
@@ -1024,15 +1070,18 @@ class Tools
 					cacheDirectory = targetDirectory + "/obj/libraries";
 					cacheFile = cacheDirectory + "/" + library.name + ".zip";
 
-					if (FileSystem.exists(cacheFile))
-					{
-						var cacheDate = FileSystem.stat(cacheFile).mtime;
-						var toolDate = FileSystem.stat(Haxelib.getPath(new Haxelib("swf"), true) + "/run.n").mtime;
-						var sourceDate = FileSystem.stat(library.sourcePath).mtime;
+					var classesCacheFile = cacheDirectory + "/" + library.name + ".classes.json";
+					var includedClasses:Array<String> = null;
 
-						if (sourceDate.getTime() < cacheDate.getTime() && toolDate.getTime() < cacheDate.getTime())
+					cacheAvailable = isCacheCurrent(cacheFile, library.sourcePath);
+
+					if (cacheAvailable && library.generate != false)
+					{
+						includedClasses = readGeneratedClassesCache(classesCacheFile, library.sourcePath, library.prefix, output);
+
+						if (includedClasses == null)
 						{
-							cacheAvailable = true;
+							cacheAvailable = false;
 						}
 					}
 
@@ -1055,38 +1104,21 @@ class Tools
 
 						if (library.generate != false)
 						{
-							var targetPath:String;
-
-							if (project.target == IOS)
-							{
-								targetPath = Path.tryFullPath(targetDirectory) + "/" + project.app.file + "/" + "/haxe/_generated";
-							}
-							else
-							{
-								targetPath = Path.tryFullPath(targetDirectory) + "/haxe/_generated";
-							}
-
-							var generatedClasses = exporter.generateClasses(targetPath, output.assets, library.prefix);
-
-							// for (className in generatedClasses)
-							// {
-							// 	output.haxeflags.push(className);
-							// }
-
-							// if (cacheDirectory != null)
-							// {
-							// 	File.saveContent(cacheDirectory + "/classNames.txt", generatedClasses.join("\n"));
-							// }
+							var firstTemplate = output.assets.length;
+							includedClasses = [];
+							exporter.generateClasses(getGeneratedPath(project), output.assets, library.prefix, includedClasses);
+							writeGeneratedClassesCache(classesCacheFile, library.prefix, includedClasses, output.assets.slice(firstTemplate));
 						}
 					}
-					else
-					{
-						// var generatedClasses = File.getContent(cacheDirectory + "/classNames.txt").split("\n");
 
-						// for (className in generatedClasses)
-						// {
-						// 	output.haxeflags.push(className);
-						// }
+					// generate="true" also compiles the generated classes, so that symbols are
+					// created as their linkage class even when nothing else references it
+					if (library.generate == true)
+					{
+						for (className in includedClasses)
+						{
+							output.haxeflags.push(className);
+						}
 					}
 
 					var asset = new Asset(cacheFile, "lib/" + library.name + ".zip", AssetType.BUNDLE);
@@ -1480,6 +1512,37 @@ class Tools
 		return null;
 	}
 
+	private static function readGeneratedClassesCache(cacheFile:String, sourcePath:String, prefix:String, output:HXProject):Array<String>
+	{
+		if (!isCacheCurrent(cacheFile, sourcePath)) return null;
+
+		var cache:Dynamic = null;
+
+		try
+		{
+			cache = Json.parse(File.getContent(cacheFile));
+		}
+		catch (e:Dynamic)
+		{
+			return null;
+		}
+
+		if (cache == null || cache.prefix != (prefix != null ? prefix : "") || cache.classes == null || cache.templates == null) return null;
+
+		// the generated class templates are added again, otherwise Lime deletes them as stale files
+		var templates:Array<Dynamic> = cache.templates;
+
+		for (template in templates)
+		{
+			var asset = new Asset("", template.targetPath, AssetType.TEMPLATE);
+			asset.data = template.data;
+			asset.embed = template.embed;
+			output.assets.push(asset);
+		}
+
+		return cache.classes;
+	}
+
 	private static function readSWC(bytes:ByteArray):ByteArray
 	{
 		var input = new BytesInput(bytes);
@@ -1518,5 +1581,18 @@ class Tools
 		}
 
 		return result;
+	}
+
+	private static function writeGeneratedClassesCache(cacheFile:String, prefix:String, classes:Array<String>, templates:Array<Asset>):Void
+	{
+		var templateData = [];
+
+		for (asset in templates)
+		{
+			templateData.push({targetPath: asset.targetPath, data: asset.data, embed: asset.embed});
+		}
+
+		System.mkdir(Path.directory(cacheFile));
+		File.saveContent(cacheFile, Json.stringify({prefix: prefix != null ? prefix : "", classes: classes, templates: templateData}));
 	}
 }
