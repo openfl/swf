@@ -737,8 +737,8 @@ class Tools
 		// }
 		// else
 		{
-			var version = Haxelib.getVersion();
-			if (version == null) version = "0.0.0";
+			// Haxelib.getVersion() without an argument is the version of Lime
+			var version = getVersion(Path.directory(Sys.programPath()));
 
 			Log.println("\x1b[36;1mSWF Command-Line Tools (" + version + ")\x1b[0m");
 		}
@@ -759,6 +759,23 @@ class Tools
 		{
 			return Path.tryFullPath(targetDirectory) + "/haxe/_generated";
 		}
+	}
+
+	private static function getVersion(directory:String):String
+	{
+		var path = Path.combine(directory, "haxelib.json");
+
+		if (FileSystem.exists(path))
+		{
+			try
+			{
+				var version:String = Json.parse(File.getContent(path)).version;
+				if (version != null) return version;
+			}
+			catch (e:Dynamic) {}
+		}
+
+		return "0.0.0";
 	}
 
 	private static function isCacheCurrent(cacheFile:String, sourcePath:String):Bool

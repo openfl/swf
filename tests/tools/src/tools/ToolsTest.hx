@@ -80,6 +80,15 @@ class ToolsTest extends Test
 		Assert.isNull(findTemplate(disabled, "Clip.hx"));
 	}
 
+	public function testVersionComesFromHaxelibJson():Void
+	{
+		// run.n is next to haxelib.json, here the repository is three directories up from tests/tools/bin
+		var root = Path.combine(Path.directory(Sys.programPath()), "../../..");
+		var expected:String = Json.parse(File.getContent(Path.combine(root, "haxelib.json"))).version;
+		Assert.equals(expected, Tools.getVersion(root));
+		Assert.equals("0.0.0", Tools.getVersion(createDirectory("no-haxelib-json")));
+	}
+
 	private static function createClipSWF():SWFBuilder
 	{
 		return new SWFBuilder().add(SWFBuilder.createSprite(1)).link(1, "Clip");
