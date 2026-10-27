@@ -3,6 +3,6 @@ class ToolsTestMain
 {
 	public static function main():Void
 	{
-		utest.UTest.run([new tools.AnimateLibraryExporterTest(), new tools.ToolsTest()]);
+		utest.UTest.run([new tools.AnimateLibraryExporterTest(), new tools.RoundTripTest(), new tools.ToolsTest()]);
 	}
 }

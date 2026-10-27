@@ -197,6 +197,12 @@ jobs:
           haxe tools.hxml
           neko bin/tools.n
 
+      - name: Run tools tests with compact timelines
+        working-directory: tests/tools
+        run: |
+          haxe tools.hxml -D swf_compact_animate_timelines
+          neko bin/tools.n
+
   unit-test-hashlink:
     strategy:
       matrix:
