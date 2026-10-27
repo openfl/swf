@@ -8,6 +8,10 @@ import utest.Assert;
 import utest.Test;
 
 @:access(swf.exporters.animate.AnimateShapeSymbol)
+#if !flash
+@:access(openfl.display.Graphics)
+@:access(openfl.display._internal.DrawCommandBuffer)
+#end
 class AnimateShapeSymbolTest extends Test
 {
 	public function testCompactCommandsRenderLikeLegacyCommands():Void
@@ -52,6 +56,19 @@ class AnimateShapeSymbolTest extends Test
 		Assert.same(legacyShape.graphics.readGraphicsData(false), compactShape.graphics.readGraphicsData(false));
 		Assert.same(legacyShape.graphics.readGraphicsData(false), cachedCompactShape.graphics.readGraphicsData(false));
 		Assert.same(legacyShape.getBounds(legacyShape), compactShape.getBounds(compactShape));
+
+		#if !flash
+		// readGraphicsData() does not report line gradients, so compare the raw draw commands too
+		var legacyCommands = legacyShape.graphics.__commands;
+		var compactCommands = compactShape.graphics.__commands;
+		Assert.same(legacyCommands.types, compactCommands.types);
+		Assert.same(legacyCommands.b, compactCommands.b);
+		Assert.same(legacyCommands.f, compactCommands.f);
+		Assert.same(legacyCommands.i, compactCommands.i);
+		Assert.same(legacyCommands.ii, compactCommands.ii);
+		Assert.same(legacyCommands.ff, compactCommands.ff);
+		Assert.same(legacyCommands.o, compactCommands.o);
+		#end
 		Assert.isNull(compact.commands);
 		Assert.isNull(compact.compactCommands);
 	}
