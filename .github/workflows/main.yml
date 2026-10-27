@@ -126,6 +126,41 @@ jobs:
         run: |
           haxelib run openfl test neko
 
+  unit-test-tools:
+    strategy:
+      matrix:
+        haxe-version: [4.2.5, 4.3.6]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: ${{ matrix.haxe-version }}
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install hxp --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Rebuild swf run.n
+        run: |
+          haxe rebuild.hxml
+
+      - name: Run tools tests
+        working-directory: tests/tools
+        run: |
+          haxe tools.hxml
+          neko bin/tools.n
+
   unit-test-hashlink:
     strategy:
       matrix:
