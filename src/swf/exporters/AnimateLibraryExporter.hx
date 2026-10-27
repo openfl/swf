@@ -4,6 +4,9 @@ import format.png.Data;
 import format.png.Writer as PNGWriter;
 import swf.data.consts.BitmapFormat;
 import swf.data.consts.BlendMode;
+import swf.data.consts.SoundCompression;
+import swf.data.consts.SoundRate;
+import swf.data.consts.SoundSize;
 import swf.data.filters.IFilter;
 import swf.data.SWFButtonRecord;
 import swf.data.SWFSymbol;
@@ -51,6 +54,7 @@ import openfl.text.TextFormatAlign;
 import openfl.utils.AssetManifest;
 import openfl.utils.AssetType;
 import openfl.utils.ByteArray;
+import openfl.utils.Endian;
 import haxe.crypto.Crc32;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
@@ -1081,13 +1085,12 @@ class AnimateLibraryExporter
 		return symbol;
 	}
 
-	private function addSound(tag:IDefinitionTag):Void
+	private function addSound(tag:IDefinitionTag):Dynamic
 	{
 		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 		{
 			var defineSound:TagDefineSound = cast tag;
 
-			var byteArray = defineSound.soundData;
 			var type:SoundType = switch (defineSound.soundFormat)
 			{
 				case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
@@ -1097,58 +1100,96 @@ class AnimateLibraryExporter
 				case 4: SoundType.NELLYMOSER_16_KHZ;
 				case 5: SoundType.NELLYMOSER_8_KHZ;
 				case 6: SoundType.NELLYMOSER;
-				case 7: SoundType.SPEEX;
+				case 11: SoundType.SPEEX;
 				case _: throw("invalid sound type!");
 			}
 
-			// TODO
+			var byteArray:ByteArray = null;
+			var extension:String = null;
 
-			// 			var entry:Entry = {
-			// 				fileName: symbol.path,
-			// 				fileSize: byteArray.length,
-			// 				fileTime: Date.now(),
-			// 				compressed: false,
-			// 				dataSize: 0,
-			// 				data: byteArray,
-			// 				crc32: Crc32.make(byteArray)
-			// 			};
-			// 			outputList.add(entry);
+			switch (type)
+			{
+				case MP3:
+					// skip SeekSamples, the rest is MP3 frames
+					byteArray = new ByteArray();
+					if (defineSound.soundData.length > 2)
+					{
+						byteArray.writeBytes(defineSound.soundData, 2, defineSound.soundData.length - 2);
+					}
+					extension = "mp3";
 
-			// createdDirectory = false;
-			// 		for (id in exporter.sounds.keys())
-			// 		{
-			// 			if (!createdDirectory)
-			// 			{
-			// 				System.mkdir(Path.combine(targetPath, "sounds"));
-			// 				createdDirectory = true;
-			// 			}
+				case UNCOMPRESSED_NATIVE_ENDIAN, UNCOMPRESSED_LITTLE_ENDIAN:
+					byteArray = createWAV(defineSound);
+					extension = "wav";
 
-			// 			var symbolClassName = exporter.soundSymbolClassNames.get(id);
-			// 			var typeId = exporter.soundTypes.get(id);
+				default:
+					Log.warn("Skipping sound " + tag.characterId + ", " + SoundCompression.toString(defineSound.soundFormat)
+						+ " sounds cannot be exported");
+					return null;
+			}
 
-			// 			Log.info("", " - \x1b[1mExporting sound:\x1b[0m [id=" + id + ", type=" + typeId + ", symbolClassName=" + symbolClassName + "]");
+			var symbol:Dynamic = {};
+			symbol.type = SWFSymbolType.SOUND;
+			symbol.id = tag.characterId;
+			symbol.path = "sounds/" + symbol.id + "." + extension;
 
-			// 			var type;
-			// 			switch (typeId)
-			// 			{
-			// 				case SoundType.MP3:
-			// 					type = "mp3";
-			// 				case SoundType.ADPCM:
-			// 					type = "adpcm";
-			// 				case _:
-			// 					throw "unsupported sound type " + id + ", type " + typeId + ", symbol class name " + symbolClassName;
-			// 			};
-			// 			var path = "sounds/" + symbolClassName + "." + type;
-			// 			var assetData = exporter.sounds.get(id);
+			var entry:Entry = {
+				fileName: symbol.path,
+				fileSize: byteArray.length,
+				fileTime: Date.now(),
+				compressed: false,
+				dataSize: 0,
+				data: byteArray,
+				crc32: Crc32.make(byteArray)
+			};
+			outputList.add(entry);
 
-			// 			File.saveBytes(Path.combine(targetPath, path), assetData);
+			manifestData.assets.push({
+				path: symbol.path,
+				type: AssetType.SOUND
+			});
 
-			// 			// NOTICE: everything must be .mp3 in its final form, even though we write out various formats to disk
-			// 			var soundAsset = new Asset("", "sounds/" + symbolClassName + ".mp3", AssetType.SOUND);
-			// 			project.assets.push(soundAsset);
+			libraryData.symbols.set(symbol.id, symbol);
+
+			return symbol;
 		}
 
-		return;
+		return null;
+	}
+
+	private function createWAV(defineSound:TagDefineSound):ByteArray
+	{
+		var pcm = defineSound.soundData;
+		var channels = defineSound.soundType == swf.data.consts.SoundType.STEREO ? 2 : 1;
+		var bitsPerSample = defineSound.soundSize == SoundSize.BIT_16 ? 16 : 8;
+		var sampleRate = switch (defineSound.soundRate)
+		{
+			case SoundRate.KHZ_5: 5512;
+			case SoundRate.KHZ_11: 11025;
+			case SoundRate.KHZ_22: 22050;
+			default: 44100;
+		}
+		var blockAlign = channels * Std.int(bitsPerSample / 8);
+		var padding = pcm.length % 2;
+
+		var wav = new ByteArray();
+		wav.endian = Endian.LITTLE_ENDIAN;
+		wav.writeUTFBytes("RIFF");
+		wav.writeInt(36 + pcm.length + padding);
+		wav.writeUTFBytes("WAVE");
+		wav.writeUTFBytes("fmt ");
+		wav.writeInt(16);
+		wav.writeShort(1); // PCM
+		wav.writeShort(channels);
+		wav.writeInt(sampleRate);
+		wav.writeInt(sampleRate * blockAlign);
+		wav.writeShort(blockAlign);
+		wav.writeShort(bitsPerSample);
+		wav.writeUTFBytes("data");
+		wav.writeInt(pcm.length);
+		wav.writeBytes(pcm, 0, pcm.length);
+		if (padding > 0) wav.writeByte(0);
+		return wav;
 	}
 
 	/**
@@ -1448,7 +1489,7 @@ class AnimateLibraryExporter
 			}
 			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 			{
-				addSound(tag);
+				return addSound(tag);
 			}
 
 			return null;
@@ -1633,6 +1674,7 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to 
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var SOUND = 7;
 }
 
 #if (haxe_ver < 4.0) @:enum #end

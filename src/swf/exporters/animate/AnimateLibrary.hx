@@ -19,6 +19,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Future;
 import openfl.utils.Promise;
 #if lime
+import lime.media.AudioBuffer;
 import lime.utils.AssetBundle;
 import lime.utils.AssetManifest;
 import lime.utils.AssetLibrary as LimeAssetLibrary;
@@ -64,6 +65,7 @@ import openfl.filters.GlowFilter;
 	private var preloading:Bool;
 	private var root:AnimateSpriteSymbol;
 	private var rootPath:String;
+	private var soundClassNames:Map<String, String>;
 	private var symbols:Map<Int, AnimateSymbol>;
 	private var symbolsByClassName:Map<String, AnimateSymbol>;
 
@@ -77,6 +79,7 @@ import openfl.filters.GlowFilter;
 
 		alphaCheck = new Map();
 		bitmapClassNames = new Map();
+		soundClassNames = new Map();
 
 		#if (ios || tvos)
 		rootPath = "assets/";
@@ -127,7 +130,12 @@ import openfl.filters.GlowFilter;
 
 			if (type == null || type == (cast AssetType.IMAGE) || type == (cast AssetType.MOVIE_CLIP))
 			{
-				return (symbolsByClassName != null && symbolsByClassName.exists(id));
+				return (symbolsByClassName != null && symbolsByClassName.exists(id)) || (type == null && soundClassNames.exists(id));
+			}
+
+			if ((type == (cast AssetType.SOUND) || type == (cast AssetType.MUSIC)) && soundClassNames.exists(id))
+			{
+				return true;
 			}
 		}
 
@@ -139,6 +147,13 @@ import openfl.filters.GlowFilter;
 	{
 		return instances.get(uuid);
 	}
+
+	#if lime
+	public override function getAudioBuffer(id:String):AudioBuffer
+	{
+		return super.getAudioBuffer(__getSoundID(id));
+	}
+	#end
 
 	#if lime
 	public override function getImage(id:String):Image
@@ -257,6 +272,7 @@ import openfl.filters.GlowFilter;
 
 			var data:Dynamic, type:SWFSymbolType, symbol:AnimateSymbol = null;
 			var bitmapSymbol:AnimateBitmapSymbol;
+			var soundSymbol:AnimateSoundSymbol;
 			var spriteSymbol:AnimateSpriteSymbol;
 
 			symbols = new Map();
@@ -268,6 +284,7 @@ import openfl.filters.GlowFilter;
 				data = symbolData[i];
 				if (data == null) continue;
 				type = data.type;
+				symbol = null;
 
 				switch (type)
 				{
@@ -284,6 +301,10 @@ import openfl.filters.GlowFilter;
 						symbol = __parseFont(data);
 					case SHAPE:
 						symbol = __parseShape(data);
+					case SOUND:
+						soundSymbol = __parseSound(data);
+						if (soundSymbol.className != null) soundClassNames.set(soundSymbol.className, soundSymbol.path);
+						symbol = soundSymbol;
 					case SPRITE:
 						spriteSymbol = __parseSprite(data);
 						if (i == rootIndex) root = spriteSymbol;
@@ -295,7 +316,8 @@ import openfl.filters.GlowFilter;
 
 				if (symbol == null) continue;
 				symbols.set(symbol.id, symbol);
-				if (symbol.className != null)
+				// sounds are not display objects, so they are only found through soundClassNames
+				if (symbol.className != null && type != SOUND)
 				{
 					symbolsByClassName.set(symbol.className, symbol);
 					#if (openfl > "9.1.0")
@@ -357,6 +379,13 @@ import openfl.filters.GlowFilter;
 		}
 
 		return promise.future;
+	}
+	#end
+
+	#if lime
+	public override function loadAudioBuffer(id:String):Future<AudioBuffer>
+	{
+		return super.loadAudioBuffer(__getSoundID(id));
 	}
 	#end
 
@@ -507,6 +536,38 @@ import openfl.filters.GlowFilter;
 		{
 			bytesTotal += sizes.get(id);
 		}
+	}
+	#end
+
+	#if lime
+	private function __getSoundID(id:String):String
+	{
+		if (soundClassNames.exists(id))
+		{
+			id = soundClassNames.get(id);
+		}
+
+		// Lime keeps bundled sounds as bytes on HTML5, and does not decode them later
+		if (!cachedAudioBuffers.exists(id) && cachedBytes.exists(id))
+		{
+			var bytes = cachedBytes.get(id);
+			#if (js && html5 && lime_howlerjs)
+			// AudioBuffer.fromBytes() cannot detect MP3 data without an ID3 tag, which
+			// SWF files do not include, so use the file extension from the exporter
+			var audioBuffer = new AudioBuffer();
+			audioBuffer.src = new lime.media.howlerjs.Howl({
+				src: ["data:audio/" + haxe.io.Path.extension(id) + ";base64," + haxe.crypto.Base64.encode(bytes)],
+				html5: true,
+				preload: false
+			});
+			cachedAudioBuffers.set(id, audioBuffer);
+			#else
+			cachedAudioBuffers.set(id, AudioBuffer.fromBytes(bytes));
+			#end
+			cachedBytes.remove(id);
+		}
+
+		return id;
 	}
 	#end
 
@@ -693,6 +754,15 @@ import openfl.filters.GlowFilter;
 		return symbol;
 	}
 
+	private function __parseSound(data:Dynamic):AnimateSoundSymbol
+	{
+		var symbol = new AnimateSoundSymbol();
+		symbol.id = data.id;
+		symbol.className = data.className;
+		symbol.path = data.path;
+		return symbol;
+	}
+
 	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
 	{
 		if (data == null) return null;
@@ -792,4 +862,5 @@ import openfl.filters.GlowFilter;
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var SOUND = 7;
 }

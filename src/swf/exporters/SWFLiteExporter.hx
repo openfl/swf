@@ -844,7 +844,7 @@ class SWFLiteExporter
 				case 4: SoundType.NELLYMOSER_16_KHZ;
 				case 5: SoundType.NELLYMOSER_8_KHZ;
 				case 6: SoundType.NELLYMOSER;
-				case 7: SoundType.SPEEX;
+				case 11: SoundType.SPEEX;
 				case _: throw("invalid sound type!");
 			}
 			sounds.set(tag.characterId, byteArray);
@@ -869,6 +869,10 @@ class SWFLiteExporter
 		{
 			data2.className = symbol.name;
 			data2.baseClassName = FrameScriptParser.getBaseClassName(data, symbol.name);
+		}
+		else if (symbol.name != null && sounds.exists(symbol.tagId))
+		{
+			soundSymbolClassNames.set(symbol.tagId, symbol.name);
 		}
 	}
 
