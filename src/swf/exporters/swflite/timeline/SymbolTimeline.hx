@@ -461,7 +461,7 @@ class SymbolTimeline extends Timeline
 		{
 			displayObject.transform.colorTransform = frameObject.colorTransform;
 		}
-		else if (reset && !displayObject.transform.colorTransform.__isDefault(true))
+		else if (reset #if !flash && !displayObject.transform.colorTransform.__isDefault(true) #end)
 		{
 			displayObject.transform.colorTransform = new ColorTransform();
 		}
