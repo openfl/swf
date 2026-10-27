@@ -1,19 +1,23 @@
-3.5.0 (10/26/2026)
+3.5.0 (10/27/2026)
 ------------------
 
 * Added `DisplayObject.metaData` support for Animate libraries
 * Added `lineGradientStyle` support for SWF shapes in Animate, SWFLite and runtime shapes
 * Added caching of generated classes for Flash and AIR SWF libraries
 * Added export of linked MP3 and uncompressed sounds in Animate libraries (MP3 on native targets requires Lime 8.4 or newer)
+* Added the `swf_compact_animate_timelines` define, to keep Animate timelines in compact buffers instead of one object per frame and event
+* Added the `swf_hardware_bitmap_cache` define, to share Animate bitmaps and release their CPU images once uploaded
 * Improved `generate="true"` on Animate libraries to compile the generated classes, so symbols are created as their linkage class
 * Improved Animate shape memory usage by keeping commands compact until a shape is first drawn
 * Improved SWF exporter performance for shapes with many drawing commands
 * Improved timeline performance by caching instance field lists per class
+* Improved dynamic text performance by caching the embedded font found for each symbol
 * Changed `AnimateShapeSymbol.commands` to be `null` for shapes loaded from an Animate library
 * Fixed Animate and SWFLite exports of SWF files without ABC or `SymbolClass` tags, such as AS2 SWF files using `ExportAssets`
 * Fixed `SWFLibrary` failing to load non-embedded SWF files
 * Fixed processing SWF files with linked Speex sounds
 * Fixed generated Animate classes using another library's symbol when several libraries export the same class
+* Fixed generated Animate classes not being used, or extending the wrong base class, when the library has a `prefix`
 * Fixed the document class not being applied to the root timeline when it is not named `*_fla.MainTimeline`
 * Fixed clipping characters being displayed when nothing is in their mask range
 * Fixed reused timeline instances keeping an outdated `clipDepth`
@@ -25,6 +29,7 @@
 * Fixed C++ compile error in `AnimateLibraryExporter` class generation
 * Fixed Animate libraries created without a UUID being registered under a `null` key
 * Fixed processed Animate ZIP files not being closed after writing
+* Fixed the command-line tools showing the version of Lime instead of swf
 
 
 3.4.0 (11/11/2025)
