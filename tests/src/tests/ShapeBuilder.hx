@@ -5,6 +5,7 @@ import swf.data.SWFGradient;
 import swf.data.SWFGradientRecord;
 import swf.data.SWFLineStyle2;
 import swf.data.SWFMatrix;
+import swf.data.SWFShape;
 import swf.data.SWFShapeRecordCurvedEdge;
 import swf.data.SWFShapeRecordEnd;
 import swf.data.SWFShapeRecordStraightEdge;
@@ -129,6 +130,17 @@ class ShapeBuilder
 	{
 		shape.records.push(new SWFShapeRecordEnd());
 		return shape;
+	}
+
+	// Only the records, like the start and end edges of a morph shape
+	public function edges():SWFShape
+	{
+		var edges = new SWFShape();
+		for (record in end().records)
+		{
+			edges.records.push(record);
+		}
+		return edges;
 	}
 
 	// A readable description of shape commands, with numbers rounded so it is the same on every target

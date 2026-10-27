@@ -28,6 +28,7 @@
 * Fixed SWFLite timelines failing to compile on the Flash target
 * Fixed `DefineFont2` and `DefineFont3` parsing reading past the tag for fonts without layout
 * Fixed `SWFRoot.publish()` sizing bit fields from the decimal digits of each value, which wrote broken matrices, rectangles, color transforms and shapes
+* Fixed morph shapes moving to the origin at style changes, leaving paths open, and losing focal gradients, gradient modes and the width of filled lines
 * Fixed generated Flash/AIR classes being written to the wrong package directory
 * Fixed C++ compile error in `AnimateLibraryExporter` class generation
 * Fixed Animate libraries created without a UUID being registered under a `null` key
