@@ -10,6 +10,7 @@ import openfl.geom.Rectangle;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
+@:access(swf.exporters.animate.AnimateLibrary)
 @:access(openfl.display.Sprite)
 class AnimateSpriteSymbol extends AnimateSymbol
 {
@@ -57,9 +58,9 @@ class AnimateSpriteSymbol extends AnimateSymbol
 		}
 		#end
 
-		var symbolType = null;
+		var symbolType = library.__getGeneratedClass(id);
 
-		if (className != null)
+		if (symbolType == null && className != null)
 		{
 			symbolType = Type.resolveClass(SymbolUtils.formatClassName(className));
 

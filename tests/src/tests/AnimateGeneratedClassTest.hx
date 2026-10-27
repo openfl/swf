@@ -31,13 +31,28 @@ class AnimateGeneratedClassTest extends Test
 		Assert.same(new Rectangle(1, 2, 3, 4), clip.scale9Grid);
 		Assert.isNull(AnimateSymbol.__pendingSymbol);
 	}
+
+	public function testPrefixedGeneratedClass():Void
+	{
+		// with a prefix, the generated class is not named after the linkage, so it is found by library and symbol
+		var library = createLibrary(LibPrefixedTestClip.UUID, new Rectangle(1, 2, 3, 4), "tests.PrefixedTestClip");
+		var clip:MovieClip = cast library.symbols.get(1).__createObject(library);
+		Assert.equals(Type.getClassName(LibPrefixedTestClip), Type.getClassName(Type.getClass(clip)));
+		Assert.same(new Rectangle(1, 2, 3, 4), clip.scale9Grid);
+
+		// another library with the same linkage did not generate this class
+		var other = createLibrary("generated-prefix-test-other", new Rectangle(5, 6, 7, 8), "tests.PrefixedTestClip");
+		var otherClip:MovieClip = cast other.symbols.get(1).__createObject(other);
+		Assert.equals(Type.getClassName(MovieClip), Type.getClassName(Type.getClass(otherClip)));
+		Assert.same(new Rectangle(5, 6, 7, 8), otherClip.scale9Grid);
+	}
 	#end
 
-	private static function createLibrary(uuid:String, scale9Grid:Rectangle):AnimateLibrary
+	private static function createLibrary(uuid:String, scale9Grid:Rectangle, className:String = null):AnimateLibrary
 	{
 		var symbol = new AnimateSpriteSymbol();
 		symbol.id = 1;
-		symbol.className = Type.getClassName(GeneratedTestClip);
+		symbol.className = className != null ? className : Type.getClassName(GeneratedTestClip);
 		symbol.frames.push(new AnimateFrame());
 		symbol.scale9Grid = scale9Grid;
 

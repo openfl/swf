@@ -6,6 +6,11 @@ class GeneratedTestClip extends openfl.display.MovieClip
 {
 	public static inline var UUID = "generated-class-test-a";
 
+	@:noCompletion private static function __init__():Void
+	{
+		swf.exporters.animate.AnimateLibrary.__registerGeneratedClass(UUID, 1, GeneratedTestClip);
+	}
+
 	public function new()
 	{
 		if (!swf.exporters.animate.AnimateSymbol.__initPending(GeneratedTestClip))

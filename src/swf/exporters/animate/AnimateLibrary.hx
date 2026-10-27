@@ -54,6 +54,8 @@ import openfl.filters.GlowFilter;
 	];
 	#end
 
+	// Generated classes register here from __init__, which can run before static initializers
+	@:noCompletion private static var __generatedClasses:Map<String, Class<Dynamic>>;
 	private static var instances:Map<String, AnimateLibrary> = new Map();
 
 	private var alphaCheck:Map<String, Bool>;
@@ -539,6 +541,12 @@ import openfl.filters.GlowFilter;
 	}
 	#end
 
+	// Generated class names can have a prefix, so symbols find their class by library and symbol ID
+	@:noCompletion private function __getGeneratedClass(symbolID:Int):Class<Dynamic>
+	{
+		return __generatedClasses != null ? __generatedClasses.get(instanceID + ":" + symbolID) : null;
+	}
+
 	#if lime
 	private function __getSoundID(id:String):String
 	{
@@ -831,6 +839,13 @@ import openfl.filters.GlowFilter;
 		symbol.matrix = __parseMatrix(data.matrix);
 		symbol.records = data.records;
 		return symbol;
+	}
+
+	// Called from __init__ by generated classes that are compiled
+	@:noCompletion private static function __registerGeneratedClass(uuid:String, symbolID:Int, type:Class<Dynamic>):Void
+	{
+		if (__generatedClasses == null) __generatedClasses = new Map();
+		__generatedClasses.set(uuid + ":" + symbolID, type);
 	}
 
 	private inline function __pixel(value:Int):Float

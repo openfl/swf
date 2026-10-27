@@ -9,6 +9,7 @@ import openfl.display.SimpleButton;
 @:noDebug
 #end
 @:access(openfl.display.SimpleButton)
+@:access(swf.exporters.animate.AnimateLibrary)
 class AnimateButtonSymbol extends AnimateSymbol
 {
 	public var downState:AnimateSpriteSymbol;
@@ -59,18 +60,16 @@ class AnimateButtonSymbol extends AnimateSymbol
 		}
 		#end
 
-		if (className != null)
-		{
-			var symbolType = Type.resolveClass(SymbolUtils.formatClassName(className));
+		var symbolType = library.__getGeneratedClass(id);
 
-			if (symbolType != null)
-			{
-				simpleButton = __createInstance(library, symbolType);
-			}
-			else
-			{
-				// Log.warn ("Could not resolve class \"" + symbol.className + "\"");
-			}
+		if (symbolType == null && className != null)
+		{
+			symbolType = Type.resolveClass(SymbolUtils.formatClassName(className));
+		}
+
+		if (symbolType != null)
+		{
+			simpleButton = __createInstance(library, symbolType);
 		}
 
 		if (simpleButton == null)

@@ -1214,6 +1214,15 @@ class AnimateLibraryExporter
 		var generatedClasses = [];
 		var classDependencies = new Map<String, Array<String>>();
 
+		var libraryClassNames = new Map<String, Bool>();
+		for (symbol in libraryData.symbols)
+		{
+			if (Reflect.hasField(symbol, "className") && symbol.className != null)
+			{
+				libraryClassNames.set(symbol.className, true);
+			}
+		}
+
 		for (symbolID in libraryData.symbols.keys())
 		{
 			var symbol = libraryData.symbols.get(symbolID);
@@ -1232,6 +1241,11 @@ class AnimateLibraryExporter
 				if (Reflect.hasField(symbol, "baseClassName"))
 				{
 					baseClassName = symbol.baseClassName;
+					// a base class from this library is generated too, with the same prefix
+					if (baseClassName != null && libraryClassNames.exists(baseClassName))
+					{
+						baseClassName = SymbolUtils.formatClassName(baseClassName, prefix);
+					}
 				}
 			}
 			else if (type == BUTTON)

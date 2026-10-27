@@ -4,6 +4,11 @@ package ::PACKAGE_NAME::;
 
 class ::CLASS_NAME:: extends ::if BASE_CLASS_NAME::::BASE_CLASS_NAME::::else::#if flash flash.display.SimpleButton.SimpleButton2 #else openfl.display.SimpleButton #end::end::
 {
+	@:noCompletion private static function __init__():Void
+	{
+		swf.exporters.animate.AnimateLibrary.__registerGeneratedClass("::UUID::", ::SYMBOL_ID::, ::CLASS_NAME::);
+	}
+
 	public function new()
 	{
 		if (!swf.exporters.animate.AnimateSymbol.__initPending(::CLASS_NAME::))

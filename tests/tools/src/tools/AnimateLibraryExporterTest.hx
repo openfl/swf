@@ -42,6 +42,28 @@ class AnimateLibraryExporterTest extends Test
 		Assert.same(["Child", "Clip"], getIncludedClasses("Clip"));
 	}
 
+	public function testPrefixedGeneratedClasses():Void
+	{
+		var exporter = createChildAndClip("Child");
+		var output:Array<Asset> = [];
+		var included = [];
+		var generated = exporter.generateClasses("generated", output, "lib", included);
+		generated.sort(Reflect.compare);
+		included.sort(Reflect.compare);
+		Assert.same(["LibChild", "LibClip"], generated);
+		Assert.same(["LibChild", "LibClip"], included);
+
+		var clip:String = null;
+		for (asset in output)
+		{
+			if (Path.withoutDirectory(asset.targetPath) == "LibClip.hx") clip = asset.data;
+		}
+		// the base class from this library is generated with the same prefix
+		Assert.isTrue(clip.indexOf("class LibClip extends LibChild") > -1);
+		// generated classes register themselves, since their names do not match the linkage
+		Assert.isTrue(clip.indexOf('__registerGeneratedClass("' + exporter.libraryData.uuid + '", 2, LibClip)') > -1);
+	}
+
 	public function testSymbolClassZeroIsRoot():Void
 	{
 		// the document class is linked to character 0, and is not always named *_fla.MainTimeline
@@ -139,21 +161,29 @@ class AnimateLibraryExporterTest extends Test
 
 	private static function getIncludedClasses(childBaseClassName:String):Array<String>
 	{
-		var exporter = export(new SWFBuilder().parse());
-		exporter.libraryData.symbols = new Map();
-		exporter.libraryData.symbols.set(1, {type: 5, id: 1, className: "Child", baseClassName: childBaseClassName, frames: []});
-		exporter.libraryData.symbols.set(2, {
-			type: 5,
-			id: 2,
-			className: "Clip",
-			baseClassName: null,
-			frames: [{objects: [{name: "child", symbol: 1}]}]
-		});
+		var exporter = createChildAndClip(null);
+		exporter.libraryData.symbols.get(1).baseClassName = childBaseClassName;
 
 		var included = [];
 		exporter.generateClasses("generated", [], "", included);
 		included.sort(Reflect.compare);
 		return included;
+	}
+
+	// Clip has a child field of type Child
+	private static function createChildAndClip(clipBaseClassName:String):AnimateLibraryExporter
+	{
+		var exporter = export(new SWFBuilder().parse());
+		exporter.libraryData.symbols = new Map();
+		exporter.libraryData.symbols.set(1, {type: 5, id: 1, className: "Child", baseClassName: null, frames: []});
+		exporter.libraryData.symbols.set(2, {
+			type: 5,
+			id: 2,
+			className: "Clip",
+			baseClassName: clipBaseClassName,
+			frames: [{objects: [{name: "child", symbol: 1}]}]
+		});
+		return exporter;
 	}
 
 	private static function export(swf:SWFRoot, path:String = null):AnimateLibraryExporter
