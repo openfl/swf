@@ -1335,7 +1335,7 @@ class AnimateLibraryExporter
 	{
 		var data2 = processTag(cast swfData.getCharacter(symbol.tagId));
 
-		if (data2 == null && ~/_fla\.MainTimeline$/.match(symbol.name))
+		if (data2 == null && (symbol.tagId == 0 || ~/_fla\.MainTimeline$/.match(symbol.name)))
 		{
 			data2 = libraryData.root;
 		}
