@@ -90,7 +90,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 		if (symbolType != null)
 		{
-			sprite = Type.createInstance(symbolType, []);
+			sprite = __createInstance(library, symbolType);
 		}
 		else
 		{

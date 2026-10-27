@@ -65,7 +65,7 @@ class AnimateButtonSymbol extends AnimateSymbol
 
 			if (symbolType != null)
 			{
-				simpleButton = Type.createInstance(symbolType, []);
+				simpleButton = __createInstance(library, symbolType);
 			}
 			else
 			{
