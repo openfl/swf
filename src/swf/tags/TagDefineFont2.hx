@@ -83,11 +83,15 @@ class TagDefineFont2 extends TagDefineFont implements IDefinitionTag
 				codeTable.push(wideCodes ? data.readUI16() : data.readUI8());
 			}
 		}
-		else if (length - (data.position - start) > (hasLayout ? 8 : 0))
+		else
 		{
 			// Flash may write a CodeTableOffset even when there are no glyphs.
 			// Without glyphs to kern, the layout that follows is 8 bytes.
-			data.skipBytes(wideOffsets ? 4 : 2);
+			var remaining:Int = length - (data.position - start);
+			if (remaining > (hasLayout ? 8 : 0))
+			{
+				data.skipBytes(wideOffsets ? 4 : 2);
+			}
 		}
 		if (hasLayout)
 		{
