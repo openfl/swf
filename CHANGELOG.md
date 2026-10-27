@@ -1,3 +1,32 @@
+3.5.0 (10/26/2026)
+------------------
+
+* Added `DisplayObject.metaData` support for Animate libraries
+* Added `lineGradientStyle` support for SWF shapes in Animate, SWFLite and runtime shapes
+* Added caching of generated classes for Flash and AIR SWF libraries
+* Added export of linked MP3 and uncompressed sounds in Animate libraries (MP3 on native targets requires Lime 8.4 or newer)
+* Improved `generate="true"` on Animate libraries to compile the generated classes, so symbols are created as their linkage class
+* Improved Animate shape memory usage by keeping commands compact until a shape is first drawn
+* Improved SWF exporter performance for shapes with many drawing commands
+* Improved timeline performance by caching instance field lists per class
+* Changed `AnimateShapeSymbol.commands` to be `null` for shapes loaded from an Animate library
+* Fixed Animate and SWFLite exports of SWF files without ABC or `SymbolClass` tags, such as AS2 SWF files using `ExportAssets`
+* Fixed `SWFLibrary` failing to load non-embedded SWF files
+* Fixed processing SWF files with linked Speex sounds
+* Fixed generated Animate classes using another library's symbol when several libraries export the same class
+* Fixed the document class not being applied to the root timeline when it is not named `*_fla.MainTimeline`
+* Fixed clipping characters being displayed when nothing is in their mask range
+* Fixed reused timeline instances keeping an outdated `clipDepth`
+* Fixed Animate `blendMode` being set to the string `"null"`
+* Fixed `clippingLayer` being set on the Flash target
+* Fixed SWFLite timelines failing to compile on the Flash target
+* Fixed `DefineFont2` and `DefineFont3` parsing reading past the tag for fonts without layout
+* Fixed generated Flash/AIR classes being written to the wrong package directory
+* Fixed C++ compile error in `AnimateLibraryExporter` class generation
+* Fixed Animate libraries created without a UUID being registered under a `null` key
+* Fixed processed Animate ZIP files not being closed after writing
+
+
 3.4.0 (11/11/2025)
 ------------------
 

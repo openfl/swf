@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
-	"version": "3.4.0",
-	"releasenote": "Fix duplicate scale9Grid graphics, improved clipping layers, new filters",
+	"version": "3.5.0",
+	"releasenote": "Line gradient styles, lower Animate shape memory use, clipping and exporter fixes",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",
