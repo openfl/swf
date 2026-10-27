@@ -39,76 +39,78 @@ class AnimateShapeSymbol extends AnimateSymbol
 	private override function __createObject(library:AnimateLibrary):Shape
 	{
 		var shape = new Shape();
-		var graphics = shape.graphics;
+		shape.graphics.copyFrom(__getRendered(library).graphics);
+		return shape;
+	}
 
-		if (rendered != null)
+	private function __getRendered(library:AnimateLibrary):Shape
+	{
+		if (rendered == null)
 		{
-			graphics.copyFrom(rendered.graphics);
-			return shape;
-		}
+			rendered = new Shape();
+			var graphics = rendered.graphics;
 
-		if (compactCommands != null)
-		{
-			__renderCompactCommands(graphics, library);
-		}
-		else if (commands != null)
-		{
-			for (command in commands)
+			if (compactCommands != null)
 			{
-				switch (command)
+				__renderCompactCommands(graphics, library);
+			}
+			else if (commands != null)
+			{
+				for (command in commands)
 				{
-					case BeginFill(color, alpha):
-						graphics.beginFill(color, alpha);
+					switch (command)
+					{
+						case BeginFill(color, alpha):
+							graphics.beginFill(color, alpha);
 
-					case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-						__beginBitmapFill(graphics, library, bitmapID, matrix, repeat, smooth);
+						case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
+							__beginBitmapFill(graphics, library, bitmapID, matrix, repeat, smooth);
 
-					case BeginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						#if flash
-						var colors:Array<UInt> = cast colors;
-						#end
-						graphics.beginGradientFill(GradientType.fromInt(fillType), colors, alphas, ratios, matrix, SpreadMethod.fromInt(spreadMethod),
-							InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
+						case BeginGradientFill(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+							#if flash
+							var colors:Array<UInt> = cast colors;
+							#end
+							graphics.beginGradientFill(GradientType.fromInt(fillType), colors, alphas, ratios, matrix, SpreadMethod.fromInt(spreadMethod),
+								InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
 
-					case CurveTo(controlX, controlY, anchorX, anchorY):
-						graphics.curveTo(controlX, controlY, anchorX, anchorY);
+						case CurveTo(controlX, controlY, anchorX, anchorY):
+							graphics.curveTo(controlX, controlY, anchorX, anchorY);
 
-					case EndFill:
-						graphics.endFill();
+						case EndFill:
+							graphics.endFill();
 
-					case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
-						if (thickness != null)
-						{
-							graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.fromInt(scaleMode), CapsStyle.fromInt(caps),
-								JointStyle.fromInt(joints), miterLimit);
-						}
-						else
-						{
-							graphics.lineStyle();
-						}
+						case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, caps, joints, miterLimit):
+							if (thickness != null)
+							{
+								graphics.lineStyle(thickness, color, alpha, pixelHinting, LineScaleMode.fromInt(scaleMode), CapsStyle.fromInt(caps),
+									JointStyle.fromInt(joints), miterLimit);
+							}
+							else
+							{
+								graphics.lineStyle();
+							}
 
-					case LineGradientStyle(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						#if flash
-						var colors:Array<UInt> = cast colors;
-						#end
-						graphics.lineGradientStyle(GradientType.fromInt(fillType), colors, alphas, ratios, matrix, SpreadMethod.fromInt(spreadMethod),
-							InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
+						case LineGradientStyle(fillType, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+							#if flash
+							var colors:Array<UInt> = cast colors;
+							#end
+							graphics.lineGradientStyle(GradientType.fromInt(fillType), colors, alphas, ratios, matrix, SpreadMethod.fromInt(spreadMethod),
+								InterpolationMethod.fromInt(interpolationMethod), focalPointRatio);
 
-					case LineTo(x, y):
-						graphics.lineTo(x, y);
+						case LineTo(x, y):
+							graphics.lineTo(x, y);
 
-					case MoveTo(x, y):
-						graphics.moveTo(x, y);
+						case MoveTo(x, y):
+							graphics.moveTo(x, y);
+					}
 				}
 			}
+
+			commands = null;
+			compactCommands = null;
 		}
 
-		commands = null;
-		compactCommands = null;
-		rendered = new Shape();
-		rendered.graphics.copyFrom(shape.graphics);
-
-		return shape;
+		return rendered;
 	}
 
 	private static function __beginBitmapFill(graphics:openfl.display.Graphics, library:AnimateLibrary, bitmapID:Int, matrix:openfl.geom.Matrix, repeat:Bool,

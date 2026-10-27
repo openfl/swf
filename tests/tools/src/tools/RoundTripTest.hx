@@ -13,6 +13,7 @@ import swf.tags.TagPlaceObject2;
 import swf.tags.TagRemoveObject2;
 import swf.tags.TagShowFrame;
 import sys.io.File;
+import tests.MorphShapeTest;
 import tests.SWFBuilder;
 import tests.ShapeBuilder;
 import utest.Assert;
@@ -22,6 +23,7 @@ import utest.Test;
 // Exports a SWF with the Animate exporter, loads the result with AnimateLibrary, and plays it,
 // so the runtime is tested with the data the exporter really writes
 @:access(openfl.display.DisplayObject)
+@:access(swf.exporters.AnimateLibraryExporter)
 class RoundTripTest extends Test
 {
 	public function testTimelineRoundTrip(async:Async):Void
@@ -77,6 +79,66 @@ class RoundTripTest extends Test
 				clip.gotoAndStop(frame);
 				Assert.equals(expected[frame - 1], describe(clip), "frame " + frame + " after rewinding");
 			}
+
+			library.unload();
+			async.done();
+		}).onError(function(error)
+		{
+			Assert.fail("Could not load the exported library: " + error);
+			async.done();
+		});
+	}
+
+	public function testMorphShapeRoundTrip(async:Async):Void
+	{
+		// a morph shape whose start and end edges do not match is skipped
+		var broken = MorphShapeTest.createMorphShape(2, 400, 800);
+		broken.endEdges = new ShapeBuilder().move(0, 0).lineTo(800, 0).lineTo(-800, 0).edges();
+
+		var sprite = new TagDefineSprite();
+		sprite.characterId = 10;
+		sprite.frameCount = 4;
+		var frames:Array<Array<swf.tags.ITag>> = [[place(1, 1)], [morph(1, 32768)], [morph(1, 65535)], [place(2, 2)]];
+		for (frame in frames)
+		{
+			for (tag in frame)
+			{
+				sprite.tags.push(tag);
+			}
+			sprite.tags.push(new TagShowFrame());
+		}
+		sprite.tags.push(new TagEnd());
+
+		var swf = new SWFBuilder().add(MorphShapeTest.createMorphShape(1, 400, 800)).add(broken).add(sprite).link(10, "MorphClip").parse();
+		var path = AnimateLibraryExporterTest.tempPath("morph-round-trip.zip");
+		var exporter = new AnimateLibraryExporter(swf, path);
+
+		// each ratio is drawn once, and placements without a ratio start at 0
+		var morphShape:Dynamic = exporter.libraryData.symbols.get(1);
+		Assert.equals(8, morphShape.type);
+		Assert.same([0, 32768, 65535], morphShape.ratios);
+		Assert.equals(3, morphShape.shapes.length);
+		Assert.isFalse(exporter.libraryData.symbols.exists(2));
+		var ratios = [];
+		for (frame in (exporter.libraryData.symbols.get(10).frames : Array<Dynamic>))
+		{
+			for (object in (frame.objects : Array<Dynamic>))
+			{
+				if (object.symbol == 1) ratios.push(object.ratio);
+			}
+		}
+		Assert.same([0, 32768, 65535], ratios);
+
+		AnimateLibrary.loadFromBytes(File.getBytes(path)).onComplete(function(library)
+		{
+			var clip = library.getMovieClip("MorphClip");
+			var states = [];
+			for (frame in [1, 2, 3, 4, 2, 1])
+			{
+				clip.gotoAndStop(frame);
+				states.push(describe(clip));
+			}
+			Assert.equals("20x20 at 0, 30x30 at 0, 40x40 at 0, 40x40 at 0, 30x30 at 0, 20x20 at 0", states.join(", "));
 
 			library.unload();
 			async.done();
@@ -153,6 +215,16 @@ class RoundTripTest extends Test
 		tag.hasMatrix = true;
 		tag.matrix = new SWFMatrix();
 		tag.matrix.translateX = x;
+		return tag;
+	}
+
+	private static function morph(depth:Int, ratio:Int):TagPlaceObject2
+	{
+		var tag = new TagPlaceObject2();
+		tag.depth = depth;
+		tag.hasMove = true;
+		tag.hasRatio = true;
+		tag.ratio = ratio;
 		return tag;
 	}
 

@@ -108,6 +108,23 @@ class AnimateBitmapSymbolTest extends Test
 		#end
 	}
 
+	public function testMorphShapeBitmapsStayReadable():Void
+	{
+		#if (lime && swf_hardware_bitmap_cache)
+		var library = createLibrary("morph-shape-bitmap-test");
+		var bitmapSymbol = addBitmap(library, 1, "morph-shape-bitmap.png");
+
+		var data:Array<Dynamic> = [0, bitmapSymbol.id, null, true, true, 8, 0, 0, 7, 640, 0, 7, 640, 640, 7, 0, 640, 5];
+		var morphShape = library.__parseMorphShape({id: 2, ratios: [0], shapes: [data]});
+		library.symbols.set(morphShape.id, morphShape);
+
+		library.__markShapeBitmapsReadable();
+		Assert.isTrue(bitmapSymbol.__createBitmapData(library).readable);
+		#else
+		Assert.isTrue(true);
+		#end
+	}
+
 	private static function createLibrary(id:String):AnimateLibrary
 	{
 		var library = new AnimateLibrary(id, id);

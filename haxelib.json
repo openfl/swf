@@ -5,7 +5,7 @@
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
 	"version": "3.5.0",
-	"releasenote": "Linked sounds, line gradients, generated class fixes, opt-in compact timelines and bitmap cache, many timeline and exporter fixes",
+	"releasenote": "Shape tweens, linked sounds, line gradients, generated class fixes, opt-in compact timelines and bitmap cache, many timeline and exporter fixes",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",

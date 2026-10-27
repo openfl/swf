@@ -240,17 +240,25 @@ import openfl.filters.GlowFilter;
 	{
 		for (symbol in symbols)
 		{
-			#if (haxe_ver >= 4.2)
-			if (Std.isOfType(symbol, AnimateShapeSymbol))
-			#else
-			if (Std.is(symbol, AnimateShapeSymbol))
-			#end
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateShapeSymbol))
 			{
-				for (bitmapID in cast(symbol, AnimateShapeSymbol).__getBitmapFillIDs())
+				__markFillBitmapsReadable(cast symbol);
+			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateMorphShapeSymbol))
+			{
+				for (shape in cast(symbol, AnimateMorphShapeSymbol).shapes)
 				{
-					__markBitmapDataReadable(cast symbols.get(bitmapID));
+					__markFillBitmapsReadable(shape);
 				}
 			}
+		}
+	}
+
+	private function __markFillBitmapsReadable(shape:AnimateShapeSymbol):Void
+	{
+		for (bitmapID in shape.__getBitmapFillIDs())
+		{
+			__markBitmapDataReadable(cast symbols.get(bitmapID));
 		}
 	}
 	#end
@@ -406,6 +414,8 @@ import openfl.filters.GlowFilter;
 						symbol = __parseDynamicText(data);
 					case FONT:
 						symbol = __parseFont(data);
+					case MORPH_SHAPE:
+						symbol = __parseMorphShape(data);
 					case SHAPE:
 						symbol = __parseShape(data);
 					case SOUND:
@@ -903,6 +913,7 @@ import openfl.filters.GlowFilter;
 					object.id = objectData.id;
 					object.matrix = __parseMatrix(objectData.matrix);
 					object.name = objectData.name;
+					object.ratio = objectData.ratio;
 					object.symbol = objectData.symbol;
 					object.type = objectData.type;
 					object.visible = objectData.visible;
@@ -917,6 +928,25 @@ import openfl.filters.GlowFilter;
 	private function __parseMatrix(values:Array<Float>):Matrix
 	{
 		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(cast values[4]), __pixel(cast values[5])) : null;
+	}
+
+	private function __parseMorphShape(data:Dynamic):AnimateMorphShapeSymbol
+	{
+		var symbol = new AnimateMorphShapeSymbol();
+		symbol.id = data.id;
+		symbol.ratios = [];
+		symbol.shapes = [];
+		var ratios:Array<Dynamic> = data.ratios;
+		var shapes:Array<Dynamic> = data.shapes;
+		for (i in 0...ratios.length)
+		{
+			var shape = new AnimateShapeSymbol();
+			shape.id = symbol.id;
+			shape.__setCompactCommands(shapes[i]);
+			symbol.ratios.push(Std.int(ratios[i]));
+			symbol.shapes.push(shape);
+		}
+		return symbol;
 	}
 
 	private function __parseShape(data:Dynamic):AnimateShapeSymbol
@@ -1001,4 +1031,5 @@ import openfl.filters.GlowFilter;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
 	public var SOUND = 7;
+	public var MORPH_SHAPE = 8;
 }

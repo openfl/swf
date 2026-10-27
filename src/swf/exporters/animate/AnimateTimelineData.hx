@@ -21,6 +21,7 @@ class AnimateTimelineData
 	public static inline var HAS_VISIBLE = 128;
 	public static inline var VISIBLE = 256;
 	public static inline var HAS_META_DATA = 512;
+	public static inline var HAS_RATIO = 1024;
 
 	public var frameCount(default, null):Int;
 	public var frameOffsets(default, null):Array<Int>;
@@ -116,6 +117,7 @@ class AnimateTimelineData
 		if ((flags & HAS_FILTERS) != 0) position++;
 		if ((flags & HAS_NAME) != 0) position++;
 		if ((flags & HAS_BLEND_MODE) != 0) position++;
+		if ((flags & HAS_RATIO) != 0) position++;
 		if ((flags & HAS_META_DATA) != 0) position++;
 
 		return position;
@@ -143,6 +145,7 @@ class AnimateTimelineData
 		var cacheAsBitmap:Dynamic = Reflect.field(frameObject, "cacheAsBitmap");
 		var visible:Dynamic = Reflect.field(frameObject, "visible");
 		var metaData:Dynamic = Reflect.field(frameObject, "metaData");
+		var ratio:Dynamic = Reflect.field(frameObject, "ratio");
 		var flags = 0;
 
 		if (matrix != null) flags |= HAS_MATRIX;
@@ -161,6 +164,7 @@ class AnimateTimelineData
 			if (visible) flags |= VISIBLE;
 		}
 		if (metaData != null) flags |= HAS_META_DATA;
+		if (ratio != null) flags |= HAS_RATIO;
 
 		// DESTROY records only have a type and an ID
 		encodedObjects.push(__number(Reflect.field(frameObject, "type")));
@@ -185,6 +189,8 @@ class AnimateTimelineData
 		if (name != null) encodedObjects.push(__addReference(name));
 		// stored as a BlendMode, which is not a string on every target
 		if (blendMode != null) encodedObjects.push(__addReference((Std.string(blendMode) : BlendMode)));
+		// before metaData, which is only read with OpenFL 9.5 and later
+		if (ratio != null) encodedObjects.push(ratio);
 		if (metaData != null) encodedObjects.push(__addReference(metaData));
 	}
 }

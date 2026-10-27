@@ -24,6 +24,7 @@ import swf.tags.TagDefineEditText;
 import swf.tags.TagDefineFont;
 import swf.tags.TagDefineFont2;
 import swf.tags.TagDefineFont4;
+import swf.tags.TagDefineMorphShape;
 import swf.tags.TagDefineScalingGrid;
 import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSound;
@@ -47,6 +48,7 @@ import swf.exporters.core.FilterType;
 import swf.exporters.core.ShapeCommand;
 import openfl.display.BitmapData;
 import openfl.display.PNGEncoderOptions;
+import openfl.errors.Error;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
@@ -591,93 +593,136 @@ class AnimateLibraryExporter
 			symbol.type = SWFSymbolType.SHAPE;
 			symbol.id = tag.characterId;
 
-			var commands:Array<Dynamic> = [];
-
-			for (command in handler.commands)
-			{
-				switch (command)
-				{
-					case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, joints, miterLimit):
-						if (thickness == null && color == null && alpha == null)
-						{
-							commands.push(SWFShapeCommandType.CLEAR_LINE_STYLE);
-						}
-						else
-						{
-							commands.push(SWFShapeCommandType.LINE_STYLE);
-							commands.push(thickness);
-							commands.push(color);
-							commands.push(alpha);
-							commands.push(pixelHinting);
-							commands.push(scaleMode);
-							commands.push(startCaps);
-							commands.push(joints);
-							commands.push(miterLimit);
-						}
-
-					case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						commands.push(SWFShapeCommandType.LINE_GRADIENT_STYLE);
-						commands.push(type);
-						commands.push(colors);
-						commands.push(alphas);
-						commands.push(ratios);
-						commands.push(serializeMatrix(matrix));
-						commands.push(spreadMethod);
-						commands.push(interpolationMethod);
-						commands.push(focalPointRatio);
-
-					case BeginFill(color, alpha):
-						commands.push(SWFShapeCommandType.BEGIN_FILL);
-						commands.push(color);
-						commands.push(alpha);
-
-					case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						commands.push(SWFShapeCommandType.BEGIN_GRADIENT_FILL);
-						commands.push(type);
-						commands.push(colors);
-						commands.push(alphas);
-						commands.push(ratios);
-						commands.push(serializeMatrix(matrix));
-						commands.push(spreadMethod);
-						commands.push(interpolationMethod);
-						commands.push(focalPointRatio);
-
-					case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-						commands.push(SWFShapeCommandType.BEGIN_BITMAP_FILL);
-						commands.push(bitmapID);
-						commands.push(serializeMatrix(matrix));
-						commands.push(repeat);
-						commands.push(smooth);
-						processTag(cast swfData.getCharacter(bitmapID));
-
-					case EndFill:
-						commands.push(SWFShapeCommandType.END_FILL);
-
-					case MoveTo(x, y):
-						commands.push(SWFShapeCommandType.MOVE_TO);
-						commands.push(twip(x));
-						commands.push(twip(y));
-
-					case LineTo(x, y):
-						commands.push(SWFShapeCommandType.LINE_TO);
-						commands.push(twip(x));
-						commands.push(twip(y));
-
-					case CurveTo(controlX, controlY, anchorX, anchorY):
-						commands.push(SWFShapeCommandType.CURVE_TO);
-						commands.push(twip(controlX));
-						commands.push(twip(controlY));
-						commands.push(twip(anchorX));
-						commands.push(twip(anchorY));
-
-					default:
-				}
-			}
-
-			symbol.commands = commands;
+			symbol.commands = serializeShapeCommands(handler.commands);
 			libraryData.symbols.set(symbol.id, symbol);
 			return symbol;
 		}
+	}
+
+	private function addMorphShape(tag:TagDefineMorphShape):Dynamic
+	{
+		var symbol:Dynamic = {};
+		symbol.type = SWFSymbolType.MORPH_SHAPE;
+		symbol.id = tag.characterId;
+		symbol.ratios = [];
+		symbol.shapes = [];
+
+		// The start of the shape is always drawn, and timelines add the other ratios they use
+		try
+		{
+			addMorphShapeRatio(symbol, 0);
+		}
+		catch (e:Error)
+		{
+			Log.warn("Skipping morph shape " + tag.characterId + ", its start and end edges do not match");
+			return null;
+		}
+
+		libraryData.symbols.set(symbol.id, symbol);
+		return symbol;
+	}
+
+	private function addMorphShapeRatio(symbol:Dynamic, ratio:Int):Void
+	{
+		var ratios:Array<Int> = symbol.ratios;
+		if (ratios.indexOf(ratio) > -1) return;
+
+		var tag:TagDefineMorphShape = cast swfData.getCharacter(symbol.id);
+		var handler = new ShapeCommandExporter(swfData);
+		tag.exportHandler = handler;
+		tag.export(ratio / 65535);
+
+		var shapes:Array<Dynamic> = symbol.shapes;
+		ratios.push(ratio);
+		shapes.push(serializeShapeCommands(handler.commands));
+	}
+
+	private function serializeShapeCommands(shapeCommands:Array<ShapeCommand>):Array<Dynamic>
+	{
+		var commands:Array<Dynamic> = [];
+
+		for (command in shapeCommands)
+		{
+			switch (command)
+			{
+				case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, joints, miterLimit):
+					if (thickness == null && color == null && alpha == null)
+					{
+						commands.push(SWFShapeCommandType.CLEAR_LINE_STYLE);
+					}
+					else
+					{
+						commands.push(SWFShapeCommandType.LINE_STYLE);
+						commands.push(thickness);
+						commands.push(color);
+						commands.push(alpha);
+						commands.push(pixelHinting);
+						commands.push(scaleMode);
+						commands.push(startCaps);
+						commands.push(joints);
+						commands.push(miterLimit);
+					}
+
+				case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					commands.push(SWFShapeCommandType.LINE_GRADIENT_STYLE);
+					commands.push(type);
+					commands.push(colors);
+					commands.push(alphas);
+					commands.push(ratios);
+					commands.push(serializeMatrix(matrix));
+					commands.push(spreadMethod);
+					commands.push(interpolationMethod);
+					commands.push(focalPointRatio);
+
+				case BeginFill(color, alpha):
+					commands.push(SWFShapeCommandType.BEGIN_FILL);
+					commands.push(color);
+					commands.push(alpha);
+
+				case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					commands.push(SWFShapeCommandType.BEGIN_GRADIENT_FILL);
+					commands.push(type);
+					commands.push(colors);
+					commands.push(alphas);
+					commands.push(ratios);
+					commands.push(serializeMatrix(matrix));
+					commands.push(spreadMethod);
+					commands.push(interpolationMethod);
+					commands.push(focalPointRatio);
+
+				case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
+					commands.push(SWFShapeCommandType.BEGIN_BITMAP_FILL);
+					commands.push(bitmapID);
+					commands.push(serializeMatrix(matrix));
+					commands.push(repeat);
+					commands.push(smooth);
+					processTag(cast swfData.getCharacter(bitmapID));
+
+				case EndFill:
+					commands.push(SWFShapeCommandType.END_FILL);
+
+				case MoveTo(x, y):
+					commands.push(SWFShapeCommandType.MOVE_TO);
+					commands.push(twip(x));
+					commands.push(twip(y));
+
+				case LineTo(x, y):
+					commands.push(SWFShapeCommandType.LINE_TO);
+					commands.push(twip(x));
+					commands.push(twip(y));
+
+				case CurveTo(controlX, controlY, anchorX, anchorY):
+					commands.push(SWFShapeCommandType.CURVE_TO);
+					commands.push(twip(controlX));
+					commands.push(twip(controlY));
+					commands.push(twip(anchorX));
+					commands.push(twip(anchorY));
+
+				default:
+			}
+		}
+
+		return commands;
 	}
 
 	private function addSprite(tag:SWFTimelineContainer, root:Bool = false):Dynamic
@@ -745,6 +790,20 @@ class AnimateLibraryExporter
 				else
 				{
 					frameObject.type = SWFFrameObjectType.UPDATE;
+				}
+
+				var characterSymbol:Dynamic = libraryData.symbols.get(object.characterId);
+				if (characterSymbol != null && characterSymbol.type == SWFSymbolType.MORPH_SHAPE)
+				{
+					if (placeTag.hasRatio)
+					{
+						frameObject.ratio = placeTag.ratio;
+						addMorphShapeRatio(characterSymbol, placeTag.ratio);
+					}
+					else if (frameObject.type == SWFFrameObjectType.CREATE)
+					{
+						frameObject.ratio = 0;
+					}
 				}
 
 				if (placeTag.matrix != null)
@@ -1496,6 +1555,10 @@ class AnimateLibraryExporter
 			{
 				return addShape(cast tag);
 			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineMorphShape))
+			{
+				return addMorphShape(cast tag);
+			}
 			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont)
 				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont4))
 			{
@@ -1689,6 +1752,7 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to 
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
 	public var SOUND = 7;
+	public var MORPH_SHAPE = 8;
 }
 
 #if (haxe_ver < 4.0) @:enum #end

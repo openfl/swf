@@ -30,6 +30,7 @@ import hscript.Parser;
 @:noDebug
 #end
 @:access(swf.exporters.animate.AnimateLibrary)
+@:access(swf.exporters.animate.AnimateMorphShapeSymbol)
 @:access(swf.exporters.animate.AnimateSpriteSymbol)
 @:access(swf.exporters.animate.AnimateSymbol)
 @:access(swf.exporters.animate.AnimateTimelineData)
@@ -704,6 +705,11 @@ class AnimateTimeline extends Timeline
 			displayObject.cacheAsBitmap = frameObject.cacheAsBitmap;
 		}
 
+		if (frameObject.ratio != null)
+		{
+			__setRatio(displayObject, frameObject.symbol, frameObject.ratio);
+		}
+
 		#if (openfl >= "9.5.0")
 		if (frameObject.metaData != null)
 		{
@@ -795,6 +801,11 @@ class AnimateTimeline extends Timeline
 			displayObject.blendMode = cast references[Std.int(data[position++])];
 		}
 
+		if ((flags & AnimateTimelineData.HAS_RATIO) != 0)
+		{
+			__setRatio(displayObject, Std.int(data[objectPosition + 2]), Std.int(data[position++]));
+		}
+
 		if ((flags & AnimateTimelineData.HAS_CACHE_AS_BITMAP) != 0)
 		{
 			displayObject.cacheAsBitmap = (flags & AnimateTimelineData.CACHE_AS_BITMAP) != 0;
@@ -817,6 +828,17 @@ class AnimateTimeline extends Timeline
 		#end
 
 		__lastUpdatedCompact.set(displayObject, objectPosition);
+	}
+
+	@:noCompletion private function __setRatio(displayObject:DisplayObject, symbolID:Int, ratio:Int):Void
+	{
+		var symbol = __library.symbols.get(symbolID);
+
+		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateMorphShapeSymbol)
+			&& #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (displayObject, Shape))
+		{
+			cast(symbol, AnimateMorphShapeSymbol).__setRatio(cast displayObject, ratio, __library);
+		}
 	}
 
 	@:noCompletion private function __updateInstanceFields():Void

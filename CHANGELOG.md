@@ -3,6 +3,7 @@
 
 * Added `DisplayObject.metaData` support for Animate libraries
 * Added `lineGradientStyle` support for SWF shapes in Animate, SWFLite and runtime shapes
+* Added shape tween (`DefineMorphShape` and `DefineMorphShape2`) support for Animate libraries
 * Added caching of generated classes for Flash and AIR SWF libraries
 * Added export of linked MP3 and uncompressed sounds in Animate libraries (MP3 on native targets requires Lime 8.4 or newer)
 * Added the `swf_compact_animate_timelines` define, to keep Animate timelines in compact buffers instead of one object per frame and event

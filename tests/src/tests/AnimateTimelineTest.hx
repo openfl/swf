@@ -172,6 +172,51 @@ class AnimateTimelineTest extends Test
 		}
 	}
 
+	private static function describe(clip:MovieClip):String
+	{
+		var children = [];
+		for (i in 0...clip.numChildren)
+		{
+			var child = clip.getChildAt(i);
+			// unnamed objects get an automatic instance name from OpenFL, which depends on creation order
+			var name = StringTools.startsWith(child.name, "instance") ? "" : child.name;
+			var values:Array<Dynamic> = [
+				name, child.x, child.y, child.scaleX, child.scaleY, child.alpha, child.visible, child.__isMask == true, child.blendMode == BlendMode.SCREEN
+			];
+			children.push(values.join(","));
+		}
+		return children.join(" | ");
+	}
+	#end
+
+	public function testMorphShapeRatio():Void
+	{
+		var frames:Array<Dynamic> = [
+			{objects: [createMorphObject(0, 0, "morph")]},
+			{objects: [createMorphObject(1, 32768, null, "multiply")]},
+			{objects: [createMorphObject(1, 65535)]},
+			// the ratio stays when an update does not set it
+			{objects: [createObject(1, 10, 2, 1, 0, null, [1, 0, 0, 1, 200, 0])]}
+		];
+
+		for (compact in [false, true])
+		{
+			var clip = createClip(frames, compact);
+			var shape = clip.getChildAt(0);
+			var states = [];
+			for (frame in [1, 2, 3, 4, 2, 1])
+			{
+				clip.gotoAndStop(frame);
+				Assert.equals(shape, clip.getChildAt(0));
+				states.push(Math.round(shape.width) + " at " + Math.round(shape.x));
+			}
+			var message = compact ? "compact" : "default";
+			Assert.equals("20 at 0, 30 at 0, 40 at 0, 40 at 10, 30 at 0, 20 at 0", states.join(", "), message);
+			Assert.equals("morph", shape.name, message);
+			Assert.equals(BlendMode.MULTIPLY, shape.blendMode, message);
+		}
+	}
+
 	private static function createClip(frames:Array<Dynamic>, compact:Bool):MovieClip
 	{
 		var library = createLibrary();
@@ -192,23 +237,6 @@ class AnimateTimelineTest extends Test
 		return cast symbol.__createObject(library);
 	}
 
-	private static function describe(clip:MovieClip):String
-	{
-		var children = [];
-		for (i in 0...clip.numChildren)
-		{
-			var child = clip.getChildAt(i);
-			// unnamed objects get an automatic instance name from OpenFL, which depends on creation order
-			var name = StringTools.startsWith(child.name, "instance") ? "" : child.name;
-			var values:Array<Dynamic> = [
-				name, child.x, child.y, child.scaleX, child.scaleY, child.alpha, child.visible, child.__isMask == true, child.blendMode == BlendMode.SCREEN
-			];
-			children.push(values.join(","));
-		}
-		return children.join(" | ");
-	}
-	#end
-
 	private static function createLibrary():AnimateLibrary
 	{
 		var library = new AnimateLibrary("compact-timeline-test", "compact-timeline-test");
@@ -221,7 +249,23 @@ class AnimateTimelineTest extends Test
 		shape.id = 1;
 		shape.commands = [];
 		library.symbols.set(shape.id, shape);
+
+		// a red square, 20 pixels wide at the start and 40 at the end
+		var morphShape = library.__parseMorphShape({id: 2, ratios: [0, 32768, 65535], shapes: [createSquare(400), createSquare(600), createSquare(800)]});
+		library.symbols.set(morphShape.id, morphShape);
 		return library;
+	}
+
+	private static function createSquare(size:Int):Array<Dynamic>
+	{
+		return [1, 0xFF0000, 1, 8, 0, 0, 7, size, 0, 7, size, size, 7, 0, size, 7, 0, 0, 5];
+	}
+
+	private static function createMorphObject(type:Int, ratio:Int, name:String = null, blendMode:String = null):Dynamic
+	{
+		var object = createObject(type, 10, 2, 1, 0, name, [1, 0, 0, 1, 0, 0], null, blendMode);
+		object.ratio = ratio;
+		return object;
 	}
 
 	private static function createObject(type:Int, id:Int, symbol:Int, depth:Int, clipDepth:Int, name:String = null, matrix:Array<Float> = null,
