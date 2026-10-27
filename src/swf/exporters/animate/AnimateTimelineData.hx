@@ -1,6 +1,7 @@
 package swf.exporters.animate;
 
 import haxe.ds.Vector;
+import openfl.display.BlendMode;
 
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
@@ -182,7 +183,8 @@ class AnimateTimelineData
 		// filters are rare, so they are kept parsed, the same as without compact timelines
 		if (filters != null) encodedObjects.push(__addReference(library.__parseFilters(filters)));
 		if (name != null) encodedObjects.push(__addReference(name));
-		if (blendMode != null) encodedObjects.push(__addReference(Std.string(blendMode)));
+		// stored as a BlendMode, which is not a string on every target
+		if (blendMode != null) encodedObjects.push(__addReference((Std.string(blendMode) : BlendMode)));
 		if (metaData != null) encodedObjects.push(__addReference(metaData));
 	}
 }

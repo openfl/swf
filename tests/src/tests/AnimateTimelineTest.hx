@@ -1,5 +1,6 @@
 package tests;
 
+import openfl.display.BlendMode;
 import openfl.display.MovieClip;
 import swf.exporters.animate.AnimateLibrary;
 import swf.exporters.animate.AnimateShapeSymbol;
@@ -119,7 +120,7 @@ class AnimateTimelineTest extends Test
 	{
 		var frames:Array<Dynamic> = [
 			{label: "start", objects: [createObject(0, 10, 1, 1, 0, "first", [1, 0, 0, 1, 200, 400]), createObject(0, 11, 1, 2, 3)]},
-			{objects: [createObject(1, 10, 1, 1, 0, null, [2, 0, 0, 3, 600, 800], [20, 20, 20, 10, 0, 0, 0, 0])]},
+			{objects: [createObject(1, 10, 1, 1, 0, null, [2, 0, 0, 3, 600, 800], [20, 20, 20, 10, 0, 0, 0, 0], "screen")]},
 			{objects: [{type: 2, id: 11}, createObject(0, 12, 1, 3, 0, "second")]},
 			{objects: [{type: 2, id: 10}, {type: 2, id: 12}]}
 		];
@@ -199,7 +200,9 @@ class AnimateTimelineTest extends Test
 			var child = clip.getChildAt(i);
 			// unnamed objects get an automatic instance name from OpenFL, which depends on creation order
 			var name = StringTools.startsWith(child.name, "instance") ? "" : child.name;
-			var values:Array<Dynamic> = [name, child.x, child.y, child.scaleX, child.scaleY, child.alpha, child.visible, child.__isMask == true];
+			var values:Array<Dynamic> = [
+				name, child.x, child.y, child.scaleX, child.scaleY, child.alpha, child.visible, child.__isMask == true, child.blendMode == BlendMode.SCREEN
+			];
 			children.push(values.join(","));
 		}
 		return children.join(" | ");
@@ -222,7 +225,7 @@ class AnimateTimelineTest extends Test
 	}
 
 	private static function createObject(type:Int, id:Int, symbol:Int, depth:Int, clipDepth:Int, name:String = null, matrix:Array<Float> = null,
-			colorTransform:Array<Float> = null):Dynamic
+			colorTransform:Array<Float> = null, blendMode:String = null):Dynamic
 	{
 		return {
 			type: type,
@@ -232,7 +235,8 @@ class AnimateTimelineTest extends Test
 			clipDepth: clipDepth,
 			name: name,
 			matrix: matrix,
-			colorTransform: colorTransform
+			colorTransform: colorTransform,
+			blendMode: blendMode
 		};
 	}
 }
