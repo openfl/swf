@@ -21,6 +21,7 @@ class TestMain extends Sprite
 		#end
 		runner.addCase(new tests.ShapeExportTest());
 		runner.addCase(new tests.ShapesTest());
+		runner.addCase(new tests.SWFDataTest());
 		#if !flash
 		runner.addCase(new tests.SWFLiteExporterTest());
 		#end

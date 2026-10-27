@@ -1,7 +1,6 @@
 package swf.utils;
 
 import openfl.utils.ByteArray;
-import haxe.crypto.BaseCode;
 
 class BitArray extends ByteArrayData
 {
@@ -115,40 +114,24 @@ class BitArray extends ByteArrayData
 
 	public function calculateMaxBits(signed:Bool, values:Array<Int>):Int
 	{
-		var b:Int = 0;
-		var vmax:Int = SWFData.MIN_INT_VALUE;
-		if (!signed)
-		{
-			for (usvalue in values)
-			{
-				b |= usvalue;
-			}
-		}
-		else
-		{
-			for (svalue in values)
-			{
-				if (svalue >= 0)
-				{
-					b |= svalue;
-				}
-				else
-				{
-					b |= ~svalue << 1;
-				}
-				if (vmax < svalue)
-				{
-					vmax = svalue;
-				}
-			}
-		}
 		var bits:Int = 0;
-		if (b > 0)
+		for (value in values)
 		{
-			bits = BaseCode.encode(Std.string(b), "01").length;
-			if (signed && vmax > 0 && BaseCode.encode(Std.string(vmax), "01").length >= bits)
+			if (value == 0)
 			{
-				bits++;
+				continue;
+			}
+			// A signed value needs the bits of its magnitude plus a sign bit
+			var magnitude:Int = (signed && value < 0) ? ~value : value;
+			var valueBits:Int = signed ? 1 : 0;
+			while (magnitude != 0)
+			{
+				magnitude >>>= 1;
+				valueBits++;
+			}
+			if (valueBits > bits)
+			{
+				bits = valueBits;
 			}
 		}
 		return bits;
