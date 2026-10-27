@@ -18,6 +18,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 	public var frames:Array<AnimateFrame>;
 	public var scale9Grid:Rectangle;
 
+	private var compactTimeline:AnimateTimelineData;
 	private var library:AnimateLibrary;
 
 	public function new()
@@ -128,5 +129,10 @@ class AnimateSpriteSymbol extends AnimateSymbol
 	{
 		this.library = library;
 		__constructor(cast instance);
+	}
+
+	private function __setCompactTimeline(frames:Array<Dynamic>, library:AnimateLibrary):Void
+	{
+		compactTimeline = new AnimateTimelineData(frames, library);
 	}
 }

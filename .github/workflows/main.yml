@@ -126,6 +126,38 @@ jobs:
         run: |
           haxelib run openfl test neko
 
+  unit-test-neko-defines:
+    strategy:
+      matrix:
+        define: [swf_compact_animate_timelines]
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: "dummy"
+      SDL_AUDIODRIVER: "disk"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.3.6
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Run tests on Neko with ${{ matrix.define }}
+        working-directory: tests
+        run: |
+          haxelib run openfl test neko -D${{ matrix.define }}
+
   unit-test-tools:
     strategy:
       matrix:

@@ -39,6 +39,7 @@ import openfl.filters.GlowFilter;
 @:noDebug
 #end
 @:access(swf.exporters.animate.AnimateSpriteSymbol)
+@:access(swf.exporters.animate.AnimateTimelineData)
 @:access(swf.exporters.animate)
 @SuppressWarnings("checkstyle:FieldDocComment")
 @:keep class AnimateLibrary extends AssetLibrary
@@ -749,39 +750,8 @@ import openfl.filters.GlowFilter;
 		return symbol;
 	}
 
-	private function __parseMatrix(values:Array<Float>):Matrix
+	private function __parseFrames(symbol:AnimateSpriteSymbol, frames:Array<Dynamic>):Void
 	{
-		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(cast values[4]), __pixel(cast values[5])) : null;
-	}
-
-	private function __parseShape(data:Dynamic):AnimateShapeSymbol
-	{
-		var symbol = new AnimateShapeSymbol();
-		symbol.id = data.id;
-		symbol.__setCompactCommands(data.commands);
-		return symbol;
-	}
-
-	private function __parseSound(data:Dynamic):AnimateSoundSymbol
-	{
-		var symbol = new AnimateSoundSymbol();
-		symbol.id = data.id;
-		symbol.className = data.className;
-		symbol.path = data.path;
-		return symbol;
-	}
-
-	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
-	{
-		if (data == null) return null;
-
-		var symbol = new AnimateSpriteSymbol();
-		symbol.id = data.id;
-		symbol.className = data.className;
-		symbol.baseClassName = data.baseClassName;
-		symbol.scale9Grid = data.scale9Grid != null ? new Rectangle(__pixel(data.scale9Grid[0]), __pixel(data.scale9Grid[1]), __pixel(data.scale9Grid[2]),
-			__pixel(data.scale9Grid[3])) : null;
-		var frames:Array<Dynamic> = data.frames;
 		var frame:AnimateFrame,
 			objects:Array<Dynamic>,
 			object:AnimateFrameObject;
@@ -829,6 +799,46 @@ import openfl.filters.GlowFilter;
 			}
 			symbol.frames.push(frame);
 		}
+	}
+
+	private function __parseMatrix(values:Array<Float>):Matrix
+	{
+		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(cast values[4]), __pixel(cast values[5])) : null;
+	}
+
+	private function __parseShape(data:Dynamic):AnimateShapeSymbol
+	{
+		var symbol = new AnimateShapeSymbol();
+		symbol.id = data.id;
+		symbol.__setCompactCommands(data.commands);
+		return symbol;
+	}
+
+	private function __parseSound(data:Dynamic):AnimateSoundSymbol
+	{
+		var symbol = new AnimateSoundSymbol();
+		symbol.id = data.id;
+		symbol.className = data.className;
+		symbol.path = data.path;
+		return symbol;
+	}
+
+	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
+	{
+		if (data == null) return null;
+
+		var symbol = new AnimateSpriteSymbol();
+		symbol.id = data.id;
+		symbol.className = data.className;
+		symbol.baseClassName = data.baseClassName;
+		symbol.scale9Grid = data.scale9Grid != null ? new Rectangle(__pixel(data.scale9Grid[0]), __pixel(data.scale9Grid[1]), __pixel(data.scale9Grid[2]),
+			__pixel(data.scale9Grid[3])) : null;
+		var frames:Array<Dynamic> = data.frames;
+		#if swf_compact_animate_timelines
+		symbol.__setCompactTimeline(frames, this);
+		#else
+		__parseFrames(symbol, frames);
+		#end
 		return symbol;
 	}
 
