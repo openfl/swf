@@ -37,6 +37,10 @@ class AnimateDynamicTextSymbol extends AnimateSymbol
 	public var x:Float;
 	public var y:Float;
 
+	private var resolvedFontCount:Int = -1;
+	private var resolvedFontFound:Bool;
+	private var resolvedFontName:String;
+
 	public function new()
 	{
 		super();
@@ -99,39 +103,51 @@ class AnimateDynamicTextSymbol extends AnimateSymbol
 
 		format.font = fontName;
 
-		var found = false;
-
-		switch (format.font)
+		// fonts are only ever added, so the font to use only changes when another one is registered
+		var fontCount = Font.enumerateFonts().length;
+		if (resolvedFontCount != fontCount)
 		{
-			case "_sans", "_serif", "_typewriter", "", null:
-				found = true;
+			var found = false;
 
-			default:
+			switch (format.font)
+			{
+				case "_sans", "_serif", "_typewriter", "", null:
+					found = true;
+
+				default:
+					for (font in Font.enumerateFonts())
+					{
+						if (font.fontName == format.font)
+						{
+							found = true;
+							break;
+						}
+					}
+			}
+
+			if (!found)
+			{
+				var alpha = ~/[^a-zA-Z]+/g;
+				var spaces = ~/\s/g;
+
 				for (font in Font.enumerateFonts())
 				{
-					if (font.fontName == format.font)
+					if (alpha.replace(font.fontName, "").substr(0, fontName.length) == spaces.replace(fontName, ""))
 					{
+						format.font = font.fontName;
 						found = true;
 						break;
 					}
 				}
-		}
-
-		if (!found)
-		{
-			var alpha = ~/[^a-zA-Z]+/g;
-			var spaces = ~/\s/g;
-
-			for (font in Font.enumerateFonts())
-			{
-				if (alpha.replace(font.fontName, "").substr(0, fontName.length) == spaces.replace(fontName, ""))
-				{
-					format.font = font.fontName;
-					found = true;
-					break;
-				}
 			}
+
+			resolvedFontCount = fontCount;
+			resolvedFontFound = found;
+			resolvedFontName = format.font;
 		}
+
+		format.font = resolvedFontName;
+		var found = resolvedFontFound;
 
 		if (found)
 		{
