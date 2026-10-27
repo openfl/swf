@@ -42,7 +42,7 @@ jobs:
     needs: package-haxelib
     strategy:
       matrix:
-        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.7]
     runs-on: ubuntu-latest
     steps:
 
@@ -97,7 +97,7 @@ jobs:
   unit-test-neko:
     strategy:
       matrix:
-        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.7]
     runs-on: ubuntu-latest
     env:
       SDL_VIDEODRIVER: "dummy"
@@ -139,7 +139,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@v2
         with:
-          haxe-version: 4.3.6
+          haxe-version: 4.3.7
 
       - name: Set HAXEPATH
         run: |
@@ -161,7 +161,7 @@ jobs:
   unit-test-tools:
     strategy:
       matrix:
-        haxe-version: [4.2.5, 4.3.6]
+        haxe-version: [4.2.5, 4.3.7]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -183,6 +183,10 @@ jobs:
           haxelib install utest --quiet
           haxelib dev swf ${{ github.workspace }}
 
+      - name: Check haxelib dependencies
+        run: |
+          haxelib path swf | grep -q -- "-D format="
+
       - name: Rebuild swf run.n
         run: |
           haxe rebuild.hxml
@@ -197,7 +201,7 @@ jobs:
     strategy:
       matrix:
         # HashLink is not supported by Haxe 3
-        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.7]
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
@@ -227,7 +231,7 @@ jobs:
   unit-test-air:
     strategy:
       matrix:
-        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.7]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
@@ -267,7 +271,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@v2
         with:
-          haxe-version: "4.3.6"
+          haxe-version: "4.3.7"
 
       - uses: joshtynjala/setup-adobe-air-action@v2
         with:

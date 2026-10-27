@@ -1,15 +1,18 @@
 {
 	"name": "swf",
-	"url": "http://github.com/openfl/swf",
+	"url": "https://github.com/openfl/swf",
 	"license": "MIT",
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
 	"version": "3.5.0",
-	"releasenote": "Line gradient styles, lower Animate shape memory use, clipping and exporter fixes",
+	"releasenote": "Linked sounds, line gradients, generated class fixes, opt-in compact timelines and bitmap cache, many timeline and exporter fixes",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",
 		"Dimensionscape"
 	],
-	"classPath": "src"
+	"classPath": "src",
+	"dependencies": {
+		"format": ""
+	}
 }

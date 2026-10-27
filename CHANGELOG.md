@@ -13,6 +13,8 @@
 * Improved timeline performance by caching instance field lists per class
 * Improved dynamic text performance by caching the embedded font found for each symbol
 * Changed `AnimateShapeSymbol.commands` to be `null` for shapes loaded from an Animate library
+* Changed `ShapeCommand` and `AnimateShapeCommand` to include `LineGradientStyle`, so exhaustive `switch` statements over them need another case
+* Changed haxelib.json to declare the `format` dependency
 * Fixed Animate and SWFLite exports of SWF files without ABC or `SymbolClass` tags, such as AS2 SWF files using `ExportAssets`
 * Fixed `SWFLibrary` failing to load non-embedded SWF files
 * Fixed processing SWF files with linked Speex sounds
