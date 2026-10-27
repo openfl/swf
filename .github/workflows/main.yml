@@ -129,7 +129,7 @@ jobs:
   unit-test-neko-defines:
     strategy:
       matrix:
-        define: [swf_compact_animate_timelines]
+        define: [swf_compact_animate_timelines, swf_hardware_bitmap_cache, "swf_compact_animate_timelines -Dswf_hardware_bitmap_cache"]
     runs-on: ubuntu-latest
     env:
       SDL_VIDEODRIVER: "dummy"

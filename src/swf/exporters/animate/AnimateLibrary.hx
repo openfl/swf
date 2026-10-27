@@ -5,6 +5,7 @@ import lime.graphics.Image;
 import lime.graphics.ImageChannel;
 import lime.math.Vector2;
 import swf.exporters.core.FilterType;
+import openfl.display.BitmapData;
 import openfl.display.MovieClip;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -63,6 +64,11 @@ import openfl.filters.GlowFilter;
 	private var bitmapClassNames:Map<String, String>;
 	private var bitmapSymbols:Array<AnimateBitmapSymbol>;
 	private var frameRate:Float;
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	private var hardwareBitmapData:Map<String, BitmapData>;
+	private var readableBitmapDataKeys:Map<String, Bool>;
+	private var readableShapeBitmapData:Map<String, BitmapData>;
+	#end
 	private var id:String;
 	private var instanceID:String;
 	private var preloading:Bool;
@@ -83,6 +89,11 @@ import openfl.filters.GlowFilter;
 		alphaCheck = new Map();
 		bitmapClassNames = new Map();
 		soundClassNames = new Map();
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 
 		#if (ios || tvos)
 		rootPath = "assets/";
@@ -150,6 +161,99 @@ import openfl.filters.GlowFilter;
 	{
 		return instances.get(uuid);
 	}
+
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	@:allow(swf.exporters.animate.AnimateBitmapSymbol)
+	private function __getHardwareBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		if (readableBitmapDataKeys.exists(key))
+		{
+			return __getReadableShapeBitmapData(symbol);
+		}
+
+		var bitmapData = hardwareBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				bitmapData.disposeImage();
+				hardwareBitmapData.set(key, bitmapData);
+
+				if (symbol.path != null)
+				{
+					cachedImages.remove(symbol.path);
+					alphaCheck.remove(symbol.path);
+				}
+
+				if (symbol.alpha != null)
+				{
+					cachedImages.remove(symbol.alpha);
+				}
+			}
+		}
+
+		return bitmapData;
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __markBitmapDataReadable(symbol:AnimateBitmapSymbol):Void
+	{
+		if (symbol != null)
+		{
+			readableBitmapDataKeys.set(__getBitmapDataKey(symbol), true);
+		}
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __getReadableShapeBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		readableBitmapDataKeys.set(key, true);
+		var bitmapData = readableShapeBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				readableShapeBitmapData.set(key, bitmapData);
+			}
+		}
+
+		return bitmapData;
+	}
+
+	private function __getBitmapDataKey(symbol:AnimateBitmapSymbol):String
+	{
+		return symbol.path != null
+			? "path:" + symbol.path + "|alpha:" + (symbol.alpha != null ? symbol.alpha : "")
+			: "symbol:" + symbol.id;
+	}
+
+	// Shapes are drawn in software, so bitmaps used by shape fills keep their pixels
+	private function __markShapeBitmapsReadable():Void
+	{
+		for (symbol in symbols)
+		{
+			#if (haxe_ver >= 4.2)
+			if (Std.isOfType(symbol, AnimateShapeSymbol))
+			#else
+			if (Std.is(symbol, AnimateShapeSymbol))
+			#end
+			{
+				for (bitmapID in cast(symbol, AnimateShapeSymbol).__getBitmapFillIDs())
+				{
+					__markBitmapDataReadable(cast symbols.get(bitmapID));
+				}
+			}
+		}
+	}
+	#end
 
 	#if lime
 	public override function getAudioBuffer(id:String):AudioBuffer
@@ -329,6 +433,10 @@ import openfl.filters.GlowFilter;
 				}
 			}
 
+			#if (lime && !flash && swf_hardware_bitmap_cache)
+			__markShapeBitmapsReadable();
+			#end
+
 			// SWFLite.instances.set(instanceID, swf);
 
 			__load().onProgress(promise.progress).onError(promise.error).onComplete(function(_)
@@ -478,6 +586,11 @@ import openfl.filters.GlowFilter;
 	public override function unload():Void
 	{
 		instances.remove(instanceID);
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 		if (symbols == null) return;
 		// if (swf == null) return;
 

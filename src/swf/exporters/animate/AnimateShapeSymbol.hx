@@ -26,6 +26,9 @@ class AnimateShapeSymbol extends AnimateSymbol
 	public var commands:Array<AnimateShapeCommand>;
 	public var rendered:Shape;
 
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	private var compactBitmapFillIDs:Array<Int>;
+	#end
 	private var compactCommands:Array<Float>;
 
 	public function new()
@@ -113,14 +116,44 @@ class AnimateShapeSymbol extends AnimateSymbol
 	{
 		#if lime
 		var bitmapSymbol:AnimateBitmapSymbol = cast library.symbols.get(bitmapID);
+		#if (!flash && swf_hardware_bitmap_cache)
+		// OpenFL draws shape paths in software, which reads the pixels of bitmap fills
+		var bitmapData = library.__getReadableShapeBitmapData(bitmapSymbol);
+		#else
 		var bitmap = library.getImage(bitmapSymbol.path);
+		var bitmapData = bitmap != null ? BitmapData.fromImage(bitmap) : null;
+		#end
 
-		if (bitmap != null)
+		if (bitmapData != null)
 		{
-			graphics.beginBitmapFill(BitmapData.fromImage(bitmap), matrix, repeat, smooth);
+			graphics.beginBitmapFill(bitmapData, matrix, repeat, smooth);
 		}
 		#end
 	}
+
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	@:allow(swf.exporters.animate.AnimateLibrary)
+	private function __getBitmapFillIDs():Array<Int>
+	{
+		if (compactCommands != null) return compactBitmapFillIDs != null ? compactBitmapFillIDs : [];
+
+		var ids = [];
+		if (commands != null)
+		{
+			for (command in commands)
+			{
+				switch (command)
+				{
+					case BeginBitmapFill(bitmapID, _, _, _):
+						ids.push(bitmapID);
+
+					default:
+				}
+			}
+		}
+		return ids;
+	}
+	#end
 
 	@:allow(swf.exporters.animate.AnimateLibrary)
 	private function __setCompactCommands(data:Array<Dynamic>):Void
@@ -136,6 +169,10 @@ class AnimateShapeSymbol extends AnimateSymbol
 			switch (type)
 			{
 				case BEGIN_BITMAP_FILL:
+					#if (lime && !flash && swf_hardware_bitmap_cache)
+					if (compactBitmapFillIDs == null) compactBitmapFillIDs = [];
+					compactBitmapFillIDs.push(data[i + 1]);
+					#end
 					compactCommands.push(data[i + 1]);
 					__encodeMatrix(compactCommands, data[i + 2]);
 					compactCommands.push(data[i + 3] ? 1 : 0);

@@ -35,6 +35,20 @@ values directly during playback, reducing retained managed memory and the
 amount of graph traversal performed by full garbage collections. Filters are
 rare, so they are still kept parsed.
 
+Hardware-only Animate bitmap cache
+==================================
+
+Native hardware-rendered projects may define `swf_hardware_bitmap_cache` to
+share each Animate bitmap asset between bitmap instances. After its texture is
+uploaded, the decoded CPU image is released. OpenFL draws shape paths in
+software, which reads the pixels of bitmap fills, so bitmaps used by shapes
+keep one shared readable `BitmapData` instead.
+
+This mode is opt-in because cached bitmap assets used by direct `Bitmap`
+instances become non-readable. Pixel read/write APIs and software-renderer
+fallback are not supported for those bitmaps, and their textures cannot be
+restored after a graphics context is lost.
+
 The exported Animate asset format does not change, and standard timeline
 playback remains compatible. This mode is opt-in because code that accesses
 `AnimateSpriteSymbol.frames` directly will not receive the eagerly expanded

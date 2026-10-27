@@ -9,6 +9,9 @@ class TestMain extends Sprite
 		super();
 
 		var runner = new Runner();
+		#if !flash
+		runner.addCase(new tests.AnimateBitmapSymbolTest());
+		#end
 		runner.addCase(new tests.AnimateGeneratedClassTest());
 		runner.addCase(new tests.AnimateLibraryTest());
 		runner.addCase(new tests.AnimateShapeSymbolTest());
