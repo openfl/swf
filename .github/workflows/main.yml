@@ -253,6 +253,13 @@ jobs:
       matrix:
         # HashLink is not supported by Haxe 3
         haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.7]
+        # Before Haxe 4.2, two HashLink threads reading their message queues for
+        # the first time can crash, so Lime loads assets without threads there
+        include:
+          - haxe-version: 4.0.5
+            lime-flags: -Dforce-synchronous
+          - haxe-version: 4.1.5
+            lime-flags: -Dforce-synchronous
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
@@ -277,7 +284,7 @@ jobs:
       - name: Run tests on HashLink
         working-directory: tests
         run: |
-          haxelib run openfl test hl
+          haxelib run openfl test hl ${{ matrix.lime-flags }}
 
   unit-test-air:
     strategy:
