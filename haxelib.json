@@ -1,15 +1,18 @@
 {
 	"name": "swf",
-	"url": "http://github.com/openfl/swf",
+	"url": "https://github.com/openfl/swf",
 	"license": "MIT",
 	"tags": [ "openfl", "swf", "animation", "flash", "assets", "swc" ],
 	"description": "Provides support for parsing and displaying SWF content",
-	"version": "3.4.0",
-	"releasenote": "Fix duplicate scale9Grid graphics, improved clipping layers, new filters",
+	"version": "3.5.0",
+	"releasenote": "Shape tweens, linked sounds, line gradients, generated class fixes, opt-in compact timelines and bitmap cache, many timeline and exporter fixes",
 	"contributors": [
 		"singmajesty",
 		"bowlerhat",
 		"Dimensionscape"
 	],
-	"classPath": "src"
+	"classPath": "src",
+	"dependencies": {
+		"format": ""
+	}
 }

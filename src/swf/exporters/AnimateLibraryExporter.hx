@@ -4,6 +4,9 @@ import format.png.Data;
 import format.png.Writer as PNGWriter;
 import swf.data.consts.BitmapFormat;
 import swf.data.consts.BlendMode;
+import swf.data.consts.SoundCompression;
+import swf.data.consts.SoundRate;
+import swf.data.consts.SoundSize;
 import swf.data.filters.IFilter;
 import swf.data.SWFButtonRecord;
 import swf.data.SWFSymbol;
@@ -21,6 +24,7 @@ import swf.tags.TagDefineEditText;
 import swf.tags.TagDefineFont;
 import swf.tags.TagDefineFont2;
 import swf.tags.TagDefineFont4;
+import swf.tags.TagDefineMorphShape;
 import swf.tags.TagDefineScalingGrid;
 import swf.tags.TagDefineShape;
 import swf.tags.TagDefineSound;
@@ -44,6 +48,7 @@ import swf.exporters.core.FilterType;
 import swf.exporters.core.ShapeCommand;
 import openfl.display.BitmapData;
 import openfl.display.PNGEncoderOptions;
+import openfl.errors.Error;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
@@ -51,6 +56,7 @@ import openfl.text.TextFormatAlign;
 import openfl.utils.AssetManifest;
 import openfl.utils.AssetType;
 import openfl.utils.ByteArray;
+import openfl.utils.Endian;
 import haxe.crypto.Crc32;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
@@ -587,84 +593,136 @@ class AnimateLibraryExporter
 			symbol.type = SWFSymbolType.SHAPE;
 			symbol.id = tag.characterId;
 
-			var commands:Array<Dynamic> = [];
-
-			for (command in handler.commands)
-			{
-				switch (command)
-				{
-					case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, joints, miterLimit):
-						if (thickness == null && color == null && alpha == null)
-						{
-							commands.push(SWFShapeCommandType.CLEAR_LINE_STYLE);
-						}
-						else
-						{
-							commands = commands.concat([
-								SWFShapeCommandType.LINE_STYLE,
-								thickness,
-								color,
-								alpha,
-								pixelHinting,
-								scaleMode,
-								startCaps,
-								joints,
-								miterLimit
-							]);
-						}
-
-					case BeginFill(color, alpha):
-						commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
-
-					case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-						commands = commands.concat([
-							SWFShapeCommandType.BEGIN_GRADIENT_FILL,
-							type,
-							colors,
-							alphas,
-							ratios,
-							serializeMatrix(matrix),
-							spreadMethod,
-							interpolationMethod,
-							focalPointRatio
-						]);
-
-					case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-						commands = commands.concat([
-							SWFShapeCommandType.BEGIN_BITMAP_FILL,
-							bitmapID,
-							serializeMatrix(matrix),
-							repeat,
-							smooth
-						]);
-						processTag(cast swfData.getCharacter(bitmapID));
-
-					case EndFill:
-						commands.push(SWFShapeCommandType.END_FILL);
-
-					case MoveTo(x, y):
-						commands = commands.concat([SWFShapeCommandType.MOVE_TO, twip(x), twip(y)]);
-
-					case LineTo(x, y):
-						commands = commands.concat([SWFShapeCommandType.LINE_TO, twip(x), twip(y)]);
-
-					case CurveTo(controlX, controlY, anchorX, anchorY):
-						commands = commands.concat([
-							SWFShapeCommandType.CURVE_TO,
-							twip(controlX),
-							twip(controlY),
-							twip(anchorX),
-							twip(anchorY)
-						]);
-
-					default:
-				}
-			}
-
-			symbol.commands = commands;
+			symbol.commands = serializeShapeCommands(handler.commands);
 			libraryData.symbols.set(symbol.id, symbol);
 			return symbol;
 		}
+	}
+
+	private function addMorphShape(tag:TagDefineMorphShape):Dynamic
+	{
+		var symbol:Dynamic = {};
+		symbol.type = SWFSymbolType.MORPH_SHAPE;
+		symbol.id = tag.characterId;
+		symbol.ratios = [];
+		symbol.shapes = [];
+
+		// The start of the shape is always drawn, and timelines add the other ratios they use
+		try
+		{
+			addMorphShapeRatio(symbol, 0);
+		}
+		catch (e:Error)
+		{
+			Log.warn("Skipping morph shape " + tag.characterId + ", its start and end edges do not match");
+			return null;
+		}
+
+		libraryData.symbols.set(symbol.id, symbol);
+		return symbol;
+	}
+
+	private function addMorphShapeRatio(symbol:Dynamic, ratio:Int):Void
+	{
+		var ratios:Array<Int> = symbol.ratios;
+		if (ratios.indexOf(ratio) > -1) return;
+
+		var tag:TagDefineMorphShape = cast swfData.getCharacter(symbol.id);
+		var handler = new ShapeCommandExporter(swfData);
+		tag.exportHandler = handler;
+		tag.export(ratio / 65535);
+
+		var shapes:Array<Dynamic> = symbol.shapes;
+		ratios.push(ratio);
+		shapes.push(serializeShapeCommands(handler.commands));
+	}
+
+	private function serializeShapeCommands(shapeCommands:Array<ShapeCommand>):Array<Dynamic>
+	{
+		var commands:Array<Dynamic> = [];
+
+		for (command in shapeCommands)
+		{
+			switch (command)
+			{
+				case LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, joints, miterLimit):
+					if (thickness == null && color == null && alpha == null)
+					{
+						commands.push(SWFShapeCommandType.CLEAR_LINE_STYLE);
+					}
+					else
+					{
+						commands.push(SWFShapeCommandType.LINE_STYLE);
+						commands.push(thickness);
+						commands.push(color);
+						commands.push(alpha);
+						commands.push(pixelHinting);
+						commands.push(scaleMode);
+						commands.push(startCaps);
+						commands.push(joints);
+						commands.push(miterLimit);
+					}
+
+				case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					commands.push(SWFShapeCommandType.LINE_GRADIENT_STYLE);
+					commands.push(type);
+					commands.push(colors);
+					commands.push(alphas);
+					commands.push(ratios);
+					commands.push(serializeMatrix(matrix));
+					commands.push(spreadMethod);
+					commands.push(interpolationMethod);
+					commands.push(focalPointRatio);
+
+				case BeginFill(color, alpha):
+					commands.push(SWFShapeCommandType.BEGIN_FILL);
+					commands.push(color);
+					commands.push(alpha);
+
+				case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+					commands.push(SWFShapeCommandType.BEGIN_GRADIENT_FILL);
+					commands.push(type);
+					commands.push(colors);
+					commands.push(alphas);
+					commands.push(ratios);
+					commands.push(serializeMatrix(matrix));
+					commands.push(spreadMethod);
+					commands.push(interpolationMethod);
+					commands.push(focalPointRatio);
+
+				case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
+					commands.push(SWFShapeCommandType.BEGIN_BITMAP_FILL);
+					commands.push(bitmapID);
+					commands.push(serializeMatrix(matrix));
+					commands.push(repeat);
+					commands.push(smooth);
+					processTag(cast swfData.getCharacter(bitmapID));
+
+				case EndFill:
+					commands.push(SWFShapeCommandType.END_FILL);
+
+				case MoveTo(x, y):
+					commands.push(SWFShapeCommandType.MOVE_TO);
+					commands.push(twip(x));
+					commands.push(twip(y));
+
+				case LineTo(x, y):
+					commands.push(SWFShapeCommandType.LINE_TO);
+					commands.push(twip(x));
+					commands.push(twip(y));
+
+				case CurveTo(controlX, controlY, anchorX, anchorY):
+					commands.push(SWFShapeCommandType.CURVE_TO);
+					commands.push(twip(controlX));
+					commands.push(twip(controlY));
+					commands.push(twip(anchorX));
+					commands.push(twip(anchorY));
+
+				default:
+			}
+		}
+
+		return commands;
 	}
 
 	private function addSprite(tag:SWFTimelineContainer, root:Bool = false):Dynamic
@@ -732,6 +790,20 @@ class AnimateLibraryExporter
 				else
 				{
 					frameObject.type = SWFFrameObjectType.UPDATE;
+				}
+
+				var characterSymbol:Dynamic = libraryData.symbols.get(object.characterId);
+				if (characterSymbol != null && characterSymbol.type == SWFSymbolType.MORPH_SHAPE)
+				{
+					if (placeTag.hasRatio)
+					{
+						frameObject.ratio = placeTag.ratio;
+						addMorphShapeRatio(characterSymbol, placeTag.ratio);
+					}
+					else if (frameObject.type == SWFFrameObjectType.CREATE)
+					{
+						frameObject.ratio = 0;
+					}
 				}
 
 				if (placeTag.matrix != null)
@@ -979,62 +1051,71 @@ class AnimateLibraryExporter
 									}
 									else
 									{
-										commands = commands.concat([
-											SWFShapeCommandType.LINE_STYLE,
-											thickness,
-											color,
-											alpha,
-											pixelHinting,
-											scaleMode,
-											startCaps,
-											joints,
-											miterLimit
-										]);
+										commands.push(SWFShapeCommandType.LINE_STYLE);
+										commands.push(thickness);
+										commands.push(color);
+										commands.push(alpha);
+										commands.push(pixelHinting);
+										commands.push(scaleMode);
+										commands.push(startCaps);
+										commands.push(joints);
+										commands.push(miterLimit);
 									}
 
+								case LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
+									commands.push(SWFShapeCommandType.LINE_GRADIENT_STYLE);
+									commands.push(type);
+									commands.push(colors);
+									commands.push(alphas);
+									commands.push(ratios);
+									commands.push(serializeMatrix(matrix));
+									commands.push(spreadMethod);
+									commands.push(interpolationMethod);
+									commands.push(focalPointRatio);
+
 								case BeginFill(color, alpha):
-									commands = commands.concat([SWFShapeCommandType.BEGIN_FILL, color, alpha]);
+									commands.push(SWFShapeCommandType.BEGIN_FILL);
+									commands.push(color);
+									commands.push(alpha);
 
 								case BeginGradientFill(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio):
-									commands = commands.concat([
-										SWFShapeCommandType.BEGIN_GRADIENT_FILL,
-										type,
-										colors,
-										alphas,
-										ratios,
-										serializeMatrix(matrix),
-										spreadMethod,
-										interpolationMethod,
-										focalPointRatio
-									]);
+									commands.push(SWFShapeCommandType.BEGIN_GRADIENT_FILL);
+									commands.push(type);
+									commands.push(colors);
+									commands.push(alphas);
+									commands.push(ratios);
+									commands.push(serializeMatrix(matrix));
+									commands.push(spreadMethod);
+									commands.push(interpolationMethod);
+									commands.push(focalPointRatio);
 
 								case BeginBitmapFill(bitmapID, matrix, repeat, smooth):
-									commands = commands.concat([
-										SWFShapeCommandType.BEGIN_BITMAP_FILL,
-										bitmapID,
-										serializeMatrix(matrix),
-										repeat,
-										smooth
-									]);
+									commands.push(SWFShapeCommandType.BEGIN_BITMAP_FILL);
+									commands.push(bitmapID);
+									commands.push(serializeMatrix(matrix));
+									commands.push(repeat);
+									commands.push(smooth);
 									processTag(cast swfData.getCharacter(bitmapID));
 
 								case EndFill:
 									commands.push(SWFShapeCommandType.END_FILL);
 
 								case MoveTo(x, y):
-									commands = commands.concat([SWFShapeCommandType.MOVE_TO, twip(x), twip(y)]);
+									commands.push(SWFShapeCommandType.MOVE_TO);
+									commands.push(twip(x));
+									commands.push(twip(y));
 
 								case LineTo(x, y):
-									commands = commands.concat([SWFShapeCommandType.LINE_TO, twip(x), twip(y)]);
+									commands.push(SWFShapeCommandType.LINE_TO);
+									commands.push(twip(x));
+									commands.push(twip(y));
 
 								case CurveTo(controlX, controlY, anchorX, anchorY):
-									commands = commands.concat([
-										SWFShapeCommandType.CURVE_TO,
-										twip(controlX),
-										twip(controlY),
-										twip(anchorX),
-										twip(anchorY)
-									]);
+									commands.push(SWFShapeCommandType.CURVE_TO);
+									commands.push(twip(controlX));
+									commands.push(twip(controlY));
+									commands.push(twip(anchorX));
+									commands.push(twip(anchorY));
 
 								default:
 							}
@@ -1063,13 +1144,12 @@ class AnimateLibraryExporter
 		return symbol;
 	}
 
-	private function addSound(tag:IDefinitionTag):Void
+	private function addSound(tag:IDefinitionTag):Dynamic
 	{
 		if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 		{
 			var defineSound:TagDefineSound = cast tag;
 
-			var byteArray = defineSound.soundData;
 			var type:SoundType = switch (defineSound.soundFormat)
 			{
 				case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
@@ -1079,61 +1159,106 @@ class AnimateLibraryExporter
 				case 4: SoundType.NELLYMOSER_16_KHZ;
 				case 5: SoundType.NELLYMOSER_8_KHZ;
 				case 6: SoundType.NELLYMOSER;
-				case 7: SoundType.SPEEX;
+				case 11: SoundType.SPEEX;
 				case _: throw("invalid sound type!");
 			}
 
-			// TODO
+			var byteArray:ByteArray = null;
+			var extension:String = null;
 
-			// 			var entry:Entry = {
-			// 				fileName: symbol.path,
-			// 				fileSize: byteArray.length,
-			// 				fileTime: Date.now(),
-			// 				compressed: false,
-			// 				dataSize: 0,
-			// 				data: byteArray,
-			// 				crc32: Crc32.make(byteArray)
-			// 			};
-			// 			outputList.add(entry);
+			switch (type)
+			{
+				case MP3:
+					// skip SeekSamples, the rest is MP3 frames
+					byteArray = new ByteArray();
+					if (defineSound.soundData.length > 2)
+					{
+						byteArray.writeBytes(defineSound.soundData, 2, defineSound.soundData.length - 2);
+					}
+					extension = "mp3";
 
-			// createdDirectory = false;
-			// 		for (id in exporter.sounds.keys())
-			// 		{
-			// 			if (!createdDirectory)
-			// 			{
-			// 				System.mkdir(Path.combine(targetPath, "sounds"));
-			// 				createdDirectory = true;
-			// 			}
+				case UNCOMPRESSED_NATIVE_ENDIAN, UNCOMPRESSED_LITTLE_ENDIAN:
+					byteArray = createWAV(defineSound);
+					extension = "wav";
 
-			// 			var symbolClassName = exporter.soundSymbolClassNames.get(id);
-			// 			var typeId = exporter.soundTypes.get(id);
+				default:
+					Log.warn("Skipping sound " + tag.characterId + ", " + SoundCompression.toString(defineSound.soundFormat)
+						+ " sounds cannot be exported");
+					return null;
+			}
 
-			// 			Log.info("", " - \x1b[1mExporting sound:\x1b[0m [id=" + id + ", type=" + typeId + ", symbolClassName=" + symbolClassName + "]");
+			var symbol:Dynamic = {};
+			symbol.type = SWFSymbolType.SOUND;
+			symbol.id = tag.characterId;
+			symbol.path = "sounds/" + symbol.id + "." + extension;
 
-			// 			var type;
-			// 			switch (typeId)
-			// 			{
-			// 				case SoundType.MP3:
-			// 					type = "mp3";
-			// 				case SoundType.ADPCM:
-			// 					type = "adpcm";
-			// 				case _:
-			// 					throw "unsupported sound type " + id + ", type " + typeId + ", symbol class name " + symbolClassName;
-			// 			};
-			// 			var path = "sounds/" + symbolClassName + "." + type;
-			// 			var assetData = exporter.sounds.get(id);
+			var entry:Entry = {
+				fileName: symbol.path,
+				fileSize: byteArray.length,
+				fileTime: Date.now(),
+				compressed: false,
+				dataSize: 0,
+				data: byteArray,
+				crc32: Crc32.make(byteArray)
+			};
+			outputList.add(entry);
 
-			// 			File.saveBytes(Path.combine(targetPath, path), assetData);
+			manifestData.assets.push({
+				path: symbol.path,
+				type: AssetType.SOUND
+			});
 
-			// 			// NOTICE: everything must be .mp3 in its final form, even though we write out various formats to disk
-			// 			var soundAsset = new Asset("", "sounds/" + symbolClassName + ".mp3", AssetType.SOUND);
-			// 			project.assets.push(soundAsset);
+			libraryData.symbols.set(symbol.id, symbol);
+
+			return symbol;
 		}
 
-		return;
+		return null;
 	}
 
-	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = ""):Array<String>
+	private function createWAV(defineSound:TagDefineSound):ByteArray
+	{
+		var pcm = defineSound.soundData;
+		var channels = defineSound.soundType == swf.data.consts.SoundType.STEREO ? 2 : 1;
+		var bitsPerSample = defineSound.soundSize == SoundSize.BIT_16 ? 16 : 8;
+		var sampleRate = switch (defineSound.soundRate)
+		{
+			case SoundRate.KHZ_5: 5512;
+			case SoundRate.KHZ_11: 11025;
+			case SoundRate.KHZ_22: 22050;
+			default: 44100;
+		}
+		var blockAlign = channels * Std.int(bitsPerSample / 8);
+		var padding = pcm.length % 2;
+
+		var wav = new ByteArray();
+		wav.endian = Endian.LITTLE_ENDIAN;
+		wav.writeUTFBytes("RIFF");
+		wav.writeInt(36 + pcm.length + padding);
+		wav.writeUTFBytes("WAVE");
+		wav.writeUTFBytes("fmt ");
+		wav.writeInt(16);
+		wav.writeShort(1); // PCM
+		wav.writeShort(channels);
+		wav.writeInt(sampleRate);
+		wav.writeInt(sampleRate * blockAlign);
+		wav.writeShort(blockAlign);
+		wav.writeShort(bitsPerSample);
+		wav.writeUTFBytes("data");
+		wav.writeInt(pcm.length);
+		wav.writeBytes(pcm, 0, pcm.length);
+		if (padding > 0) wav.writeByte(0);
+		return wav;
+	}
+
+	/**
+		Generates linkage classes as template assets, and returns their class names.
+
+		If `includedClasses` is provided, it is filled with the generated classes that are
+		safe to compile without being referenced: classes that only depend on OpenFL and
+		other included classes, and not on ActionScript classes outside of this library.
+	**/
+	public function generateClasses(targetPath:String, output:Array<Asset>, prefix:String = "", includedClasses:Array<String> = null):Array<String>
 	{
 		#if commonjs
 		var bitmapDataTemplate = File.getContent(Path.combine(js.Node.__dirname, "../templates/animate/BitmapData.mtt"));
@@ -1146,6 +1271,16 @@ class AnimateLibraryExporter
 		#end
 
 		var generatedClasses = [];
+		var classDependencies = new Map<String, Array<String>>();
+
+		var libraryClassNames = new Map<String, Bool>();
+		for (symbol in libraryData.symbols)
+		{
+			if (Reflect.hasField(symbol, "className") && symbol.className != null)
+			{
+				libraryClassNames.set(symbol.className, true);
+			}
+		}
 
 		for (symbolID in libraryData.symbols.keys())
 		{
@@ -1165,6 +1300,11 @@ class AnimateLibraryExporter
 				if (Reflect.hasField(symbol, "baseClassName"))
 				{
 					baseClassName = symbol.baseClassName;
+					// a base class from this library is generated too, with the same prefix
+					if (baseClassName != null && libraryClassNames.exists(baseClassName))
+					{
+						baseClassName = SymbolUtils.formatClassName(baseClassName, prefix);
+					}
 				}
 			}
 			else if (type == BUTTON)
@@ -1301,12 +1441,65 @@ class AnimateLibraryExporter
 				var template = new Template(templateData);
 
 				var templateFile = new Asset("", Path.combine(Path.combine(targetPath, Path.directory(className.split(".").join("/"))), name + ".hx"),
-					cast AssetType.TEMPLATE);
+					lime.tools.AssetType.TEMPLATE);
 				templateFile.embed = false;
 				templateFile.data = template.execute(context);
 				output.push(templateFile);
 
-				generatedClasses.push((packageName.length > 0 ? packageName + "." : "") + name);
+				var generatedClassName = (packageName.length > 0 ? packageName + "." : "") + name;
+				generatedClasses.push(generatedClassName);
+
+				var dependencies = [];
+				if (baseClassName != null)
+				{
+					dependencies.push(baseClassName);
+				}
+				for (property in classProperties)
+				{
+					var propertyType:String = property.type;
+					if (propertyType != "Dynamic" && !StringTools.startsWith(propertyType, "openfl."))
+					{
+						dependencies.push(propertyType);
+					}
+				}
+				classDependencies.set(generatedClassName, dependencies);
+			}
+		}
+
+		if (includedClasses != null)
+		{
+			var included = new Map<String, Bool>();
+			for (className in generatedClasses)
+			{
+				included.set(className, true);
+			}
+
+			var changed = true;
+			while (changed)
+			{
+				changed = false;
+				for (className in generatedClasses)
+				{
+					if (!included.exists(className)) continue;
+
+					for (dependency in classDependencies.get(className))
+					{
+						if (!included.exists(dependency))
+						{
+							included.remove(className);
+							changed = true;
+							break;
+						}
+					}
+				}
+			}
+
+			for (className in generatedClasses)
+			{
+				if (included.exists(className))
+				{
+					includedClasses.push(className);
+				}
 			}
 		}
 
@@ -1317,7 +1510,7 @@ class AnimateLibraryExporter
 	{
 		var data2 = processTag(cast swfData.getCharacter(symbol.tagId));
 
-		if (data2 == null && ~/_fla\.MainTimeline$/.match(symbol.name))
+		if (data2 == null && (symbol.tagId == 0 || ~/_fla\.MainTimeline$/.match(symbol.name)))
 		{
 			data2 = libraryData.root;
 		}
@@ -1362,6 +1555,10 @@ class AnimateLibraryExporter
 			{
 				return addShape(cast tag);
 			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineMorphShape))
+			{
+				return addMorphShape(cast tag);
+			}
 			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont)
 				|| #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineFont4))
 			{
@@ -1369,7 +1566,7 @@ class AnimateLibraryExporter
 			}
 			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (tag, TagDefineSound))
 			{
-				addSound(tag);
+				return addSound(tag);
 			}
 
 			return null;
@@ -1541,6 +1738,7 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFShapeCommandType(Int) from I
 	public var LINE_STYLE = 6;
 	public var LINE_TO = 7;
 	public var MOVE_TO = 8;
+	public var LINE_GRADIENT_STYLE = 9;
 }
 
 #if (haxe_ver < 4.0) @:enum #end
@@ -1553,6 +1751,8 @@ private #if (haxe_ver >= 4.0) enum #end abstract SWFSymbolType(Int) from Int to 
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var SOUND = 7;
+	public var MORPH_SHAPE = 8;
 }
 
 #if (haxe_ver < 4.0) @:enum #end

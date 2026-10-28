@@ -5,6 +5,7 @@ import lime.graphics.Image;
 import lime.graphics.ImageChannel;
 import lime.math.Vector2;
 import swf.exporters.core.FilterType;
+import openfl.display.BitmapData;
 import openfl.display.MovieClip;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -19,6 +20,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Future;
 import openfl.utils.Promise;
 #if lime
+import lime.media.AudioBuffer;
 import lime.utils.AssetBundle;
 import lime.utils.AssetManifest;
 import lime.utils.AssetLibrary as LimeAssetLibrary;
@@ -38,6 +40,7 @@ import openfl.filters.GlowFilter;
 @:noDebug
 #end
 @:access(swf.exporters.animate.AnimateSpriteSymbol)
+@:access(swf.exporters.animate.AnimateTimelineData)
 @:access(swf.exporters.animate)
 @SuppressWarnings("checkstyle:FieldDocComment")
 @:keep class AnimateLibrary extends AssetLibrary
@@ -53,32 +56,44 @@ import openfl.filters.GlowFilter;
 	];
 	#end
 
+	// Generated classes register here from __init__, which can run before static initializers
+	@:noCompletion private static var __generatedClasses:Map<String, Class<Dynamic>>;
 	private static var instances:Map<String, AnimateLibrary> = new Map();
 
 	private var alphaCheck:Map<String, Bool>;
 	private var bitmapClassNames:Map<String, String>;
 	private var bitmapSymbols:Array<AnimateBitmapSymbol>;
 	private var frameRate:Float;
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	private var hardwareBitmapData:Map<String, BitmapData>;
+	private var readableBitmapDataKeys:Map<String, Bool>;
+	private var readableShapeBitmapData:Map<String, BitmapData>;
+	#end
 	private var id:String;
 	private var instanceID:String;
 	private var preloading:Bool;
 	private var root:AnimateSpriteSymbol;
 	private var rootPath:String;
+	private var soundClassNames:Map<String, String>;
 	private var symbols:Map<Int, AnimateSymbol>;
 	private var symbolsByClassName:Map<String, AnimateSymbol>;
-	private var uuid:String;
 
 	public function new(id:String, uuid:String = null)
 	{
 		super();
 
 		this.id = id;
-		this.uuid = uuid;
 
 		instanceID = uuid != null ? uuid : id;
 
 		alphaCheck = new Map();
 		bitmapClassNames = new Map();
+		soundClassNames = new Map();
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 
 		#if (ios || tvos)
 		rootPath = "assets/";
@@ -86,7 +101,7 @@ import openfl.filters.GlowFilter;
 		rootPath = "";
 		#end
 
-		instances.set(uuid, this);
+		instances.set(instanceID, this);
 
 		// Hack to include filter classes, macro.include is not working properly
 
@@ -129,7 +144,12 @@ import openfl.filters.GlowFilter;
 
 			if (type == null || type == (cast AssetType.IMAGE) || type == (cast AssetType.MOVIE_CLIP))
 			{
-				return (symbolsByClassName != null && symbolsByClassName.exists(id));
+				return (symbolsByClassName != null && symbolsByClassName.exists(id)) || (type == null && soundClassNames.exists(id));
+			}
+
+			if ((type == (cast AssetType.SOUND) || type == (cast AssetType.MUSIC)) && soundClassNames.exists(id))
+			{
+				return true;
 			}
 		}
 
@@ -141,6 +161,114 @@ import openfl.filters.GlowFilter;
 	{
 		return instances.get(uuid);
 	}
+
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	@:allow(swf.exporters.animate.AnimateBitmapSymbol)
+	private function __getHardwareBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		if (readableBitmapDataKeys.exists(key))
+		{
+			return __getReadableShapeBitmapData(symbol);
+		}
+
+		var bitmapData = hardwareBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				bitmapData.disposeImage();
+				hardwareBitmapData.set(key, bitmapData);
+
+				if (symbol.path != null)
+				{
+					cachedImages.remove(symbol.path);
+					alphaCheck.remove(symbol.path);
+				}
+
+				if (symbol.alpha != null)
+				{
+					cachedImages.remove(symbol.alpha);
+				}
+			}
+		}
+
+		return bitmapData;
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __markBitmapDataReadable(symbol:AnimateBitmapSymbol):Void
+	{
+		if (symbol != null)
+		{
+			readableBitmapDataKeys.set(__getBitmapDataKey(symbol), true);
+		}
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __getReadableShapeBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		readableBitmapDataKeys.set(key, true);
+		var bitmapData = readableShapeBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				readableShapeBitmapData.set(key, bitmapData);
+			}
+		}
+
+		return bitmapData;
+	}
+
+	private function __getBitmapDataKey(symbol:AnimateBitmapSymbol):String
+	{
+		return symbol.path != null
+			? "path:" + symbol.path + "|alpha:" + (symbol.alpha != null ? symbol.alpha : "")
+			: "symbol:" + symbol.id;
+	}
+
+	// Shapes are drawn in software, so bitmaps used by shape fills keep their pixels
+	private function __markShapeBitmapsReadable():Void
+	{
+		for (symbol in symbols)
+		{
+			if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateShapeSymbol))
+			{
+				__markFillBitmapsReadable(cast symbol);
+			}
+			else if (#if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (symbol, AnimateMorphShapeSymbol))
+			{
+				for (shape in cast(symbol, AnimateMorphShapeSymbol).shapes)
+				{
+					__markFillBitmapsReadable(shape);
+				}
+			}
+		}
+	}
+
+	private function __markFillBitmapsReadable(shape:AnimateShapeSymbol):Void
+	{
+		for (bitmapID in shape.__getBitmapFillIDs())
+		{
+			__markBitmapDataReadable(cast symbols.get(bitmapID));
+		}
+	}
+	#end
+
+	#if lime
+	public override function getAudioBuffer(id:String):AudioBuffer
+	{
+		return super.getAudioBuffer(__getSoundID(id));
+	}
+	#end
 
 	#if lime
 	public override function getImage(id:String):Image
@@ -259,6 +387,7 @@ import openfl.filters.GlowFilter;
 
 			var data:Dynamic, type:SWFSymbolType, symbol:AnimateSymbol = null;
 			var bitmapSymbol:AnimateBitmapSymbol;
+			var soundSymbol:AnimateSoundSymbol;
 			var spriteSymbol:AnimateSpriteSymbol;
 
 			symbols = new Map();
@@ -270,6 +399,7 @@ import openfl.filters.GlowFilter;
 				data = symbolData[i];
 				if (data == null) continue;
 				type = data.type;
+				symbol = null;
 
 				switch (type)
 				{
@@ -284,8 +414,14 @@ import openfl.filters.GlowFilter;
 						symbol = __parseDynamicText(data);
 					case FONT:
 						symbol = __parseFont(data);
+					case MORPH_SHAPE:
+						symbol = __parseMorphShape(data);
 					case SHAPE:
 						symbol = __parseShape(data);
+					case SOUND:
+						soundSymbol = __parseSound(data);
+						if (soundSymbol.className != null) soundClassNames.set(soundSymbol.className, soundSymbol.path);
+						symbol = soundSymbol;
 					case SPRITE:
 						spriteSymbol = __parseSprite(data);
 						if (i == rootIndex) root = spriteSymbol;
@@ -297,7 +433,8 @@ import openfl.filters.GlowFilter;
 
 				if (symbol == null) continue;
 				symbols.set(symbol.id, symbol);
-				if (symbol.className != null)
+				// sounds are not display objects, so they are only found through soundClassNames
+				if (symbol.className != null && type != SOUND)
 				{
 					symbolsByClassName.set(symbol.className, symbol);
 					#if (openfl > "9.1.0")
@@ -305,6 +442,10 @@ import openfl.filters.GlowFilter;
 					#end
 				}
 			}
+
+			#if (lime && !flash && swf_hardware_bitmap_cache)
+			__markShapeBitmapsReadable();
+			#end
 
 			// SWFLite.instances.set(instanceID, swf);
 
@@ -359,6 +500,13 @@ import openfl.filters.GlowFilter;
 		}
 
 		return promise.future;
+	}
+	#end
+
+	#if lime
+	public override function loadAudioBuffer(id:String):Future<AudioBuffer>
+	{
+		return super.loadAudioBuffer(__getSoundID(id));
 	}
 	#end
 
@@ -447,7 +595,12 @@ import openfl.filters.GlowFilter;
 	#if lime
 	public override function unload():Void
 	{
-		instances.remove(uuid);
+		instances.remove(instanceID);
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 		if (symbols == null) return;
 		// if (swf == null) return;
 
@@ -509,6 +662,44 @@ import openfl.filters.GlowFilter;
 		{
 			bytesTotal += sizes.get(id);
 		}
+	}
+	#end
+
+	// Generated class names can have a prefix, so symbols find their class by library and symbol ID
+	@:noCompletion private function __getGeneratedClass(symbolID:Int):Class<Dynamic>
+	{
+		return __generatedClasses != null ? __generatedClasses.get(instanceID + ":" + symbolID) : null;
+	}
+
+	#if lime
+	private function __getSoundID(id:String):String
+	{
+		if (soundClassNames.exists(id))
+		{
+			id = soundClassNames.get(id);
+		}
+
+		// Lime keeps bundled sounds as bytes on HTML5, and does not decode them later
+		if (!cachedAudioBuffers.exists(id) && cachedBytes.exists(id))
+		{
+			var bytes = cachedBytes.get(id);
+			#if (js && html5 && lime_howlerjs)
+			// AudioBuffer.fromBytes() cannot detect MP3 data without an ID3 tag, which
+			// SWF files do not include, so use the file extension from the exporter
+			var audioBuffer = new AudioBuffer();
+			audioBuffer.src = new lime.media.howlerjs.Howl({
+				src: ["data:audio/" + haxe.io.Path.extension(id) + ";base64," + haxe.crypto.Base64.encode(bytes)],
+				html5: true,
+				preload: false
+			});
+			cachedAudioBuffers.set(id, audioBuffer);
+			#else
+			cachedAudioBuffers.set(id, AudioBuffer.fromBytes(bytes));
+			#end
+			cachedBytes.remove(id);
+		}
+
+		return id;
 	}
 	#end
 
@@ -662,6 +853,10 @@ import openfl.filters.GlowFilter;
 								commands.push(LineStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7],
 									data[i + 8]));
 								i += 9;
+							case LINE_GRADIENT_STYLE:
+								commands.push(LineGradientStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], __parseMatrix(data[i + 5]), data[i + 6],
+									data[i + 7], data[i + 8]));
+								i += 9;
 							case LINE_TO:
 								commands.push(LineTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
 								i += 3;
@@ -678,71 +873,8 @@ import openfl.filters.GlowFilter;
 		return symbol;
 	}
 
-	private function __parseMatrix(values:Array<Float>):Matrix
+	private function __parseFrames(symbol:AnimateSpriteSymbol, frames:Array<Dynamic>):Void
 	{
-		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(cast values[4]), __pixel(cast values[5])) : null;
-	}
-
-	private function __parseShape(data:Dynamic):AnimateShapeSymbol
-	{
-		var symbol = new AnimateShapeSymbol();
-		symbol.id = data.id;
-		symbol.commands = [];
-
-		var data:Array<Dynamic> = data.commands;
-		var commands = symbol.commands;
-		var i = 0;
-
-		while (i < data.length)
-		{
-			switch (data[i])
-			{
-				case BEGIN_BITMAP_FILL:
-					commands.push(BeginBitmapFill(data[i + 1], __parseMatrix(data[i + 2]), data[i + 3], data[i + 4]));
-					i += 5;
-				case BEGIN_FILL:
-					commands.push(BeginFill(data[i + 1], data[i + 2]));
-					i += 3;
-				case BEGIN_GRADIENT_FILL:
-					commands.push(BeginGradientFill(data[i + 1], data[i + 2], data[i + 3], data[i + 4], __parseMatrix(data[i + 5]), data[i + 6], data[i + 7],
-						data[i + 8]));
-					i += 9;
-				case CLEAR_LINE_STYLE:
-					commands.push(LineStyle(null, null, null, null, null, null, null, null));
-					i++;
-				case CURVE_TO:
-					commands.push(CurveTo(__pixel(data[i + 1]), __pixel(data[i + 2]), __pixel(data[i + 3]), __pixel(data[i + 4])));
-					i += 5;
-				case END_FILL:
-					commands.push(EndFill);
-					i++;
-				case LINE_STYLE:
-					commands.push(LineStyle(data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7], data[i + 8]));
-					i += 9;
-				case LINE_TO:
-					commands.push(LineTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
-					i += 3;
-				case MOVE_TO:
-					commands.push(MoveTo(__pixel(data[i + 1]), __pixel(data[i + 2])));
-					i += 3;
-				default:
-					i++;
-			}
-		}
-		return symbol;
-	}
-
-	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
-	{
-		if (data == null) return null;
-
-		var symbol = new AnimateSpriteSymbol();
-		symbol.id = data.id;
-		symbol.className = data.className;
-		symbol.baseClassName = data.baseClassName;
-		symbol.scale9Grid = data.scale9Grid != null ? new Rectangle(__pixel(data.scale9Grid[0]), __pixel(data.scale9Grid[1]), __pixel(data.scale9Grid[2]),
-			__pixel(data.scale9Grid[3])) : null;
-		var frames:Array<Dynamic> = data.frames;
 		var frame:AnimateFrame,
 			objects:Array<Dynamic>,
 			object:AnimateFrameObject;
@@ -781,6 +913,7 @@ import openfl.filters.GlowFilter;
 					object.id = objectData.id;
 					object.matrix = __parseMatrix(objectData.matrix);
 					object.name = objectData.name;
+					object.ratio = objectData.ratio;
 					object.symbol = objectData.symbol;
 					object.type = objectData.type;
 					object.visible = objectData.visible;
@@ -790,6 +923,65 @@ import openfl.filters.GlowFilter;
 			}
 			symbol.frames.push(frame);
 		}
+	}
+
+	private function __parseMatrix(values:Array<Float>):Matrix
+	{
+		return values != null ? new Matrix(values[0], values[1], values[2], values[3], __pixel(cast values[4]), __pixel(cast values[5])) : null;
+	}
+
+	private function __parseMorphShape(data:Dynamic):AnimateMorphShapeSymbol
+	{
+		var symbol = new AnimateMorphShapeSymbol();
+		symbol.id = data.id;
+		symbol.ratios = [];
+		symbol.shapes = [];
+		var ratios:Array<Dynamic> = data.ratios;
+		var shapes:Array<Dynamic> = data.shapes;
+		for (i in 0...ratios.length)
+		{
+			var shape = new AnimateShapeSymbol();
+			shape.id = symbol.id;
+			shape.__setCompactCommands(shapes[i]);
+			symbol.ratios.push(Std.int(ratios[i]));
+			symbol.shapes.push(shape);
+		}
+		return symbol;
+	}
+
+	private function __parseShape(data:Dynamic):AnimateShapeSymbol
+	{
+		var symbol = new AnimateShapeSymbol();
+		symbol.id = data.id;
+		symbol.__setCompactCommands(data.commands);
+		return symbol;
+	}
+
+	private function __parseSound(data:Dynamic):AnimateSoundSymbol
+	{
+		var symbol = new AnimateSoundSymbol();
+		symbol.id = data.id;
+		symbol.className = data.className;
+		symbol.path = data.path;
+		return symbol;
+	}
+
+	private function __parseSprite(data:Dynamic):AnimateSpriteSymbol
+	{
+		if (data == null) return null;
+
+		var symbol = new AnimateSpriteSymbol();
+		symbol.id = data.id;
+		symbol.className = data.className;
+		symbol.baseClassName = data.baseClassName;
+		symbol.scale9Grid = data.scale9Grid != null ? new Rectangle(__pixel(data.scale9Grid[0]), __pixel(data.scale9Grid[1]), __pixel(data.scale9Grid[2]),
+			__pixel(data.scale9Grid[3])) : null;
+		var frames:Array<Dynamic> = data.frames;
+		#if swf_compact_animate_timelines
+		symbol.__setCompactTimeline(frames, this);
+		#else
+		__parseFrames(symbol, frames);
+		#end
 		return symbol;
 	}
 
@@ -800,6 +992,13 @@ import openfl.filters.GlowFilter;
 		symbol.matrix = __parseMatrix(data.matrix);
 		symbol.records = data.records;
 		return symbol;
+	}
+
+	// Called from __init__ by generated classes that are compiled
+	@:noCompletion private static function __registerGeneratedClass(uuid:String, symbolID:Int, type:Class<Dynamic>):Void
+	{
+		if (__generatedClasses == null) __generatedClasses = new Map();
+		__generatedClasses.set(uuid + ":" + symbolID, type);
 	}
 
 	private inline function __pixel(value:Int):Float
@@ -819,6 +1018,7 @@ import openfl.filters.GlowFilter;
 	public var LINE_STYLE = 6;
 	public var LINE_TO = 7;
 	public var MOVE_TO = 8;
+	public var LINE_GRADIENT_STYLE = 9;
 }
 
 #if (haxe_ver >= 4.0) enum #else @:enum #end abstract SWFSymbolType(Int) from Int to Int
@@ -830,4 +1030,6 @@ import openfl.filters.GlowFilter;
 	public var SHAPE = 4;
 	public var SPRITE = 5;
 	public var STATIC_TEXT = 6;
+	public var SOUND = 7;
+	public var MORPH_SHAPE = 8;
 }

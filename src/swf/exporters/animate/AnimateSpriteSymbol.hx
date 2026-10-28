@@ -10,6 +10,7 @@ import openfl.geom.Rectangle;
 @:fileXml('tags="haxe,release"')
 @:noDebug
 #end
+@:access(swf.exporters.animate.AnimateLibrary)
 @:access(openfl.display.Sprite)
 class AnimateSpriteSymbol extends AnimateSymbol
 {
@@ -17,6 +18,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 	public var frames:Array<AnimateFrame>;
 	public var scale9Grid:Rectangle;
 
+	private var compactTimeline:AnimateTimelineData;
 	private var library:AnimateLibrary;
 
 	public function new()
@@ -57,9 +59,9 @@ class AnimateSpriteSymbol extends AnimateSymbol
 		}
 		#end
 
-		var symbolType = null;
+		var symbolType = library.__getGeneratedClass(id);
 
-		if (className != null)
+		if (symbolType == null && className != null)
 		{
 			symbolType = Type.resolveClass(SymbolUtils.formatClassName(className));
 
@@ -90,7 +92,7 @@ class AnimateSpriteSymbol extends AnimateSymbol
 
 		if (symbolType != null)
 		{
-			sprite = Type.createInstance(symbolType, []);
+			sprite = __createInstance(library, symbolType);
 		}
 		else
 		{
@@ -127,5 +129,10 @@ class AnimateSpriteSymbol extends AnimateSymbol
 	{
 		this.library = library;
 		__constructor(cast instance);
+	}
+
+	private function __setCompactTimeline(frames:Array<Dynamic>, library:AnimateLibrary):Void
+	{
+		compactTimeline = new AnimateTimelineData(frames, library);
 	}
 }

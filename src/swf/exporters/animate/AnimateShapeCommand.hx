@@ -19,6 +19,8 @@ enum AnimateShapeCommand
 	EndFill;
 	LineStyle(thickness:Null<Float>, color:Null<Int>, alpha:Null<Float>, pixelHinting:Null<Bool>, scaleMode:Null<Int> /*LineScaleMode*/,
 		caps:Null<Int> /*CapsStyle*/, joints:Null<Int> /*JointStyle*/, miterLimit:Null<Float>);
+	LineGradientStyle(fillType:Null<Int> /*GradientType*/, colors:Array<Int>, alphas:Array<Float>, ratios:Array<Int>, matrix:Matrix,
+		spreadMethod:Null<Int> /*SpreadMethod*/, interpolationMethod:Null<Int> /*InterpolationMethod*/, focalPointRatio:Float);
 	LineTo(x:Float, y:Float);
 	MoveTo(x:Float, y:Float);
 }

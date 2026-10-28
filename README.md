@@ -1,4 +1,4 @@
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/swf.svg?style=flat&label=haxelib)](http://lib.haxe.org/p/swf)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.md) [![Haxelib Version](https://img.shields.io/github/tag/openfl/swf.svg?style=flat&label=haxelib)](https://lib.haxe.org/p/swf)
 
 SWF
 ===
@@ -22,6 +22,37 @@ There are three primary code paths within the library:
  Type "animate" is the latest exporter format, and the default for all targets. It combines the benefits of the "swflite" format while writing to JSON and compressing all assets into a single ZIP file. It can be iteratively improved while maintaining backward compatibility. The Macromedia SWF format also has these benefits, however it is optimized for a runtime different from modern web browsers. For example, images in a Macromedia SWF file may have premultiplied alpha applied to bitmaps already. There is no quick way to render this properly using HTML5 canvas. The Animate library format offers an opportunity for to pre-process SWF content into a flexible format optimized for modern production-use.
 
 This library can be called automatically by the OpenFL/Lime command-line tools to process `<library />` tags, or it can be used on the command-line to process SWF files into Animate ZIP files.
+
+Compact Animate timelines
+=========================
+
+Projects with large Animate libraries may define
+`swf_compact_animate_timelines` to keep serialized timeline events in compact
+numeric buffers. The default parser creates one `AnimateFrame` and
+`AnimateFrameObject` graph for every frame and event, including separate
+matrix, color-transform and filter objects. The compact mode decodes these
+values directly during playback, reducing retained managed memory and the
+amount of graph traversal performed by full garbage collections. Filters are
+rare, so they are still kept parsed.
+
+Hardware-only Animate bitmap cache
+==================================
+
+Native hardware-rendered projects may define `swf_hardware_bitmap_cache` to
+share each Animate bitmap asset between bitmap instances. After its texture is
+uploaded, the decoded CPU image is released. OpenFL draws shape paths in
+software, which reads the pixels of bitmap fills, so bitmaps used by shapes
+keep one shared readable `BitmapData` instead.
+
+This mode is opt-in because cached bitmap assets used by direct `Bitmap`
+instances become non-readable. Pixel read/write APIs and software-renderer
+fallback are not supported for those bitmaps, and their textures cannot be
+restored after a graphics context is lost.
+
+The exported Animate asset format does not change, and standard timeline
+playback remains compatible. This mode is opt-in because code that accesses
+`AnimateSpriteSymbol.frames` directly will not receive the eagerly expanded
+legacy metadata.
 
 
 Usage

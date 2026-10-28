@@ -48,6 +48,9 @@ class SWFMorphGradient
 	public function getMorphedGradient(ratio:Float = 0):SWFGradient
 	{
 		var gradient:SWFGradient = new SWFGradient();
+		gradient.spreadMode = spreadMode;
+		gradient.interpolationMode = interpolationMode;
+		gradient.focalPoint = 0;
 		for (i in 0...records.length)
 		{
 			gradient.records.push(records[i].getMorphedGradientRecord(ratio));

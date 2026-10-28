@@ -28,6 +28,11 @@ class SWFMorphLineStyle
 		startCapsStyle = LineCapsStyle.ROUND;
 		endCapsStyle = LineCapsStyle.ROUND;
 		jointStyle = LineJointStyle.ROUND;
+		hasFillFlag = false;
+		noHScaleFlag = false;
+		noVScaleFlag = false;
+		pixelHintingFlag = false;
+		noClose = false;
 		miterLimitFactor = 3;
 		if (data != null)
 		{
@@ -54,6 +59,7 @@ class SWFMorphLineStyle
 	public function getMorphedLineStyle(ratio:Float = 0):SWFLineStyle
 	{
 		var lineStyle:SWFLineStyle = new SWFLineStyle();
+		lineStyle.width = Math.round(startWidth + (endWidth - startWidth) * ratio);
 		if (hasFillFlag)
 		{
 			lineStyle.fillType = fillType.getMorphedFillStyle(ratio);
@@ -61,7 +67,6 @@ class SWFMorphLineStyle
 		else
 		{
 			lineStyle.color = ColorUtils.interpolate(startColor, endColor, ratio);
-			lineStyle.width = Std.int(startWidth + (endWidth - startWidth) * ratio);
 		}
 		lineStyle.startCapsStyle = startCapsStyle;
 		lineStyle.endCapsStyle = endCapsStyle;

@@ -69,6 +69,12 @@ class ShapeCommandExporter extends DefaultShapeExporter
 		commands.push(LineStyle(thickness, color, alpha, pixelHinting, scaleMode, startCaps, /*endCaps,*/ joints, miterLimit));
 	}
 
+	override public function lineGradientStyle(type:GradientType, colors:Array<Int>, alphas:Array<Float>, ratios:Array<Int>, matrix:Matrix = null,
+			spreadMethod:SpreadMethod = null, interpolationMethod:InterpolationMethod = null, focalPointRatio:Float = 0):Void
+	{
+		commands.push(LineGradientStyle(type, colors, alphas, ratios, matrix, spreadMethod, interpolationMethod, focalPointRatio));
+	}
+
 	override public function moveTo(x:Float, y:Float):Void
 	{
 		commands.push(MoveTo(x, y));

@@ -20,6 +20,7 @@ class AnimateFrameObject
 	public var id:Int;
 	public var matrix:Matrix;
 	public var name:String;
+	public var ratio:Null<Int>;
 	public var symbol:Int;
 	public var type:AnimateFrameObjectType;
 	public var visible:Null<Bool>;

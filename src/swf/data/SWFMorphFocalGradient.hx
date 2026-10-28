@@ -25,12 +25,8 @@ class SWFMorphFocalGradient extends SWFMorphGradient
 
 	override public function getMorphedGradient(ratio:Float = 0):SWFGradient
 	{
-		var gradient:SWFGradient = new SWFGradient();
-		// TODO: focalPoint
-		for (i in 0...records.length)
-		{
-			gradient.records.push(records[i].getMorphedGradientRecord(ratio));
-		}
+		var gradient:SWFGradient = super.getMorphedGradient(ratio);
+		gradient.focalPoint = startFocalPoint + (endFocalPoint - startFocalPoint) * ratio;
 		return gradient;
 	}
 

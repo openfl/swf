@@ -9,7 +9,25 @@ class TestMain extends Sprite
 		super();
 
 		var runner = new Runner();
+		#if !flash
+		runner.addCase(new tests.AnimateBitmapSymbolTest());
+		#end
+		runner.addCase(new tests.AnimateGeneratedClassTest());
+		runner.addCase(new tests.AnimateLibraryTest());
+		runner.addCase(new tests.AnimateShapeSymbolTest());
+		runner.addCase(new tests.AnimateTimelineTest());
+		runner.addCase(new tests.MorphShapeTest());
+		#if !flash
+		runner.addCase(new tests.DynamicTextFontTest());
+		#end
+		runner.addCase(new tests.ShapeExportTest());
 		runner.addCase(new tests.ShapesTest());
+		runner.addCase(new tests.SWFDataTest());
+		#if !flash
+		runner.addCase(new tests.SWFLiteExporterTest());
+		#end
+		runner.addCase(new tests.TagDefineFont2Test());
+		runner.addCase(new tests.TimelineTest());
 
 		Report.create(runner);
 

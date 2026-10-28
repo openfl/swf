@@ -1,0 +1,14 @@
+-cp src
+-cp ../src
+-cp ../../src
+-cp ../../scripts
+-lib openfl
+-lib lime
+-lib hxp
+-lib format
+-lib utest
+-D lime-cairo
+-D lime-cffi
+-D optional-cffi
+-main ToolsTestMain
+-neko bin/tools.n

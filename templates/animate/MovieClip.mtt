@@ -7,11 +7,19 @@ class ::CLASS_NAME:: extends ::if BASE_CLASS_NAME::::BASE_CLASS_NAME::::else::#i
 	::foreach CLASS_PROPERTIES::@:keep ::if hidden::@:noCompletion @:dox(hide) ::end::public var ::name::(default, null):::type::;
 	::end::
 
+	@:noCompletion private static function __init__():Void
+	{
+		swf.exporters.animate.AnimateLibrary.__registerGeneratedClass("::UUID::", ::SYMBOL_ID::, ::CLASS_NAME::);
+	}
+
 	public function new()
 	{
-		var library = swf.exporters.animate.AnimateLibrary.get("::UUID::");
-		var symbol = library.symbols.get(::SYMBOL_ID::);
-		symbol.__init(library);
+		if (!swf.exporters.animate.AnimateSymbol.__initPending(::CLASS_NAME::))
+		{
+			var library = swf.exporters.animate.AnimateLibrary.get("::UUID::");
+			var symbol = library.symbols.get(::SYMBOL_ID::);
+			symbol.__init(library);
+		}
 
 		super();
 	}

@@ -39,6 +39,8 @@ import hscript.Parser;
 @:access(openfl.geom.ColorTransform)
 class SymbolTimeline extends Timeline
 {
+	@:noCompletion private static var __instanceFieldsCacheByClassName:Map<String, Array<String>> = new Map();
+
 	#if openfljs
 	@:noCompletion private static var __useParentFPS:Bool;
 	#else
@@ -210,7 +212,8 @@ class SymbolTimeline extends Timeline
 						{
 							if (activeInstance.displayObject != null
 								&& activeInstance.characterID == frameObject.symbol
-								&& activeInstance.depth == frameObject.depth)
+								&& activeInstance.depth == frameObject.depth
+								&& activeInstance.clipDepth == frameObject.clipDepth)
 							{
 								// TODO: Fix duplicates in exporter
 								instance = activeInstance;
@@ -256,7 +259,7 @@ class SymbolTimeline extends Timeline
 		}
 
 		#if !openfljs
-		__instanceFields = Type.getInstanceFields(Type.getClass(movieClip));
+		__instanceFields = __getCachedInstanceFields(movieClip);
 		#end
 
 		enterFrame(1);
@@ -360,8 +363,12 @@ class SymbolTimeline extends Timeline
 				{
 					if (targetDepth > mask.depth && targetDepth <= mask.clipDepth)
 					{
-						#if (openfl >= "9.5.0" && !flash)
+						#if (openfl >= "9.5.0")
+						#if flash
+						child.mask = mask.displayObject;
+						#else
 						child.clippingLayer = mask.displayObject;
+						#end
 						#else
 						child.mask = mask.displayObject;
 						#end
@@ -375,6 +382,13 @@ class SymbolTimeline extends Timeline
 					child.mask = null;
 				}
 			}
+
+			#if !flash
+			for (mask in currentMasks)
+			{
+				__markTimelineMask(mask.displayObject);
+			}
+			#end
 
 			var child:DisplayObject;
 			var i = currentInstances.length;
@@ -419,6 +433,18 @@ class SymbolTimeline extends Timeline
 		return a.depth - b.depth;
 	}
 
+	#if !flash
+	@:noCompletion private inline function __markTimelineMask(displayObject:DisplayObject):Void
+	{
+		// SWF clipDepth>0 placements are masks even before a child exists in their depth range.
+		if (!displayObject.__isMask)
+		{
+			displayObject.__isMask = true;
+			displayObject.__setRenderDirty();
+		}
+	}
+	#end
+
 	@:noCompletion private function __updateDisplayObject(displayObject:DisplayObject, frameObject:FrameObject, reset:Bool = false):Void
 	{
 		if (displayObject == null) return;
@@ -437,7 +463,7 @@ class SymbolTimeline extends Timeline
 		{
 			displayObject.transform.colorTransform = frameObject.colorTransform;
 		}
-		else if (reset && !displayObject.transform.colorTransform.__isDefault(true))
+		else if (reset #if !flash && !displayObject.transform.colorTransform.__isDefault(true) #end)
 		{
 			displayObject.transform.colorTransform = new ColorTransform();
 		}
@@ -510,6 +536,30 @@ class SymbolTimeline extends Timeline
 				}
 			}
 		}
+	}
+
+	@:noCompletion private static function __getCachedInstanceFields(displayObject:DisplayObject):Array<String>
+	{
+		var clazz = Type.getClass(displayObject);
+		if (clazz == null)
+		{
+			return [];
+		}
+
+		var className = Type.getClassName(clazz);
+		if (className == null)
+		{
+			return Type.getInstanceFields(clazz);
+		}
+
+		var cached = __instanceFieldsCacheByClassName.get(className);
+		if (cached == null)
+		{
+			cached = Type.getInstanceFields(clazz);
+			__instanceFieldsCacheByClassName.set(className, cached);
+		}
+
+		return cached;
 	}
 }
 

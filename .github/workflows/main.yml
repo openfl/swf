@@ -42,7 +42,7 @@ jobs:
     needs: package-haxelib
     strategy:
       matrix:
-        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.7]
     runs-on: ubuntu-latest
     steps:
 
@@ -61,6 +61,7 @@ jobs:
 
       - name: Install Haxe dependencies
         run: |
+          haxelib install format --quiet
           haxelib install lime --quiet
           haxelib install openfl --quiet
           haxelib install layout --quiet
@@ -97,7 +98,7 @@ jobs:
   unit-test-neko:
     strategy:
       matrix:
-        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.7]
     runs-on: ubuntu-latest
     env:
       SDL_VIDEODRIVER: "dummy"
@@ -126,11 +127,139 @@ jobs:
         run: |
           haxelib run openfl test neko
 
+  unit-test-neko-defines:
+    strategy:
+      matrix:
+        define: [swf_compact_animate_timelines, swf_hardware_bitmap_cache, "swf_compact_animate_timelines -Dswf_hardware_bitmap_cache"]
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: "dummy"
+      SDL_AUDIODRIVER: "disk"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.3.7
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Run tests on Neko with ${{ matrix.define }}
+        working-directory: tests
+        run: |
+          haxelib run openfl test neko -D${{ matrix.define }}
+
+  unit-test-tools:
+    strategy:
+      matrix:
+        haxe-version: [4.2.5, 4.3.7]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: ${{ matrix.haxe-version }}
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install hxp --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Check haxelib dependencies
+        run: |
+          haxelib path swf | grep -q -- "-D format="
+
+      - name: Rebuild swf run.n
+        run: |
+          haxe rebuild.hxml
+
+      - name: Run tools tests
+        working-directory: tests/tools
+        run: |
+          haxe tools.hxml
+          neko bin/tools.n
+
+      - name: Run tools tests with compact timelines
+        working-directory: tests/tools
+        run: |
+          haxe tools.hxml -D swf_compact_animate_timelines
+          neko bin/tools.n
+
+  unit-test-html5:
+    strategy:
+      matrix:
+        flags: ["", "-Dswf_compact_animate_timelines -Dswf_hardware_bitmap_cache"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.3.7
+
+      - name: Set HAXEPATH
+        run: |
+          echo "HAXEPATH=$HAXE_STD_PATH/.." >> $GITHUB_ENV
+
+      - name: Install Haxe dependencies
+        run: |
+          haxelib install format --quiet
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib install utest --quiet
+          haxelib dev swf ${{ github.workspace }}
+
+      - name: Build tests for HTML5
+        working-directory: tests
+        run: |
+          haxelib run openfl build html5 ${{ matrix.flags }}
+
+      - name: Run tests in headless Chrome
+        working-directory: tests
+        timeout-minutes: 8
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 --directory bin/html5/bin &
+          sleep 2
+          # headless Chrome sometimes hangs, so each attempt has a time limit
+          for attempt in 1 2 3; do
+            if timeout 120 google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8000/index.html > report.html; then
+              break
+            fi
+          done
+          sed -e 's/<[^>]*>/ /g' report.html
+          grep -q "TEST OK" report.html
+
   unit-test-hashlink:
     strategy:
       matrix:
         # HashLink is not supported by Haxe 3
-        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [4.0.5, 4.1.5, 4.2.5, 4.3.7]
+        # Before Haxe 4.2, two HashLink threads reading their message queues for
+        # the first time can crash, so Lime loads assets without threads there
+        include:
+          - haxe-version: 4.0.5
+            lime-flags: -Dforce-synchronous
+          - haxe-version: 4.1.5
+            lime-flags: -Dforce-synchronous
     # AL init fails on both windows and ubuntu
     runs-on: macos-latest
     steps:
@@ -155,12 +284,12 @@ jobs:
       - name: Run tests on HashLink
         working-directory: tests
         run: |
-          haxelib run openfl test hl
+          haxelib run openfl test hl ${{ matrix.lime-flags }}
 
   unit-test-air:
     strategy:
       matrix:
-        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.6]
+        haxe-version: [3.4.7, 4.0.5, 4.1.5, 4.2.5, 4.3.7]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
@@ -200,7 +329,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@v2
         with:
-          haxe-version: "4.3.6"
+          haxe-version: "4.3.7"
 
       - uses: joshtynjala/setup-adobe-air-action@v2
         with:
