@@ -235,10 +235,16 @@ jobs:
 
       - name: Run tests in headless Chrome
         working-directory: tests
+        timeout-minutes: 8
         run: |
           python3 -m http.server 8000 --bind 127.0.0.1 --directory bin/html5/bin &
           sleep 2
-          google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8000/index.html > report.html
+          # headless Chrome sometimes hangs, so each attempt has a time limit
+          for attempt in 1 2 3; do
+            if timeout 120 google-chrome --headless=new --no-sandbox --disable-gpu --virtual-time-budget=10000 --dump-dom http://127.0.0.1:8000/index.html > report.html; then
+              break
+            fi
+          done
           sed -e 's/<[^>]*>/ /g' report.html
           grep -q "TEST OK" report.html
 
