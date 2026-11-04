@@ -994,6 +994,9 @@ class Tools
 		var embeddedSWFLite = false;
 		var embeddedAnimate = false;
 		// var filterClasses = [];
+		// classes a reprocessed library no longer generates, deleted once every library has listed its own:
+		// another library, cached and not reprocessed, can still generate one of them (a shared symbol class)
+		var removedGeneratedClasses:Array<{targetPath:String, className:String}> = [];
 
 		for (library in project.libraries)
 		{
@@ -1151,17 +1154,13 @@ class Tools
 
 							if (previousGeneratedClasses != null)
 							{
-								var removedGeneratedClasses = [];
-
 								for (className in previousGeneratedClasses)
 								{
 									if (!generatedLookup.exists(className))
 									{
-										removedGeneratedClasses.push(className);
+										removedGeneratedClasses.push({targetPath: targetPath, className: className});
 									}
 								}
-
-								deleteGeneratedClassFiles(targetPath, removedGeneratedClasses);
 							}
 
 								for (className in generatedClasses)
@@ -1524,6 +1523,14 @@ class Tools
 			// 			output.assets.push(asset);
 			// 		}
 			// 	}
+		}
+
+		for (removed in removedGeneratedClasses)
+		{
+			if (output.haxeflags.indexOf(removed.className) == -1)
+			{
+				deleteGeneratedClassFiles(removed.targetPath, [removed.className]);
+			}
 		}
 
 		if (embeddedAnimate)
