@@ -28,7 +28,10 @@ Hardware-only Animate bitmap cache
 
 Native hardware-rendered projects may define `swf_hardware_bitmap_cache` to
 share each Animate bitmap asset between bitmap instances. After its texture is
-uploaded, the decoded CPU image is released. Bitmap-filled shapes are probed
+uploaded, the decoded CPU image is released. A bitmap whose PNG or JPEG file the
+library holds is decoded when it is first drawn, not when a symbol that uses it
+is created, so one that is never drawn is never decoded, and it is decoded
+again if its texture is lost. Bitmap-filled shapes are probed
 against OpenFL's hardware graphics compatibility rules. Hardware-compatible
 shapes use the same cache, while shapes that fall back to software rendering
 keep one shared readable `BitmapData`. Shapes used directly by scale9 grids are
@@ -36,8 +39,9 @@ also kept readable.
 
 This mode is opt-in because cached bitmap assets used by direct `Bitmap`
 instances become non-readable. Pixel read/write APIs and software-renderer
-fallback are not supported for those bitmaps, and their textures cannot be
-restored after a graphics context is lost.
+fallback are not supported for those bitmaps, and the textures of those decoded
+when their symbol was created cannot be restored after a graphics context is
+lost.
 
 
 Usage

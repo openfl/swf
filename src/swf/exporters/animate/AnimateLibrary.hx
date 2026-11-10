@@ -167,6 +167,15 @@ import openfl.filters.GlowFilter;
 
 		if (bitmapData == null)
 		{
+			// Decoded when it is first drawn, where its size can be told without
+			bitmapData = AnimateHardwareBitmapData.create(this, symbol);
+
+			if (bitmapData != null)
+			{
+				hardwareBitmapData.set(key, bitmapData);
+				return bitmapData;
+			}
+
 			bitmapData = symbol.__createBitmapDataUncached(this);
 
 			if (bitmapData != null)
@@ -188,6 +197,62 @@ import openfl.filters.GlowFilter;
 		}
 
 		return bitmapData;
+	}
+
+	/**
+		The encoded image the library holds for a path, as the bytes of the
+		file, or null once it has been decoded or when it never held them.
+	**/
+	@:allow(swf.exporters.animate.AnimateHardwareBitmapData)
+	private function __getEncodedImage(path:String):Bytes
+	{
+		if (path == null || cachedImages.exists(path))
+		{
+			return null;
+		}
+
+		var bytes = cachedBytes.get(path);
+
+		if (bytes == null)
+		{
+			// Lime keeps the image bytes of a bundle apart from its other
+			// bytes in some versions
+			var imageBytes:Map<String, Bytes> = Reflect.field(this, "cachedImageBytes");
+
+			if (imageBytes != null)
+			{
+				bytes = imageBytes.get(path);
+			}
+		}
+
+		return bytes;
+	}
+
+	/**
+		The image of a hardware-only bitmap, decoded from the bytes the
+		library holds, which it keeps to decode it again if the texture is
+		lost.
+	**/
+	@:allow(swf.exporters.animate.AnimateHardwareBitmapData)
+	private function __decodeHardwareImage(symbol:AnimateBitmapSymbol):Image
+	{
+		var bytes = __getEncodedImage(symbol.path);
+
+		if (bytes == null)
+		{
+			// Something else decoded it since
+			return getImage(symbol.path);
+		}
+
+		var image = Image.fromBytes(bytes);
+
+		if (image != null && symbol.alpha != null)
+		{
+			var alphaBytes = __getEncodedImage(symbol.alpha);
+			__copyChannel(image, alphaBytes != null ? Image.fromBytes(alphaBytes) : super.getImage(symbol.alpha));
+		}
+
+		return image;
 	}
 
 	@:allow(swf.exporters.animate.AnimateShapeSymbol)
