@@ -37,6 +37,17 @@ shapes use the same cache, while shapes that fall back to software rendering
 keep one shared readable `BitmapData`. Shapes used directly by scale9 grids are
 also kept readable.
 
+`AnimateLibrary.hardwareBitmapIdleTime` sets how many seconds such a bitmap
+keeps its texture after it was last drawn; 0, the default, keeps it for as long
+as its library is loaded. A bitmap drawn again after that is decoded and
+uploaded again, which takes time in its size (about half a second for an
+8000x4500 PNG), so it suits screens that are left for long.
+A bitmap whose texture a `clone()` shares keeps it, but a texture taken with
+`getTexture` and kept is disposed of with the others.
+`AnimateLibrary.releaseIdleHardwareBitmaps(seconds)` does it once, on demand,
+and `swf_hardware_bitmap_idle_time`, defined with a number of seconds, sets the
+idle time from the start.
+
 This mode is opt-in because cached bitmap assets used by direct `Bitmap`
 instances become non-readable. Pixel read/write APIs and software-renderer
 fallback are not supported for those bitmaps, and the textures of those decoded

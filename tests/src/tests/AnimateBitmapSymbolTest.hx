@@ -363,4 +363,32 @@ class AnimateBitmapSymbolTest extends Test
 		Assert.isTrue(true);
 		#end
 	}
+
+	public function testIdleHardwareBitmapsWithoutATextureAreLeftAlone():Void
+	{
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		var library = new AnimateLibrary("idle-bitmap-test", "idle-bitmap-test");
+		library.bitmapSymbols = [];
+		var symbol = new AnimateBitmapSymbol();
+		symbol.id = 1;
+		symbol.path = "idle.png";
+		setEncodedImage(library, symbol.path, new Image(null, 0, 0, 8, 8, 0x336699FF).encode(PNG));
+
+		var bitmapData = symbol.__createBitmapData(library);
+
+		// Nothing was drawn, so there is no texture to release, and the bitmap stays valid
+		Assert.equals(0, AnimateLibrary.releaseIdleHardwareBitmaps(0));
+		Assert.isTrue(bitmapData.__isValid);
+		Assert.equals(8, bitmapData.width);
+
+		var idleTime = AnimateLibrary.hardwareBitmapIdleTime;
+		AnimateLibrary.hardwareBitmapIdleTime = -5;
+		Assert.equals(0.0, AnimateLibrary.hardwareBitmapIdleTime);
+		AnimateLibrary.hardwareBitmapIdleTime = idleTime;
+
+		library.unload();
+		#else
+		Assert.isTrue(true);
+		#end
+	}
 }

@@ -56,6 +56,87 @@ import openfl.filters.GlowFilter;
 
 	private static var instances:Map<String, AnimateLibrary> = new Map();
 
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	/**
+		With `swf_hardware_bitmap_cache`, the seconds a bitmap's texture is
+		kept after it was last drawn, or 0, the default, to keep it for as
+		long as its library is loaded. A bitmap drawn again after that decodes
+		its image and uploads it again, which takes time in its size, so this
+		suits screens that are left for long, not ones that come and go.
+		Only bitmaps decoded when they are first drawn are released.
+		`-D swf_hardware_bitmap_idle_time=<seconds>` sets it from the start.
+	**/
+	public static var hardwareBitmapIdleTime(default, set):Float = 0;
+
+	// Seconds, counted on each frame while an idle time is set
+	@:allow(swf.exporters.animate.AnimateHardwareBitmapData)
+	private static var __hardwareBitmapClock:Float = 0;
+	private static var __hardwareBitmapClockFrom:Float = 0;
+	private static var __hardwareBitmapListening:Bool = false;
+	private static var __hardwareBitmapSweepAt:Float = 0;
+	#if swf_hardware_bitmap_idle_time
+	private static var __hardwareBitmapIdleTimeDefined:Bool = false;
+	#end
+
+	private static function set_hardwareBitmapIdleTime(value:Float):Float
+	{
+		hardwareBitmapIdleTime = value > 0 ? value : 0;
+
+		if (hardwareBitmapIdleTime > 0 && !__hardwareBitmapListening)
+		{
+			__hardwareBitmapListening = true;
+			__hardwareBitmapClockFrom = haxe.Timer.stamp() - __hardwareBitmapClock;
+			openfl.Lib.current.addEventListener(Event.ENTER_FRAME, __onHardwareBitmapFrame);
+		}
+
+		return hardwareBitmapIdleTime;
+	}
+
+	private static function __onHardwareBitmapFrame(_:Event):Void
+	{
+		if (hardwareBitmapIdleTime <= 0)
+		{
+			__hardwareBitmapListening = false;
+			openfl.Lib.current.removeEventListener(Event.ENTER_FRAME, __onHardwareBitmapFrame);
+			return;
+		}
+
+		__hardwareBitmapClock = haxe.Timer.stamp() - __hardwareBitmapClockFrom;
+
+		// Once a second is often enough
+		if (__hardwareBitmapClock >= __hardwareBitmapSweepAt)
+		{
+			__hardwareBitmapSweepAt = __hardwareBitmapClock + 1;
+			releaseIdleHardwareBitmaps(hardwareBitmapIdleTime);
+		}
+	}
+
+	/**
+		Disposes of the textures of the bitmaps that were not drawn in the
+		last `idleTime` seconds, in every library, and returns how many.
+		`hardwareBitmapIdleTime` calls it as time passes.
+	**/
+	public static function releaseIdleHardwareBitmaps(idleTime:Float):Int
+	{
+		var released = 0;
+
+		for (library in instances)
+		{
+			for (bitmapData in library.hardwareBitmapData)
+			{
+				var deferred = #if (haxe_ver >= 4.2) Std.downcast #else Std.instance #end (bitmapData, AnimateHardwareBitmapData);
+
+				if (deferred != null && deferred.__releaseIdleTexture(idleTime))
+				{
+					released++;
+				}
+			}
+		}
+
+		return released;
+	}
+	#end
+
 	private var alphaCheck:Map<String, Bool>;
 	private var bitmapClassNames:Map<String, String>;
 	private var bitmapSymbols:Array<AnimateBitmapSymbol>;
@@ -89,6 +170,13 @@ import openfl.filters.GlowFilter;
 		hardwareBitmapData = new Map();
 		readableBitmapDataKeys = new Map();
 		readableShapeBitmapData = new Map();
+		#if swf_hardware_bitmap_idle_time
+		if (!__hardwareBitmapIdleTimeDefined)
+		{
+			__hardwareBitmapIdleTimeDefined = true;
+			hardwareBitmapIdleTime = Std.parseFloat(haxe.macro.Compiler.getDefine("swf_hardware_bitmap_idle_time"));
+		}
+		#end
 		#end
 
 		#if (ios || tvos)

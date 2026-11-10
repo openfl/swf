@@ -23,6 +23,10 @@ class AnimateHardwareBitmapData extends BitmapData
 {
 	private var __library:AnimateLibrary;
 	private var __symbol:AnimateBitmapSymbol;
+	// AnimateLibrary's clock when a texture was last asked for
+	private var __lastUsed:Float = 0;
+	// A clone draws with this bitmap's texture without asking it for one
+	private var __textureShared:Bool = false;
 
 	private function new(library:AnimateLibrary, symbol:AnimateBitmapSymbol, width:Int, height:Int)
 	{
@@ -133,6 +137,11 @@ class AnimateHardwareBitmapData extends BitmapData
 			return bitmapData;
 		}
 
+		if (__texture != null && image == null)
+		{
+			__textureShared = true;
+		}
+
 		return super.clone();
 	}
 
@@ -143,7 +152,26 @@ class AnimateHardwareBitmapData extends BitmapData
 			__decodeImage();
 		}
 
+		__lastUsed = AnimateLibrary.__hardwareBitmapClock;
+
 		return super.getTexture(context);
+	}
+
+	/**
+		Disposes of the texture if none was asked for in the last `idleTime`
+		seconds. The next draw decodes the image and uploads it again.
+	**/
+	@:allow(swf.exporters.animate.AnimateLibrary)
+	private function __releaseIdleTexture(idleTime:Float):Bool
+	{
+		if (__texture == null || __textureShared || AnimateLibrary.__hardwareBitmapClock - __lastUsed < idleTime)
+		{
+			return false;
+		}
+
+		__texture.dispose();
+		__texture = null;
+		return true;
 	}
 
 	private function __decodeImage():Void
