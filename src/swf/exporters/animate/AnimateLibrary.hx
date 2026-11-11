@@ -238,6 +238,21 @@ import openfl.filters.GlowFilter;
 	#if lime
 	public override function load():Future<lime.utils.AssetLibrary>
 	{
+		if (loaded && symbols != null && !preloading)
+		{
+			// The symbols are parsed and their text was let go: all there is
+			// to load again is the bindings unload() removed
+			#if (openfl > "9.1.0")
+			for (className in symbolsByClassName.keys())
+			{
+				Assets.registerBinding(className, this);
+			}
+			#end
+
+			var library:lime.utils.AssetLibrary = this;
+			return Future.withValue(library);
+		}
+
 		if (id != null)
 		{
 			preload.set(id, true);
@@ -310,6 +325,10 @@ import openfl.filters.GlowFilter;
 
 			__load().onProgress(promise.progress).onError(promise.error).onComplete(function(_)
 			{
+				// The text was only there to be parsed, and it is as large as
+				// the library's file
+				cachedText.remove(id);
+
 				preloading = false;
 				promise.complete(this);
 			});
