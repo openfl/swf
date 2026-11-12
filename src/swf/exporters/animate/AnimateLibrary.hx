@@ -5,6 +5,7 @@ import lime.graphics.Image;
 import lime.graphics.ImageChannel;
 import lime.math.Vector2;
 import swf.exporters.core.FilterType;
+import openfl.display.BitmapData;
 import openfl.display.MovieClip;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -55,10 +56,96 @@ import openfl.filters.GlowFilter;
 
 	private static var instances:Map<String, AnimateLibrary> = new Map();
 
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	/**
+		With `swf_hardware_bitmap_cache`, the seconds a bitmap's texture is
+		kept after it was last drawn, or 0, the default, to keep it for as
+		long as its library is loaded. A bitmap drawn again after that decodes
+		its image and uploads it again, which takes time in its size, so this
+		suits screens that are left for long, not ones that come and go.
+		Only bitmaps decoded when they are first drawn are released.
+		`-D swf_hardware_bitmap_idle_time=<seconds>` sets it from the start.
+	**/
+	public static var hardwareBitmapIdleTime(default, set):Float = 0;
+
+	// Seconds, counted on each frame while an idle time is set
+	@:allow(swf.exporters.animate.AnimateHardwareBitmapData)
+	private static var __hardwareBitmapClock:Float = 0;
+	private static var __hardwareBitmapClockFrom:Float = 0;
+	private static var __hardwareBitmapListening:Bool = false;
+	private static var __hardwareBitmapSweepAt:Float = 0;
+	#if swf_hardware_bitmap_idle_time
+	private static var __hardwareBitmapIdleTimeDefined:Bool = false;
+	#end
+
+	private static function set_hardwareBitmapIdleTime(value:Float):Float
+	{
+		hardwareBitmapIdleTime = value > 0 ? value : 0;
+
+		if (hardwareBitmapIdleTime > 0 && !__hardwareBitmapListening)
+		{
+			__hardwareBitmapListening = true;
+			__hardwareBitmapClockFrom = haxe.Timer.stamp() - __hardwareBitmapClock;
+			openfl.Lib.current.addEventListener(Event.ENTER_FRAME, __onHardwareBitmapFrame);
+		}
+
+		return hardwareBitmapIdleTime;
+	}
+
+	private static function __onHardwareBitmapFrame(_:Event):Void
+	{
+		if (hardwareBitmapIdleTime <= 0)
+		{
+			__hardwareBitmapListening = false;
+			openfl.Lib.current.removeEventListener(Event.ENTER_FRAME, __onHardwareBitmapFrame);
+			return;
+		}
+
+		__hardwareBitmapClock = haxe.Timer.stamp() - __hardwareBitmapClockFrom;
+
+		// Once a second is often enough
+		if (__hardwareBitmapClock >= __hardwareBitmapSweepAt)
+		{
+			__hardwareBitmapSweepAt = __hardwareBitmapClock + 1;
+			releaseIdleHardwareBitmaps(hardwareBitmapIdleTime);
+		}
+	}
+
+	/**
+		Disposes of the textures of the bitmaps that were not drawn in the
+		last `idleTime` seconds, in every library, and returns how many.
+		`hardwareBitmapIdleTime` calls it as time passes.
+	**/
+	public static function releaseIdleHardwareBitmaps(idleTime:Float):Int
+	{
+		var released = 0;
+
+		for (library in instances)
+		{
+			for (bitmapData in library.hardwareBitmapData)
+			{
+				var deferred = #if (haxe_ver >= 4.2) Std.downcast #else Std.instance #end (bitmapData, AnimateHardwareBitmapData);
+
+				if (deferred != null && deferred.__releaseIdleTexture(idleTime))
+				{
+					released++;
+				}
+			}
+		}
+
+		return released;
+	}
+	#end
+
 	private var alphaCheck:Map<String, Bool>;
 	private var bitmapClassNames:Map<String, String>;
 	private var bitmapSymbols:Array<AnimateBitmapSymbol>;
 	private var frameRate:Float;
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	private var hardwareBitmapData:Map<String, BitmapData>;
+	private var readableBitmapDataKeys:Map<String, Bool>;
+	private var readableShapeBitmapData:Map<String, BitmapData>;
+	#end
 	private var id:String;
 	private var instanceID:String;
 	private var preloading:Bool;
@@ -79,6 +166,18 @@ import openfl.filters.GlowFilter;
 
 		alphaCheck = new Map();
 		bitmapClassNames = new Map();
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
+		readableShapeBitmapData = new Map();
+		#if swf_hardware_bitmap_idle_time
+		if (!__hardwareBitmapIdleTimeDefined)
+		{
+			__hardwareBitmapIdleTimeDefined = true;
+			hardwareBitmapIdleTime = Std.parseFloat(haxe.macro.Compiler.getDefine("swf_hardware_bitmap_idle_time"));
+		}
+		#end
+		#end
 
 		#if (ios || tvos)
 		rootPath = "assets/";
@@ -141,6 +240,205 @@ import openfl.filters.GlowFilter;
 	{
 		return instances.get(uuid);
 	}
+
+	#if (lime && !flash && swf_hardware_bitmap_cache)
+	@:allow(swf.exporters.animate.AnimateBitmapSymbol)
+	private function __getHardwareBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		if (readableBitmapDataKeys.exists(key))
+		{
+			return __getReadableShapeBitmapData(symbol);
+		}
+
+		var bitmapData = hardwareBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			// Decoded when it is first drawn, where its size can be told without
+			bitmapData = AnimateHardwareBitmapData.create(this, symbol);
+
+			if (bitmapData != null)
+			{
+				hardwareBitmapData.set(key, bitmapData);
+				return bitmapData;
+			}
+
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				bitmapData.disposeImage();
+				hardwareBitmapData.set(key, bitmapData);
+
+				if (symbol.path != null)
+				{
+					cachedImages.remove(symbol.path);
+					alphaCheck.remove(symbol.path);
+				}
+
+				if (symbol.alpha != null)
+				{
+					cachedImages.remove(symbol.alpha);
+				}
+			}
+		}
+
+		return bitmapData;
+	}
+
+	/**
+		The encoded image the library holds for a path, as the bytes of the
+		file, or null once it has been decoded or when it never held them.
+	**/
+	@:allow(swf.exporters.animate.AnimateHardwareBitmapData)
+	private function __getEncodedImage(path:String):Bytes
+	{
+		if (path == null || cachedImages.exists(path))
+		{
+			return null;
+		}
+
+		var bytes = cachedBytes.get(path);
+
+		if (bytes == null)
+		{
+			// Lime keeps the image bytes of a bundle apart from its other
+			// bytes in some versions
+			var imageBytes:Map<String, Bytes> = Reflect.field(this, "cachedImageBytes");
+
+			if (imageBytes != null)
+			{
+				bytes = imageBytes.get(path);
+			}
+		}
+
+		return bytes;
+	}
+
+	/**
+		The image of a hardware-only bitmap, decoded from the bytes the
+		library holds, which it keeps to decode it again if the texture is
+		lost.
+	**/
+	@:allow(swf.exporters.animate.AnimateHardwareBitmapData)
+	private function __decodeHardwareImage(symbol:AnimateBitmapSymbol):Image
+	{
+		var bytes = __getEncodedImage(symbol.path);
+
+		if (bytes == null)
+		{
+			// Something else decoded it since
+			return getImage(symbol.path);
+		}
+
+		var image = Image.fromBytes(bytes);
+
+		if (image != null && symbol.alpha != null)
+		{
+			var alphaBytes = __getEncodedImage(symbol.alpha);
+			__copyChannel(image, alphaBytes != null ? Image.fromBytes(alphaBytes) : super.getImage(symbol.alpha));
+		}
+
+		return image;
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __markBitmapDataReadable(symbol:AnimateBitmapSymbol):Void
+	{
+		if (symbol != null)
+		{
+			readableBitmapDataKeys.set(__getBitmapDataKey(symbol), true);
+		}
+	}
+
+	@:allow(swf.exporters.animate.AnimateShapeSymbol)
+	private function __getReadableShapeBitmapData(symbol:AnimateBitmapSymbol):BitmapData
+	{
+		var key = __getBitmapDataKey(symbol);
+		var bitmapData = readableShapeBitmapData.get(key);
+
+		if (bitmapData == null)
+		{
+			bitmapData = symbol.__createBitmapDataUncached(this);
+
+			if (bitmapData != null)
+			{
+				readableShapeBitmapData.set(key, bitmapData);
+			}
+		}
+
+		return bitmapData;
+	}
+
+	private function __getBitmapDataKey(symbol:AnimateBitmapSymbol):String
+	{
+		return symbol.path != null
+			? "path:" + symbol.path + "|alpha:" + (symbol.alpha != null ? symbol.alpha : "")
+			: "symbol:" + symbol.id;
+	}
+
+	private function __markScale9GridShapesReadable():Void
+	{
+		for (symbol in symbols)
+		{
+			var spriteSymbol:AnimateSpriteSymbol;
+			#if (haxe_ver >= 4.2)
+			if (!Std.isOfType(symbol, AnimateSpriteSymbol))
+			#else
+			if (!Std.is(symbol, AnimateSpriteSymbol))
+			#end
+			{
+				continue;
+			}
+			else
+			{
+				spriteSymbol = cast symbol;
+			}
+
+			if (spriteSymbol.scale9Grid == null)
+			{
+				continue;
+			}
+
+			for (frame in spriteSymbol.frames)
+			{
+				if (frame.objects == null)
+				{
+					continue;
+				}
+
+				for (frameObject in frame.objects)
+				{
+					var childSymbol = symbols.get(frameObject.symbol);
+					#if (haxe_ver >= 4.2)
+					if (Std.isOfType(childSymbol, AnimateShapeSymbol))
+					#else
+					if (Std.is(childSymbol, AnimateShapeSymbol))
+					#end
+					{
+						cast(childSymbol, AnimateShapeSymbol).requiresReadableBitmapData = true;
+					}
+				}
+			}
+		}
+	}
+
+	private function __prepareBitmapCaches():Void
+	{
+		for (symbol in symbols)
+		{
+			#if (haxe_ver >= 4.2)
+			if (Std.isOfType(symbol, AnimateShapeSymbol))
+			#else
+			if (Std.is(symbol, AnimateShapeSymbol))
+			#end
+			{
+				cast(symbol, AnimateShapeSymbol).__prepareBitmapCache(this);
+			}
+		}
+	}
+	#end
 
 	#if lime
 	public override function getImage(id:String):Image
@@ -306,6 +604,11 @@ import openfl.filters.GlowFilter;
 				}
 			}
 
+			#if (lime && !flash && swf_hardware_bitmap_cache)
+			__markScale9GridShapesReadable();
+			__prepareBitmapCaches();
+			#end
+
 			// SWFLite.instances.set(instanceID, swf);
 
 			__load().onProgress(promise.progress).onError(promise.error).onComplete(function(_)
@@ -448,6 +751,11 @@ import openfl.filters.GlowFilter;
 	public override function unload():Void
 	{
 		instances.remove(uuid);
+		#if (lime && !flash && swf_hardware_bitmap_cache)
+		hardwareBitmapData = new Map();
+		readableBitmapDataKeys = new Map();
+		readableShapeBitmapData = new Map();
+		#end
 		if (symbols == null) return;
 		// if (swf == null) return;
 

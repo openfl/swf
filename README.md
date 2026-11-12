@@ -23,6 +23,42 @@ There are three primary code paths within the library:
 
 This library can be called automatically by the OpenFL/Lime command-line tools to process `<library />` tags, or it can be used on the command-line to process SWF files into Animate ZIP files.
 
+Hardware-only Animate bitmap cache
+==================================
+
+Native hardware-rendered projects may define `swf_hardware_bitmap_cache` to
+share each Animate bitmap asset between bitmap instances. After its texture is
+uploaded, the decoded CPU image is released. A bitmap whose PNG or JPEG file the
+library holds is decoded when it is first drawn, not when a symbol that uses it
+is created, so one that is never drawn is never decoded, and it is decoded
+again if its texture is lost. Bitmap-filled shapes are probed
+against OpenFL's hardware graphics compatibility rules. Hardware-compatible
+shapes use the same cache, while shapes that fall back to software rendering
+keep one shared readable `BitmapData`. Shapes used directly by scale9 grids are
+also kept readable.
+
+`AnimateLibrary.hardwareBitmapIdleTime` sets how many seconds such a bitmap
+keeps its texture after it was last drawn; 0, the default, keeps it for as long
+as its library is loaded. A bitmap drawn again after that is decoded and
+uploaded again, which takes time in its size (about half a second for an
+8000x4500 PNG), so it suits screens that are left for long.
+A bitmap whose texture a `clone()` shares keeps it, but a texture taken with
+`getTexture` and kept is disposed of with the others.
+`AnimateLibrary.releaseIdleHardwareBitmaps(seconds)` does it once, on demand,
+and `swf_hardware_bitmap_idle_time`, defined with a number of seconds, sets the
+idle time from the start.
+
+This mode is opt-in because cached bitmap assets used by direct `Bitmap`
+instances become non-readable. Pixel read/write APIs are not supported for
+those bitmaps, and the textures of those decoded when their symbol was created
+cannot be restored after a graphics context is lost.
+
+The software renderer, as `BitmapData.draw()` into a readable bitmap uses,
+draws a bitmap decoded when it is first drawn from a decoded copy, let go two
+seconds after it was last drawn: a `Bitmap` of it with any OpenFL, and a shape
+filled with it or the bitmap itself where OpenFL asks a bitmap that is not
+readable for its surface. The other cached bitmaps are drawn black.
+
 
 Usage
 =====
