@@ -49,10 +49,15 @@ and `swf_hardware_bitmap_idle_time`, defined with a number of seconds, sets the
 idle time from the start.
 
 This mode is opt-in because cached bitmap assets used by direct `Bitmap`
-instances become non-readable. Pixel read/write APIs and software-renderer
-fallback are not supported for those bitmaps, and the textures of those decoded
-when their symbol was created cannot be restored after a graphics context is
-lost.
+instances become non-readable. Pixel read/write APIs are not supported for
+those bitmaps, and the textures of those decoded when their symbol was created
+cannot be restored after a graphics context is lost.
+
+The software renderer, as `BitmapData.draw()` into a readable bitmap uses,
+draws a bitmap decoded when it is first drawn from a decoded copy, let go two
+seconds after it was last drawn: a `Bitmap` of it with any OpenFL, and a shape
+filled with it or the bitmap itself where OpenFL asks a bitmap that is not
+readable for its surface. The other cached bitmaps are drawn black.
 
 
 Usage

@@ -312,6 +312,93 @@ class AnimateBitmapSymbolTest extends Test
 		#end
 	}
 
+	public function testSoftwareRendererDrawsHardwareBitmap():Void
+	{
+		#if (lime_cairo && !flash && swf_hardware_bitmap_cache)
+		var library = new AnimateLibrary("software-draw-test", "software-draw-test");
+		library.bitmapSymbols = [];
+		var symbol = new AnimateBitmapSymbol();
+		symbol.id = 1;
+		symbol.path = "software-draw.png";
+		setEncodedImage(library, symbol.path, new Image(null, 0, 0, 48, 20, 0x336699FF).encode(PNG));
+
+		var bitmapData:AnimateHardwareBitmapData = cast symbol.__createBitmapData(library);
+		Assert.isFalse(bitmapData.readable);
+
+		// BitmapData.draw() into a readable bitmap uses the software renderer, which draws a
+		// Bitmap from the surface its bitmap gives
+		var fromBitmap = new BitmapData(48, 20, true, 0);
+		fromBitmap.draw(new openfl.display.Bitmap(bitmapData));
+		Assert.equals(0xFF336699, fromBitmap.getPixel32(5, 5));
+		Assert.equals(0xFF336699, fromBitmap.getPixel32(47, 19));
+
+		// It drew from a copy: the bitmap is as it was, without an image of its own
+		Assert.isFalse(bitmapData.readable);
+		Assert.isNull(bitmapData.image);
+		Assert.notNull(bitmapData.__softwareCopy);
+
+		// A fill and the bitmap itself are drawn too where OpenFL asks a bitmap that is not
+		// readable for its surface, and black or not at all where it does not
+		var shape = new openfl.display.Shape();
+		shape.graphics.beginBitmapFill(bitmapData);
+		shape.graphics.drawRect(0, 0, 48, 20);
+		shape.graphics.endFill();
+
+		var fromShape = new BitmapData(48, 20, true, 0);
+		fromShape.draw(shape);
+		var fromBitmapData = new BitmapData(48, 20, true, 0);
+		fromBitmapData.draw(bitmapData);
+
+		if (softwareRendererAsksForSurface())
+		{
+			Assert.equals(0xFF336699, fromShape.getPixel32(5, 5));
+			Assert.equals(0xFF336699, fromBitmapData.getPixel32(5, 5));
+		}
+		else
+		{
+			Assert.equals(0xFF000000, fromShape.getPixel32(5, 5));
+			Assert.equals(0, fromBitmapData.getPixel32(5, 5));
+		}
+
+		// The copy goes once it was not drawn for a while, and the next draw decodes it again
+		Assert.equals(1, AnimateHardwareBitmapData.__releaseIdleSoftwareCopies(bitmapData.__softwareCopyUsed - 1));
+		Assert.notNull(bitmapData.__softwareCopy);
+		Assert.equals(0, AnimateHardwareBitmapData.__releaseIdleSoftwareCopies(bitmapData.__softwareCopyUsed));
+		Assert.isNull(bitmapData.__softwareCopy);
+
+		var again = new BitmapData(48, 20, true, 0);
+		again.draw(new openfl.display.Bitmap(bitmapData));
+		Assert.equals(0xFF336699, again.getPixel32(5, 5));
+
+		// A clone decodes the image for itself
+		var clone:AnimateHardwareBitmapData = cast bitmapData.clone();
+		var fromClone = new BitmapData(48, 20, true, 0);
+		fromClone.draw(new openfl.display.Bitmap(clone));
+		Assert.equals(0xFF336699, fromClone.getPixel32(5, 5));
+		Assert.notNull(clone.__softwareCopy);
+		Assert.isFalse(clone.__softwareCopy == bitmapData.__softwareCopy);
+
+		Assert.equals(0, AnimateHardwareBitmapData.__releaseIdleSoftwareCopies(haxe.Timer.stamp()));
+		#else
+		Assert.isTrue(true);
+		#end
+	}
+
+	#if (lime_cairo && !flash && swf_hardware_bitmap_cache)
+	// Whether this OpenFL fills a shape with a bitmap that is not readable and gives a surface
+	private static function softwareRendererAsksForSurface():Bool
+	{
+		var shape = new openfl.display.Shape();
+		shape.graphics.beginBitmapFill(new SurfaceProbeBitmapData());
+		shape.graphics.drawRect(0, 0, 4, 4);
+		shape.graphics.endFill();
+
+		var target = new BitmapData(4, 4, true, 0);
+		target.draw(shape);
+		return target.getPixel32(2, 2) == 0xFFFFFFFF;
+	}
+	#end
+
 	public function testDeferredHardwareBitmapTakesItsAlphaImage():Void
 	{
 		#if (lime && !flash && swf_hardware_bitmap_cache)
@@ -392,3 +479,23 @@ class AnimateBitmapSymbolTest extends Test
 		#end
 	}
 }
+
+#if (lime_cairo && !flash && swf_hardware_bitmap_cache)
+private class SurfaceProbeBitmapData extends BitmapData
+{
+	private var pixels:BitmapData;
+
+	public function new()
+	{
+		super(4, 4, true, 0xFFFFFFFF);
+
+		pixels = clone();
+		disposeImage();
+	}
+
+	public override function getSurface():lime.graphics.cairo.CairoImageSurface
+	{
+		return pixels.getSurface();
+	}
+}
+#end

@@ -1,16 +1,20 @@
 package swf.exporters.animate;
 
 #if (lime && !flash && swf_hardware_bitmap_cache)
+import lime.graphics.cairo.CairoImageSurface;
 import lime.utils.Bytes;
 import openfl.display.BitmapData;
 import openfl.display3D.Context3D;
 import openfl.display3D.textures.TextureBase;
+import openfl.events.Event;
 import openfl.geom.Rectangle;
 
 /**
 	A hardware-only bitmap of an Animate library that decodes its image when a
 	texture is first asked for, and again if the texture is lost, instead of
-	when a symbol that uses it is created.
+	when a symbol that uses it is created. It decodes it for the software
+	renderer too, as `BitmapData.draw()` into a readable bitmap uses, into a
+	copy that is let go once it is no longer drawn.
 **/
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
@@ -25,8 +29,17 @@ class AnimateHardwareBitmapData extends BitmapData
 	private var __symbol:AnimateBitmapSymbol;
 	// AnimateLibrary's clock when a texture was last asked for
 	private var __lastUsed:Float = 0;
-	// A clone draws with this bitmap's texture without asking it for one
+	// A clone draws with this bitmap's texture, which neither lets go of
 	private var __textureShared:Bool = false;
+	// The decoded copy the software renderer draws from, and when it was last asked for
+	private var __softwareCopy:BitmapData;
+	private var __softwareCopyUsed:Float = 0;
+
+	// The seconds a copy for the software renderer is kept after it was last drawn
+	private static inline var SOFTWARE_COPY_IDLE_TIME:Float = 2;
+
+	private static var __softwareCopies:Array<AnimateHardwareBitmapData> = [];
+	private static var __softwareCopiesListening:Bool = false;
 
 	private function new(library:AnimateLibrary, symbol:AnimateBitmapSymbol, width:Int, height:Int)
 	{
@@ -127,19 +140,22 @@ class AnimateHardwareBitmapData extends BitmapData
 
 	public override function clone():BitmapData
 	{
-		if (__isValid && image == null && __texture == null)
+		if (__isValid && image == null)
 		{
-			// There is no texture to share yet, and a plain clone would never
-			// have an image: this one decodes it for itself when it is drawn
+			// A plain clone would never have an image: this one decodes it
+			// for itself when it is drawn
 			var bitmapData = new AnimateHardwareBitmapData(__library, __symbol, width, height);
+
+			if (__texture != null)
+			{
+				bitmapData.__texture = __texture;
+				bitmapData.__textureContext = __textureContext;
+				__textureShared = bitmapData.__textureShared = true;
+			}
+
 			bitmapData.__worldTransform.copyFrom(__worldTransform);
 			bitmapData.__renderTransform.copyFrom(__renderTransform);
 			return bitmapData;
-		}
-
-		if (__texture != null && image == null)
-		{
-			__textureShared = true;
 		}
 
 		return super.clone();
@@ -155,6 +171,91 @@ class AnimateHardwareBitmapData extends BitmapData
 		__lastUsed = AnimateLibrary.__hardwareBitmapClock;
 
 		return super.getTexture(context);
+	}
+
+	/**
+		What the software renderer draws this bitmap from: a decoded copy,
+		kept while it is drawn. OpenFL asks for it for a `Bitmap`, and for a
+		fill or a `BitmapData` drawn as it is where it asks a bitmap that is
+		not readable.
+	**/
+	public override function getSurface():CairoImageSurface
+	{
+		#if lime_cairo
+		if (!readable && __isValid)
+		{
+			if (__softwareCopy == null)
+			{
+				__softwareCopy = BitmapData.fromImage(__library.__decodeHardwareImage(__symbol), transparent);
+
+				if (__softwareCopy == null)
+				{
+					return null;
+				}
+
+				__softwareCopies.push(this);
+
+				if (!__softwareCopiesListening)
+				{
+					__softwareCopiesListening = true;
+					openfl.Lib.current.addEventListener(Event.ENTER_FRAME, __onSoftwareCopiesFrame);
+				}
+			}
+
+			__softwareCopyUsed = haxe.Timer.stamp();
+			return __softwareCopy.getSurface();
+		}
+		#end
+
+		return super.getSurface();
+	}
+
+	private static function __onSoftwareCopiesFrame(_:Event):Void
+	{
+		__releaseIdleSoftwareCopies(haxe.Timer.stamp() - SOFTWARE_COPY_IDLE_TIME);
+
+		if (__softwareCopies.length == 0)
+		{
+			__softwareCopiesListening = false;
+			openfl.Lib.current.removeEventListener(Event.ENTER_FRAME, __onSoftwareCopiesFrame);
+		}
+	}
+
+	/**
+		Lets go of the copies for the software renderer that were last drawn
+		at `time` or before, and returns how many are left.
+	**/
+	private static function __releaseIdleSoftwareCopies(time:Float):Int
+	{
+		var index = __softwareCopies.length;
+
+		while (--index >= 0)
+		{
+			var bitmapData = __softwareCopies[index];
+
+			if (bitmapData.__softwareCopy == null || bitmapData.__softwareCopyUsed <= time)
+			{
+				bitmapData.__releaseSoftwareCopy();
+				__softwareCopies.splice(index, 1);
+			}
+		}
+
+		return __softwareCopies.length;
+	}
+
+	private function __releaseSoftwareCopy():Void
+	{
+		if (__softwareCopy != null)
+		{
+			__softwareCopy.dispose();
+			__softwareCopy = null;
+		}
+	}
+
+	public override function dispose():Void
+	{
+		__releaseSoftwareCopy();
+		super.dispose();
 	}
 
 	/**
